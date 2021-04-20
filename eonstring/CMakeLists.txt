@@ -23,7 +23,7 @@ add_library(EonString STATIC ${STRING_HEADERS} ${STRING_SOURCES} ${STRING_OTHER}
 set_target_properties(
 	EonString
 	PROPERTIES
-		OUTPUT_NAME_DEBUG eon_string${EON_DEBUG_POSTFIX}
+		OUTPUT_NAME_DEBUG eon_string
 		OUTPUT_NAME_RELEASE eon_string
 )
 

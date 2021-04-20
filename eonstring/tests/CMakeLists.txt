@@ -13,7 +13,7 @@ add_executable(EonStringTests ${STRINGTEST_HEADERS} ${STRINGTEST_SOURCES})
 set_target_properties(
 	EonStringTests
 	PROPERTIES
-		OUTPUT_NAME_DEBUG eon_string_tests${EON_DEBUG_POSTFIX}
+		OUTPUT_NAME_DEBUG eon_string_tests
 		OUTPUT_NAME_RELEASE eon_string_tests
 )
 
