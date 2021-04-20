@@ -25,4 +25,4 @@ install(TARGETS StringTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
 )
 
-target_include_directories( StringTests PUBLIC "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}")
+target_include_directories( StringTests PUBLIC "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}" "${EON_SOURCES_DIR}")
