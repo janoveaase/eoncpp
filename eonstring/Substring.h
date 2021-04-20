@@ -367,6 +367,16 @@ namespace eon
 		// The substring must be high-to-low!
 		string_iterator findLastOtherThan( charcat category ) const noexcept;
 
+		// Get substring before/after first/last occurrence of the delimiter
+		substring beforeFirst( const substring& delimiter ) const noexcept;
+		substring beforeFirst( eon_char delimiter ) const noexcept;
+		substring beforeLast( const substring& delimiter ) const noexcept;
+		substring beforeLast( eon_char delimiter ) const noexcept;
+		substring afterFirst( const substring& delimiter ) const noexcept;
+		substring afterFirst( eon_char delimiter ) const noexcept;
+		substring afterLast( const substring& delimiter ) const noexcept;
+		substring afterLast( eon_char delimiter ) const noexcept;
+
 
 
 

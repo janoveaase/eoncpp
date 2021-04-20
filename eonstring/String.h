@@ -612,14 +612,22 @@ namespace eon
 		substring slice( int64_t start, int64_t end ) const;
 
 		// Get substring before/after first/last occurrence of the delimiter
-		substring beforeFirst( const string& delimiter ) const;
-		substring beforeFirst( eon_char delimiter ) const;
-		substring beforeLast( const string& delimiter ) const;
-		substring beforeLast( eon_char delimiter ) const;
-		substring afterFirst( const string& delimiter ) const;
-		substring afterFirst( eon_char delimiter ) const;
-		substring afterLast( const string& delimiter ) const;
-		substring afterLast( eon_char delimiter ) const;
+		inline substring beforeFirst( const string& delimiter ) const
+			noexcept { return substr().beforeFirst( delimiter.substr() ); }
+		inline substring beforeFirst( eon_char delimiter ) const noexcept {
+			return substr().beforeFirst( delimiter ); }
+		inline substring beforeLast( const string& delimiter ) const noexcept {
+			return substr().beforeLast( delimiter.substr() ); }
+		inline substring beforeLast( eon_char delimiter ) const noexcept {
+			return substr().beforeLast( delimiter ); }
+		inline substring afterFirst( const string& delimiter ) const noexcept {
+			return substr().afterFirst( delimiter.substr() ); }
+		inline substring afterFirst( eon_char delimiter ) const noexcept {
+			return substr().afterFirst( delimiter ); }
+		inline substring afterLast( const string& delimiter ) const noexcept {
+			return substr().afterLast( delimiter.substr() ); }
+		inline substring afterLast( eon_char delimiter ) const noexcept {
+			return substr().afterLast( delimiter ); }
 
 
 		// Get a copy of the entire string with all occurrences of 'find'

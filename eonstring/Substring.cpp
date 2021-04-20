@@ -698,6 +698,71 @@ namespace eon
 		return end();
 	}
 
+	substring substring::beforeFirst( const substring& delimiter ) const noexcept
+	{
+		auto found = findFirst( delimiter );
+		if( found )
+			return substring( begin(), found.begin() );
+		else
+			return substring( end() );
+	}
+	substring substring::beforeFirst( eon_char delimiter ) const noexcept
+	{
+		auto found = findFirst( delimiter );
+		if( found )
+			return substring( begin(), found.begin() );
+		else
+			return substring( end() );
+	}
+	substring substring::beforeLast( const substring& delimiter ) const noexcept
+	{
+		auto found = findLast( delimiter );
+		if( found )
+			return substring( begin(), found.begin() );
+		else
+			return substring( end() );
+	}
+	substring substring::beforeLast( eon_char delimiter ) const noexcept
+	{
+		auto found = findLast( delimiter );
+		if( found )
+			return substring( begin(), found.begin() );
+		else
+			return substring( end() );
+	}
+	substring substring::afterFirst( const substring& delimiter ) const noexcept
+	{
+		auto found = findFirst( delimiter );
+		if( found )
+			return substring( found.end() );
+		else
+			return substring( end() );
+	}
+	substring substring::afterFirst( eon_char delimiter ) const noexcept
+	{
+		auto found = findFirst( delimiter );
+		if( found )
+			return substring( found.end() );
+		else
+			return substring( end() );
+	}
+	substring substring::afterLast( const substring& delimiter ) const noexcept
+	{
+		auto found = findLast( delimiter );
+		if( found )
+			return substring( found.end() );
+		else
+			return substring( end() );
+	}
+	substring substring::afterLast( eon_char delimiter ) const noexcept
+	{
+		auto found = findLast( delimiter );
+		if( found )
+			return substring( found.end() );
+		else
+			return substring( end() );
+	}
+
 
 
 
