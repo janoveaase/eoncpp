@@ -1,7 +1,7 @@
 #pragma once
 
-#include <test/Test.h>
-#include <string/String.h>
+#include <eontest/Test.h>
+#include <eonstring/String.h>
 #include <chrono>
 
 

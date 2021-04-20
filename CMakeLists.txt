@@ -13,6 +13,6 @@ set(EON_INCLUDE_TESTS ON CACHE BOOL "Include tests in build?")
 set(EON_TESTS_DIR "eontests" CACHE PATH "Where to install tests under EON_INSTALL_DIR")
 
 if(EON_INCLUDE_TESTS)
-	add_subdirectory(test)
+	add_subdirectory(eontest)
 endif()
-add_subdirectory(string)
+add_subdirectory(eonstring)

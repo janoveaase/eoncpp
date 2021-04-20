@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-project(Test LANGUAGES CXX)
-message(STATUS " - Test")
+project(EonTest LANGUAGES CXX)
+message(STATUS " - EonTest")
 
 set(TEST_HEADERS
 	Test.h
@@ -10,19 +10,19 @@ set(TEST_SOURCES
 	Main.cpp
 )
 
-add_library(Test STATIC ${TEST_HEADERS} ${TEST_SOURCES})
+add_library(EonTest STATIC ${TEST_HEADERS} ${TEST_SOURCES})
 set_target_properties(
-	Test
+	EonTest
 	PROPERTIES
 		OUTPUT_NAME_DEBUG eon_test${EON_DEBUG_POSTFIX}
 		OUTPUT_NAME_RELEASE eon_test
 )
 
-install(TARGETS Test
+install(TARGETS EonTest
 	LIBRARY DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"
 	ARCHIVE DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"
 )
 install(FILES ${TEST_HEADERS} DESTINATION "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}/eontest")
 if(WIN32)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Test.dir/Debug/Test.pdb DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}" OPTIONAL)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/EonTest.dir/Debug/EonTest.pdb DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}" OPTIONAL)
 endif()
