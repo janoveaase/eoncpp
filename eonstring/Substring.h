@@ -474,7 +474,7 @@ namespace eon
 				found = substring( start, end() ).findFirst( delimiter ) )
 			{
 				elms.insert( substring( start, found.begin() ) );
-				start = found.begin() + delimiter.numChars();
+				start = found.begin() + 1;
 			}
 			if( start )
 				elms.insert( substring( start, end() ) );
