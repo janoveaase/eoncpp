@@ -13,8 +13,8 @@ add_executable(StringTests ${STRINGTEST_HEADERS} ${STRINGTEST_SOURCES})
 set_target_properties(
 	StringTests
 	PROPERTIES
-		OUTPUT_NAME_DEBUG string_tests${EON_DEBUG_POSTFIX}
-		OUTPUT_NAME_RELEASE string_tests
+		OUTPUT_NAME_DEBUG eon_string_tests${EON_DEBUG_POSTFIX}
+		OUTPUT_NAME_RELEASE eon_string_tests
 )
 
 target_link_libraries(StringTests PUBLIC String Test)
