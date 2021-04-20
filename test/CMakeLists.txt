@@ -14,7 +14,7 @@ add_library(Test STATIC ${TEST_HEADERS} ${TEST_SOURCES})
 set_target_properties(
 	Test
 	PROPERTIES
-		OUTPUT_NAME_DEBUG test_d
+		OUTPUT_NAME_DEBUG test${EON_DEBUG_POSTFIX}
 		OUTPUT_NAME_RELEASE test
 )
 

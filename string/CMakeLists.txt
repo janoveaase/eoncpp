@@ -23,7 +23,7 @@ add_library(String STATIC ${STRING_HEADERS} ${STRING_SOURCES} ${STRING_OTHER})
 set_target_properties(
 	String
 	PROPERTIES
-		OUTPUT_NAME_DEBUG string_d
+		OUTPUT_NAME_DEBUG string${EON_DEBUG_POSTFIX}
 		OUTPUT_NAME_RELEASE string
 )
 

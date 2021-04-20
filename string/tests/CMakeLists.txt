@@ -13,13 +13,13 @@ add_executable(StringTests ${STRINGTEST_HEADERS} ${STRINGTEST_SOURCES})
 set_target_properties(
 	StringTests
 	PROPERTIES
-		OUTPUT_NAME_DEBUG string_tests_d
+		OUTPUT_NAME_DEBUG string_tests${EON_DEBUG_POSTFIX}
 		OUTPUT_NAME_RELEASE string_tests
 )
 
 target_link_libraries(StringTests PUBLIC String Test)
-#target_link_libraries(StringTests PUBLIC optimized "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/string" debug "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/string_d")
-#target_link_libraries(StringTests PUBLIC optimized "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/test" debug "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/test_d")
+#target_link_libraries(StringTests PUBLIC optimized "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/string" debug "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/string${EON_DEBUG_POSTFIX}")
+#target_link_libraries(StringTests PUBLIC optimized "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/test" debug "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}/test${EON_DEBUG_POSTFIX}")
 	
 install(TARGETS StringTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
