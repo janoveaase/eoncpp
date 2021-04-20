@@ -734,7 +734,7 @@ namespace eon
 	{
 		auto found = findFirst( delimiter );
 		if( found )
-			return substring( found.end() );
+			return substring( found.end(), end() );
 		else
 			return substring( end() );
 	}
@@ -742,7 +742,7 @@ namespace eon
 	{
 		auto found = findFirst( delimiter );
 		if( found )
-			return substring( found.end() );
+			return substring( found.end(), end() );
 		else
 			return substring( end() );
 	}
@@ -750,7 +750,7 @@ namespace eon
 	{
 		auto found = findLast( delimiter );
 		if( found )
-			return substring( found.end() );
+			return substring( found.end(), end() );
 		else
 			return substring( end() );
 	}
@@ -758,7 +758,7 @@ namespace eon
 	{
 		auto found = findLast( delimiter );
 		if( found )
-			return substring( found.end() );
+			return substring( found.end(), end() );
 		else
 			return substring( end() );
 	}
