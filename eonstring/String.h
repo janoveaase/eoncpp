@@ -862,24 +862,28 @@ namespace eon
 		// Convert String to number
 		// Non-numbers (including non-ASCII numerals) will be returned as zero!
 		inline int32_t toInt32() const { return substr().toInt32(); }
-		inline int32_t toInt32( const substring& pos ) const {
-			pos.assertSameBuffer( Bytes.c_str() );
+		inline int32_t toInt32( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() );
 			return substr().toInt32(); }
 		inline int64_t toInt64() const { return substr().toInt64(); }
-		inline int64_t toInt64( const substring& pos ) const {
-			pos.assertSameBuffer( Bytes.c_str() );
+		inline int64_t toInt64( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() );
 			return substr().toInt64(); }
 		inline uint32_t toUInt32() const { return substr().toUInt32(); }
-		inline uint32_t toUInt32( const substring& pos ) const {
-			pos.assertSameBuffer( Bytes.c_str() );
+		inline uint32_t toUInt32( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() );
 			return substr().toUInt32(); }
 		inline uint64_t toUInt64() const { return substr().toUInt64(); }
-		inline uint64_t toUInt64( const substring& pos ) const {
-			pos.assertSameBuffer( Bytes.c_str() );
+		inline uint64_t toUInt64( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() );
 			return substr().toUInt64(); }
+		inline size_t toSize() const { return substr().toSize(); }
+		inline size_t toSize( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() );
+			return substr().toSize(); }
 		inline double toDouble() const { return substr().toDouble(); }
-		inline double toDouble( const substring& pos ) const {
-			pos.assertSameBuffer( Bytes.c_str() );
+		inline double toDouble( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() );
 			return substr().toDouble(); }
 
 
