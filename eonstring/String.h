@@ -1135,8 +1135,12 @@ namespace eon
 		template<>
 		static inline string toString<double>( double value )
 		{
-			static char digits[ 256 ];
+			static char digits[ 320 ];
+#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )
+			sprintf_s( digits, 320, "%.8f", value );
+#else
 			sprintf( digits, "%.8f", value );
+#endif
 			auto size = strlen( digits );
 			for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.'; --size )
 				;

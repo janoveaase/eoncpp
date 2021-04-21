@@ -648,5 +648,6 @@ namespace eon
 		WANT_EQ( "9034658634325425", string::toString( ui64 ).stdstr() ) << "Wrong uint64_t value";
 		WANT_EQ( "1.23", string::toString( dbl_1 ).stdstr() ) << "Wrong double value";
 		WANT_EQ( "-3546346.02341436", string::toString( dbl_2 ).stdstr() ) << "Wrong double value";
+		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
 	}
 }
