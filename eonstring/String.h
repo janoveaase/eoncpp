@@ -405,10 +405,10 @@ namespace eon
 		
 		// Find last occurrence of a character in the specified set
 		inline iterator findLastOf( const string& characters ) const
-			noexcept { return substr().findLastOf( characters.substr() ); }
+			noexcept { return substr().highToLow().findLastOf( characters.substr() ); }
 		inline iterator findLastOf( const string& characters, substring sub )
 			const noexcept { sub.assertSameBuffer( Bytes.c_str() );
-				return sub.findLastOf( characters.substr() ); }
+				return sub.highToLow().findLastOf( characters.substr() ); }
 
 		// Find first occurrence of a character not in the specified set
 		inline iterator findFirstNotOf( const string& characters ) const
@@ -420,11 +420,11 @@ namespace eon
 		
 		// Find last occurrence of a character not in the specified set
 		inline iterator findLastNotOf( const string& characters ) const
-			noexcept { return substr().findLastNotOf( characters.substr() ); }
+			noexcept { return substr().highToLow().findLastNotOf( characters.substr() ); }
 		inline iterator findLastNotOf( const string& characters,
 			substring sub ) const noexcept {
 			sub.assertSameBuffer( Bytes.c_str() );
-			return sub.findLastNotOf( characters.substr() ); }
+			return sub.highToLow().findLastNotOf( characters.substr() ); }
 
 
 		// Find the first character in 'this' that differs from the other
