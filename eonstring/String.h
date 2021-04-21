@@ -1302,19 +1302,6 @@ namespace std
 		inline bool operator()( const ::eon::string& lhs,
 			const ::eon::string& rhs ) const { return lhs == rhs; } };
 
-/*	template<>
-	struct hash<::eon::string*> {
-		inline size_t operator()( const ::eon::string* rhs ) const {
-			return static_cast<size_t>( rhs->hash64() ); } };
-	template<>
-	struct equal_to<::eon::string*> {
-		inline bool operator()( const ::eon::string* lhs,
-			const ::eon::string* rhs ) const {
-			return *lhs == *rhs; } };
-	struct stringp_lt {
-		inline bool operator()( const ::eon::string* lhs,
-			const ::eon::string* rhs ) const { return *lhs < *rhs; } };*/
-
 	template<>
 	struct hash<::eon::string_ptr> {
 		inline size_t operator()( const ::eon::string_ptr& rhs ) const {
@@ -1328,8 +1315,8 @@ namespace std
 		inline bool operator()( const ::eon::string_ptr& lhs,
 			const ::eon::string_ptr& rhs ) const { return *lhs < *rhs; } };
 
-//	inline ostream& operator<<( ostream& o, const ::eon::string& str ) {
-//		o << str.str(); return o; }
-//	inline istream& operator>>( istream& i, ::eon::string& str ) {
-//		std::string tmp; i >> tmp; str = tmp; return i; }
+	inline ostream& operator<<( ostream& o, const ::eon::string& str ) {
+		o << str.stdstr(); return o; }
+	inline istream& operator>>( istream& i, ::eon::string& str ) {
+		std::string tmp; i >> tmp; str = tmp; return i; }
 };
