@@ -637,4 +637,16 @@ namespace eon
 			++i;
 		}
 	}
+
+	TEST( String, toString_int )
+	{
+		int64_t i64_1{ 1 }, i64_2{ -56746754767LL };
+		uint64_t ui64{ 9034658634325425ULL };
+		double dbl_1{ 1.23 }, dbl_2{ -3546346.02341435536 };
+		WANT_EQ( "1", string::toString( i64_1 ).stdstr() ) << "Wrong int64_t value";
+		WANT_EQ( "-56746754767", string::toString( i64_2 ).stdstr() ) << "Wrong int64_t value";
+		WANT_EQ( "9034658634325425", string::toString( ui64 ).stdstr() ) << "Wrong uint64_t value";
+		WANT_EQ( "1.23", string::toString( dbl_1 ).stdstr() ) << "Wrong double value";
+		WANT_EQ( "-3546346.02341436", string::toString( dbl_2 ).stdstr() ) << "Wrong double value";
+	}
 }

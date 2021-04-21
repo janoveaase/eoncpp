@@ -23,4 +23,4 @@ install(TARGETS EonStringTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
 )
 
-target_include_directories( EonStringTests PUBLIC "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}" "${EON_SOURCES_DIR}")
+target_include_directories(EonStringTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")

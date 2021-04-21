@@ -3,6 +3,7 @@
 #include "Substring.h"
 #include <set>
 #include <list>
+#include <cstdlib>
 
 /*
 	UTF-8 String Class
@@ -1128,6 +1129,19 @@ namespace eon
 		template<typename T>
 		static inline string toString( T value ) {
 			return string( std::to_string( value ) ); }
+
+		// Override for double - we want greater precision and to remove
+		// trailing decimal zeros!
+		template<>
+		static inline string toString<double>( double value )
+		{
+			static char digits[ 256 ];
+			sprintf( digits, "%.8f", value );
+			auto size = strlen( digits );
+			for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.'; --size )
+				;
+			return string( digits, size );
+		}
 		
 		// Convert iterator into a string format: "<byte pos>:<char pos>"
 		// (See decodeIterator method.)
