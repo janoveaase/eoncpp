@@ -259,7 +259,8 @@ namespace eon
 		eon::string positive( "+00123.45600" );
 		eon::string negative( "-00123.45600" );
 		eon::string shortflt( "1.9" );
-		eon::string allzero( "0000" );
+		eon::string allzero1( "0000" );
+		eon::string allzero2( "0.0000" );
 		eon::string invalid( "1.2.3" );
 
 		auto str = eon::string( basic.trimNumber() );
@@ -274,8 +275,10 @@ namespace eon
 		WANT_EQ( "-00123.456", str.stdstr() ) << "Wrong negative";
 		str = shortflt.trimNumber();
 		WANT_EQ( "1.9", str.stdstr() ) << "Wrong shortflt";
-		str = allzero.trimNumber();
-		WANT_EQ( "0", str.stdstr() ) << "Wrong allzero";
+		str = allzero1.trimNumber();
+		WANT_EQ( "0", str.stdstr() ) << "Wrong allzero1";
+		str = allzero2.trimNumber();
+		WANT_EQ( "0", str.stdstr() ) << "Wrong allzero2";
 		str = invalid.trimNumber();
 		WANT_EQ( "1.2.3", str.stdstr() ) << "Invalid number string was trimmed";
 	}

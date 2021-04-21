@@ -285,7 +285,18 @@ namespace eon
 
 		// If no trailing fractional zeros, return the integer part
 		if( last_non_zero == sep )
+		{
+			if( first_non_zero == last_non_zero )
+			{
+				if( first_non_zero > begin() )
+					return substring( begin(), begin() + 1 );
+				else if( last_non_zero < end() )
+					substring( last_non_zero + 1, last_non_zero + 2 );
+				else
+					return substring( first_non_zero, last_non_zero );
+			}
 			return substring( first_non_zero, sep );
+		}
 
 		return substring( first_non_zero, last_non_zero + 1 );
 	}
