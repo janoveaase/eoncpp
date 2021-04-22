@@ -45,10 +45,18 @@ namespace eontest
 		
 		
 		template<typename T>
-		inline _stringstream& operator<<( const T& value ) { Strm << value; return *this; }
+		inline _stringstream& operator<<( const T& value )
+		{
+			Strm << value;
+			return *this;
+		}
 		template<typename T>
-		inline _stringstream& operator<<( const T* value ) { Strm << ( value != nullptr ) ? value : "(nullptr)"; return *this; }
-		inline _stringstream& operator<<( bool value ) { Strm << value ? "true" : "false"; return *this; }
+		inline _stringstream& operator<<( T* const& value ) {
+			if( value == nullptr ) Strm << "(nullptr)";
+				else Strm << value;
+			return *this; }
+		inline _stringstream& operator<<( bool value ) {
+			Strm << value ? "true" : "false"; return *this; }
 		std::string str() const
 		{
 			const std::string& in = Strm.str();
