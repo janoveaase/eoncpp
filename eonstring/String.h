@@ -768,7 +768,7 @@ namespace eon
 		}
 		template<typename container_t>
 		string join( const container_t& source ) const {
-			return join<container_t::const_iterator>(
+			return join<typename container_t::const_iterator>(
 				source.begin(), source.end() ); }
 
 
