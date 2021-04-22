@@ -562,6 +562,7 @@ namespace eon
 
 		WANT_EQ( -5, eon::string( "beta" ).compare( "beta/gamma", eon::CompareType::diff_pos ) ) << "Failed to compare correctly when rhs is identical to lhs but longer";
 	}
+#ifndef __GNUC__
 	TEST( String, compare_faster )
 	{
 		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta" ) ) << "Failed to compare equal";
@@ -589,6 +590,35 @@ namespace eon
 
 		WANT_EQ( -1, eon::string( "beta" ).compare( "beta/gamma" ) ) << "Failed to compare correctly when rhs is identical to lhs but longer";
 	}
+#else
+	TEST( String, compare_faster )
+	{
+		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta" ) ) << "Failed to compare equal";
+		eon::string str{ "alpha beta" };
+		WANT_TRUE( str.compare( "alpha" ) > 0 ) << "Failed to compare substring from start";
+		str = "alpha beta";
+		WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare( eon::substring( "alpha" ) ) ) << "Failed to compare shorter left";
+		WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare( eon::substring( "beta" ) ) ) << "Failed to compare shorter right";
+		WANT_TRUE( eon::string( "alpha betA" ).compare( "alpha beta" ) < 0 ) << "Failed to compare lesser";
+		WANT_TRUE( eon::string( "alpha beta" ).compare( "alpha betA" ) > 0 ) << "Failed to compare greater";
+
+		WANT_EQ( 0, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) ) << "Failed to compare limited equal";
+		str = "alpha bEta";
+		WANT_TRUE( eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) < 0 ) << "Failed to compare limited lesser";
+		str = "alpha beta";
+		WANT_TRUE( eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha bE" ) ) > 0 ) << "Failed to compare limited greater";
+
+		str = "Hello Big World!";
+		eon::string str2{ "Big and bad" };
+		WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare( eon::substring( str2.begin(), str2.begin() + 4 ) ) ) << "Failed to compare big and bad";
+
+		str = "";
+		str2 = "Someting";
+		WANT_TRUE( str.compare( str2 ) < 0 ) << "Failed to compare empty";
+
+		WANT_TRUE( eon::string( "beta" ).compare( "beta/gamma" ) < 0 ) << "Failed to compare correctly when rhs is identical to lhs but longer";
+	}
+#endif
 	TEST( String, iCompare )
 	{
 		WANT_EQ( 0, eon::string( "alpha" ).iCompare( "ALPHA" ) );
