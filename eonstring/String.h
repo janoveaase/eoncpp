@@ -40,7 +40,7 @@
 
 
 // Detect platform
-#if defined( WIN32 ) || defined( _WIN32 ) || defined( WIN64 ) || defined( _WIN64 )
+#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )
 #	define EON_WINDOWS
 #elif defined( __APPLE__ ) || defined( __MACH__ )
 #	define EON_APPLE
@@ -1135,7 +1135,7 @@ namespace eon
 		static inline string toString( double value )
 		{
 			static char digits[ 320 ];
-#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )
+#ifdef EON_WINDOWS
 			sprintf_s( digits, 320, "%.8f", value );
 #else
 			sprintf( digits, "%.8f", value );
