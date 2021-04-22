@@ -33,18 +33,34 @@ namespace eon
 	// source string, but aren't.
 	class WrongSource : public std::exception
 	{
+	private:
+		std::string Message;
 	public:
 		WrongSource() : std::exception() {}
-		WrongSource( const char* message ) : std::exception( message ) {}
+		WrongSource( const char* message ) : std::exception() {
+			Message = message; }
+		WrongSource( const std::string& message ) : std::exception() {
+			Message = message; }
+		WrongSource( std::string&& message ) noexcept : std::exception() {
+			Message = std::move( message ); }
+		const char* what() const noexcept override { return Message.c_str(); }
 	};
 
 	// Exception thrown when UTF-8 is required, but the source string contains
 	// one or more invalid UTF-8 characters.
 	class InvalidUTF8 : public std::exception
 	{
+	private:
+		std::string Message;
 	public:
 		InvalidUTF8() : std::exception() {}
-		InvalidUTF8( const char* message ) : std::exception( message ) {}
+		InvalidUTF8( const char* message ) : std::exception() {
+			Message = message; }
+		InvalidUTF8( const std::string& message ) : std::exception() {
+			Message = message; }
+		InvalidUTF8( std::string&& message ) noexcept : std::exception() {
+			Message = std::move( message ); }
+		const char* what() const noexcept override { return Message.c_str(); }
 	};
 
 
