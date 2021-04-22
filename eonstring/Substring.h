@@ -233,7 +233,7 @@ namespace eon
 #define FNV_PRIME32 16777619;
 #define FNV_PRIME64 1099511628211;
 #define FNV_OFFSET32 2166136261;
-#define FNV_OFFSET64 14695981039346656037;
+#define FNV_OFFSET64 14695981039346656037LLU;
 		uint32_t hash32() const noexcept;
 		uint64_t hash64() const noexcept;
 		inline size_t hash() const noexcept {
