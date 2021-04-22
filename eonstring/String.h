@@ -1132,8 +1132,7 @@ namespace eon
 
 		// Override for double - we want greater precision and to remove
 		// trailing decimal zeros!
-		template<>
-		static inline string toString<double>( double value )
+		static inline string toString( double value )
 		{
 			static char digits[ 320 ];
 #if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )

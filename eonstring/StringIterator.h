@@ -5,6 +5,7 @@
 #include <iostream>
 #include <functional>
 #include <exception>
+#include <string.h>
 
 /*
 	UTF-8 String string_iterator Class. (Can also iterate bytes if the string

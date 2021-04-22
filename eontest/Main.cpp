@@ -58,7 +58,7 @@ bool runTest( eontest::EonTest::TestRef& test )
 void runTests( const std::string& filter, std::list<std::string>& failed )
 {
 	if( !eontest::EonTest::Tests )
-		throw std::exception( "No tests have been defined!" );
+		throw TestError( "No tests have been defined!" );
 
 	std::regex pattern( filter );
 	for( auto& test : *eontest::EonTest::Tests )
