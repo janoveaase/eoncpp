@@ -117,7 +117,7 @@ namespace eon
 			return End >= Beg ? End - Beg : Beg - End; }
 
 		// Get number of bytes in substring
-		inline size_t numBytes() const noexcept;
+		size_t numBytes() const noexcept;
 
 		// Check if 'this' substring is for the same area as the 'other'
 		inline bool sameArea( const substring& other ) const
@@ -330,8 +330,7 @@ namespace eon
 		// Find the first character in 'this' substring that differs from the
 		// other, 'false' if none (equal substrings).
 		// Both substrings must be low-to-high!
-		inline string_iterator findFirstDiff( const substring& other )
-			const noexcept;
+		string_iterator findFirstDiff( const substring& other ) const noexcept;
 
 
 		// Find first, but skip sections of matching start_sect and end_sect
