@@ -35,24 +35,24 @@ namespace eon
 			return Beg.numByte() - End.numByte();
 	}
 
-	eon_byte substring::byte( eon_pos pos ) const noexcept
+	byte_t substring::byte( size_t pos ) const noexcept
 	{
 		if( empty() )
 			return 0;
 		if( Beg < End )
-			return pos < static_cast<eon_pos>( End.Begin - Beg.Begin )
+			return pos < static_cast<size_t>( End.Begin - Beg.Begin )
 			? *( Beg.Begin + pos ) : 0;
 		else
-			return pos < static_cast<eon_pos>( Beg.Begin - End.Begin )
+			return pos < static_cast<size_t>( Beg.Begin - End.Begin )
 			? *( End.Begin + pos ) : 0;
 	}
 
 	bool substring::blank() const noexcept
 	{
 		auto& chars = Characters::get();
-		for( auto codepoint : *this )
+		for( auto cp : *this )
 		{
-			if( !chars.isSeparatorSpace( codepoint ) )
+			if( !chars.isSeparatorSpace( cp ) )
 				return false;
 		}
 		return true;
@@ -80,22 +80,22 @@ namespace eon
 		return begin() + num_char;
 	}
 
-	eon_pos substring::indentationLevel( eon_char indentation_char )
+	size_t substring::indentationLevel( char_t indentation_char )
 		const noexcept
 	{
-		eon_pos level = 0;
-		for( auto codepoint : *this )
+		size_t level = 0;
+		for( auto cp : *this )
 		{
-			if( codepoint != indentation_char )
+			if( cp != indentation_char )
 				break;
 			++level;
 		}
 		return level;
 	}
 
-	std::vector<eon_char> substring::chars() const
+	std::vector<char_t> substring::chars() const
 	{
-		std::vector<eon_char> result;
+		std::vector<char_t> result;
 		for( auto chr : *this )
 			result.push_back( chr );
 		return result;
@@ -165,7 +165,7 @@ namespace eon
 		}
 		return true;
 	}
-	bool substring::isFloat( eon_char decimal_separator ) const noexcept
+	bool substring::isFloat( char_t decimal_separator ) const noexcept
 	{
 		if( empty() )
 			return false;
@@ -218,7 +218,7 @@ namespace eon
 		}
 		return num;
 	}
-	double substring::toDouble( eon_char decimal_separator ) const
+	double substring::toDouble( char_t decimal_separator ) const
 	{
 		if( empty() )
 			return 0.0;
@@ -258,7 +258,7 @@ namespace eon
 			return num + ( dec / dec_pow );
 	}
 
-	substring substring::trimNumber( eon_char decimal_separator ) const
+	substring substring::trimNumber( char_t decimal_separator ) const
 	{
 		// Find first non-zero
 		auto first_non_zero = begin();
@@ -300,7 +300,7 @@ namespace eon
 
 		return substring( first_non_zero, last_non_zero + 1 );
 	}
-	substring substring::trimFloat( eon_char decimal_separator ) const
+	substring substring::trimFloat( char_t decimal_separator ) const
 	{
 		// Find first non-zero
 		auto first_non_zero = begin();
@@ -412,7 +412,7 @@ namespace eon
 		}
 		return substring( End.getEnd() );
 	}
-	substring substring::findFirst( eon_char to_find ) const noexcept
+	substring substring::findFirst( char_t to_find ) const noexcept
 	{
 		if( empty() )
 			return substring( End.getEnd() );
@@ -483,7 +483,7 @@ namespace eon
 		}
 		return substring( End.getEnd() );
 	}
-	substring substring::findLast( eon_char to_find ) const noexcept
+	substring substring::findLast( char_t to_find ) const noexcept
 	{
 		if( empty() )
 			return substring( End.getEnd() );
@@ -503,7 +503,8 @@ namespace eon
 				if( found < Beg.End )
 					return substring(
 						string_iterator( Beg, found, found - Beg.Begin ),
-						string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Begin ) );
+						string_iterator( Beg, found + 1, ( found + 1 )
+							- Beg.Begin ) );
 				else
 					return substring( string_iterator( Beg, found,
 						found - Beg.Begin ), End );
@@ -579,7 +580,7 @@ namespace eon
 	}
 
 	substring substring::findFirstIgnoreSections(
-		const substring& other, eon_char start_sect, eon_char end_sect )
+		const substring& other, char_t start_sect, char_t end_sect )
 		const noexcept
 	{
 		end_sect = end_sect == same_char ? start_sect : end_sect;
@@ -625,8 +626,8 @@ namespace eon
 		}
 		return substring( End.getEnd() );
 	}
-	substring substring::findFirstIgnoreSections( eon_char codepoint,
-		eon_char start_sect, eon_char end_sect ) const noexcept
+	substring substring::findFirstIgnoreSections( char_t cp,
+		char_t start_sect, char_t end_sect ) const noexcept
 	{
 		end_sect = end_sect == same_char ? start_sect : end_sect;
 		int sections = 0;
@@ -658,7 +659,7 @@ namespace eon
 					escaped = true;
 				else if( *i == start_sect )
 					++sections;
-				else if( *i == codepoint )
+				else if( *i == cp )
 					return substring( i, i + 1 );
 			}
 		}
@@ -709,7 +710,8 @@ namespace eon
 		return end();
 	}
 
-	substring substring::beforeFirst( const substring& delimiter ) const noexcept
+	substring substring::beforeFirst( const substring& delimiter )
+		const noexcept
 	{
 		auto found = findFirst( delimiter );
 		if( found )
@@ -717,7 +719,7 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::beforeFirst( eon_char delimiter ) const noexcept
+	substring substring::beforeFirst( char_t delimiter ) const noexcept
 	{
 		auto found = findFirst( delimiter );
 		if( found )
@@ -725,7 +727,8 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::beforeLast( const substring& delimiter ) const noexcept
+	substring substring::beforeLast( const substring& delimiter )
+		const noexcept
 	{
 		auto found = findLast( delimiter );
 		if( found )
@@ -733,7 +736,7 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::beforeLast( eon_char delimiter ) const noexcept
+	substring substring::beforeLast( char_t delimiter ) const noexcept
 	{
 		auto found = findLast( delimiter );
 		if( found )
@@ -741,7 +744,8 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::afterFirst( const substring& delimiter ) const noexcept
+	substring substring::afterFirst( const substring& delimiter )
+		const noexcept
 	{
 		auto found = findFirst( delimiter );
 		if( found )
@@ -749,7 +753,7 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::afterFirst( eon_char delimiter ) const noexcept
+	substring substring::afterFirst( char_t delimiter ) const noexcept
 	{
 		auto found = findFirst( delimiter );
 		if( found )
@@ -765,7 +769,7 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::afterLast( eon_char delimiter ) const noexcept
+	substring substring::afterLast( char_t delimiter ) const noexcept
 	{
 		auto found = findLast( delimiter );
 		if( found )
@@ -777,7 +781,7 @@ namespace eon
 
 
 
-	size_t substring::count( eon_char to_count ) const noexcept
+	size_t substring::count( char_t to_count ) const noexcept
 	{
 		size_t cnt = 0;
 		for( auto i = begin(); i != end(); ++i )

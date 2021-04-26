@@ -379,8 +379,8 @@ namespace eon
 	TEST( String, count )
 	{
 		eon::string str{ "abacad" };
-		WANT_EQ( 3, str.count( eon_char( 'a' ) ) ) << "Wrong char count";
-		WANT_EQ( 1, str.count( eon_char( 'a' ), eon::substring( str.begin() + 1, str.begin() + 3 ) ) ) << "Wrong limited char count";
+		WANT_EQ( 3, str.count( char_t( 'a' ) ) ) << "Wrong char count";
+		WANT_EQ( 1, str.count( char_t( 'a' ), eon::substring( str.begin() + 1, str.begin() + 3 ) ) ) << "Wrong limited char count";
 
 		str = "alpha beta alpha gamma alpha delta";
 		WANT_EQ( 3, str.count( "alpha" ) ) << "Wrong string count";
@@ -636,7 +636,7 @@ namespace eon
 	TEST( String, escape_nonprintable )
 	{
 		eon::string base{ '\0', '\v', '\r' };
-		base += eon_char( 128522 );	// Smileyface
+		base += char_t( 128522 );	// Smileyface
 //		base += u8"😊";
 		auto esc = base.escapeNonPrintable();
 		WANT_EQ( "&#0;&#11;&#13;&#128522;", esc.stdstr() ) << "Failed to escape";
@@ -656,14 +656,14 @@ namespace eon
 		eon::string str;
 		for( auto i : codepoints )
 		{
-			REQUIRE_NO_EXCEPT( str += eon_char( i ) ) << "Failed to add unicode character &#" << std::to_string( i );
+			REQUIRE_NO_EXCEPT( str += char_t( i ) ) << "Failed to add unicode character &#" << std::to_string( i );
 		}
 		REQUIRE_EQ( codepoints.size(), str.numChars() ) << "Wrong size";
 
 		size_t i = 0;
-		for( auto codepoint : str )
+		for( auto char_t : str )
 		{
-			if( codepoint != codepoints[ i ] )
+			if( char_t != codepoints[ i ] )
 				ADD_FAILURE() << "Wrong code point at index " << std::to_string( i );
 			++i;
 		}

@@ -54,7 +54,7 @@ namespace eon
 		return *Cats;
 	}
 
-	bool Characters::isLetterUpperCase( eon_char c ) const noexcept
+	bool Characters::isLetterUpperCase( char_t c ) const noexcept
 	{
 		if( c <= 0xDE )
 			return ( c >= 0x41 && c <= 0x5A )
@@ -66,7 +66,7 @@ namespace eon
 				letter_upper_case->end(),
 				c );
 	}
-	bool Characters::isLetterLowerCase( eon_char c ) const noexcept
+	bool Characters::isLetterLowerCase( char_t c ) const noexcept
 	{
 		if( c <= 0xFF )
 			return ( c >= 0x61 && c <= 0x7A )
@@ -78,7 +78,7 @@ namespace eon
 				letter_lower_case->end(),
 				c );
 	}
-	bool Characters::isLetterModifier( eon_char c ) const noexcept
+	bool Characters::isLetterModifier( char_t c ) const noexcept
 	{
 		return ( c >= 0x2B0 && c <= 0x2C1 ) || ( c >= 0x2C6 && c <= 0x2D1 )
 			|| std::binary_search( letter_modifier->begin(),
@@ -87,7 +87,7 @@ namespace eon
 
 
 
-	bool Characters::is( eon_char codepoint, charcat category ) const noexcept
+	bool Characters::is( char_t codepoint, charcat category ) const noexcept
 	{
 		switch( category )
 		{

@@ -8,7 +8,7 @@ namespace eon
 	const string string::Empty;
 
 
-	string& string::assign( const eon_char* codepoints, size_t size )
+	string& string::assign( const char_t* codepoints, size_t size )
 	{
 		clear();
 		reserve( size );
@@ -26,10 +26,10 @@ namespace eon
 		return *this;
 	}
 
-	string& string::assign( size_t copies, eon_char codepoint )
+	string& string::assign( size_t copies, char_t cp )
 	{
 		uint32_t bytes;
-		auto size = iterator::unicodeToBytes( codepoint, bytes );
+		auto size = iterator::unicodeToBytes( cp, bytes );
 		Bytes.reserve( size * copies );
 		for( size_t i = 0; i < copies; ++i )
 			Bytes.append( (const char*)&bytes, size );
@@ -103,20 +103,20 @@ namespace eon
 	}
 
 	string& string::operator=(
-		const std::initializer_list<eon_char>& codepoints )
+		const std::initializer_list<char_t>& codepoints )
 	{
 		clear();
 		reserve( codepoints.size() );
-		for( auto& codepoint : codepoints )
-			*this += codepoint;
+		for( auto& c : codepoints )
+			*this += c;
 		return *this;
 	}
-	string& string::operator=( const std::vector<eon_char>& codepoints )
+	string& string::operator=( const std::vector<char_t>& codepoints )
 	{
 		clear();
 		reserve( codepoints.size() );
-		for( auto& codepoint : codepoints )
-			*this += codepoint;
+		for( auto& c : codepoints )
+			*this += c;
 		return *this;
 	}
 	string& string::operator=( const std::initializer_list<char>& chars )
@@ -124,7 +124,7 @@ namespace eon
 		clear();
 		reserve( chars.size() );
 		for( auto& chr : chars )
-			*this += static_cast<eon_byte>( chr );
+			*this += static_cast<byte_t>( chr );
 		return *this;
 	}
 	string& string::operator=(
@@ -133,7 +133,7 @@ namespace eon
 		clear();
 		reserve( chars.size() );
 		for( auto& chr : chars )
-			*this += static_cast<eon_byte>( chr );
+			*this += static_cast<byte_t>( chr );
 		return *this;
 	}
 
@@ -174,7 +174,7 @@ namespace eon
 
 
 
-	string::iterator string::bytePos( eon_pos pos, iterator start ) const
+	string::iterator string::bytePos( size_t pos, iterator start ) const
 	{
 		if( start )
 			start.assertSameBuffer( Bytes.c_str() );
@@ -207,7 +207,8 @@ namespace eon
 		return end();
 	}
 
-	string::iterator string::rebaseMoved( const iterator& other ) const noexcept
+	string::iterator string::rebaseMoved( const iterator& other )
+		const noexcept
 	{
 		if( other )
 			return iterator( Bytes.c_str(), numBytes(), NumChars,
@@ -259,7 +260,7 @@ namespace eon
 		for( auto i = area.begin(); i != area.end(); ++i )
 		{
 			if( *i <= 0xFFFF )
-				result += static_cast<eon_char>(
+				result += static_cast<char_t>(
 					std::toupper( static_cast<int>( *i ) ) );
 			else
 				result += *i;
@@ -279,7 +280,7 @@ namespace eon
 		for( auto i = area.begin(); i != area.end(); ++i )
 		{
 			if( *i <= 0xFFFF )
-				result += static_cast<eon_char>(
+				result += static_cast<char_t>(
 					std::tolower( static_cast<int>( *i ) ) );
 			else
 				result += *i;
@@ -316,7 +317,7 @@ namespace eon
 			if( new_word )
 			{
 				if( chars.isLetterLowerCase( *i ) )
-					result += static_cast<eon_char>( std::toupper( *i ) );
+					result += static_cast<char_t>( std::toupper( *i ) );
 				else
 					result += *i;
 				if( chars.isLetter( *i ) )
@@ -348,7 +349,7 @@ namespace eon
 			if( new_sentence )
 			{
 				if( chars.isLetterLowerCase( *i ) )
-					result += static_cast<eon_char>( std::toupper( *i ) );
+					result += static_cast<char_t>( std::toupper( *i ) );
 				else
 					result += *i;
 				if( chars.isLetter( *i ) )
@@ -406,7 +407,7 @@ namespace eon
 			result += substr( pos );
 		return result;
 	}
-	string string::replace( eon_char find, eon_char replacement,
+	string string::replace( char_t find, char_t replacement,
 		const substring& sub ) const
 	{
 		if( sub.empty() )
@@ -539,15 +540,15 @@ namespace eon
 			return *this;
 		auto area = sub.lowToHigh();
 		string result;
-		for( auto codepoint : area )
+		for( auto c : area )
 		{
-			if( codepoint < '\n'
-				|| ( codepoint > '\n' && codepoint < ' ' )
-				|| codepoint > 126 )
-				result += "&#" + string( static_cast<int32_t>( codepoint ) )
+			if( c < '\n'
+				|| ( c > '\n' && c < ' ' )
+				|| c > 126 )
+				result += "&#" + string( static_cast<int32_t>( c ) )
 				+ SemiColonChr;
 			else
-				result += codepoint;
+				result += c;
 		}
 		return result;
 	}
@@ -566,9 +567,10 @@ namespace eon
 				if( end )
 				{
 					auto num = substr( i + 2, end.begin() );
-					if( num.findFirstOtherThan( charcat::number_ascii_digit ) == num.end() )
+					if( num.findFirstOtherThan( charcat::number_ascii_digit )
+						== num.end() )
 					{
-						result += static_cast<eon_char>( num.toUInt32() );
+						result += static_cast<char_t>( num.toUInt32() );
 						i = end.begin();
 						continue;
 					}
@@ -639,7 +641,7 @@ namespace eon
 		return result;
 	}
 
-	string string::padLeftAndRight( size_t target_size, eon_char fill ) const
+	string string::padLeftAndRight( size_t target_size, char_t fill ) const
 	{
 		if( numChars() >= target_size )
 			return *this;
@@ -649,7 +651,7 @@ namespace eon
 	}
 
 	string string::indentLines( size_t indentation_level,
-		eon_char indentation_char ) const
+		char_t indentation_char ) const
 	{
 		auto lines = splitSequential<std::list<substring>>( NewlineChr );
 		string result;
@@ -680,8 +682,8 @@ namespace eon
 
 
 
-	string string::separateThousands( eon_char thousands_sep,
-		eon_char decimal_separator ) const
+	string string::separateThousands( char_t thousands_sep,
+		char_t decimal_separator ) const
 	{
 		if( !isFloat() && !isUInt() && !isInt() )
 			return *this;
@@ -707,7 +709,7 @@ namespace eon
 		return formatted;
 	}
 	string string::roundNumber( size_t max_decimals,
-		eon_char decimal_separator ) const
+		char_t decimal_separator ) const
 	{
 		if( !isFloat() && !isUInt() && !isInt() )
 			return *this;
@@ -806,8 +808,8 @@ namespace eon
 
 
 
-	size_t string::_findDecimalSeparator( std::vector<eon_char>& digits,
-		eon_char decimal_separator ) noexcept
+	size_t string::_findDecimalSeparator( std::vector<char_t>& digits,
+		char_t decimal_separator ) noexcept
 	{
 		for( size_t i = 0; i < digits.size(); ++i )
 		{
@@ -817,7 +819,7 @@ namespace eon
 		return digits.size();
 	}
 
-	void string::_roundUp( std::vector<eon_char>& digits, size_t i ) noexcept
+	void string::_roundUp( std::vector<char_t>& digits, size_t i ) noexcept
 	{
 		// The digit at i + 1 is greater than 5, so we have to round up.
 		if( digits[ i ] == PointChr )
@@ -826,7 +828,7 @@ namespace eon
 		if( i == 0 )
 		{
 			digits[ i ] = '9';
-			digits.insert( digits.begin(), static_cast<eon_byte>( '1' ) );
+			digits.insert( digits.begin(), static_cast<byte_t>( '1' ) );
 			return;
 		}
 		if( digit == 9 )
@@ -835,6 +837,6 @@ namespace eon
 			_roundUp( digits, i - 1 );
 		}
 		else
-			digits[ i ] = static_cast<eon_byte>( ZeroChr + digit + 1 );
+			digits[ i ] = static_cast<byte_t>( ZeroChr + digit + 1 );
 	}
 }
