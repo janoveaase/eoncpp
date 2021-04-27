@@ -1,4 +1,5 @@
 #include "Substring.h"
+#include <cctype>
 
 
 namespace eon
