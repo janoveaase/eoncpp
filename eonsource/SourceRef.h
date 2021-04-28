@@ -208,7 +208,7 @@ namespace eon
 
 		//* Access the source
 		//* WARNING: Throws [eon::NoSource] if no source has been set!
-		const source& source() const {
+		const eon::source& source() const {
 			if( Src != nullptr ) return *Src; else throw NoSource(); }
 
 

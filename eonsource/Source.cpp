@@ -8,7 +8,11 @@ namespace eon
 	{
 		if( file_path.empty() )
 			return false;
+#ifdef EON_WINDOWS
 		std::ifstream file( file_path.wstr() );
+#else
+		std::ifstream file( file_path.stdstr() );
+#endif
 		if( !file )
 			return false;
 		std::string data( std::istreambuf_iterator<char>( file ),
