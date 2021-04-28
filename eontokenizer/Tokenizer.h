@@ -8,12 +8,12 @@
 namespace eon
 {
 	/**************************************************************************
-	  Eon Tokenizer Class - eon::tokenizer
+	  Eon tokenizer Class - eon::tokenizer
 
-	  A Tokenizer object will take an [eon::source], scan through it and return
+	  A tokenizer object will take an [eon::source], scan through it and return
 	  a vector of [eon::token]s.
 	**************************************************************************/
-	class Tokenizer
+	class tokenizer
 	{
 		/**********************************************************************
 		  Construction
@@ -21,14 +21,14 @@ namespace eon
 	public:
 
 		//* Default construction, invalid tokenizer
-		Tokenizer() = default;
+		tokenizer() = default;
 
 		//* Disallow copy and move
-		Tokenizer( const Tokenizer& ) = delete;
-		Tokenizer( Tokenizer&& ) = delete;
+		tokenizer( const tokenizer& ) = delete;
+		tokenizer( tokenizer&& ) = delete;
 
 		//* Default destruction
-		virtual ~Tokenizer() = default;
+		virtual ~tokenizer() = default;
 
 
 

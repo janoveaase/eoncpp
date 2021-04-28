@@ -8,7 +8,7 @@ namespace eon
 	{
 		string raw{ "This is a 02   \tline test\nLine #2!" };
 		source src( "test", std::move( raw ) );
-		auto tokens = Tokenizer()( src );
+		auto tokens = tokenizer()( src );
 		REQUIRE_EQ( 18, tokens.size() ) << "Wrong number of tokens";
 
 		string expected{
@@ -44,7 +44,7 @@ namespace eon
 			"	WANT_EQ( expected.stdstr(), actual.stdstr() );\n"
 			"}" };
 		source src( "test", std::move( raw ) );
-		auto tokens = Tokenizer()( src );
+		auto tokens = tokenizer()( src );
 		REQUIRE_EQ( 250, tokens.size() ) << "Wrong number of tokens";
 
 		string expected{

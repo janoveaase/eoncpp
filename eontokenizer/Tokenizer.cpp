@@ -3,7 +3,7 @@
 
 namespace eon
 {
-	std::vector<token> Tokenizer::operator()( const source& source )
+	std::vector<token> tokenizer::operator()( const source& source )
 	{
 		SrcRef = source;
 		auto& chars = Characters::get();
@@ -48,7 +48,7 @@ namespace eon
 		return std::move( Tokens );
 	}
 
-	void Tokenizer::scanSameChar( tokencat category )
+	void tokenizer::scanSameChar( tokencat category )
 	{
 		auto pos = SrcRef.pos();
 		while( pos.advance( SrcRef.source() ) && pos.chr() == SrcRef.chr() )
@@ -60,7 +60,7 @@ namespace eon
 			category ) );
 		SrcRef = pos;	// Move past the read token
 	}
-	void Tokenizer::scanLetter( tokencat category )
+	void tokenizer::scanLetter( tokencat category )
 	{
 		auto& chars = Characters::get();
 		auto pos = SrcRef.pos();
@@ -73,7 +73,7 @@ namespace eon
 			category ) );
 		SrcRef = pos;	// Move past the read token
 	}
-	void Tokenizer::scanNumber( tokencat category )
+	void tokenizer::scanNumber( tokencat category )
 	{
 		auto& chars = Characters::get();
 		auto pos = SrcRef.pos();
