@@ -114,10 +114,18 @@ namespace eontest
 	// Test that something is boolean true
 #define WANT_TRUE( expression ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( static_cast<bool>( expression ) ); else NONFATAL_MESSAGE
+	if( _testTrue( static_cast<bool>( expression ), #expression ) ); else NONFATAL_MESSAGE
 #define REQUIRE_TRUE( expression ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( static_cast<bool>( expression ) ); else FATAL_MESSAGE
+	if( _testTrue( static_cast<bool>( expression ), #expression ) ); else FATAL_MESSAGE
+
+	// Test that something is boolean false
+#define WANT_FALSE( expression ) \
+	EON_AMBIGUOUS_ELSE_BLOCKER \
+	if( _testFalse( static_cast<bool>( expression ), #expression ) ); else NONFATAL_MESSAGE
+#define REQUIRE_FALSE( expression ) \
+	EON_AMBIGUOUS_ELSE_BLOCKER \
+	if( _testFalse( static_cast<bool>( expression ), #expression ) ); else FATAL_MESSAGE
 
 	// Test that exception isn't thrown
 #define WANT_NO_EXCEPT( expression )\
@@ -128,7 +136,8 @@ namespace eontest
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "Expected no exceptions\nCaught an exception\n";\
+		_Messages << "\nExpression: {" << #expression << "} throws\n";\
+		_Messages << "Expected no exceptions\n";\
 	}\
 	if( Failed ) NONFATAL_MESSAGE
 #define REQUIRE_NO_EXCEPT( expression )\
@@ -139,25 +148,18 @@ namespace eontest
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "Expected no exceptions\nCaught an exception\n";\
+		_Messages << "\nExpression: {" << #expression << "} throws\n";\
+		_Messages << "Expected no exceptions\n";\
 	}\
 	if( Failed ) FATAL_MESSAGE
-
-	// Test that something is boolean false
-#define WANT_FALSE( expression ) \
-	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( !static_cast<bool>( expression ) ); else NONFATAL_MESSAGE
-#define REQUIRE_FALSE( expression ) \
-	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( !static_cast<bool>( expression ) ); else FATAL_MESSAGE
 
 	// Test that something is equal to something else
 #define WANT_EQ( expected, actual ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testEq( (expected), (actual) ) ); else NONFATAL_MESSAGE
+	if( _testEq( (expected), (actual), #expected, #actual ) ); else NONFATAL_MESSAGE
 #define REQUIRE_EQ( expected, actual ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testEq( (expected), (actual) ) ); else FATAL_MESSAGE
+	if( _testEq( (expected), (actual), #expected, #actual ) ); else FATAL_MESSAGE
 
 
 	class EonTest;
@@ -210,7 +212,7 @@ namespace eontest
 
 	public:
 		EonTest() = default;
-		virtual ~EonTest() { std::cout << ( Failed ? "FAIL" : "OK" ) << "\n"; auto str = _Messages.str();  if( !str.empty() ) std::cout << "----------\n" << str << "\n----------\n"; }
+		virtual ~EonTest() { std::cout << ( Failed ? "FAIL" : "OK" ) << "\n"; auto str = _Messages.str();  if( !str.empty() ) std::cout << "----------" << str << "----------\n"; }
 
 		virtual void test_body() = 0;
 
@@ -320,7 +322,29 @@ namespace eontest
 			return encoded;
 		}
 
-		bool _testEq( const std::string& expected, const std::string& actual )
+		bool _testTrue( bool value, const char* expression )
+		{
+			if( value )
+				return true;
+			else
+			{
+				_Messages << "\nExpression: {" << expression << "}=false\nExpected true\n";
+				return false;
+			}
+		}
+		bool _testFalse( bool value, const char* expression )
+		{
+			if( !value )
+				return true;
+			else
+			{
+				_Messages << "\nExpression: {" << expression << "}=true\nExpected false\n";
+				return false;
+			}
+		}
+
+		bool _testEq( const std::string& expected, const std::string& actual,
+			const char* exp_expr, const char* act_expr )
 		{
 			if( expected == actual )
 				return true;
@@ -334,8 +358,10 @@ namespace eontest
 				diff_pos -= start;
 			size_t exp_end = expected.size() - start > 40 ? start + 40 : expected.size() - start;
 			size_t act_end = actual.size() - start > 40 ? start + 40 : actual.size() - start;
-			_Messages << "Failed to compare equal (at position " << std::to_string( start + diff_pos ) << ")\n";
-			_Messages << "Expected: \"";
+			_Messages << "\nFailed to compare equal (at position " << std::to_string( start + diff_pos ) << ")\n";
+			_Messages << "Expected expression: {" << exp_expr << "}\n";
+			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected value: \"";
 			if( start > 0 )
 			{
 				diff_pos += 3;
@@ -344,7 +370,7 @@ namespace eontest
 			_Messages << encode( expected.substr( start, exp_end - start ), diff_pos );
 			if( exp_end < expected.size() )
 				_Messages << "...";
-			_Messages << "\"\n  Actual: \"";
+			_Messages << "\"\n  Actual value: \"";
 			if( start > 0 )
 				_Messages << "...";
 			size_t dummy{ 50 };
@@ -352,24 +378,27 @@ namespace eontest
 			if( act_end < actual.size() )
 				_Messages << "...";
 			_Messages << "\"\n";
-			_Messages << std::string( static_cast<size_t>( 11 + diff_pos ), ' ' ) << "^\n";
+			_Messages << std::string( static_cast<size_t>( 17 + diff_pos ), ' ' ) << "^\n";
 			std::string marker{ "Different here" };
 			if( diff_pos > marker.size() + 2 )
-				_Messages << std::string( static_cast<size_t>( 11 + diff_pos - marker.size() - 1 ), ' ' ) << marker << "-'\n";
+				_Messages << std::string( static_cast<size_t>( 17 + diff_pos - marker.size() - 1 ), ' ' ) << marker << "-'\n";
 			else
-				_Messages << std::string( static_cast<size_t>( 11 + diff_pos ), ' ' ) << "'-"  << marker << "\n";
+				_Messages << std::string( static_cast<size_t>( 17 + diff_pos ), ' ' ) << "'-"  << marker << "\n";
 			return false;
 		}
 
 		template<typename T1, typename T2>
-		bool _testEq( const T1& expected, const T2& actual )
+		bool _testEq( const T1& expected, const T2& actual,
+			const char* exp_expr, const char* act_expr )
 		{
 			if( expected != actual )
 			{
 				Failed = true;
-				_Messages << "Failed to compare equal\n";
-				_Messages << "Expected: \"" << expected << "\"\n";
-				_Messages << "  Actual: \"" << actual << "\"\n";
+				_Messages << "\nFailed to compare equal\n";
+				_Messages << "Expected expression: {" << exp_expr << "}\n";
+				_Messages << "  Actual expression: {" << act_expr << "}\n";
+				_Messages << "Expected value: \"" << expected << "\"\n";
+				_Messages << "  Actual value: \"" << actual << "\"\n";
 				return false;
 			}
 			else

@@ -8,7 +8,7 @@
 namespace eon
 {
 	/**************************************************************************
-	  Eon tokenizer Class - eon::tokenizer
+	  Eon Tokenizer Class - eon::tokenizer
 
 	  A tokenizer object will take an [eon::source], scan through it and return
 	  a vector of [eon::token]s.

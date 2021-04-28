@@ -75,4 +75,37 @@ namespace eon
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
+
+
+	TEST( TokenParserTest, basic )
+	{
+		string raw{ "This is a 02   \tline test\nLine #2!" };
+		source src( "test", std::move( raw ) );
+		auto tokens = tokenizer()( src );
+		tokenparser parser( std::move( tokens ) );
+		
+		REQUIRE_EQ( "This", parser.current().substr().stdstr() ) << "Wrong first token";
+		parser.forward();
+		REQUIRE_EQ( " ", parser.current().substr().stdstr() ) << "Wrong second token";
+		parser.forward();
+		REQUIRE_EQ( "is", parser.current().substr().stdstr() ) << "Wrong third token";
+
+		WANT_EQ( 0, parser.lineStart() ) << "Wrong first line start";
+		
+		parser.backward();
+		parser.backward();
+		REQUIRE_EQ( "This", parser.current().substr().stdstr() ) << "Wrong first token - again";
+
+		WANT_TRUE( parser.match( { "T*", "*", "is", "*", "*", " ", "*2" } ) ) << "Failed to match group";
+
+		parser.pos( 8 );
+		REQUIRE_EQ( "\t", parser.current().substr().stdstr() ) << "Wrong eigth token";
+
+		REQUIRE_EQ( "test", parser.ahead( 3 ).substr().stdstr() ) << "Wrong eleventh token";
+
+		REQUIRE_EQ( "#", parser.at( 15 ).substr().stdstr() ) << "Wrong fifteenth token";
+
+		parser.pos( 15 );
+		REQUIRE_EQ( 13, parser.lineStart() ) << "Wrong second line start";
+	}
 }

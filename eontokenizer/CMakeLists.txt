@@ -5,9 +5,11 @@ message(STATUS " - EonTokenizer")
 set(TOKENIZER_HEADERS
 	Tokenizer.h
 	Token.h
+	TokenParser.h
 )
 set(TOKENIZER_SOURCES
 	Tokenizer.cpp
+	TokenParser.cpp
 )
 
 add_library(EonTokenizer STATIC ${TOKENIZER_HEADERS} ${TOKENIZER_SOURCES})
