@@ -71,7 +71,7 @@ namespace eon
 		Begin = nullptr;
 		End = nullptr;
 		Pos = nullptr;
-		Codepoint = NullChr;
+		Codepoint = nochar;
 		CodepointSize = 0;
 		NumChar = 0;
 		NumChars = 0;
@@ -93,7 +93,7 @@ namespace eon
 		if( Pos != End )
 		{
 			Pos = End;
-			Codepoint = NullChr;
+			Codepoint = nochar;
 			CodepointSize = 0;
 			NumChar = NumChars;
 		}
@@ -110,7 +110,7 @@ namespace eon
 
 		// Next byte position
 		Pos += CodepointSize;
-		Codepoint = NullChr;		// Unknown at this time
+		Codepoint = nochar;		// Unknown at this time
 
 		// End of string?
 		if( Pos == End )
@@ -147,7 +147,7 @@ namespace eon
 		if( Pos == Begin )
 		{
 			CodepointSize = 0;
-			Codepoint = NullChr;
+			Codepoint = nochar;
 			return *this;
 		}
 
@@ -313,7 +313,7 @@ namespace eon
 
 	void string_iterator::_translateCodepoint() noexcept
 	{
-		Codepoint = NullChr;
+		Codepoint = nochar;
 		if( Pos == End )
 		{
 			CodepointSize = 0;
@@ -353,7 +353,7 @@ namespace eon
 		{
 			Pos = End;
 			CodepointSize = 0;
-			Codepoint = NullChr;
+			Codepoint = nochar;
 			NumChar = NumChars;
 		}
 	}
@@ -370,7 +370,7 @@ namespace eon
 		{
 			Pos = End;
 			CodepointSize = 0;
-			Codepoint = NullChr;
+			Codepoint = nochar;
 			NumChar = NumChars;
 		}
 	}

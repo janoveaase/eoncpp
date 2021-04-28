@@ -35,14 +35,14 @@ namespace eon
 	static const char_t BarChr{ '|' };
 
 	//* Special character that indicates a 'char_t' nothing value
-	static const char_t eon_nochar{ UINT32_MAX };
+	static const char_t nochar{ UINT32_MAX };
 
 	//* Special character used as default value in parameter declarations to
 	//* indicate that the 'char_t' parameter in question will have the same
 	//* value as the previous 'char_t' parameter.
-	//* It is the same as [eon::eon_nochar], but with a name that is more
+	//* It is the same as [eon::nochar], but with a name that is more
 	//* appropriate for the context.
-	static const char_t same_char = eon_nochar;
+	static const char_t same_char = nochar;
 
 
 	//* Check if the given 'value' is a valid codepoint
@@ -60,17 +60,6 @@ namespace eon
 	**************************************************************************/
 	enum class charcat
 	{
-		undef,
-
-		other_control,
-		Cc = other_control,
-		other_format,
-		Cf = other_format,
-		other_private_use,
-		Co = other_private_use,
-		other_surrogate,
-		Cs = other_surrogate,
-
 		letter_lowercase,
 		Ll = letter_lowercase,
 		letter_modifier,
@@ -126,7 +115,18 @@ namespace eon
 		separator_paragraph,
 		Zp = separator_paragraph,
 		separator_space,
-		Zs = separator_space
+		Zs = separator_space,
+
+		other_control,
+		Cc = other_control,
+		other_format,
+		Cf = other_format,
+		other_private_use,
+		Co = other_private_use,
+		other_surrogate,
+		Cs = other_surrogate,
+
+		undef
 	};
 
 
@@ -276,9 +276,14 @@ namespace eon
 				|| c == 0x3000; }
 
 
-		//* Check if a character belongs to a named [charcat] character
+		//* Check if a character belongs to a named [eon::charcat] character
 		//* 'category'
 		bool is( char_t codepoint, charcat category ) const noexcept;
+
+		//* Get the [eon::charcat] character category for the specified
+		//* character
+		//* Returns charcat::undef if unable to categorize.
+		charcat category( char_t codepoint ) const noexcept;
 
 
 

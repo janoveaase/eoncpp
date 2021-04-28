@@ -102,6 +102,17 @@ namespace eon
 		return *this;
 	}
 
+	string& string::operator=( std::string&& stdstr )
+	{
+		substring sub( stdstr );
+		if( !sub.validUTF8() )
+			throw InvalidUTF8();
+
+		NumChars = sub.numChars();
+		Bytes = std::move( stdstr );
+		return *this;
+	}
+
 	string& string::operator=(
 		const std::initializer_list<char_t>& codepoints )
 	{

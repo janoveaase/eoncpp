@@ -89,9 +89,13 @@ namespace eon
 		inline string( const substring& other ) { *this = other; }
 
 
-		//* Construct as a copy of an std::string
+		//* Construct as a copy of an 'std::string'
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
 		inline string( const std::string& stdstr ) { *this = stdstr; }
+
+		//* Construct by taking ownership of an 'std::string'
+		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
+		inline string( std::string&& stdstr ) { *this = std::move( stdstr ); }
 
 		//* Construct as a copy of a C string
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
@@ -254,10 +258,14 @@ namespace eon
 		string& operator=( const substring& sub );
 
 
-		//* Assign from a std::string
+		//* Assign from an 'std::string'
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
 		inline string& operator=( const std::string& stdstr ) {
 			return assign( stdstr.c_str(), stdstr.size() ); }
+
+		//* Assign by taking ownership of an 'std::string'
+		//* Throws [eon::InvalidUTF8] if not valid UTF-8
+		string& operator=( std::string&& stdstr );
 
 		//* Assign from a C string
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8

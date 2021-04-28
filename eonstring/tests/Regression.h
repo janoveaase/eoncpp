@@ -5,11 +5,6 @@
 #include <chrono>
 
 
-/*
-	Regression tests for regex classes
-*/
-
-
 namespace eon
 {
 	class Substring : public eontest::EonTest {};

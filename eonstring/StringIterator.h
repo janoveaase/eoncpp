@@ -449,7 +449,7 @@ namespace eon
 		const char* Pos{ nullptr };			// Address of character in string
 		const char* Begin{ nullptr };		// Start of string
 		const char* End{ nullptr };			// End of string
-		char_t Codepoint{ NullChr };		// Translated code point
+		char_t Codepoint{ nochar };			// Translated code point
 		charsize_t CodepointSize{ 0 };		// Number of bytes in code point
 		size_t NumChar{ 0 };				// Character position from start
 		size_t NumChars{ 0 };				// Total number of characters

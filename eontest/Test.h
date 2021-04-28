@@ -262,6 +262,105 @@ namespace eontest
 		{
 			_Messages << "In " << file << ":" << line << "\n";
 		}
+		std::string encode( const std::string& str, size_t& diffpos )
+		{
+			auto start = diffpos;
+			std::string encoded;
+			size_t pos = 0;
+			for( auto c : str )
+			{
+				switch( c )
+				{
+					case '\0':
+						encoded += "\\0";
+						if( pos < start )
+							++diffpos;
+						break;
+					case '\b':
+						encoded += "\\b";
+						if( pos < start )
+							++diffpos;
+						break;
+					case '\t':
+						encoded += "\\t";
+						if( pos < start )
+							++diffpos;
+						break;
+					case '\n':
+						encoded += "\\n";
+						if( pos < start )
+							++diffpos;
+						break;
+					case '\v':
+						encoded += "\\v";
+						if( pos < start )
+							++diffpos;
+						break;
+					case '\r':
+						encoded += "\\r";
+						if( pos < start )
+							++diffpos;
+						break;
+					default:
+					{
+						if( c < ' ' || c > '~' )
+						{
+							auto enc = "&#" + std::to_string(
+								static_cast<int>( c ) ) + ";";
+							encoded += enc;
+							if( pos < start )
+								diffpos += enc.size() - 1;
+						}
+						else
+							encoded += c;
+					}
+				}
+				++pos;
+			}
+			return encoded;
+		}
+
+		bool _testEq( const std::string& expected, const std::string& actual )
+		{
+			if( expected == actual )
+				return true;
+			Failed = true;
+			size_t diff_pos = 0;
+			for( ; diff_pos < expected.size() && diff_pos < actual.size()
+				&& expected[ diff_pos ] == actual[ diff_pos ]; ++diff_pos )
+				;
+			size_t start = diff_pos > 13 ? diff_pos - 10 : 0;
+			if( start > 0 )
+				diff_pos -= start;
+			size_t exp_end = expected.size() - start > 40 ? start + 40 : expected.size() - start;
+			size_t act_end = actual.size() - start > 40 ? start + 40 : actual.size() - start;
+			_Messages << "Failed to compare equal (at position " << std::to_string( start + diff_pos ) << ")\n";
+			_Messages << "Expected: \"";
+			if( start > 0 )
+			{
+				diff_pos += 3;
+				_Messages << "...";
+			}
+			_Messages << encode( expected.substr( start, exp_end - start ), diff_pos );
+			if( exp_end < expected.size() )
+				_Messages << "...";
+			_Messages << "\"\n  Actual: \"";
+			if( start > 0 )
+				_Messages << "...";
+			size_t dummy{ 50 };
+			_Messages << encode( actual.substr( start, act_end - start ), dummy );
+			if( act_end < actual.size() )
+				_Messages << "...";
+			_Messages << "\"\n";
+			_Messages << std::string( static_cast<size_t>( 11 + diff_pos ), ' ' ) << "^\n";
+			std::string marker{ "Different here" };
+			if( diff_pos > marker.size() + 2 )
+				_Messages << std::string( static_cast<size_t>( 11 + diff_pos - marker.size() - 1 ), ' ' ) << marker << "-'\n";
+			else
+				_Messages << std::string( static_cast<size_t>( 11 + diff_pos ), ' ' ) << "'-"  << marker << "\n";
+			return false;
+		}
+
 		template<typename T1, typename T2>
 		bool _testEq( const T1& expected, const T2& actual )
 		{

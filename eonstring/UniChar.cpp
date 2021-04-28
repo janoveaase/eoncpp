@@ -162,4 +162,13 @@ namespace eon
 				return false;
 		}
 	}
+	charcat Characters::category( char_t codepoint ) const noexcept
+	{
+		for( int cat = 0; cat < static_cast<int>( charcat::undef ); ++cat )
+		{
+			if( is( codepoint, static_cast<charcat>( cat ) ) )
+				return static_cast<charcat>( cat );
+		}
+		return charcat::undef;
+	}
 }
