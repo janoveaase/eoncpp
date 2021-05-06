@@ -16,7 +16,8 @@ namespace eontest
 			Tests = new std::list<TestRef>();
 			Classes = new std::list<std::string>();
 		}
-		if( std::find( Classes->begin(), Classes->end(), test_class ) == Classes->end() )
+		if( std::find( Classes->begin(), Classes->end(), test_class )
+			== Classes->end() )
 			Classes->push_back( test_class );
 		Tests->push_back( TestRef( test_class, test_name, test ) );
 		return true;

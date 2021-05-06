@@ -1,5 +1,6 @@
 #pragma once
 #include <eonstring/String.h>
+#include <eonexcept/Exception.h>
 #include <vector>
 
 
@@ -11,20 +12,7 @@ namespace eon
 	/**************************************************************************
 	  Exception used when attempting to set a source with an empty name.
 	**************************************************************************/
-	class EmptyName : public std::exception
-	{
-	private:
-		std::string Message;
-	public:
-		EmptyName() : std::exception() {}
-		inline EmptyName( const char* message ) : std::exception() {
-			Message = message; }
-		inline EmptyName( const std::string& message ) : std::exception() {
-			Message = message;}
-		inline EmptyName( std::string&& message ) noexcept : std::exception() {
-			Message = std::move( message ); }
-		const char* what() const noexcept override { return Message.c_str(); }
-	};
+	EONEXCEPT( EmptyName );
 
 
 

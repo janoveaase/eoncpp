@@ -9,10 +9,8 @@
 #include <iomanip>
 
 
-/*
-	Eon Test Library
-*/
 
+// Internal control exception
 class TestError : public std::exception
 {
 private:
@@ -28,6 +26,10 @@ public:
 	const char* what() const noexcept override { return Message.c_str(); }
 };
 
+
+/******************************************************************************
+  The 'eontest' namespace encloses all public test functionality
+******************************************************************************/
 namespace eontest
 {
 	// General macros
@@ -35,13 +37,16 @@ namespace eontest
 #define TEST_ID( test_class, test_name ) #test_class"_"#test_name
 #define TEST_LINE std::to_string( __LINE__ )
 
+	// Replace std::stringstream for user messages
 	class _stringstream
 	{
 	public:
-		_stringstream() { auto x = std::setprecision( std::numeric_limits<double>::digits10 + 2 ); }
+		_stringstream() { auto x = std::setprecision(
+			std::numeric_limits<double>::digits10 + 2 ); }
 		_stringstream( const _stringstream& other ) { *this = other; }
 		
-		_stringstream& operator=( const _stringstream& other ) { Strm << other.Strm.str(); return *this; }
+		_stringstream& operator=( const _stringstream& other ) {
+			Strm << other.Strm.str(); return *this; }
 		
 		
 		template<typename T>
@@ -90,8 +95,9 @@ namespace eontest
 
 
 
-#define EON_MESSAGE_LOCATION( file, line, fatal ) \
-	::eontest::EonTest::Report( *this, file, line, fatal ) = ::eontest::_stringstream()
+#define EON_MESSAGE_LOCATION( file, line, fatal )\
+	::eontest::EonTest::Report( *this, file, line, fatal )\
+		= ::eontest::_stringstream()
 
 #define FAILURE_MESSAGE_( fatal ) \
 	EON_MESSAGE_LOCATION( __FILE__, __LINE__, fatal )
@@ -114,52 +120,104 @@ namespace eontest
 	// Test that something is boolean true
 #define WANT_TRUE( expression ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testTrue( static_cast<bool>( expression ), #expression ) ); else NONFATAL_MESSAGE
+	if( _testTrue( static_cast<bool>( expression ), #expression ) );\
+		else NONFATAL_MESSAGE
 #define REQUIRE_TRUE( expression ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testTrue( static_cast<bool>( expression ), #expression ) ); else FATAL_MESSAGE
+	if( _testTrue( static_cast<bool>( expression ), #expression ) );\
+		else FATAL_MESSAGE
 
 	// Test that something is boolean false
 #define WANT_FALSE( expression ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testFalse( static_cast<bool>( expression ), #expression ) ); else NONFATAL_MESSAGE
+	if( _testFalse( static_cast<bool>( expression ), #expression ) );\
+		else NONFATAL_MESSAGE
 #define REQUIRE_FALSE( expression ) \
 	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testFalse( static_cast<bool>( expression ), #expression ) ); else FATAL_MESSAGE
+	if( _testFalse( static_cast<bool>( expression ), #expression ) );\
+		else FATAL_MESSAGE
 
 	// Test that exception isn't thrown
+#define _NO_EXCEPT( expression )\
+	try { expression; }\
+	catch( ... )\
+	{\
+		Failed = true;\
+		_Messages << "\nExpression: {" << #expression << "} throws\n";\
+		_Messages << "Expected no exceptions\n"; }
 #define WANT_NO_EXCEPT( expression )\
-	try\
-	{\
-		expression;\
-	}\
-	catch( ... )\
-	{\
-		Failed = true;\
-		_Messages << "\nExpression: {" << #expression << "} throws\n";\
-		_Messages << "Expected no exceptions\n";\
-	}\
-	if( Failed ) NONFATAL_MESSAGE
+	_NO_EXCEPT( expression ); if( Failed ) NONFATAL_MESSAGE
 #define REQUIRE_NO_EXCEPT( expression )\
-	try\
-	{\
-		expression;\
+	_NO_EXCEPT( expression ); if( Failed ) FATAL_MESSAGE
+
+	// Test that a specific exception is thrown
+#define _EXCEPT( expression, exception )\
+	try { expression;\
+		Failed = true;\
+		_Messages << "\nExpression: {" << #expression << "} doesn't throw\n";\
+		_Messages << "Expected exception: " << #exception << "\n";\
 	}\
+	catch( exception ) { /* This is what we want! */ }\
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: {" << #expression << "} throws\n";\
-		_Messages << "Expected no exceptions\n";\
-	}\
-	if( Failed ) FATAL_MESSAGE
+		_Messages << "\nExpression: {" << #expression << "} doesn't throw \""\
+			<< #exception << "\"\n";\
+		_Messages << "A different exception was thrown\n"; }
+#define WANT_EXCEPT( expression, exception )\
+	_EXCEPT( expression, exception ); if( Failed ) NONFATAL_MESSAGE
+#define REQURE_EXCEPT( expression, exception )\
+	_EXCEPT( expression, exception ); if( Failed ) FATAL_MESSAGE
 
 	// Test that something is equal to something else
-#define WANT_EQ( expected, actual ) \
-	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testEq( (expected), (actual), #expected, #actual ) ); else NONFATAL_MESSAGE
-#define REQUIRE_EQ( expected, actual ) \
-	EON_AMBIGUOUS_ELSE_BLOCKER \
-	if( _testEq( (expected), (actual), #expected, #actual ) ); else FATAL_MESSAGE
+#define WANT_EQ( expected, actual )\
+	EON_AMBIGUOUS_ELSE_BLOCKER\
+	if( _testEq( (expected), (actual), #expected, #actual ) );\
+		else NONFATAL_MESSAGE
+#define REQUIRE_EQ( expected, actual )\
+	EON_AMBIGUOUS_ELSE_BLOCKER\
+	if( _testEq( (expected), (actual), #expected, #actual ) );\
+		else FATAL_MESSAGE
+
+	// Test that something is not equal to something else
+#define WANT_NE( expected, actual )\
+	if( _testNe( (expected), (actual), #expected, #actual ) );\
+		else NONFATAL_MESSAGE
+#define REQUIRE_NE( expected, actual )\
+	if( _testNe( (expected), (actual), #expected, #actual ) );\
+		else FATAL_MESSAGE
+
+	// Test that something is less than something else
+#define WANT_LT( expected, actual )\
+	if( _testLt( (expected), (actual), #expected, #actual ) );\
+		else NONFATAL_MESSAGE
+#define REQUIRE_LT( expected, actual )\
+	if( _testLt( (expected), (actual), #expected, #actual ) );\
+		else FATAL_MESSAGE
+
+	// Test that something is less than or equal to something else
+#define WANT_LE( expected, actual )\
+	if( _testLe( (expected), (actual), #expected, #actual ) );\
+		else NONFATAL_MESSAGE
+#define REQUIRE_LE( expected, actual )\
+	if( _testLe( (expected), (actual), #expected, #actual ) );\
+		else FATAL_MESSAGE
+
+	// Test that something is greater than something else
+#define WANT_GT( expected, actual )\
+	if( _testGt( (expected), (actual), #expected, #actual ) );\
+		else NONFATAL_MESSAGE
+#define REQUIRE_GT( expected, actual )\
+	if( _testGt( (expected), (actual), #expected, #actual ) );\
+		else FATAL_MESSAGE
+
+	// Test that something is greater than or equal to something else
+#define WANT_GE( expected, actual )\
+	if( _testGe( (expected), (actual), #expected, #actual ) );\
+		else NONFATAL_MESSAGE
+#define REQUIRE_GE( expected, actual )\
+	if( _testGe( (expected), (actual), #expected, #actual ) );\
+		else FATAL_MESSAGE
 
 
 	class EonTest;
@@ -195,10 +253,13 @@ namespace eontest
 		Messages& prep( std::string& info ) { Info = &info; return *this; }
 		Messages& prep() { Info = nullptr; return *this; }
 
-		Messages& operator <<( const char* str ) { if( Info ) *Info += str; return *this; }
-		Messages& operator <<( const std::string& str ) { if( Info ) *Info += str; return *this; }
+		inline Messages& operator <<( const char* str ) {
+			if( Info ) *Info += str; return *this; }
+		inline Messages& operator <<( const std::string& str ) {
+			if( Info ) *Info += str; return *this; }
 		template<typename T>
-		Messages& operator <<( T value ) { if( Info ) *Info += std::to_string( value ); return *this; }
+		Messages& operator <<( T value ) {
+			if( Info ) *Info += std::to_string( value ); return *this; }
 	};
 
 
@@ -212,7 +273,11 @@ namespace eontest
 
 	public:
 		EonTest() = default;
-		virtual ~EonTest() { std::cout << ( Failed ? "FAIL" : "OK" ) << "\n"; auto str = _Messages.str();  if( !str.empty() ) std::cout << "----------" << str << "----------\n"; }
+		virtual ~EonTest() {
+			std::cout << ( Failed ? "FAIL" : "OK" ) << "\n";
+			auto str = _Messages.str();
+			if( !str.empty() ) std::cout << "----------" << str
+				<< "----------\n"; }
 
 		virtual void test_body() = 0;
 
@@ -223,7 +288,10 @@ namespace eontest
 			std::string TestName;
 			FactoryMain* Factory{ nullptr };
 			TestRef() = default;
-			TestRef( const std::string& test_class, const std::string& test_name, FactoryMain* factory ) { TestClass = test_class; TestName = test_name; Factory = factory; }
+			inline TestRef( const std::string& test_class,
+				const std::string& test_name, FactoryMain* factory ) {
+				TestClass = test_class; TestName = test_name;
+				Factory = factory; }
 		};
 		static std::list<TestRef>* Tests;
 		static std::list<std::string>* Classes;
@@ -260,10 +328,8 @@ namespace eontest
 		};
 
 	public:
-		void _reportLocation( const char* file, int line )
-		{
-			_Messages << "In " << file << ":" << line << "\n";
-		}
+		inline void _reportLocation( const char* file, int line ) {
+			_Messages << "In " << file << ":" << line << "\n"; }
 		std::string encode( const std::string& str, size_t& diffpos )
 		{
 			auto start = diffpos;
@@ -324,23 +390,17 @@ namespace eontest
 
 		bool _testTrue( bool value, const char* expression )
 		{
-			if( value )
-				return true;
-			else
-			{
-				_Messages << "\nExpression: {" << expression << "}=false\nExpected true\n";
-				return false;
-			}
+			if( !value )
+				_Messages << "\nExpression: {" << expression
+					<< "}=false\nExpected true\n";
+			return value;
 		}
 		bool _testFalse( bool value, const char* expression )
 		{
-			if( !value )
-				return true;
-			else
-			{
-				_Messages << "\nExpression: {" << expression << "}=true\nExpected false\n";
-				return false;
-			}
+			if( value )
+				_Messages << "\nExpression: {" << expression
+					<< "}=true\nExpected false\n";
+			return !value;
 		}
 
 		bool _testEq( const std::string& expected, const std::string& actual,
@@ -356,9 +416,12 @@ namespace eontest
 			size_t start = diff_pos > 13 ? diff_pos - 10 : 0;
 			if( start > 0 )
 				diff_pos -= start;
-			size_t exp_end = expected.size() - start > 40 ? start + 40 : expected.size() - start;
-			size_t act_end = actual.size() - start > 40 ? start + 40 : actual.size() - start;
-			_Messages << "\nFailed to compare equal (at position " << std::to_string( start + diff_pos ) << ")\n";
+			size_t exp_end = expected.size() - start > 40
+				? start + 40 : expected.size() - start;
+			size_t act_end = actual.size() - start > 40
+				? start + 40 : actual.size() - start;
+			_Messages << "\nFailed to compare equal (at position "
+				<< std::to_string( start + diff_pos ) << ")\n";
 			_Messages << "Expected expression: {" << exp_expr << "}\n";
 			_Messages << "  Actual expression: {" << act_expr << "}\n";
 			_Messages << "Expected value: \"";
@@ -367,26 +430,30 @@ namespace eontest
 				diff_pos += 3;
 				_Messages << "...";
 			}
-			_Messages << encode( expected.substr( start, exp_end - start ), diff_pos );
+			_Messages << encode( expected.substr( start, exp_end - start ),
+				diff_pos );
 			if( exp_end < expected.size() )
 				_Messages << "...";
 			_Messages << "\"\n  Actual value: \"";
 			if( start > 0 )
 				_Messages << "...";
 			size_t dummy{ 50 };
-			_Messages << encode( actual.substr( start, act_end - start ), dummy );
+			_Messages << encode( actual.substr( start, act_end - start ),
+				dummy );
 			if( act_end < actual.size() )
 				_Messages << "...";
 			_Messages << "\"\n";
-			_Messages << std::string( static_cast<size_t>( 17 + diff_pos ), ' ' ) << "^\n";
+			_Messages << std::string( static_cast<size_t>( 17 + diff_pos ),
+				' ' ) << "^\n";
 			std::string marker{ "Different here" };
 			if( diff_pos > marker.size() + 2 )
-				_Messages << std::string( static_cast<size_t>( 17 + diff_pos - marker.size() - 1 ), ' ' ) << marker << "-'\n";
+				_Messages << std::string( static_cast<size_t>( 17 + diff_pos
+					- marker.size() - 1 ), ' ' ) << marker << "-'\n";
 			else
-				_Messages << std::string( static_cast<size_t>( 17 + diff_pos ), ' ' ) << "'-"  << marker << "\n";
+				_Messages << std::string( static_cast<size_t>( 17 + diff_pos ),
+					' ' ) << "'-"  << marker << "\n";
 			return false;
 		}
-
 		template<typename T1, typename T2>
 		bool _testEq( const T1& expected, const T2& actual,
 			const char* exp_expr, const char* act_expr )
@@ -403,6 +470,96 @@ namespace eontest
 			}
 			else
 				return true;
+		}
+
+		template<typename T1, typename T2>
+		bool _testNe( const T1& expected, const T2& actual,
+			const char* exp_expr, const char* act_expr )
+		{
+			if( expected != actual )
+				return true;
+			Failed = true;
+			_Messages << "\nFailed to compare not equal\n";
+			_Messages << "Expected expression: {" << exp_expr << "}\n";
+			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			size_t dummy{ SIZE_MAX };
+			_Messages << "Expected value: \"" << encode( expected, dummy )
+				<< "\"\n";
+			_Messages << "  Actual value: \"" << encode( actual, dummy )
+				<< "\"\n";
+			return false;
+		}
+
+		template<typename T1, typename T2>
+		bool _testLt( const T1& expected, const T2& actual,
+			const char* exp_expr, const char* act_expr )
+		{
+			if( expected < actual )
+				return true;
+			Failed = true;
+			_Messages << "\nFailed to compare less than\n";
+			_Messages << "Expected expression: {" << exp_expr << "}\n";
+			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			size_t dummy{ SIZE_MAX };
+			_Messages << "Expected value: \"" << encode( expected, dummy )
+				<< "\"\n";
+			_Messages << "  Actual value: \"" << encode( actual, dummy )
+				<< "\"\n";
+			return false;
+		}
+
+		template<typename T1, typename T2>
+		bool _testLe( const T1& expected, const T2& actual,
+			const char* exp_expr, const char* act_expr )
+		{
+			if( expected <= actual )
+				return true;
+			Failed = true;
+			_Messages << "\nFailed to compare less than or equal to\n";
+			_Messages << "Expected expression: {" << exp_expr << "}\n";
+			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			size_t dummy{ SIZE_MAX };
+			_Messages << "Expected value: \"" << encode( expected, dummy )
+				<< "\"\n";
+			_Messages << "  Actual value: \"" << encode( actual, dummy )
+				<< "\"\n";
+			return false;
+		}
+
+		template<typename T1, typename T2>
+		bool _testGt( const T1& expected, const T2& actual,
+			const char* exp_expr, const char* act_expr )
+		{
+			if( expected > actual )
+				return true;
+			Failed = true;
+			_Messages << "\nFailed to compare greater than\n";
+			_Messages << "Expected expression: {" << exp_expr << "}\n";
+			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			size_t dummy{ SIZE_MAX };
+			_Messages << "Expected value: \"" << encode( expected, dummy )
+				<< "\"\n";
+			_Messages << "  Actual value: \"" << encode( actual, dummy )
+				<< "\"\n";
+			return false;
+		}
+
+		template<typename T1, typename T2>
+		bool _testGe( const T1& expected, const T2& actual,
+			const char* exp_expr, const char* act_expr )
+		{
+			if( expected >= actual )
+				return true;
+			Failed = true;
+			_Messages << "\nFailed to compare greater than or equal to\n";
+			_Messages << "Expected expression: {" << exp_expr << "}\n";
+			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			size_t dummy{ SIZE_MAX };
+			_Messages << "Expected value: \"" << encode( expected, dummy )
+				<< "\"\n";
+			_Messages << "  Actual value: \"" << encode( actual, dummy )
+				<< "\"\n";
+			return false;
 		}
 	};
 }

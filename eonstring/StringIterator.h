@@ -297,6 +297,10 @@ namespace eon
 		inline string_iterator getEnd() const noexcept { if( !*this )
 			return *this; auto end = *this; return end.resetToEnd(); }
 
+		//* Get a copy of the iterator, but reset to the beginning
+		inline string_iterator getBegin() const noexcept { if( !*this )
+			return *this; auto beg = *this; return beg.resetToBegin(); }
+
 
 
 		/**********************************************************************

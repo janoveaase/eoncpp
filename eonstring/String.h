@@ -1668,6 +1668,9 @@ namespace eon
 		static inline bool isMarkEnclosing( char_t cp ) noexcept {
 			return Characters::get().isMarkEnclosing( cp ); }
 		//*
+		static inline bool isNumber( char_t cp ) noexcept {
+			return isNumberDecimalDigit( cp ) || isNumberLetter( cp )
+				|| isNumberOther( cp ); }
 		static inline bool isNumberAsciiDigit( char_t cp ) noexcept {
 			return Characters::get().isNumberAsciiDigit( cp ); }
 		static inline bool isNumberDecimalDigit( char_t cp )

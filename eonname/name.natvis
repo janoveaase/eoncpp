@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  
+  <Type Name="eon::string">
+    <DisplayString>{Bytes} num-chars={NumChars}</DisplayString>
+  </Type>
+  <Type Name="eon::string::iterator">
+    <DisplayString Condition="Str==nullptr">(N/A)</DisplayString>
+    <DisplayString Condition="Cur!=-1 &amp;&amp; Cur&lt;65536">{Pos.CharPos}=[{(wchar_t)Cur}]</DisplayString>
+    <DisplayString Condition="Cur!=-1 &amp;&amp; Cur&gt;=65536">{Pos.CharPos}=[{Cur}]</DisplayString>
+  </Type>
+  
+</AutoVisualizer>

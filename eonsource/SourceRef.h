@@ -11,20 +11,7 @@ namespace eon
 	  Exception used when attempting to access a referenced source when no such
 	  source exists.
 	**************************************************************************/
-	class NoSource : public std::exception
-	{
-	private:
-		std::string Message;
-	public:
-		NoSource() : std::exception() {}
-		inline NoSource( const char* message ) : std::exception() {
-			Message = message; }
-		inline NoSource( const std::string& message ) : std::exception() {
-			Message = message; }
-		inline NoSource( std::string&& message ) noexcept : std::exception() {
-			Message = std::move( message ); }
-		const char* what() const noexcept override { return Message.c_str(); }
-	};
+	EONEXCEPT( NoSource );
 
 
 

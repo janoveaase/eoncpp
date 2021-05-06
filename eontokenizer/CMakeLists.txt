@@ -32,6 +32,6 @@ if(WIN32)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/EonTokenizer.dir/Debug/EonTokenizer.pdb DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}" OPTIONAL)
 endif()
 
-if(EON_INCLUDE_TESTS)
+if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()

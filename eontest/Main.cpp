@@ -6,7 +6,8 @@
 void usage( const std::string& prog )
 {
 	std::cout << "Usage: " << prog.c_str() << " [--eonfilter=<regex>]\n";
-	std::cout << "If run with filter, only tests matching that filter regex pattern will be run.\n";
+	std::cout << "If run with filter, "
+		"only tests matching that filter regex pattern will be run.\n";
 }
 
 class Args
@@ -63,9 +64,11 @@ void runTests( const std::string& filter, std::list<std::string>& failed )
 	std::regex pattern( filter );
 	for( auto& test : *eontest::EonTest::Tests )
 	{
-		if( !filter.empty() && !std::regex_match( test.TestClass + "." + test.TestName, pattern ) )
+		if( !filter.empty() && !std::regex_match(
+			test.TestClass + "." + test.TestName, pattern ) )
 			continue;
-		std::cout << "Running " << test.TestClass << "." << test.TestName << ": ";
+		std::cout << "Running " << test.TestClass << "." << test.TestName
+			<< ": ";
 		try
 		{
 			if( !runTest( test ) )
