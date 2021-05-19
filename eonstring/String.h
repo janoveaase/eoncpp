@@ -490,6 +490,12 @@ namespace eon
 		inline bool containsAnyOf( const string& characters ) const noexcept {
 			return substr().containsAnyOf( characters.substr() ); }
 
+		//* Check if string contains any charcters other than the ones in the
+		//* 'characters' string
+		inline bool containsOtherThan( const string& characters )
+			const noexcept {
+			return substr().containsOtherThan( characters.substr() ); }
+
 
 		/** Find First Occurrence **/
 
@@ -1026,11 +1032,23 @@ namespace eon
 
 		//* Get a copy of the string with standard C single character escapes
 		//* processed
+		//* NOTE: Single quotes, question marks and tabs are not escaped!
 		inline string escape() const { return escape( substr() ); }
 
 		//* Get a copy of the string with standard C single character escapes
 		//* processed only within 'sub' [eon::substring]
+		//* NOTE: Single quotes, question marks and tabs are not escaped!
 		string escape( const substring& sub ) const;
+
+		//* Get a copy of the string with standard C single character escapes
+		//* processed
+		//* NOTE: Single quotes, question marks and tabs are also escaped!
+		inline string escapeAll() const { return escapeAll( substr() ); }
+
+		//* Get a copy of the string with standard C single character escapes
+		//* processed only within 'sub' [eon::substring]
+		//* NOTE: Single quotes, question marks and tabs are also escaped!
+		string escapeAll( const substring& sub ) const;
 
 		//* Get a copy of the string with standard C single character escapes
 		//* reverse processed

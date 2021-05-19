@@ -1,6 +1,7 @@
 #include "String.h"
 #include <cctype>
 #include <regex>
+#include <unordered_map>
 
 
 namespace eon
@@ -439,108 +440,159 @@ namespace eon
 		return result;
 	}
 
-	string string::escape( const substring& sub ) const
+	inline string _escape( const string& src, const substring& sub,
+		const std::unordered_map<char_t, char_t>& singletons )
 	{
 		if( sub.empty() )
-			return *this;
+			return src;
 		auto area = sub.lowToHigh();
 		string result;
-		for( auto i = area.begin(); i != area.end(); ++i )
+		auto& chars = Characters::get();
+		for( auto c = area.begin(); c != area.end(); ++c )
 		{
-			switch( *i )
+			auto found = singletons.find( *c );
+			if( found != singletons.end() )
 			{
-				case '\a':
-					result += "\\a";
-					break;
-				case '\b':
-					result += "\\b";
-					break;
-				case '\f':
-					result += "\\f";
-					break;
-				case '\n':
-					result += "\\n";
-					break;
-				case '\r':
-					result += "\\r";
-					break;
-				case '\t':
-					result += "\\t";
-					break;
-				case '\v':
-					result += "\\v";
-					break;
-				case '\\':
-					result += "\\\\";
-					break;
-				case '\"':
-					result += "\\\"";
-					break;
-				case '\?':
-					result += "\\?";
-					break;
-				default:
-					result += *i;
+				if( found->second != nochar )
+				{
+					result += BackSlashChr;
+					result += found->second;
+				}
+				else
+					result += *c;
 			}
+
+			// Null gets output as octal
+			else if( *c == NullChr )
+			{
+				result += BackSlashChr;
+				result += ZeroChr;
+			}
+
+			// Non-printable gets output as Unicode escapes
+			else if( chars.isOther( *c ) )
+			{
+				result += BackSlashChr;
+				result += "U";
+				auto end = c + 1;
+				for( size_t i = 0; i < end.numByte(); ++i )
+					result += numToHex( *( c.byteData() + i ) );
+			}
+
+			else
+				result += *c;
 		}
 		return result;
 	}
+	string string::escape( const substring& sub ) const
+	{
+		static std::unordered_map<char_t, char_t> singletons{
+			{ '\'', nochar }, { '"', '"' }, { '?', nochar }, { '\\', '\\' },
+			{ '\a', 'a' }, { '\b', 'b' }, { '\f', 'f' }, { '\n', 'n' },
+			{ '\r', 'r' }, { '\t', nochar }, { '\v', 'v' } };
+		return _escape( *this, sub, singletons );
+	}
+	string string::escapeAll( const substring& sub ) const
+	{
+		static std::unordered_map<char_t, char_t> singletons{
+			{ '\'', '\'' }, { '"', '"' }, { '?', '?' }, { '\\', '\\' },
+			{ '\a', 'a' }, { '\b', 'b' }, { '\f', 'f' }, { '\n', 'n' },
+			{ '\r', 'r' }, { '\t', 't' }, { '\v', 'v' } };
+		return _escape( *this, sub, singletons );
+	}
 	string string::unescape( const substring& sub ) const
 	{
+		static std::unordered_map<char_t, char_t> singletons{
+			{ '\'', '\'' }, { '"', '"' }, { '?', '?' }, { '\\', '\\' },
+			{ 'a', '\a' }, { 'b', '\b' }, { 'f', '\f' }, { 'n', '\n' },
+			{ 'r', '\r' }, { 't', '\t' }, { 'v', '\v' } };
+
 		if( sub.empty() )
 			return *this;
 		auto area = sub.lowToHigh();
 		string result;
-		bool esc = false;
-		for( auto i = area.begin(); i != area.end(); ++i )
+		for( auto c = area.begin(); c != area.end(); ++c )
 		{
-			if( !esc )
+			auto c1 = c + 1;
+			if( *c == BackSlashChr && c1 != area.end() )
 			{
-				if( *i == '\\' )
-					esc = true;
-				else
-					result += *i;
-			}
-			else
-			{
-				switch( *i )
+				auto found = singletons.find( *c1 );
+				if( found != singletons.end() )
 				{
-					case 'a':
-						result += "\a";
-						break;
-					case 'b':
-						result += "\b";
-						break;
-					case 'f':
-						result += "\f";
-						break;
-					case 'n':
-						result += "\n";
-						break;
-					case 'r':
-						result += "\r";
-						break;
-					case 't':
-						result += "\t";
-						break;
-					case 'v':
-						result += "\v";
-						break;
-					case '\\':
-						result += "\\";
-						break;
-					case '"':
-						result += "\"";
-						break;
-					case '?':
-						result += "\?";
-						break;
-					default:
-						result += "\\";
-						result += *i;
+					result += found->second;
+					++c;
+					continue;
 				}
-				esc = false;
+
+				// Unicode
+				else if( ( *c1 == 'u' || *c1 == 'U' )
+					&& c1 + 1 != area.end() && isHexDigit( *( c1 + 1 ) ) )
+				{
+					++c;
+					char_t val{ 0 };
+					for( int j = 0; j < 8; ++j )
+					{
+						val <<= 4;
+						val += hexToNum( static_cast<byte_t>( *++c ) );
+						if( c + 1 == area.end() || !isHexDigit( *( c + 1 ) ) )
+							break;
+					}
+					result += val;
+					continue;
+				}
+
+				// Hex
+				else if( ( *c1 == 'x' || *c1 == 'X' )
+					&& c1 + 1 != area.end() && isHexDigit( *( c1 + 1 ) ) )
+				{
+					++c;
+					byte_t val{ 0 };
+					int shifts = 0;
+					while( true )
+					{
+						val <<= 4;
+						val += hexToNum( static_cast<byte_t>( *++c ) );
+						if( ++shifts == 2 )
+						{
+							shifts = 0;
+							result += val;
+							val = 0;
+						}
+						if( c + 1 == area.end() || !isHexDigit( *( c + 1 ) ) )
+							break;
+					}
+					continue;
+				}
+
+				// Octal
+				else if( isOctalDigit( *c1 ) )
+				{
+					uint32_t val{ 0 };
+					bool have_val = false;
+					while( true )
+					{
+						val = ( val << 3 ) + ( *++c - '0' );
+						have_val = true;
+						if( val > UINT32_MAX )
+						{
+							uint32_t chr = val >> 2;
+							result += static_cast<char_t>( chr );
+							val -= chr << 2;
+						}
+						if( c + 1 == area.end() || !isOctalDigit( *( c + 1 ) ) )
+						{
+							if( have_val )
+							{
+								result += static_cast<char_t>( val );
+								have_val = false;
+							}
+							break;
+						}
+					}
+					continue;
+				}
 			}
+			result += *c;
 		}
 		return result;
 	}

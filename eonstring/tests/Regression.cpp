@@ -628,10 +628,23 @@ namespace eon
 
 	TEST( String, escape )
 	{
-		WANT_EQ( "a\\tb\\nc\\\\", eon::string( "a\tb\nc\\" ).escape().stdstr() ) << "Failed to escape";
+		WANT_EQ( "a	b\\nc\\\\", eon::string( "a\tb\nc\\" ).escape().stdstr() ) << "Failed to escape";
+		WANT_EQ( "a\\tb\\nc\\\\", eon::string( "a\tb\nc\\" ).escapeAll().stdstr() ) << "Failed to escape";
 		WANT_EQ( "a\tb\nc\\", eon::string( "a\\tb\\nc\\\\" ).unescape().stdstr() ) << "Failed to unescape";
 		auto esc = eon::string( "C:\\\\flex\\log \\n\\ntest" ).unescape();
 		WANT_EQ( "C:\\flex\\log \n\ntest", esc.stdstr() ) << "Failed to properly unescape";
+
+		string uexp{ char_t( 128522 ) };	// Smileyface
+		WANT_TRUE( string( "\\U1F60A" ).unescape() == uexp ) << "Failed to unescape unicode";
+		
+		string hexexp{ "0Az" };
+		WANT_TRUE( string( "\\x30\\x41\\x7A" ).unescape() == hexexp ) << "Failed to unescape hex";
+
+		string octexp{ "0Az" };
+		octexp += char_t( 277 );	// e with breve
+		octexp += NullChr;
+		auto octact = string( "\\60\\101\\172\\425\\0" ).unescape();
+		WANT_TRUE( octact == octexp ) << "Failed to unescape octal";
 	}
 	TEST( String, escape_nonprintable )
 	{

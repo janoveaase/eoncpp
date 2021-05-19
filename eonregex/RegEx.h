@@ -36,21 +36,21 @@ namespace eon
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
 		regex( const substring& expression ) {
-			Raw = expression; Graph.parse( Raw ); }
+			Raw = expression; Graph.parse( Raw.substr() ); }
 
 		//* Construct for an std::string 'expression'
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
 		regex( const std::string& expression ) {
-			Raw = substring( expression ); Graph.parse( Raw ); }
+			Raw = substring( expression ); Graph.parse( Raw.substr() ); }
 
 		//* Construct for a 'const char*' (C-string)
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
 		regex( const char* expression ) {
-			Raw = substring( expression ); Graph.parse( Raw ); }
+			Raw = substring( expression ); Graph.parse( Raw.substr() ); }
 
 
 		//* Default destruction
@@ -83,7 +83,7 @@ namespace eon
 		**********************************************************************/
 
 		//* Get the complete pattern (boundary markers and flags included)
-		inline const substring& raw() const noexcept { return Raw; }
+		inline const string& raw() const noexcept { return Raw; }
 
 
 
@@ -138,6 +138,6 @@ namespace eon
 
 	private:
 		rx::Graph Graph;
-		substring Raw;
+		string Raw;
 	};
 }

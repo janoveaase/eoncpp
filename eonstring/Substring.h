@@ -22,10 +22,6 @@ namespace eon
 	};
 
 
-	//* Defining eon::byte_t to reduce confusion with UTF-8/Unicode characters
-	using byte_t = char;
-
-
 
 
 	/**************************************************************************
@@ -321,6 +317,11 @@ namespace eon
 		//* substring
 		inline bool containsAnyOf( const substring& sub ) const noexcept {
 			return static_cast<bool>( findFirstOf( sub ) ); }
+
+		//* Check if the substring contains any charcters other than the ones
+		//* in the given substring
+		inline bool containsOtherThan( const substring& sub ) const noexcept {
+			return static_cast<bool>( findFirstNotOf( sub ) ); }
 
 
 		//* Find first occurrence of the 'to_find' substring

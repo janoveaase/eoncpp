@@ -47,7 +47,7 @@ namespace eon
 			// We have (or should have) a full source:
 			//   <sep><expr><sep>[<flags>]
 			// Let's make sure
-			if( source.numChars() < 2 )
+			if( source.numChars() <= 2 )
 			{
 				throw InvalidExpression(
 					"Regular expressions must be on the form: "

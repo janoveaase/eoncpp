@@ -25,7 +25,8 @@ namespace eon
 				if( SrcRef.chr() == NewlineChr )
 				{
 					Tokens.push_back( token( SrcRef, tokencat::newline ) );
-					SrcRef.advance();
+					if( !SrcRef.advance() )
+						break;
 				}
 				else
 					scanSameChar( tokencat::space );
@@ -35,13 +36,13 @@ namespace eon
 				scanSameChar( tokencat::separator );
 			else if( category >= charcat::punctuation_close
 				&& category <= charcat::punctuation_other )
-				scanSameChar( tokencat::punctuation );
+				scanSingleChar( tokencat::punctuation );
 			else if( category >= charcat::symbol_currency
 				&& category <= charcat::symbol_other )
-				scanSameChar( tokencat::symbol );
+				scanSingleChar( tokencat::symbol );
 			else if( category >= charcat::other_control
 				&& category <= charcat::other_surrogate )
-				scanSameChar( tokencat::other );
+				scanSingleChar( tokencat::other );
 			else
 				scanSameChar( tokencat::undef );
 		}
@@ -53,6 +54,17 @@ namespace eon
 		auto pos = SrcRef.pos();
 		while( pos.advance( SrcRef.source() ) && pos.chr() == SrcRef.chr() )
 			;
+		Tokens.push_back( token(
+			SrcRef.source(), SrcRef.pos().line(),	// Source and line number
+			SrcRef.pos().area().begin(),			// First character
+			pos.area().begin(),						// End character
+			category ) );
+		SrcRef = pos;	// Move past the read token
+	}
+	void tokenizer::scanSingleChar( tokencat category )
+	{
+		auto pos = SrcRef.pos();
+		pos.advance( SrcRef.source() );
 		Tokens.push_back( token(
 			SrcRef.source(), SrcRef.pos().line(),	// Source and line number
 			SrcRef.pos().area().begin(),			// First character

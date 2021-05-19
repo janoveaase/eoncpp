@@ -81,6 +81,15 @@ namespace eon
 	const name_t name_bytes = name::get( "bytes" );
 	const name_t name_string = name::get( "string" );
 	const name_t name_regex = name::get( "regex" );
+	const name_t name_true = name::get( "true" );
+	const name_t name_false = name::get( "false" );
 	const name_t name_key = name::get( "key" );
 	const name_t name_value = name::get( "value" );
+	const name_t name_raw = name::get( "raw" );
+	const name_t name_meta = name::get( "meta" );
+	const name_t name_reference = name::get( "reference" );
+	const name_t name_docs = name::get( "docs" );
+	const name_t name_b = name::get( "b" );
+	const name_t name_test = name::get( "test" );
+	const name_t name_title = name::get( "title" );
 }

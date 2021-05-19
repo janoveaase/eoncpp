@@ -7,6 +7,7 @@
 #include <sstream>
 #include <regex>
 #include <iomanip>
+#include <chrono>
 
 
 
@@ -166,7 +167,7 @@ namespace eontest
 		_Messages << "A different exception was thrown\n"; }
 #define WANT_EXCEPT( expression, exception )\
 	_EXCEPT( expression, exception ); if( Failed ) NONFATAL_MESSAGE
-#define REQURE_EXCEPT( expression, exception )\
+#define REQUIRE_EXCEPT( expression, exception )\
 	_EXCEPT( expression, exception ); if( Failed ) FATAL_MESSAGE
 
 	// Test that something is equal to something else
@@ -273,13 +274,38 @@ namespace eontest
 
 	public:
 		EonTest() = default;
-		virtual ~EonTest() {
+		~EonTest()
+		{
 			std::cout << ( Failed ? "FAIL" : "OK" ) << "\n";
 			auto str = _Messages.str();
 			if( !str.empty() ) std::cout << "----------" << str
-				<< "----------\n"; }
+				<< "----------\n";
+		}
 
+
+		void runTest()
+		{
+			try { prepare(); }
+			catch( ... )
+			{
+				Failed = true;
+				_Messages << "Failure in 'prepare' method of test\n";
+			}
+			if( !Failed )
+				test_body();
+			try { cleanup(); }
+			catch( ... )
+			{
+				Failed = true;
+				_Messages << "Failure in 'cleanup' method of test\n";
+			}
+		}
+
+	protected:
 		virtual void test_body() = 0;
+
+		virtual void prepare() {}
+		virtual void cleanup() {}
 
 	public:
 		struct TestRef
@@ -339,6 +365,11 @@ namespace eontest
 			{
 				switch( c )
 				{
+					case '\\':
+						encoded += "\\\\";
+						if( pos < start )
+							++diffpos;
+						break;
 					case '\0':
 						encoded += "\\0";
 						if( pos < start )

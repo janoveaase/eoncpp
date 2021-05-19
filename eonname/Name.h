@@ -69,8 +69,17 @@ namespace eon
 	extern const name_t name_bytes;
 	extern const name_t name_string;
 	extern const name_t name_regex;
+	extern const name_t name_true;
+	extern const name_t name_false;
 	extern const name_t name_key;
 	extern const name_t name_value;
+	extern const name_t name_raw;
+	extern const name_t name_meta;
+	extern const name_t name_reference;
+	extern const name_t name_docs;
+	extern const name_t name_b;
+	extern const name_t name_test;
+	extern const name_t name_title;
 
 
 
@@ -93,6 +102,10 @@ namespace eon
 		//* valid name.
 		static inline name_t get( const string& source ) {
 			return get( string( source ) ); }
+		static inline name_t get( const std::string& name ) {
+			return get( substring( name ) ); }
+		static inline name_t get( const char* name ) {
+			return get( substring( name ) ); }
 		static name_t get( string&& source ) noexcept;
 
 		//* Check that the [eon::name_t] value is a registered name
@@ -105,7 +118,11 @@ namespace eon
 
 
 
-
+		
+		/**********************************************************************
+		  Destruction of the name class deallocates all the stored names.
+		**********************************************************************/
+	public:
 		~name();
 	private:
 		std::vector<name_t> Names;
