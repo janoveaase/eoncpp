@@ -673,7 +673,7 @@ namespace eon
 				{
 					throw InvalidExpression( "At position "
 						+ string( param.pos() - Source.begin() )
-						+ ": Expected a digit or a comma here" );
+						+ ": Expected digit, comma, or '}' here" );
 				}
 				param.advance();
 			}
@@ -697,7 +697,7 @@ namespace eon
 				{
 					throw InvalidExpression( "At position "
 						+ string( param.pos() - Source.begin() )
-						+ ": Expected a digit or comma here" );
+						+ ": Expected digit, comma, or '}' here" );
 					return false;
 				}
 				param.advance();

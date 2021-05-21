@@ -106,7 +106,8 @@ namespace eon
 				? found->second->Value : nullptr; }
 
 		//* Check if this tuple contains a value matching the specified value
-		bool contains( name_t value ) const noexcept;
+		bool containsUnnamedValue( name_t value ) const noexcept;
+		bool containsUnnamedValue( const tup::valueptr& value ) const noexcept;
 
 		//* Get document (the top most parent that still has a parent)
 		//* Returns nullptr if 'this' has not parent.
@@ -205,6 +206,15 @@ namespace eon
 		bool compatible( const tuple& other ) const noexcept;
 
 
+		//* Disable comparison operators
+		bool operator==( const tuple& ) = delete;
+		bool operator!=( const tuple& ) = delete;
+		bool operator<( const tuple& ) = delete;
+		bool operator<=( const tuple& ) = delete;
+		bool operator>( const tuple& ) = delete;
+		bool operator>=( const tuple& ) = delete;
+
+
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -228,30 +238,30 @@ namespace eon
 
 		void _validate( tuple& metadata, const tuple* parent, const AttributePtr& value ) const;
 
-		void _validateType( tup::valueptr meta, const tuple* meta_owner, const tup::valueptr& value ) const;
+		void _validateType( tup::valueptr meta, const tuple* location, const tup::valueptr& value ) const;
 
-		void _validateMaxDepth( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const;
+		void _validateMaxDepth( tup::valueptr meta, const tuple* location, const tuple& value ) const;
 
-		void _validateMinLength( tup::valueptr meta, const tuple* meta_owner, const hex& value ) const;
-		void _validateMinLength( tup::valueptr meta, const tuple* meta_owner, const string& value ) const;
-		void _validateMinLength( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const;
+		void _validateMinLength( tup::valueptr meta, const tuple* location, const hex& value ) const;
+		void _validateMinLength( tup::valueptr meta, const tuple* location, const string& value ) const;
+		void _validateMinLength( tup::valueptr meta, const tuple* location, const tuple& value ) const;
 
-		void _validateMaxLength( tup::valueptr meta, const tuple* meta_owner, const hex& value ) const;
-		void _validateMaxLength( tup::valueptr meta, const tuple* meta_owner, const string& value ) const;
-		void _validateMaxLength( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const;
+		void _validateMaxLength( tup::valueptr meta, const tuple* location, const hex& value ) const;
+		void _validateMaxLength( tup::valueptr meta, const tuple* location, const string& value ) const;
+		void _validateMaxLength( tup::valueptr meta, const tuple* location, const tuple& value ) const;
 
-		void _validateMin( tup::valueptr meta, const tuple* meta_owner, int64_t value ) const;
-		void _validateMin( tup::valueptr meta, const tuple* meta_owner, double value ) const;
+		void _validateMin( tup::valueptr meta, const tuple* location, int64_t value ) const;
+		void _validateMin( tup::valueptr meta, const tuple* location, double value ) const;
 
-		void _validateMax( tup::valueptr meta, const tuple* meta_owner, int64_t value ) const;
-		void _validateMax( tup::valueptr meta, const tuple* meta_owner, double value ) const;
+		void _validateMax( tup::valueptr meta, const tuple* location, int64_t value ) const;
+		void _validateMax( tup::valueptr meta, const tuple* location, double value ) const;
 
-		void _validateFormat( tup::valueptr meta, const tuple* meta_owner, const string& value ) const;
-		void _validateFormat( tup::valueptr meta, const tuple* meta_owner, const std::vector<string>& value ) const;
+		void _validateFormat( tup::valueptr meta, const tuple* location, const string& value ) const;
+		void _validateFormat( tup::valueptr meta, const tuple* location, const std::vector<string>& value ) const;
 
-		void _validateFlags( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const;
+		void _validateFlags( tup::valueptr meta, const tuple* location, const tuple& value ) const;
 
-		void _validateOptions( tup::valueptr meta, const tuple* meta_owner, name_t value ) const;
+		void _validateOptions( tup::valueptr meta, const tuple* location, name_t value ) const;
 
 		void _mismatchingMeta( name_t attribute_name, const string& info ) const;
 

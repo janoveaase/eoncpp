@@ -31,13 +31,26 @@ namespace eon
 
 
 
-	bool tuple::contains( name_t value ) const noexcept
+	bool tuple::containsUnnamedValue( name_t value ) const noexcept
 	{
 		for( auto attribute : Attributes )
 		{
-			if( attribute->Value->isName()
+			if( attribute->Name == no_name && attribute->Value->isName()
 				&& attribute->Value->name_value() == value )
 				return true;
+		}
+		return false;
+	}
+	bool tuple::containsUnnamedValue( const tup::valueptr& value ) const noexcept
+	{
+		for( auto attribute : Attributes )
+		{
+			if( attribute->Name == no_name
+				&& attribute->Value->basicType() == value->basicType() )
+			{
+				if( attribute->Value->equal( value ) )
+					return true;
+			}
 		}
 		return false;
 	}
@@ -153,14 +166,27 @@ namespace eon
 	{
 		for( auto attribute : Attributes )
 		{
+			// If we haven't got a name, then make sure the other tuple has an
+			//* unnamed value that matches.
 			if( attribute->Name == no_name )
+			{
+				if( !other.containsUnnamedValue( attribute->Value ) )
+				{
+					size_t pos{ 0 };
+					throw tup::Invalid( "Attribute \"" + other.path().str()
+						+ "\": Expected tuple value to contain: "
+						+ attribute->Value->str( pos, 0,
+							tup::perm::allow_oneliner ) );
+				}
 				continue;
+			}
 			auto value = other.attribute( attribute->Name );
 			if( !value )
 			{
 				if( !attribute->MetaData
-					|| !attribute->MetaData->contains( name_optional ) )
-					throw tup::Invalid( "At \"" + other.path().str()
+					|| !attribute->MetaData->containsUnnamedValue(
+						name_optional ) )
+					throw tup::Invalid( "Attribute \"" + other.path().str()
 						+ "\": Missing non-optional \"" + *attribute->Name
 						+ "\" attribute!" );
 				continue;
@@ -173,14 +199,14 @@ namespace eon
 			{
 				auto refd = find( attribute->Value->ref_value() );
 				if( !refd || refd->isRef() )
-					throw tup::Invalid( "At \"" + other.path().str()
+					throw tup::Invalid( "Attribute \"" + other.path().str()
 						+ "\": Reference for \"" + *attribute->Name
 						+ "\" doesn't lead to a valid target!" );
 			}
 			else if( attribute->Value->isTuple() )
 			{
 				if( !value->isTuple() )
-					throw tup::Invalid( "At \"" + other.path().str()
+					throw tup::Invalid( "Attribute \"" + other.path().str()
 						+ "\": Value of \"" + *attribute->Name
 						+ "\" must be a tuple!" );
 				attribute->Value->tuple_value().validate(
@@ -189,14 +215,14 @@ namespace eon
 			else
 			{
 				if( attribute->Value->basicType() != value->basicType() )
-					throw tup::Invalid( "At \"" + other.path().str()
+					throw tup::Invalid( "Attribute \"" + other.path().str()
 						+ "\": Expected basic type of \"" + *attribute->Name
 						+ "\" to be " + *tup::mapBasicType(
 							attribute->Value->basicType() ) + "!" );
 				if( !attribute->Value->equal( value ) )
 				{
 					size_t pos{ 0 };
-					throw tup::Invalid( "At \"" + other.path().str()
+					throw tup::Invalid( "Attribute \"" + other.path().str()
 						+ "\": Expected value of \"" + *attribute->Name
 						+ "\" to be: " + attribute->Value->str( pos, 0,
 							tup::perm::allow_oneliner ) );
@@ -502,21 +528,21 @@ namespace eon
 		}
 	}
 
-	void tuple::_validateType( tup::valueptr meta, const tuple* meta_owner, const tup::valueptr& value ) const
+	void tuple::_validateType( tup::valueptr meta, const tuple* location, const tup::valueptr& value ) const
 	{
 		if( !meta->isName() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'type' meta data must have a 'name' value!" );
 		if( tup::mapBasicType( value->basicType() ) != meta->name_value() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": Type of \"" + path().str()
 				+ "\" must be \"" + *meta->name_value() + "\"!" );
 	}
 
-	void tuple::_validateMaxDepth( tup::valueptr meta, const tuple* meta_owner, const tuple& tupl ) const
+	void tuple::_validateMaxDepth( tup::valueptr meta, const tuple* location, const tuple& tupl ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_depth' meta data must have an 'int' value!" );
 		auto max_depth = meta->int_value();
 
@@ -548,156 +574,156 @@ namespace eon
 				+ "\" is exceeding " + string( max_depth ) + "!" );
 	}
 
-	void tuple::_validateMinLength( tup::valueptr meta, const tuple* meta_owner, const hex& value ) const
+	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const hex& value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min_length' meta data must have an 'int' value!" );
 		auto min_length = meta->int_value();
 		if( value.size() < static_cast<size_t>( min_length * 2 ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min_length' has been exceeded!" );
 	}
-	void tuple::_validateMinLength( tup::valueptr meta, const tuple* meta_owner, const string& value ) const
+	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const string& value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min_length' meta data must have an 'int' value!" );
 		auto min_length = meta->int_value();
 		if( value.numChars() < static_cast<size_t>( min_length ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min_length' has been exceeded!" );
 	}
-	void tuple::_validateMinLength( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const
+	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const tuple& value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min_length' meta data must have an 'int' value!" );
 		auto min_length = meta->int_value();
 		if( value.numAttributes() < static_cast<size_t>( min_length ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min_length' has been exceeded!" );
 	}
 
-	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* meta_owner, const hex& value ) const
+	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const hex& value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_length' meta data must have an 'int' value!" );
 		auto max_length = meta->int_value();
 		if( value.size() > static_cast<size_t>( max_length * 2 ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_length' has been exceeded!" );
 	}
-	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* meta_owner, const string& value ) const
+	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const string& value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_length' meta data must have an 'int' value!" );
 		auto max_length = meta->int_value();
 		if( value.numChars() > static_cast<size_t>( max_length ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_length' has been exceeded!" );
 	}
-	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const
+	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const tuple& value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_length' meta data must have an 'int' value!" );
 		auto max_length = meta->int_value();
 		if( value.numAttributes() > static_cast<size_t>( max_length ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max_length' has been exceeded!" );
 	}
 
-	void tuple::_validateMin( tup::valueptr meta, const tuple* meta_owner, int64_t value ) const
+	void tuple::_validateMin( tup::valueptr meta, const tuple* location, int64_t value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min' meta data must have an 'int' value!" );
 		auto min = meta->int_value();
 		if( value < min )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min' has been exceeded!" );
 	}
-	void tuple::_validateMin( tup::valueptr meta, const tuple* meta_owner, double value ) const
+	void tuple::_validateMin( tup::valueptr meta, const tuple* location, double value ) const
 	{
 		if( !meta->isFloat() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min' meta data must have a 'float' value!" );
 		auto min = meta->float_value();
 		if( value < min )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'min' has been exceeded!" );
 	}
 
-	void tuple::_validateMax( tup::valueptr meta, const tuple* meta_owner, int64_t value ) const
+	void tuple::_validateMax( tup::valueptr meta, const tuple* location, int64_t value ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max' meta data must have an 'int' value!" );
 		auto max = meta->int_value();
 		if( value > max )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max' has been exceeded!" );
 	}
-	void tuple::_validateMax( tup::valueptr meta, const tuple* meta_owner, double value ) const
+	void tuple::_validateMax( tup::valueptr meta, const tuple* location, double value ) const
 	{
 		if( !meta->isFloat() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max' meta data must have a 'float' value!" );
 		auto max = meta->float_value();
 		if( value > max )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'max' has been exceeded!" );
 	}
 
-	void tuple::_validateFormat( tup::valueptr meta, const tuple* meta_owner, const string& value ) const
+	void tuple::_validateFormat( tup::valueptr meta, const tuple* location, const string& value ) const
 	{
 		if( !meta->isRegex() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'format' meta data must have a 'regex' value!" );
 		auto format = meta->regex_value();
 		if( !format.match( value ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'format' validation failed!" );
 	}
-	void tuple::_validateFormat( tup::valueptr meta, const tuple* meta_owner, const std::vector<string>& value ) const
+	void tuple::_validateFormat( tup::valueptr meta, const tuple* location, const std::vector<string>& value ) const
 	{
 		if( !meta->isRegex() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'format' meta data must have a 'regex' value!" );
 		auto format = meta->regex_value();
 		if( value.empty() || !format.match( value[ 0 ] ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'format' validation failed!" );
 	}
 
-	void tuple::_validateFlags( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const
+	void tuple::_validateFlags( tup::valueptr meta, const tuple* location, const tuple& value ) const
 	{
 		if( !meta->isTuple() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'flags' meta data must have a 'tuple' value (with unnamed name attributes)!" );
 		auto flags = meta->tuple_value();
 		for( auto attribute : value.Attributes )
 		{
 			if( !attribute->Value->isName() )
-				throw tup::Invalid( "At \"" + meta_owner->path().str()
+				throw tup::Invalid( "Attribute \"" + location->path().str()
 					+ "\": 'flags' validation failed (value contains non-name attribute(s))!" );
-			if( !flags.contains( attribute->Value->name_value() ) )
-				throw tup::Invalid( "At \"" + meta_owner->path().str()
+			if( !flags.containsUnnamedValue( attribute->Value->name_value() ) )
+				throw tup::Invalid( "Attribute \"" + location->path().str()
 					+ "\": 'flags' validation failed (\"" + *attribute->Value->name_value() + "\" is not a valid flag)!" );
 		}
 	}
 
-	void tuple::_validateOptions( tup::valueptr meta, const tuple* meta_owner, name_t value ) const
+	void tuple::_validateOptions( tup::valueptr meta, const tuple* location, name_t value ) const
 	{
 		if( !meta->isTuple() )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'options' meta data must have a 'tuple' value (with unnamed name attributes)!" );
 		auto options = meta->tuple_value();
-		if( !options.contains( value ) )
-			throw tup::Invalid( "At \"" + meta_owner->path().str()
+		if( !options.containsUnnamedValue( value ) )
+			throw tup::Invalid( "Attribute \"" + location->path().str()
 				+ "\": 'options' validation failed (\"" + *value + "\" is not a valid option)!" );
 	}
 
@@ -705,7 +731,7 @@ namespace eon
 	{
 		auto location = path();
 		location.add( attribute_name );
-		throw tup::Invalid( "At \"" + location.str() + "\": " + info );
+		throw tup::Invalid( "Attribute \"" + location.str() + "\": " + info );
 	}
 
 

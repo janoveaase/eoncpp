@@ -141,6 +141,13 @@ namespace eontest
 	// Test that exception isn't thrown
 #define _NO_EXCEPT( expression )\
 	try { expression; }\
+	catch( std::exception& e )\
+	{\
+		Failed = true;\
+		_Messages << "\nExpression: {" << #expression << "} throws:\n";\
+		_Messages << e.what() << "\n";\
+		_Messages << "Expected no exceptions\n";\
+	}\
 	catch( ... )\
 	{\
 		Failed = true;\

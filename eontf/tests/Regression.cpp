@@ -996,6 +996,17 @@ namespace eon
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
 			<< "Failed to validate";
 	}
+	TEST( ValidateTest, pattern_good_3 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nnames=(one two three)"
+			"\n---\nnames=(one two three" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
+			<< "Failed to validate";
+	}
 	TEST( ValidateTest, pattern_bad_1 )
 	{
 		auto pattern = name::get( "ptrn" );
@@ -1034,6 +1045,17 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
 			"\n---\nname=\n  first=John\n  last=\"doe\"" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+			<< "Failed to validate";
+	}
+	TEST( ValidateTest, pattern_bad_5 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nnames=(one two three)"
+			"\n---\nnames=(one tw three" };
 		etf docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";

@@ -47,7 +47,7 @@ namespace eon
 	  exceptions, will throw exceptions of this class or derived from this
 	  class.
 	**************************************************************************/
-	class exception
+	class exception : public std::exception
 	{
 		/**********************************************************************
 		  Construction
@@ -111,8 +111,12 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		//* Get the message details
-		virtual string what() const {
+		//* Get the message info
+		virtual const char* what() const noexcept override {
+			return Info.c_str(); }
+
+		//* Get combined name and info
+		virtual string details() const {
 			return !Info.empty() ? *Name + ": " + Info : *Name; }
 
 		//* Get the exception name

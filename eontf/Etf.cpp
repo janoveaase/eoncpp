@@ -70,7 +70,7 @@ namespace eon
 				meta = tupleptr( new tuple( std::move( doc_meta ) ) );
 
 			// If this is a pattern document, we need to record it as such
-			if( meta && meta->contains( name_pattern ) )
+			if( meta && meta->containsUnnamedValue( name_pattern ) )
 				Patterns.insert( doc_name );
 
 			// Create (empty) tuple with these details

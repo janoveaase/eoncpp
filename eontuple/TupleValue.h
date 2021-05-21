@@ -47,7 +47,7 @@ namespace eon
 			//* Check if equal to another value of the same type
 			inline bool equal( const valueptr other ) const noexcept override {
 				return other && other->isTuple()
-					&& Val == other->tuple_value(); }
+					&& Val.equal( other->tuple_value() ); }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {

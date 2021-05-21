@@ -94,6 +94,7 @@ namespace eon
 			inline size_t indentation() const noexcept {
 				return TP.at( TP.lineStart() ).space() ? TP.at(
 					TP.lineStart() ).substr().numChars() : 0; }
+			size_t indentationStrict() const;
 
 
 
