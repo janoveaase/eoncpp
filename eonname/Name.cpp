@@ -65,6 +65,7 @@ namespace eon
 
 
 
+	const name_t name_undef = name::get( "undef" );
 	const name_t name_bool = name::get( "bool" );
 	const name_t name_byte = name::get( "byte" );
 	const name_t name_char = name::get( "char" );
@@ -80,6 +81,7 @@ namespace eon
 	const name_t name_tuple = name::get( "tuple" );
 	const name_t name_bytes = name::get( "bytes" );
 	const name_t name_string = name::get( "string" );
+	const name_t name_binary = name::get( "binary" );
 	const name_t name_regex = name::get( "regex" );
 	const name_t name_true = name::get( "true" );
 	const name_t name_false = name::get( "false" );
@@ -92,4 +94,6 @@ namespace eon
 	const name_t name_b = name::get( "b" );
 	const name_t name_test = name::get( "test" );
 	const name_t name_title = name::get( "title" );
+	const name_t name_pattern = name::get( "pattern" );
+	const name_t name_optional = name::get( "optional" );
 }

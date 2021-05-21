@@ -6,11 +6,14 @@ namespace eon
 	namespace tup
 	{
 		string binaryval::str( size_t& pos_on_line, size_t indentation_level,
-			bool named ) const noexcept
+			perm format ) const noexcept
 		{
+			bool oneliner = static_cast<bool>( format & perm::allow_oneliner );
+			bool multiliner = static_cast<bool>(
+				format & perm::allow_multiliner );
 			std::string s{ "#" };
 			++pos_on_line;
-			if( Val.size() <= 79 - pos_on_line )
+			if( !multiliner || ( Val.size() <= 79 - pos_on_line ) )
 				return s + Val.value();
 			s += " ";
 			++pos_on_line;

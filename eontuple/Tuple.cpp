@@ -63,12 +63,12 @@ namespace eon
 
 
 	string tuple::str( size_t& pos_on_line, size_t indentation_level,
-		perm permissions ) const noexcept
+		tup::perm format ) const noexcept
 	{
 		bool allow_oneliner = static_cast<bool>(
-			permissions & perm::allow_oneliner );
+			format & tup::perm::allow_oneliner );
 		bool allow_multiliner = static_cast<bool>(
-			permissions & perm::allow_multiliner );
+			format & tup::perm::allow_multiliner );
 
 		// Check if we can/must put everything on a single line
 		if( ( Parent != nullptr && Parent->Parent != nullptr )
@@ -93,7 +93,7 @@ namespace eon
 					if( attribute->Name != no_name )
 						s += *attribute->Name + "=";
 					s += attribute->Value->str( pos, indentation_level,
-						attribute->Name != no_name );
+						attribute->Name != no_name ? tup::perm::allow_oneliner : format );
 					if( allow_multiliner
 						&& Form != form::metadata && s.numChars() >= 79 )
 					{
@@ -123,14 +123,15 @@ namespace eon
 				if( attribute->MetaData )
 				{
 					s += "<" + attribute->MetaData->str( ++pos_on_line,
-						indentation_level, permissions ) + ">";
+						indentation_level, format ) + ">";
 					++pos_on_line;
 				}
 				s += "=";
 				++pos_on_line;
 			}
 			s += attribute->Value->str( pos_on_line, indentation_level,
-				attribute->Name != no_name );
+				attribute->Name != no_name ? tup::perm::allow_oneliner
+					: format );
 		}
 		return s;
 	}
@@ -138,101 +139,11 @@ namespace eon
 
 	void tuple::validate() const
 	{
-		static name_t max_depth = name::get( "max_depth" ),
-			min_length = name::get( "min_length" ),
-			max_length = name::get( "max_length" ),
-			min = name::get( "min" ), max = name::get( "max" ),
-			format = name::get( "format" ),
-			flags = name::get( "flags" ),
-			options = name::get( "options" );
 		for( auto attribute : Attributes )
 		{
 			if( attribute->MetaData && !attribute->MetaData->empty() )
-			{
-				for( size_t i = 0;
-					i < attribute->MetaData->numAttributes();
-					++i )
-				{
-					auto meta = attribute->MetaData->attribute( i );
-					if( meta )
-					{
-						if( attribute->MetaData->isNamed( i ) )
-						{
-							auto name = attribute->MetaData->name( i );
-							if( name == max_depth )
-							{
-								if( attribute->Value->isTuple() )
-									_validateMaxDepth( meta, attribute->MetaData->Parent, attribute->Value->tuple_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'max_depth' meta data can only be applied on 'tuple' values!" );
-							}
-							else if( name == min_length )
-							{
-								if( attribute->Value->isBinary() )
-									_validateMinLength( meta, attribute->MetaData->Parent, attribute->Value->binary_value() );
-								else if( attribute->Value )
-									_validateMinLength( meta, attribute->MetaData->Parent, attribute->Value->string_value() );
-								else if( attribute->Value->isTuple() )
-									_validateMinLength( meta, attribute->MetaData->Parent, attribute->Value->tuple_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'min_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!" );
-							}
-							else if( name == max_length )
-							{
-								if( attribute->Value->isBinary() )
-									_validateMaxLength( meta, attribute->MetaData->Parent, attribute->Value->binary_value() );
-								else if( attribute->Value->isString() )
-									_validateMaxLength( meta, attribute->MetaData->Parent, attribute->Value->string_value() );
-								else if( attribute->Value->isTuple() )
-									_validateMaxLength( meta, attribute->MetaData->Parent, attribute->Value->tuple_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'max_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!" );
-							}
-							else if( name == min )
-							{
-								if( attribute->Value->isInt() )
-									_validateMin( meta, attribute->MetaData->Parent, attribute->Value->int_value() );
-								else if( attribute->Value->isFloat() )
-									_validateMin( meta, attribute->MetaData->Parent, attribute->Value->float_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'min' meta data can only be applied on 'int' and 'float' values!" );
-							}
-							else if( name == max )
-							{
-								if( attribute->Value->isInt() )
-									_validateMax( meta, attribute->MetaData->Parent, attribute->Value->int_value() );
-								else if( attribute->Value->isFloat() )
-									_validateMax( meta, attribute->MetaData->Parent, attribute->Value->float_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'max' meta data can only be applied on 'int' and 'float' values!" );
-							}
-							else if( name == format )
-							{
-								if( attribute->Value->isString() )
-									_validateFormat( meta, attribute->MetaData->Parent, attribute->Value->string_value() );
-								else if( attribute->Value->isRaw() )
-									_validateFormat( meta, attribute->MetaData->Parent, attribute->Value->raw_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'format' meta data can only be applied on 'string' and 'raw' values!" );
-							}
-							else if( name == flags )
-							{
-								if( attribute->Value->isTuple() )
-									_validateFlags( meta, attribute->MetaData->Parent, attribute->Value->tuple_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'flags' meta data can only be applied on 'tuple' values!" );
-							}
-							else if( name == options )
-							{
-								if( attribute->Value->isName() )
-									_validateOptions( meta, attribute->MetaData->Parent, attribute->Value->name_value() );
-								else
-									_mismatchingMeta( attribute->Name, "'options' meta data can only be applied on 'name' values!" );
-							}
-						}
-					}
-				}
-			}
+				_validate( *attribute->MetaData, attribute->MetaData->Parent,
+					attribute );
 			if( attribute->Value->isTuple() )
 				attribute->Value->tuple_value().validate();
 		}
@@ -240,7 +151,58 @@ namespace eon
 
 	void tuple::validate( const tuple& other )
 	{
-		// TODO: 'this' is a pattern document and 'other' must match with it
+		for( auto attribute : Attributes )
+		{
+			if( attribute->Name == no_name )
+				continue;
+			auto value = other.attribute( attribute->Name );
+			if( !value )
+			{
+				if( !attribute->MetaData
+					|| !attribute->MetaData->contains( name_optional ) )
+					throw tup::Invalid( "At \"" + other.path().str()
+						+ "\": Missing non-optional \"" + *attribute->Name
+						+ "\" attribute!" );
+				continue;
+			}
+			if( attribute->Value->isMeta()
+				&& !attribute->Value->meta_value().empty() )
+				_validate( attribute->Value->meta_value(), &other,
+					other.Named.at( attribute->Name ) );
+			else if( attribute->Value->isRef() )
+			{
+				auto refd = find( attribute->Value->ref_value() );
+				if( !refd || refd->isRef() )
+					throw tup::Invalid( "At \"" + other.path().str()
+						+ "\": Reference for \"" + *attribute->Name
+						+ "\" doesn't lead to a valid target!" );
+			}
+			else if( attribute->Value->isTuple() )
+			{
+				if( !value->isTuple() )
+					throw tup::Invalid( "At \"" + other.path().str()
+						+ "\": Value of \"" + *attribute->Name
+						+ "\" must be a tuple!" );
+				attribute->Value->tuple_value().validate(
+					value->tuple_value() );
+			}
+			else
+			{
+				if( attribute->Value->basicType() != value->basicType() )
+					throw tup::Invalid( "At \"" + other.path().str()
+						+ "\": Expected basic type of \"" + *attribute->Name
+						+ "\" to be " + *tup::mapBasicType(
+							attribute->Value->basicType() ) + "!" );
+				if( !attribute->Value->equal( value ) )
+				{
+					size_t pos{ 0 };
+					throw tup::Invalid( "At \"" + other.path().str()
+						+ "\": Expected value of \"" + *attribute->Name
+						+ "\" to be: " + attribute->Value->str( pos, 0,
+							tup::perm::allow_oneliner ) );
+				}
+			}
+		}
 	}
 
 
@@ -264,6 +226,8 @@ namespace eon
 			attribute->Value = value;
 			if( attribute->Value->isTuple() )
 				attribute->Value->tuple_value().Parent = this;
+			if( attribute->Value->isRef() || attribute->Value->isTuple() )
+				_resolveReferences();
 		}
 		else if( attribute_pos == Attributes.size() )
 			append( value );
@@ -281,12 +245,18 @@ namespace eon
 		attribute->Pos = Attributes.size();
 		attribute->Value = value;
 		if( Form == form::plain )
+		{
 			attribute->MetaData = metadata;
+			if( attribute->MetaData )
+				attribute->MetaData->Parent = this;
+		}
 		if( attribute->Value->isTuple() )
 			attribute->Value->tuple_value().Parent = this;
 		Attributes.push_back( attribute );
 		if( attribute->Name != no_name )
 			Named[ attribute->Name ] = attribute;
+		if( attribute->Value->isRef() || attribute->Value->isTuple() )
+			_resolveReferences();
 	}
 
 
@@ -339,10 +309,73 @@ namespace eon
 
 
 
-
-	const tup::valueptr tuple::_get( const tup::path& path, size_t pos )
-		const noexcept
+	void tuple::_resolveReferences()
 	{
+		for( auto attribute : Attributes )
+		{
+			if( attribute->Value->isRef() )
+			{
+				auto ref = dynamic_cast<tup::refval*>( &*attribute->Value );
+				if( !ref->target() )
+				{
+					tup::valueptr found;
+					tuple* parent{ nullptr };
+					auto i_am_root = Parent == nullptr;
+					auto i_am_doc = !i_am_root && Parent->Parent == nullptr;
+					auto possible_rel_path = ref->ref_value().at( 0 )
+						!= name_docs;
+
+					if( possible_rel_path )
+					{
+						found = _find( ref->ref_value(), 0, false, &parent );
+						if( !found && !i_am_doc && !i_am_root )
+							found = document()->_find(
+								ref->ref_value(), 0, false, &parent );
+					}
+					if( !found )
+					{
+						if( i_am_doc )
+							found = Parent->_find(
+								ref->ref_value(), 0, false, &parent );
+						else if( !i_am_root )
+							found = document()->Parent->_find(
+								ref->ref_value(), 0, false, &parent );
+					}
+
+					std::set<tup::path> seen{ ref->ref_value() };
+					while( found && found->isRef() && parent != nullptr )
+					{
+						if( seen.find( found->ref_value() ) != seen.end() )
+						{
+							throw tup::CircularReferencing( "The reference \""
+								+ found->ref_value().str()
+								+ "\" leads to a circle" );
+						}
+						seen.insert( found->ref_value() );
+						found = parent->_find(
+							found->ref_value(), 0, false, &parent );
+					}
+					ref->target( found );
+				}
+			}
+			else if( attribute->Value->isTuple() )
+				attribute->Value->tuple_value()._resolveReferences();
+		}
+	}
+
+	tup::valueptr tuple::_find( const tup::path& path, size_t pos,
+		bool resolve_refs, tuple** parent ) const noexcept
+	{
+		if( pos == 0 && !path.empty() )
+		{
+			if( path.at( 0 ) == name_docs )
+			{
+				if( Parent == nullptr )
+					++pos;
+				else
+					return Parent->_find( path, pos, resolve_refs, parent );
+			}
+		}
 		if( pos < path.size() )
 		{
 			auto name = path.at( pos );
@@ -352,15 +385,133 @@ namespace eon
 				if( attrib != nullptr )
 				{
 					if( pos + 1 == path.size() )
-						return attrib;
+					{
+						if( resolve_refs && attrib->isRef() )
+							return dynamic_cast<tup::refval*>(
+								&*attrib )->target();
+						else
+						{
+							if( parent != nullptr )
+								*parent = (tuple*)this;
+							return attrib;
+						}
+					}
 					else if( attrib->isTuple() )
-						return attrib->tuple_value()._get( path, pos + 1 );
+						return attrib->tuple_value()._find(
+							path, pos + 1, resolve_refs, parent );
 				}
 			}
 		}
 		return tup::valueptr();
 	}
 
+
+	void tuple::_validate( tuple& metadata, const tuple* parent,
+		const AttributePtr& value ) const
+	{
+		static name_t max_depth = name::get( "max_depth" ),
+			min_length = name::get( "min_length" ),
+			max_length = name::get( "max_length" ),
+			min = name::get( "min" ), max = name::get( "max" ),
+			format = name::get( "format" ),
+			flags = name::get( "flags" ),
+			options = name::get( "options" );
+
+		for( size_t i = 0; i < metadata.numAttributes(); ++i )
+		{
+			auto meta = metadata.attribute( i );
+			if( meta )
+			{
+				if( metadata.isNamed( i ) )
+				{
+					auto name = metadata.name( i );
+					if( name == name_type )
+						_validateType( meta, parent, value->Value );
+					else if( name == max_depth )
+					{
+						if( value->Value->isTuple() )
+							_validateMaxDepth( meta, parent, value->Value->tuple_value() );
+						else
+							_mismatchingMeta( value->Name, "'max_depth' meta data can only be applied on 'tuple' values!" );
+					}
+					else if( name == min_length )
+					{
+						if( value->Value->isString() )
+							_validateMinLength( meta, parent, value->Value->string_value() );
+						else if( value->Value->isBinary() )
+							_validateMinLength( meta, parent, value->Value->binary_value() );
+						else if( value->Value->isTuple() )
+							_validateMinLength( meta, parent, value->Value->tuple_value() );
+						else
+							_mismatchingMeta( value->Name, "'min_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!" );
+					}
+					else if( name == max_length )
+					{
+						if( value->Value->isString() )
+							_validateMaxLength( meta, parent, value->Value->string_value() );
+						else if( value->Value->isBinary() )
+							_validateMaxLength( meta, parent, value->Value->binary_value() );
+						else if( value->Value->isTuple() )
+							_validateMaxLength( meta, parent, value->Value->tuple_value() );
+						else
+							_mismatchingMeta( value->Name, "'max_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!" );
+					}
+					else if( name == min )
+					{
+						if( value->Value->isInt() )
+							_validateMin( meta, parent, value->Value->int_value() );
+						else if( value->Value->isFloat() )
+							_validateMin( meta, parent, value->Value->float_value() );
+						else
+							_mismatchingMeta( value->Name, "'min' meta data can only be applied on 'int' and 'float' values!" );
+					}
+					else if( name == max )
+					{
+						if( value->Value->isInt() )
+							_validateMax( meta, parent, value->Value->int_value() );
+						else if( value->Value->isFloat() )
+							_validateMax( meta, parent, value->Value->float_value() );
+						else
+							_mismatchingMeta( value->Name, "'max' meta data can only be applied on 'int' and 'float' values!" );
+					}
+					else if( name == format )
+					{
+						if( value->Value->isString() )
+							_validateFormat( meta, parent, value->Value->string_value() );
+						else if( value->Value->isRaw() )
+							_validateFormat( meta, parent, value->Value->raw_value() );
+						else
+							_mismatchingMeta( value->Name, "'format' meta data can only be applied on 'string' and 'raw' values!" );
+					}
+					else if( name == flags )
+					{
+						if( value->Value->isTuple() )
+							_validateFlags( meta, parent, value->Value->tuple_value() );
+						else
+							_mismatchingMeta( value->Name, "'flags' meta data can only be applied on 'tuple' values!" );
+					}
+					else if( name == options )
+					{
+						if( value->Value->isName() )
+							_validateOptions( meta, parent, value->Value->name_value() );
+						else
+							_mismatchingMeta( value->Name, "'options' meta data can only be applied on 'name' values!" );
+					}
+				}
+			}
+		}
+	}
+
+	void tuple::_validateType( tup::valueptr meta, const tuple* meta_owner, const tup::valueptr& value ) const
+	{
+		if( !meta->isName() )
+			throw tup::Invalid( "At \"" + meta_owner->path().str()
+				+ "\": 'type' meta data must have a 'name' value!" );
+		if( tup::mapBasicType( value->basicType() ) != meta->name_value() )
+			throw tup::Invalid( "At \"" + meta_owner->path().str()
+				+ "\": Type of \"" + path().str()
+				+ "\" must be \"" + *meta->name_value() + "\"!" );
+	}
 
 	void tuple::_validateMaxDepth( tup::valueptr meta, const tuple* meta_owner, const tuple& tupl ) const
 	{
@@ -486,7 +637,7 @@ namespace eon
 			throw tup::Invalid( "At \"" + meta_owner->path().str()
 				+ "\": 'max' meta data must have an 'int' value!" );
 		auto max = meta->int_value();
-		if( value < max )
+		if( value > max )
 			throw tup::Invalid( "At \"" + meta_owner->path().str()
 				+ "\": 'max' has been exceeded!" );
 	}
@@ -496,7 +647,7 @@ namespace eon
 			throw tup::Invalid( "At \"" + meta_owner->path().str()
 				+ "\": 'max' meta data must have a 'float' value!" );
 		auto max = meta->float_value();
-		if( value < max )
+		if( value > max )
 			throw tup::Invalid( "At \"" + meta_owner->path().str()
 				+ "\": 'max' has been exceeded!" );
 	}

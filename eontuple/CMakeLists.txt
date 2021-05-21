@@ -20,6 +20,7 @@ set(TUPLE_HEADERS
 	Tuple.h
 )
 set(TUPLE_SOURCES
+	Value.cpp
 	BinaryValue.cpp
 	RawValue.cpp
 	TupleValue.cpp

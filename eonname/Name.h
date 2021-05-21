@@ -53,6 +53,7 @@ namespace eon
 
 	//* Common names that can be accessed at no cost at any time
 	//* The string value of each name is the latter part, after the underscore.
+	extern const name_t name_undef;
 	extern const name_t name_bool;
 	extern const name_t name_byte;
 	extern const name_t name_char;
@@ -68,6 +69,7 @@ namespace eon
 	extern const name_t name_tuple;
 	extern const name_t name_bytes;
 	extern const name_t name_string;
+	extern const name_t name_binary;
 	extern const name_t name_regex;
 	extern const name_t name_true;
 	extern const name_t name_false;
@@ -80,6 +82,8 @@ namespace eon
 	extern const name_t name_b;
 	extern const name_t name_test;
 	extern const name_t name_title;
+	extern const name_t name_pattern;
+	extern const name_t name_optional;
 
 
 

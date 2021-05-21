@@ -51,8 +51,9 @@ namespace eon
 
 			//* Write value to string
 			inline string str( size_t& pos_on_line, size_t indentation_level,
-				bool named ) const noexcept override {
-				pos_on_line += Val ? 4 : 5; return Val ? "true" : "false"; }
+				perm format = perm::allow_oneliner | perm::allow_multiliner )
+				const noexcept override { pos_on_line += Val ? 4 : 5; return
+					Val ? "true" : "false"; }
 
 
 

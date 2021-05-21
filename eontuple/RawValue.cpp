@@ -6,13 +6,17 @@ namespace eon
 {
 	namespace tup
 	{
-		string rawval::str( size_t& pos_on_line, size_t indentation_level, bool named )
-			const noexcept
+		string rawval::str( size_t& pos_on_line, size_t indentation_level,
+			perm format ) const noexcept
 		{
+			bool oneliner = static_cast<bool>( format & perm::allow_oneliner );
+			bool multiliner = static_cast<bool>(
+				format & perm::allow_multiliner );
 			string s{ BarChr };
 			++pos_on_line;
 			string indent( indentation_level * 2, SpaceChr );
-			if( Val.size() > 1 || ( Val.size() == 1 && Val[ 0 ].numChars() + pos_on_line > 79 ) )
+			if( multiliner && ( Val.size() > 1 || ( Val.size() == 1
+				&& Val[ 0 ].numChars() + pos_on_line > 79 ) ) )
 			{
 				s += NewlineChr;
 				indent += "  ";

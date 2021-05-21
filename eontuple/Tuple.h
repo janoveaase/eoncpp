@@ -2,6 +2,7 @@
 
 #include "Value.h"
 #include "Path.h"
+#include "ReferenceValue.h"
 #include <unordered_map>
 
 
@@ -34,6 +35,9 @@ namespace eon
 			plain,
 			metadata
 		};
+
+		struct Attribute;
+		using AttributePtr = std::shared_ptr<Attribute>;
 
 
 
@@ -104,17 +108,6 @@ namespace eon
 		//* Check if this tuple contains a value matching the specified value
 		bool contains( name_t value ) const noexcept;
 
-		//* Get attribute at specified path
-		//* Returns 'false' if the path does not lead to an existing attribute.
-		inline const tup::valueptr get( const tup::path& path )
-			const noexcept { return _get( path, 0 ); }
-
-		//* Get a const attribute or sub-tuple's const attribute
-		//* Specify path by listing attribute names.
-		//* Returns 'false' if the path does not lead to an existing attribute.
-		inline const tup::valueptr get( std::initializer_list<name_t> path )
-			const noexcept { return _get( tup::path( path ), 0 ); }
-
 		//* Get document (the top most parent that still has a parent)
 		//* Returns nullptr if 'this' has not parent.
 		inline const tuple* document() const noexcept {
@@ -127,24 +120,13 @@ namespace eon
 
 
 		//* Stringify the tuple
-		enum class perm
-		{
-			allow_oneliner = 0x01,
-			allow_multiliner = 0x02
-		};
-		friend perm operator|( perm a, perm b ) noexcept {
-			return static_cast<perm>( static_cast<int>( a )
-				| static_cast<int>( b ) ); }
-		friend perm operator&( perm a, perm b ) noexcept {
-			return static_cast<perm>( static_cast<int>( a )
-				& static_cast<int>( b ) ); }
 		inline string str() const noexcept {
 			size_t pos_on_line = 0; return str( pos_on_line, 0,
 				Parent == nullptr || Parent->Parent == nullptr
-					? perm::allow_multiliner : perm::allow_oneliner
-				| perm::allow_multiliner ); }
+					? tup::perm::allow_multiliner : tup::perm::allow_oneliner
+				| tup::perm::allow_multiliner ); }
 		string str( size_t& pos_on_line, size_t indentation_level,
-			perm permissions ) const noexcept;
+			tup::perm permissions ) const noexcept;
 
 
 		// Run internal validation (using meta data associated with named
@@ -168,40 +150,43 @@ namespace eon
 		//* type, or if the attribute value already exists with a different
 		//* type - or if the 'attribute_pos' is more then 1 past the last
 		//* existing attribute.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
 		void set( size_t attribute_pos, const tup::valueptr& value );
 
 		//* Append a new attribute
 		//* Throws [eon::tup::DuplicateName] if another attribute already
 		//* exists with the same name.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
 		void append( const tup::valueptr& value, name_t name = no_name,
-			const tupleptr& metadata = tupleptr ());
-
-		//* Get a modifiable attribute by position
-		//* Returns 'false' if invalid position.
-		inline tup::valueptr attribute( size_t pos ) noexcept { return pos
-			< Attributes.size() ? Attributes[ pos ]->Value : nullptr; }
-		inline tup::valueptr attribute( int pos ) noexcept {
-			return attribute( static_cast<size_t>( pos ) ); }
-
-		//* Get a modifiable attribute by name
-		//* Returns 'false' if no attribute with that name.
-		inline tup::valueptr attribute( name_t name ) noexcept {
-			auto found = Named.find( name ); return found != Named.end()
-				? found->second->Value : nullptr; }
-
-		//* Get a modifiable attribute or sub-tuple's attribute
-		//* Returns 'false' if the path does not lead to an existing attribute.
-		inline tup::valueptr get( const tup::path& path ) noexcept {
-			return _get( path, 0 ); }
-
-		//* Get a modifiable attribute or sub-tuple's attribute
-		//* Specify path by listing attribute names.
-		// Returns 'false' if the path does not lead to an existing attribute.
-		inline tup::valueptr get( std::initializer_list<name_t> path )
-			noexcept { return _get( tup::path( path ), 0 ); }
+			const tupleptr& metadata = tupleptr() );
 
 		//* Clear all attributes
 		inline void clear() noexcept { Attributes.clear(); Named.clear(); }
+
+
+
+
+		/**********************************************************************
+		  Searching
+
+		  NOTE: Finding an attribute that is a reference will result in the
+		        target being found, not the reference itself. To access the
+				reference and not the target, find the parent tuple of the
+				reference attribute and then use the 'attribute' method to
+				access the reference value.
+		**********************************************************************/
+	public:
+
+		//* Find attribute at specified path
+		//* Returns 'false' if the path does not lead to an existing attribute.
+		inline tup::valueptr find( const tup::path& path ) const noexcept {
+			auto found = _find( path, 0, false, nullptr ); return found->isRef()
+				? dynamic_cast<tup::refval*>( &*found )->target() : found; }
+		inline tup::valueptr find( std::initializer_list<name_t> path )
+			const noexcept { return find( tup::path( path ) ); }
+
 
 
 
@@ -228,17 +213,22 @@ namespace eon
 		//
 	private:
 
-		//* Get a const attribute or sub-tuple's const attribute
-		//* The 'path' argument must be a tuple of (unnamed) 'name'
-		//* attributes, where each specifies an attribute name along the
-		//* path.
+		//* Have all references include a pointer to their targets - if not
+		//* already
+		void _resolveReferences();
+
+		//* Get a target attribute from a path of attribute names
 		//* The 'pos' argument is the position of the attribute to get for
 		//* 'this' tuple.
 		//* Returns 'false' if the path does not lead to an existing
 		//* attribute.
-		const tup::valueptr _get( const tup::path& path, size_t pos )
-			const noexcept;
+		tup::valueptr _find( const tup::path& path, size_t pos,
+			bool resolve_refs, tuple** parent ) const noexcept;
 
+
+		void _validate( tuple& metadata, const tuple* parent, const AttributePtr& value ) const;
+
+		void _validateType( tup::valueptr meta, const tuple* meta_owner, const tup::valueptr& value ) const;
 
 		void _validateMaxDepth( tup::valueptr meta, const tuple* meta_owner, const tuple& value ) const;
 
@@ -289,7 +279,6 @@ namespace eon
 			size_t Pos{ 0 };
 			tup::valueptr Value;
 		};
-		using AttributePtr = std::shared_ptr<Attribute>;
 
 	private:
 		std::vector<AttributePtr> Attributes;

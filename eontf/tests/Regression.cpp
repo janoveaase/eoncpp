@@ -11,7 +11,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_FALSE( doc ) << "Got document contents";
 	}
 	TEST( EtfTest, empty_unnamed_02 )
@@ -21,7 +21,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_FALSE( doc ) << "Got document contents";
 	}
 	TEST( EtfTest, empty_named_01 )
@@ -31,7 +31,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_title ) );
-		auto& doc = docs.attribute( name_title );
+		auto& doc = docs.doc( name_title );
 		REQUIRE_FALSE( doc ) << "Got document contents";
 	}
 	TEST( EtfTest, empty_named_02 )
@@ -41,7 +41,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_title ) );
-		auto& doc = docs.attribute( name_title );
+		auto& doc = docs.doc( name_title );
 		REQUIRE_FALSE( doc ) << "Got document contents";
 	}
 	TEST( EtfTest, empty_multiple_named_01 )
@@ -63,7 +63,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -75,7 +75,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -88,7 +88,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -100,7 +100,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -112,7 +112,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( string( u8"'\U0000050E'" ).stdstr(), out.stdstr() );
@@ -125,7 +125,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -137,7 +137,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "45", out.stdstr() );
@@ -149,7 +149,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -162,7 +162,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -174,7 +174,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "0.0001", out.stdstr() );
@@ -186,7 +186,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "5.98", out.stdstr() );
@@ -198,7 +198,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -211,7 +211,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -224,7 +224,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -236,7 +236,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -248,7 +248,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -260,7 +260,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -272,7 +272,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "\"	Several \\\"\\n escapes'\\b\\v\"", out.stdstr() );
@@ -285,7 +285,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -297,7 +297,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -311,7 +311,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( exp, out.stdstr() );
@@ -325,7 +325,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -337,7 +337,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -349,7 +349,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "|One line of raw", out.stdstr() );
@@ -361,7 +361,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "|One line of raw", out.stdstr() );
@@ -373,7 +373,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -385,7 +385,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -405,7 +405,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -417,7 +417,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -429,7 +429,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -448,7 +448,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -468,7 +468,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -480,7 +480,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -492,45 +492,28 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
 	}
-	TEST( RefTest, get )
+	TEST( RefTest, find_one_step )
 	{
 		string in{ "a=one\nb=two\nc=@a" };
 		etf docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 
-		auto c = doc.get( { name::get( "c" ) } );
-		REQUIRE_TRUE( c ) << "Didn't get 'c'";
-		auto elm = doc.get( c->ref_value() );
+		auto elm = doc.find( { name::get( "c" ) } );
 		REQUIRE_TRUE( elm ) << "Didn't get value referenced by 'c'";
 		WANT_TRUE( elm->name_value() == name::get( "one" ) )
 			<< "Wrong value referenced by 'c'";
 	}
-	TEST( RefTest, getFinal )
-	{
-		string in{ "a=one\nb=two\nc=@a" };
-		etf docs;
-		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
-			<< "Failed to parse";
-		REQUIRE_TRUE( docs.exists( name_test ) );
-
-		auto c = docs.getFinal(
-			{ name::get( "docs" ), name_test, name::get( "c" ) } );
-		REQUIRE_TRUE( c ) << "Didn't get 'c'";
-		REQUIRE_TRUE( c->isName() ) << "Found value of 'c' must be a 'name'";
-		WANT_TRUE( c->name_value() == name::get( "one" ) )
-			<< "Wrong value referenced by 'c'";
-	}
-	TEST( RefTest, getFinal_multirefs )
+	TEST( RefTest, find_two_steps )
 	{
 		string in{ "a=one\nb=@a\nc=@b" };
 		etf docs;
@@ -538,27 +521,19 @@ namespace eon
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 
-		auto c = docs.getFinal(
+		auto elm = docs.find(
 			{ name::get( "docs" ), name_test, name::get( "c" ) } );
-		REQUIRE_TRUE( c ) << "Didn't get 'c'";
-		REQUIRE_TRUE( c->isName() ) << "Found value of 'c' must be a 'name'";
-		WANT_TRUE( c->name_value() == name::get( "one" ) )
+		REQUIRE_TRUE( elm ) << "Didn't get 'c'";
+		REQUIRE_TRUE( elm->isName() ) << "Found value of 'c' must be a 'name'";
+		WANT_TRUE( elm->name_value() == name::get( "one" ) )
 			<< "Wrong value referenced by 'c'";
 	}
-	TEST( RefTest, getFinal_circularrefs )
+	TEST( RefTest, find_circular )
 	{
 		string in{ "a=@c\nb=@a\nc=@b" };
 		etf docs;
-		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
-			<< "Failed to parse";
-		REQUIRE_TRUE( docs.exists( name_test ) );
-
-		auto c = docs.getFinal(
-			{ name::get( "docs" ), name_test, name::get( "c" ) } );
-		REQUIRE_TRUE( c ) << "Didn't get 'c'";
-		REQUIRE_TRUE( c->isRef() ) << "Found value of 'c' must be a 'reference'";
-		WANT_EQ( "b", c->ref_value().str().stdstr() )
-			<< "Wrong value referenced by 'c'";
+		REQUIRE_EXCEPT( docs.parse( in, name_test ),
+			tup::CircularReferencing );
 	}
 
 	TEST( TupleTest, empty )
@@ -568,7 +543,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -580,7 +555,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -592,7 +567,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -604,7 +579,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "(one two three four)", out.stdstr() );
@@ -616,7 +591,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "- one\n  two\n  three\n  four\n  five\n  six\n  seven\n  eight\n  nine\n  ten\n  eleven\n  twelve\n  thirteen\n  fourteen\n  fifteen", out.stdstr() );
@@ -628,7 +603,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -640,7 +615,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -652,7 +627,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "(one)\n(two three)\n(four five six)", out.stdstr() );
@@ -664,7 +639,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -676,7 +651,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -688,7 +663,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "a=(uno=one)\nb=(dos=two)", out.stdstr() );
@@ -701,7 +676,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -713,7 +688,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -725,7 +700,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( "<type=signed_int format=?/[+\\-]\\d+/ options=(alpha beta gamma)>", out.stdstr() );
@@ -737,7 +712,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
+		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
@@ -760,25 +735,309 @@ namespace eon
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
 			<< "Failed to detect invalid document";
 	}
-	TEST( ValidateTest, max_length_bytes )
+	TEST( ValidateTest, min_length_string_good )
 	{
-		string in{ "root<max_length=5>=\n  (child1)\n  (child2)" };
+		string in{ "root<min_length=5>=\"12345\"" };
 		etf docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
-
-	TEST( EtfTest, basic )
+	TEST( ValidateTest, min_length_string_bad )
 	{
-		string in{ "name=\"John Doe\"" };
+		string in{ "root<min_length=5>=\"1234\"" };
 		etf docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
-		REQUIRE_TRUE( docs.exists( name_test ) );
-		auto& doc = docs.attribute( name_test );
-		REQUIRE_TRUE( doc ) << "Got no document";
-		auto out = doc.str();
-		WANT_EQ( in.stdstr(), out.stdstr() );
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, min_length_binary_good )
+	{
+		string in{ "root<min_length=5>=#5465737421" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, min_length_binary_bad )
+	{
+		string in{ "root<min_length=5>=#54657374" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, min_length_tuple_good )
+	{
+		string in{ "root<min_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, min_length_tuple_bad )
+	{
+		string in{ "root<min_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, max_length_string_good )
+	{
+		string in{ "root<max_length=5>=\"12345\"" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, max_length_string_bad )
+	{
+		string in{ "root<max_length=5>=\"123456\"" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, max_length_binary_good )
+	{
+		string in{ "root<max_length=5>=#5465737421" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, max_length_binary_bad )
+	{
+		string in{ "root<max_length=5>=#546573742120" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, max_length_tuple_good )
+	{
+		string in{ "root<max_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, max_length_tuple_bad )
+	{
+		string in{ "root<max_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)\n  (child6)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, min_int_good )
+	{
+		string in{ "root<min=5>=5" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, min_int_bad )
+	{
+		string in{ "root<min=5>=4" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, min_float_good )
+	{
+		string in{ "root<min=5.5>=5.5" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, min_float_bad )
+	{
+		string in{ "root<min=5.5>=5.4" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, max_int_good )
+	{
+		string in{ "root<max=5>=5" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, max_int_bad )
+	{
+		string in{ "root<max=5>=6" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, max_float_good )
+	{
+		string in{ "root<max=5.5>=5.5" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, max_float_bad )
+	{
+		string in{ "root<max=5.5>=5.6" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, format_string_good )
+	{
+		string in{ R"(root<format=?/\d{4}-\d\d-\d\d/>="2021-05-19")" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, format_string_bad )
+	{
+		string in{ R"(root<format=?/\d{4}\-\d\d\-\d\d/>="2021-5-19")" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, format_raw_good )
+	{
+		string in{ R"(root<format=?/\d{4}-\d\d-\d\d/>=|2021-05-19)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, format_raw_bad )
+	{
+		string in{ R"(root<format=?/\d{4}\-\d\d\-\d\d/>=|2021-5-19)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, flags_good )
+	{
+		string in{ "root<flags=(one two three)>=(two one)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, flags_bad )
+	{
+		string in{ "root<flags=(one two three)>=(two four)" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+	TEST( ValidateTest, options_good )
+	{
+		string in{ "root<options=(one two three)>=two" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
+	}
+	TEST( ValidateTest, options_bad )
+	{
+		string in{ "root<options=(one two three)>=four" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+			<< "Failed to detect invalid document";
+	}
+
+	TEST( ValidateTest, pattern_good_1 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
+			"\n---\nname=John\nage=30" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
+			<< "Failed to validate";
+	}
+	TEST( ValidateTest, pattern_good_2 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
+			"\n---\nname=\n  first=John\n  last=\"Doe\"" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
+			<< "Failed to validate";
+	}
+	TEST( ValidateTest, pattern_bad_1 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
+			"\n---\nname=John\nage=9" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+			<< "Failed to validate";
+	}
+	TEST( ValidateTest, pattern_bad_2 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
+			"\n---\nname=\"John\"\nage=30" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+			<< "Failed to validate";
+	}
+	TEST( ValidateTest, pattern_bad_3 )
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
+			"\n---\nname=John\nage=30.5" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+			<< "Failed to validate";
+	}
+	TEST( ValidateTest, pattern_bad_4)
+	{
+		auto pattern = name::get( "ptrn" );
+		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
+			"\n---\nname=\n  first=John\n  last=\"doe\"" };
+		etf docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+			<< "Failed to validate";
 	}
 }

@@ -50,10 +50,14 @@ namespace eon
 			inline valueptr copy() const override {
 				return valueptr( new refval( Val ) ); }
 
+			//* Get target
+			inline valueptr target() const noexcept { return Target; }
+
 
 			//* Write value to string
 			inline string str( size_t& pos_on_line, size_t indentation_level,
-				bool named ) const noexcept override { auto s = Val.str();
+				perm format = perm::allow_oneliner | perm::allow_multiliner )
+				const noexcept override { auto s = Val.str();
 					pos_on_line += s.numChars() + 1; return "@" + s; }
 
 
@@ -69,6 +73,9 @@ namespace eon
 			//* Clear value
 			inline void clear() noexcept override { Val.clear(); }
 
+			//* Set target
+			inline void target( valueptr target ) noexcept { Target = target; }
+
 
 
 
@@ -78,6 +85,7 @@ namespace eon
 			//
 		private:
 			path Val;
+			valueptr Target;
 		};
 	}
 }

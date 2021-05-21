@@ -79,28 +79,6 @@ namespace eon
 			auto dc = Docs.attribute( name ); if( dc ) return
 				dc->tuple_value(); else throw NoSuchDoc(); }
 
-		//* Get a const value given a path (tuple with nameless 'name'
-		//* attributes)
-		// NOTE: Will not resolve references!
-		//* Returns the value, or 'false' if the path does not lead to an
-		//* attribute.
-		const tup::valueptr get( const tup::path& path ) const noexcept;
-		inline const tup::valueptr get( std::initializer_list<name_t> path )
-			const { return get( tup::path( path ) ); }
-
-		//* Get a const value given a path (tuple with nameless 'name'
-		//* attributes)
-		// NOTE: Will resolve references!
-		//* Returns the value, or 'false' if the path does not lead to an
-		//* attribute. If a reference is detected that does not lead to an
-		//* attribute, the reference is returned unresolved. In case of
-		//* circular referencing, the first reference seen before during the
-		//* same resolve sequence will be returned.
-		const tup::valueptr getFinal( const tup::path& path ) const noexcept;
-		inline const tup::valueptr getFinal(
-			std::initializer_list<name_t> path ) const {
-				return getFinal( tup::path( path ) ); }
-
 
 		//* Run validation on a document, optionally specify a (loaded)
 		//* 'pattern' document (for which all references in other pattern
@@ -128,6 +106,8 @@ namespace eon
 		//* name will be used for the document!
 		//* Throws [eon::EtfBadSyntax] if formatting is incorrect.
 		//* Throws [eon::EtfInvalid] if validation fails.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
 		void load( const path& file );
 
 		//* Parse one or more documents from a string
@@ -135,12 +115,16 @@ namespace eon
 		//* string contains only a single, unnamed document.
 		//* Throws [eon::EtfBadSyntax] if formatting is incorrect.
 		//* Throws [eon::EtfInvalid] if validation fails.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
 		void parse( const string& str, name_t document_name = no_name );
 
 
 		//* Set document by position
 		//* Replaces existing document, appends a new if given position is at
 		//* the end.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
 		inline void set( size_t doc_pos, tuple&& document ) { Docs.set(
 			doc_pos, tup::valueptr( new tup::tupleval( std::move(
 				document ) ) ) ); }
@@ -148,27 +132,35 @@ namespace eon
 		//* Append a new document with or without a name
 		//* Throws [eon::tuple::DuplicateName] if another document already
 		//* exists with the same name.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
 		inline void append( tuple&& document, name_t name = no_name ) {
 			Docs.append( tup::valueptr( new tup::tupleval( std::move(
 				document ) ) ), name ); }
 
-		//* Get a modifiable document (tuple) by name
-		//* Throws [eon::NoSuchDoc] if no document has that name.
-		inline tuple& attribute( name_t name ) {
-			auto doc = Docs.attribute( name ); if( doc ) return
-				doc->tuple_value(); else throw NoSuchDoc(); }
-
-		//* Get a modifiable value given a path (tuple with nameless 'name'
-		//* attributes)
-		// NOTE: Will not resolve references!
-		//* Returns the value, or 'false' if the path does not lead to an
-		//* attribute
-		tup::valueptr get( const tup::path& path ) noexcept;
-		inline tup::valueptr get( std::initializer_list<name_t> path ) {
-			return get( tup::path( path ) ); }
-
 		//* Clear all documents
 		inline void clear() noexcept { Docs.clear(); }
+
+
+
+
+		/**********************************************************************
+		  Searching
+
+		  NOTE: Finding an attribute that is a reference will result in the
+		        target being found, not the reference itself. To access the
+				reference and not the target, find the parent tuple of the
+				reference attribute and then use the 'attribute' method to
+				access the reference value.
+		**********************************************************************/
+	public:
+
+		//* Find attribute at specified path
+		//* Returns 'false' if the path does not lead to an existing attribute.
+		inline tup::valueptr find( const tup::path& path ) const noexcept {
+			return Docs.find( path ); }
+		inline tup::valueptr find( std::initializer_list<name_t> path )
+			const noexcept { return Docs.find( tup::path( path ) ); }
 
 
 
@@ -181,10 +173,6 @@ namespace eon
 
 		void _parse( name_t name, source& src );
 
-		// Get attribute and it's parent
-		std::pair<tuple*, tup::valueptr> _get( const tuple& root,
-			const tup::path& path_to_attribute, size_t first_path_elm ) const;
-
 
 
 
@@ -196,5 +184,8 @@ namespace eon
 
 		// All the documents of this object
 		tuple Docs;
+
+		// Pattern documents
+		std::set<name_t> Patterns;
 	};
 }

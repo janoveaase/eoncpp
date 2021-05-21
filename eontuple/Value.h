@@ -28,6 +28,9 @@ namespace eon
 		//* use
 		EONEXCEPT( DuplicateName );
 
+		//* Exeption thrown when references end up in circles
+		EONEXCEPT( CircularReferencing );
+
 		//* Exception thrown when document validation fails
 		EONEXCEPT( Invalid );
 
@@ -49,6 +52,24 @@ namespace eon
 			tuple_t,
 			meta_t
 		};
+		name_t mapBasicType( basic_type type );
+
+		//* Formatting permissions heeded by value types that can span multiple
+		//* lines.
+		enum class perm
+		{
+			//* Allow the value to appear on a single line
+			allow_oneliner = 0x01,
+
+			//* Allow the value to appear/be split into multiple lines
+			allow_multiliner = 0x02
+		};
+		inline perm operator|( perm a, perm b ) noexcept {
+			return static_cast<perm>( static_cast<int>( a )
+				| static_cast<int>( b ) ); }
+		inline perm operator&( perm a, perm b ) noexcept {
+			return static_cast<perm>( static_cast<int>( a )
+				& static_cast<int>( b ) ); }
 
 		class value;
 		using valueptr = std::shared_ptr<value>;
@@ -144,7 +165,8 @@ namespace eon
 
 
 			//* Write value to string
-			virtual string str( size_t& pos_on_line, size_t indentation_level, bool named )
+			virtual string str( size_t& pos_on_line, size_t indentation_level,
+				perm format = perm::allow_oneliner | perm::allow_multiliner )
 				const noexcept = 0;
 
 

@@ -89,7 +89,6 @@ namespace eon
 					skipNoise();
 				}
 
-
 				if( TP && TP.current().match( "=" ) )
 				{
 					TP.forward();

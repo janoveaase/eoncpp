@@ -6,6 +6,8 @@
 
 namespace eon
 {
+	class EtfTest : public eontest::EonTest {};
+
 	class BoolTest : public eontest::EonTest {};
 	class CharTest : public eontest::EonTest {};
 	class IntTest : public eontest::EonTest {};
@@ -21,6 +23,4 @@ namespace eon
 	class MetaTest : public eontest::EonTest {};
 
 	class ValidateTest : public eontest::EonTest {};
-
-	class EtfTest : public eontest::EonTest {};
 }
