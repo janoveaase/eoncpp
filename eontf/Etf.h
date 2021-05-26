@@ -16,14 +16,14 @@ namespace eon
 	EONEXCEPT( EtfInvalidation );
 
 	//* Exception thrown when trying to access a non-existing document
-	EONEXCEPT( NoSuchDoc );
+	EONEXCEPT( NoSuchEtfDoc );
 
 
 
 	/**************************************************************************
 	  Eon Tuple Format Class - eon::etf
 
-	  Read tuple data from file or string, or save to file convert to string
+	  Read tuple data from file or string, or save to file or to string.
 	  Note that all ETF 'documents' (top level tuples) you load or parse, are
 	  stored within the same etf object and can reference each other.
 	**************************************************************************/
@@ -68,16 +68,16 @@ namespace eon
 
 		//* Get a const document (top level tuple) by position (in order of
 		//* appending)
-		//* Throws [eon::NoSuchDoc] if position >= [eon::etf::numDocs()].
+		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::etf::numDocs()].
 		inline const tuple& doc( size_t pos ) const {
 			auto doc = Docs.attribute( pos ); if( doc ) return
-				doc->tuple_value(); else throw NoSuchDoc(); }
+				doc->tuple_value(); else throw NoSuchEtfDoc(); }
 
 		//* Get a const document (top level tuple) by name
-		//* Throws [eon::NoSuchDoc] if no document has that name.
+		//* Throws [eon::NoSuchEtfDoc] if no document has that name.
 		inline const tuple& doc( name_t name ) const {
 			auto dc = Docs.attribute( name ); if( dc ) return
-				dc->tuple_value(); else throw NoSuchDoc(); }
+				dc->tuple_value(); else throw NoSuchEtfDoc(); }
 
 
 		//* Run validation on a document, optionally specify a (loaded)

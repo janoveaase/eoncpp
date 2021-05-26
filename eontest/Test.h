@@ -441,57 +441,20 @@ namespace eontest
 			return !value;
 		}
 
+		inline bool _testEq( const std::string& expected, const char* actual,
+			const char* exp_expr, const char* act_expr ) {
+			return _testEq( expected, std::string( actual ),
+				exp_expr, act_expr ); }
+		inline bool _testEq( const char* expected, const std::string& actual,
+			const char* exp_expr, const char* act_expr ) {
+			return _testEq( std::string( expected ), actual,
+				exp_expr, act_expr ); }
+		inline bool _testEq( const char* expected, const char* actual,
+			const char* exp_expr, const char* act_expr ) {
+			return _testEq( std::string( expected ), std::string( actual ),
+				exp_expr, act_expr ); }
 		bool _testEq( const std::string& expected, const std::string& actual,
-			const char* exp_expr, const char* act_expr )
-		{
-			if( expected == actual )
-				return true;
-			Failed = true;
-			size_t diff_pos = 0;
-			for( ; diff_pos < expected.size() && diff_pos < actual.size()
-				&& expected[ diff_pos ] == actual[ diff_pos ]; ++diff_pos )
-				;
-			size_t start = diff_pos > 13 ? diff_pos - 10 : 0;
-			if( start > 0 )
-				diff_pos -= start;
-			size_t exp_end = expected.size() - start > 40
-				? start + 40 : expected.size() - start;
-			size_t act_end = actual.size() - start > 40
-				? start + 40 : actual.size() - start;
-			_Messages << "\nFailed to compare equal (at position "
-				<< std::to_string( start + diff_pos ) << ")\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
-			_Messages << "Expected value: \"";
-			if( start > 0 )
-			{
-				diff_pos += 3;
-				_Messages << "...";
-			}
-			_Messages << encode( expected.substr( start, exp_end - start ),
-				diff_pos );
-			if( exp_end < expected.size() )
-				_Messages << "...";
-			_Messages << "\"\n  Actual value: \"";
-			if( start > 0 )
-				_Messages << "...";
-			size_t dummy{ 50 };
-			_Messages << encode( actual.substr( start, act_end - start ),
-				dummy );
-			if( act_end < actual.size() )
-				_Messages << "...";
-			_Messages << "\"\n";
-			_Messages << std::string( static_cast<size_t>( 17 + diff_pos ),
-				' ' ) << "^\n";
-			std::string marker{ "Different here" };
-			if( diff_pos > marker.size() + 2 )
-				_Messages << std::string( static_cast<size_t>( 17 + diff_pos
-					- marker.size() - 1 ), ' ' ) << marker << "-'\n";
-			else
-				_Messages << std::string( static_cast<size_t>( 17 + diff_pos ),
-					' ' ) << "'-"  << marker << "\n";
-			return false;
-		}
+			const char* exp_expr, const char* act_expr );
 		template<typename T1, typename T2>
 		bool _testEq( const T1& expected, const T2& actual,
 			const char* exp_expr, const char* act_expr )
@@ -599,5 +562,14 @@ namespace eontest
 				<< "\"\n";
 			return false;
 		}
+
+	private:
+		std::vector<std::string> _splitLines( const std::string& str ) const;
+		size_t _findFirstDiffLine( const std::vector<std::string>& expected,
+			const std::vector<std::string>& actual ) const;
+		size_t _findFirstDiffPos( const std::string& expected,
+			const std::string& actual ) const;
+		std::string _extractLine( const std::string& line,
+			size_t diff_pos, size_t available_size, size_t& start_pos ) const;
 	};
 }

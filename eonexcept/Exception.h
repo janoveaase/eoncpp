@@ -113,7 +113,7 @@ namespace eon
 
 		//* Get the message info
 		virtual const char* what() const noexcept override {
-			return Info.c_str(); }
+			return Info.empty() ? Name->c_str() : Info.c_str(); }
 
 		//* Get combined name and info
 		virtual string details() const {
