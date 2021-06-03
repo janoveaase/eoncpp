@@ -1406,8 +1406,8 @@ namespace eon
 		inline uint64_t hash64() const noexcept { return substr().hash64(); }
 
 		//* Get a 'size_t'size hash value
-		inline size_t hash() const noexcept {
-			return sizeof( size_t ) == 4 ? hash32() : hash64(); }
+		inline size_t hash() const noexcept { return static_cast<size_t>(
+			sizeof( size_t ) == 4 ? hash32() : hash64() ); }
 
 
 
