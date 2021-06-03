@@ -22,10 +22,6 @@ namespace eon
 	};
 
 
-	//* Defining eon::byte_t to reduce confusion with UTF-8/Unicode characters
-	using byte_t = char;
-
-
 
 
 	/**************************************************************************
@@ -147,7 +143,7 @@ namespace eon
 
 		//* Get number of characters in substring
 		inline size_t numChars() const noexcept {
-			return End >= Beg ? End - Beg : Beg - End; }
+			return static_cast<size_t>( End >= Beg ? End - Beg : Beg - End ); }
 
 		//* Get number of bytes in substring
 		size_t numBytes() const noexcept;
@@ -277,8 +273,8 @@ namespace eon
 #define FNV_OFFSET64 14695981039346656037LLU;
 		uint32_t hash32() const noexcept;
 		uint64_t hash64() const noexcept;
-		inline size_t hash() const noexcept {
-			return sizeof( size_t ) == 4 ? hash32() : hash64(); }
+		inline size_t hash() const noexcept { return static_cast<size_t>(
+			sizeof( size_t ) == 4 ? hash32() : hash64() ); }
 
 
 
@@ -321,6 +317,11 @@ namespace eon
 		//* substring
 		inline bool containsAnyOf( const substring& sub ) const noexcept {
 			return static_cast<bool>( findFirstOf( sub ) ); }
+
+		//* Check if the substring contains any charcters other than the ones
+		//* in the given substring
+		inline bool containsOtherThan( const substring& sub ) const noexcept {
+			return static_cast<bool>( findFirstNotOf( sub ) ); }
 
 
 		//* Find first occurrence of the 'to_find' substring

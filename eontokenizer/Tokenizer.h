@@ -45,6 +45,7 @@ namespace eon
 
 	private:
 		void scanSameChar( tokencat category );
+		void scanSingleChar( tokencat category );
 		void scanLetter( tokencat category );
 		void scanNumber( tokencat category );
 

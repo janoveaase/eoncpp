@@ -15,6 +15,9 @@ namespace eon
 	//* able to show proper character for)
 	using char_t = char32_t;
 
+	//* Defining eon::byte_t to reduce confusion with UTF-8/Unicode characters
+	using byte_t = unsigned char;
+
 
 	//* While not strictly necessary, these character definitions can help
 	//* increase clarity and avoid some confusions.
@@ -344,4 +347,29 @@ namespace eon
 	//* Check if the given codepoint is a numeral (any number character)
 	static inline bool isNumeral( char_t codepoint ) noexcept {
 		return Characters::get().isNumberDecimalDigit( codepoint ); }
+
+	//* Check if the given codepoint is a hex digit
+	static inline bool isHexDigit( char_t codepoint ) noexcept {
+		return ( codepoint >= '0' && codepoint <= '9' )
+			|| ( codepoint >= 'A' && codepoint <= 'F' )
+			|| ( codepoint >= 'a' && codepoint <= 'f' ); }
+
+	//* Given a hex digit, return the numerical value
+	static inline byte_t hexToNum( byte_t digit ) noexcept {
+		return ( digit >= '0' && digit <= '9' ) ? ( digit - '0' )
+			: ( digit >= 'A' && digit <= 'F' ) ? ( digit - 'A' + 10 )
+			: ( digit >= 'a' && digit <= 'f' ) ? ( digit - 'a' + 10 ) : 0; }
+
+	//* Given a byte, convert it into two hex digits
+	static inline std::string numToHex( byte_t byte ) noexcept {
+		byte_t hi = byte / 16, lo = byte % 16;
+		std::string str( "00" );
+		str[ 0 ] = hi < 10 ? '0' + hi : 'A' + hi - 10;
+		str[ 0 ] = lo < 10 ? '0' + lo : 'A' + lo - 10;
+		return str;
+	}
+
+	//* Check if the given codepoint is an octal digit
+	static inline bool isOctalDigit( char_t codepoint ) noexcept {
+		return codepoint >= '0' && codepoint <= '7'; }
 };

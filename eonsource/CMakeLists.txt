@@ -19,7 +19,7 @@ set_target_properties(
 		OUTPUT_NAME_RELEASE eon_source
 )
 
-target_link_libraries(EonSource PUBLIC EonString)
+target_link_libraries(EonSource PUBLIC EonString EonName EonExcept)
 target_include_directories(EonSource PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonSource
@@ -31,6 +31,6 @@ if(WIN32)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/EonSource.dir/Debug/EonSource.pdb DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}" OPTIONAL)
 endif()
 
-if(EON_INCLUDE_TESTS)
+if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()

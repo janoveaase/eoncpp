@@ -6,7 +6,8 @@
 void usage( const std::string& prog )
 {
 	std::cout << "Usage: " << prog.c_str() << " [--eonfilter=<regex>]\n";
-	std::cout << "If run with filter, only tests matching that filter regex pattern will be run.\n";
+	std::cout << "If run with filter, "
+		"only tests matching that filter regex pattern will be run.\n";
 }
 
 class Args
@@ -44,7 +45,7 @@ bool runTest( eontest::EonTest::TestRef& test )
 	auto test_obj = test.Factory->createTest( test.TestClass, test.TestName );
 	try
 	{
-		test_obj->test_body();
+		test_obj->runTest();
 	}
 	catch( std::string& )
 	{
@@ -61,11 +62,14 @@ void runTests( const std::string& filter, std::list<std::string>& failed )
 		throw TestError( "No tests have been defined!" );
 
 	std::regex pattern( filter );
+	auto start = std::chrono::high_resolution_clock::now();
 	for( auto& test : *eontest::EonTest::Tests )
 	{
-		if( !filter.empty() && !std::regex_match( test.TestClass + "." + test.TestName, pattern ) )
+		if( !filter.empty() && !std::regex_match(
+			test.TestClass + "." + test.TestName, pattern ) )
 			continue;
-		std::cout << "Running " << test.TestClass << "." << test.TestName << ": ";
+		std::cout << "Running " << test.TestClass << "." << test.TestName
+			<< ": ";
 		try
 		{
 			if( !runTest( test ) )
@@ -81,6 +85,15 @@ void runTests( const std::string& filter, std::list<std::string>& failed )
 			std::cerr << "FAIL\nERROR: Unknown error\n";
 		}
 	}
+	std::cout << "\n";
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = end - start;
+	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
+	auto s = std::to_string( dur.count() / 1000 );
+	auto ms = std::to_string( dur.count() % 1000 );
+	if( ms.size() < 3 )
+		ms = std::string( 3 - ms.size(), '0' ) + ms;
+	std::cout << "Total run time: " << s << "." << ms << " seconds\n";
 }
 
 

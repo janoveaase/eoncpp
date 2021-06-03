@@ -31,9 +31,12 @@ namespace eon
 		inline tokenparser( std::vector<token>&& tokens ) noexcept {
 			Tokens = std::move( tokens ); }
 
-		//* Cannot copy- or move-construct a token parser
+		//* Cannot copy-construct a token parser
 		tokenparser( const tokenparser& ) = delete;
-		tokenparser( tokenparser&& ) = delete;
+
+		//* Take ownership of the data of another token parser
+		inline tokenparser( tokenparser&& other ) noexcept {
+			*this = std::move( other ); }
 
 		//* Default destruction
 		virtual ~tokenparser() = default;
@@ -45,6 +48,11 @@ namespace eon
 		  Modifier Methods
 		**********************************************************************/
 
+		//* Take ownership of the data of another token parser
+		inline tokenparser& operator=( tokenparser&& other ) noexcept {
+			Tokens = std::move( other.Tokens ); Cur = other.Cur; other.Cur = 0;
+			return *this; }
+
 		//* Reclaim the tokens (makes the parser void)
 		inline std::vector<token>&& reclaim() noexcept {
 			Cur = 0; return std::move( Tokens ); }
@@ -52,23 +60,29 @@ namespace eon
 
 		//* Move current [eon::token] one step forward
 		//* Returns true if still at a valid token, false if reached the end.
-		inline bool forward() noexcept {
-			if( Cur < Tokens.size() ) ++Cur; return Cur < Tokens.size(); }
+		inline bool forward( size_t steps = 1 ) noexcept { if( Tokens.size()
+			- Cur >= steps ) Cur += steps; else Cur = Tokens.size();
+			return Cur < Tokens.size(); }
 
 		//* Move current [eon::token] on step backward
 		//* Returns true if the move was successful, false if already at the
 		//* beginning of the vector.
-		inline bool backward() noexcept {
-			if( Cur == 0 ) return false; --Cur; return true; }
+		inline bool backward( size_t steps = 1 ) noexcept { if( Cur == 0 )
+			return false; else if( Cur >= steps ) Cur -= steps; else Cur = 0;
+			return true; }
 
 
 		//* Skip to next [eon::token] if current is spaces
 		inline void skipSpaces() noexcept {
-			if( *this && token().space() ) ++Cur; }
+			if( *this && current().space() ) ++Cur; }
 
 		//* Skip to the end of the current [eon::token]'s line
-		inline void skipLine() noexcept {
-			for( ; *this && !token().newline(); ++Cur ); }
+		inline void skipToEol() noexcept {
+			for( ; *this && !current().newline(); ++Cur ); }
+
+		//* Skip to the start of the next line
+		inline void skipPastEol() noexcept { for( ; *this; ++Cur ) { if(
+			current().newline() ) { ++Cur; break; } } }
 
 		//* Set position of (new) current [eon::token]
 		inline void pos( size_t pos ) noexcept { Cur = pos; }
@@ -108,7 +122,8 @@ namespace eon
 		inline const token& last() const {
 			return Tokens[ Tokens.size() - 1 ]; }
 
-		//* Get position of first [eon::token] on current token's line
+		//* Get position of first [eon::token] on current token's line - use
+		//* last line if reached the end
 		size_t lineStart() const;
 
 

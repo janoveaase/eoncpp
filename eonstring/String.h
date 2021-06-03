@@ -490,6 +490,12 @@ namespace eon
 		inline bool containsAnyOf( const string& characters ) const noexcept {
 			return substr().containsAnyOf( characters.substr() ); }
 
+		//* Check if string contains any charcters other than the ones in the
+		//* 'characters' string
+		inline bool containsOtherThan( const string& characters )
+			const noexcept {
+			return substr().containsOtherThan( characters.substr() ); }
+
 
 		/** Find First Occurrence **/
 
@@ -1026,11 +1032,23 @@ namespace eon
 
 		//* Get a copy of the string with standard C single character escapes
 		//* processed
+		//* NOTE: Single quotes, question marks and tabs are not escaped!
 		inline string escape() const { return escape( substr() ); }
 
 		//* Get a copy of the string with standard C single character escapes
 		//* processed only within 'sub' [eon::substring]
+		//* NOTE: Single quotes, question marks and tabs are not escaped!
 		string escape( const substring& sub ) const;
+
+		//* Get a copy of the string with standard C single character escapes
+		//* processed
+		//* NOTE: Single quotes, question marks and tabs are also escaped!
+		inline string escapeAll() const { return escapeAll( substr() ); }
+
+		//* Get a copy of the string with standard C single character escapes
+		//* processed only within 'sub' [eon::substring]
+		//* NOTE: Single quotes, question marks and tabs are also escaped!
+		string escapeAll( const substring& sub ) const;
 
 		//* Get a copy of the string with standard C single character escapes
 		//* reverse processed
@@ -1388,8 +1406,8 @@ namespace eon
 		inline uint64_t hash64() const noexcept { return substr().hash64(); }
 
 		//* Get a 'size_t'size hash value
-		inline size_t hash() const noexcept {
-			return sizeof( size_t ) == 4 ? hash32() : hash64(); }
+		inline size_t hash() const noexcept { return static_cast<size_t>(
+			sizeof( size_t ) == 4 ? hash32() : hash64() ); }
 
 
 
@@ -1668,6 +1686,9 @@ namespace eon
 		static inline bool isMarkEnclosing( char_t cp ) noexcept {
 			return Characters::get().isMarkEnclosing( cp ); }
 		//*
+		static inline bool isNumber( char_t cp ) noexcept {
+			return isNumberDecimalDigit( cp ) || isNumberLetter( cp )
+				|| isNumberOther( cp ); }
 		static inline bool isNumberAsciiDigit( char_t cp ) noexcept {
 			return Characters::get().isNumberAsciiDigit( cp ); }
 		static inline bool isNumberDecimalDigit( char_t cp )
