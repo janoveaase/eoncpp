@@ -1,6 +1,7 @@
 #include "FileBuffer.h"
 
 #ifndef EON_WINDOWS
+#	include <errno.h>
 #	define _close close
 #	define _read read
 #	define _write write
