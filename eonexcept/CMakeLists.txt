@@ -6,13 +6,7 @@ set(EXCEPT_HEADERS
 	Exception.h
 )
 
-add_library(EonExcept INTERFACE ${EXCEPT_HEADERS})
-set_target_properties(
-	EonExcept
-	PROPERTIES
-		OUTPUT_NAME_DEBUG eon_except
-		OUTPUT_NAME_RELEASE eon_except
-)
+add_library(EonExcept INTERFACE)
 
 #target_link_libraries(EonExcept PUBLIC EonName EonString)
 target_include_directories(EonExcept INTERFACE "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
