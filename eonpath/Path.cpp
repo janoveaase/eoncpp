@@ -209,7 +209,7 @@ namespace eon
 				ForwSlashChr, Raw.substr( start + 1 ) ).begin();
 			auto elm = string( Raw.substr( start + 1, slash ) );
 #ifdef EON_UNIX
-			if( std::ifstream( "/" + elm ) )
+			if( std::ifstream( "/" + elm.stdstr() ) )
 				Root = substring( start, start + 1 );
 			else
 #endif
