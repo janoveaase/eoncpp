@@ -13,7 +13,7 @@ namespace eon
 		}
 		catch( exception& e )
 		{
-			WANT_EQ( "Test", e.what().stdstr() );
+			WANT_EQ( "Test", e.what() );
 		}
 		try
 		{
@@ -21,7 +21,8 @@ namespace eon
 		}
 		catch( exception& e )
 		{
-			WANT_EQ( "Test: This is just a test", e.what().stdstr() );
+			WANT_EQ( "This is just a test", e.what() );
+			WANT_EQ( "Test: This is just a test", e.details().stdstr() );
 		}
 	}
 }
