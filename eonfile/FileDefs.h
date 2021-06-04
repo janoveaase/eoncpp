@@ -1,8 +1,10 @@
 #pragma once
 
 #include <eonpath/Path.h>
-#include <io.h>
 #include <fcntl.h>
+#ifdef EON_WINDOWS
+#	include <io.h>
+#endif
 
 
 /******************************************************************************

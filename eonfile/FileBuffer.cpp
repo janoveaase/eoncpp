@@ -4,6 +4,7 @@
 #	define _close close
 #	define _read read
 #	define _write write
+#	define _strerror_s strerror_s
 #endif
 
 namespace eon
