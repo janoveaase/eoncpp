@@ -14,7 +14,7 @@ namespace eon
 		if( Graph.match( data ) )
 		{
 			data.registerCapture( no_name, substring( start, data.pos() ) );
-			return rx::match( data.claimCaptures() );
+			return rx::match( std::move( data.claimCaptures() ) );
 		}
 		else
 			return rx::match();
