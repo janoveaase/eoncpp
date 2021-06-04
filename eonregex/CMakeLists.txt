@@ -17,7 +17,7 @@ set(REGEX_HEADERS
 	sources/OpNot.h
 	sources/FixedValue.h
 	sources/Backreference.h
-	sources/LocWordboundary.h
+	sources/LocWordBoundary.h
 	sources/WordChar.h
 	sources/Special.h
 	sources/Case.h
@@ -36,7 +36,7 @@ set(REGEX_SOURCES
 	sources/OpOr.cpp
 	sources/FixedValue.cpp
 	sources/Backreference.cpp
-	sources/LocWordboundary.cpp
+	sources/LocWordBoundary.cpp
 	sources/CaptureGroup.cpp
 )
 
