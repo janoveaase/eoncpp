@@ -27,10 +27,10 @@ namespace eon
 		public:
 
 			inline refval() : value( basic_type::ref_t ) {}
-			inline refval( const path& value )
-				: value( basic_type::ref_t ) { Val = value; }
-			inline refval( path&& value ) noexcept
-				: value( basic_type::ref_t ) { Val = std::move( value ); }
+			inline refval( const path& val )
+				: value( basic_type::ref_t ) { Val = val; }
+			inline refval( path&& val ) noexcept
+				: value( basic_type::ref_t ) { Val = std::move( val ); }
 
 
 

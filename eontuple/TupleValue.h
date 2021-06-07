@@ -27,12 +27,11 @@ namespace eon
 		public:
 
 			inline tupleval() : value( basic_type::tuple_t ) {}
-			inline tupleval( const tuple& value, bool pattern = false )
+			inline tupleval( const tuple& val, bool pattern = false )
+				: value( basic_type::tuple_t ) { Val = val; Pattern = pattern; }
+			inline tupleval( tuple&& val, bool pattern = false ) noexcept
 				: value( basic_type::tuple_t ) {
-				Val = value; Pattern = pattern; }
-			inline tupleval( tuple&& value, bool pattern = false ) noexcept
-				: value( basic_type::tuple_t ) {
-				Val = std::move( value ); Pattern = pattern; }
+				Val = std::move( val ); Pattern = pattern; }
 
 
 

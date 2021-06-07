@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline intval() : value( basic_type::int_t ) {}
-			inline intval( int64_t value ) noexcept
-				: value( basic_type::int_t ) { Val = value; }
+			inline intval( int64_t val ) noexcept
+				: value( basic_type::int_t ) { Val = val; }
 
 
 

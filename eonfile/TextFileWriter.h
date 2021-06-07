@@ -33,7 +33,7 @@ namespace eon
 
 		textfilewriter& operator=( const textfilewriter& ) = delete;
 		inline textfilewriter& operator=( textfilewriter&& other ) noexcept {
-			Buffer = std::move( other.Buffer ); }
+			Buffer = std::move( other.Buffer ); return *this; }
 
 
 

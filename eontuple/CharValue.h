@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline charval() : value( basic_type::char_t ) {}
-			inline charval( char_t value ) noexcept
-				: value( basic_type::char_t ) { Val = value; }
+			inline charval( char_t val ) noexcept
+				: value( basic_type::char_t ) { Val = val; }
 
 
 

@@ -2,18 +2,24 @@
 
 #ifndef EON_WINDOWS
 #	include <errno.h>
-#	define _close close
-#	define _read read
-#	define _write write
-#	define _strerror_s strerror_s
+#	include <sys/stat.h>
+#	include <fcntl.h>
+#	include <unistd.h>
+#	define _close ::close
+#	define _read ::read
+#	define _write ::write
 #endif
 
 namespace eon
 {
 	string errnoMessage()
 	{
+#ifdef EON_WINDOWS
 		char buffer[ 80 ];
 		_strerror_s<80>( buffer, NULL );
+#else
+		const char* buffer = strerror( errno );
+#endif
 		return string( buffer );
 	}
 
@@ -37,6 +43,7 @@ namespace eon
 
 
 
+#ifdef EON_WINDOWS
 	void filebuffer::open()
 	{
 		close();
@@ -65,6 +72,31 @@ namespace eon
 		BufPos = 0;
 		Eof = false;
 	}
+#else
+	void filebuffer::open()
+	{
+		close();
+		int flags = 0;
+		int perm = S_IRUSR | S_IWUSR;
+		switch( Mode )
+		{
+			case FileMode::input:
+				flags |= O_RDONLY;
+				break;
+			case FileMode::output:
+				flags |= O_CREAT | O_TRUNC | O_WRONLY;
+				break;
+		}
+		Handle = ::open( FPath.str().c_str(), flags, perm );
+		if( Handle == -1 )
+			throw FileOpenError( "File: " + FPath.stdstr() + "\nError: "
+				+ errnoMessage().stdstr() );
+		Buffer = new char[ BufferCapacity ];
+		BufferSize = 0;
+		BufPos = 0;
+		Eof = false;
+	}
+#endif
 
 	void filebuffer::close()
 	{

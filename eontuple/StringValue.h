@@ -26,10 +26,10 @@ namespace eon
 		public:
 
 			inline stringval() : value( basic_type::string_t ) {}
-			inline stringval( const string& value )
-				: value( basic_type::string_t ) { Val = value; }
-			inline stringval( string&& value ) noexcept
-				: value( basic_type::string_t ) { Val = std::move( value ); }
+			inline stringval( const string& val )
+				: value( basic_type::string_t ) { Val = val; }
+			inline stringval( string&& val ) noexcept
+				: value( basic_type::string_t ) { Val = std::move( val ); }
 
 
 

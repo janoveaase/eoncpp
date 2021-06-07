@@ -36,7 +36,7 @@ namespace eon
 				*this = std::move( other ); }
 
 			//* Construct from a map of [eon::name_t] to [eon::substring]
-			inline match( std::map<name_t, substring>& captures ) noexcept {
+			inline match( std::map<name_t, substring>&& captures ) noexcept {
 				Captures = std::move( captures ); }
 
 

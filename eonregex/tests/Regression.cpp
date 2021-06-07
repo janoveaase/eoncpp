@@ -52,8 +52,7 @@ namespace eon
 	TEST( RegExTest, match_any_three )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.{3}/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/.{3}/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8bβ" ) ) << "Didn't match 3";
 		WANT_FALSE( expr.match( "8β" ) ) << "Matched 2";
@@ -62,8 +61,7 @@ namespace eon
 	TEST( RegExTest, match_any_range )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.{2,3}/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/.{2,3}/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8bβ" ) ) << "Didn't match 3";
 		WANT_TRUE( expr.match( "8b" ) ) << "Didn't match 2";
@@ -72,8 +70,7 @@ namespace eon
 	TEST( RegExTest, match_any_range_fixed )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/^.{2,3}$/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/^.{2,3}$/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8bβ" ) ) << "Didn't match 3";
 		WANT_TRUE( expr.match( "8b" ) ) << "Didn't match 2";
@@ -84,8 +81,7 @@ namespace eon
 	TEST( RegExTest, match_digit_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\d/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/\d/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8" ) ) << "Didn't match digit";
 		WANT_FALSE( expr.match( "b" ) ) << "Matched letter";
@@ -93,8 +89,7 @@ namespace eon
 	TEST( RegExTest, match_digit_single_not )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/!\d/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/!\d/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "b" ) ) << "Didn't match letter";
 		WANT_FALSE( expr.match( "8" ) ) << "Matched digit";
@@ -102,8 +97,7 @@ namespace eon
 	TEST( RegExTest, match_digit_two )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\d\d/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/\d\d/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "82" ) ) << "Didn't match digit";
 		WANT_FALSE( expr.match( "6b" ) ) << "Match with letter";
@@ -113,8 +107,7 @@ namespace eon
 	TEST( RegExTest, match_wordchar_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\w/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/\w/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8" ) ) << "Didn't match digit";
 		WANT_TRUE( expr.match( "b" ) ) << "Didn't match letter";
@@ -125,8 +118,7 @@ namespace eon
 	TEST( RegExTest, match_wordchar_two )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\w\w/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/\w\w/)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8b" ) ) << "Didn't match digit + letter";
 		WANT_TRUE( expr.match( "_8" ) ) << "Didn't match underscore + digit";
@@ -139,8 +131,7 @@ namespace eon
 	TEST( RegExTest, match_nonwordchar_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\W/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/\W/)" ) << "Failed to parse";
 
 		WANT_FALSE( expr.match( "8") )<< "Matched digit";
 		WANT_FALSE( expr.match( "b") )<< "Matched letter";
@@ -163,8 +154,8 @@ namespace eon
 	TEST( RegExTest, match_capture_greedy_1 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.*@<key>(\w+): @<value>(\w+).*/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/.*@<key>(\w+): @<value>(\w+).*/)" )
+			<< "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
@@ -192,8 +183,8 @@ namespace eon
 	TEST( RegExTest, match_capture_greedy_2 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\W*@<key>(\w+): @<value>(\w+)\W*/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/\W*@<key>(\w+): @<value>(\w+)\W*/)" )
+			<< "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
@@ -219,8 +210,8 @@ namespace eon
 	TEST( RegExTest, match_capture_nongreedy )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.*?@<key>(\w+): @<value>(\w+).*?/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/.*?@<key>(\w+): @<value>(\w+).*?/)" )
+			<< "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
@@ -257,8 +248,7 @@ namespace eon
 	TEST( MatchOrTest, simple_multi )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/a|b|c|d/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/a|b|c|d/)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "a" ) ) << "Didn't match 'a'";
@@ -270,8 +260,7 @@ namespace eon
 	TEST( MatchOrTest, complex_binary )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/alpha|beta/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/alpha|beta/)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "alpha" ) ) << "Didn't match 'alpha'";
@@ -282,8 +271,8 @@ namespace eon
 	TEST( MatchOrTest, complex_multi )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/alpha|beta|gamma|delta/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/alpha|beta|gamma|delta/)" )
+			<< "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "alpha" ) ) << "Didn't match 'alpha'";
@@ -296,8 +285,8 @@ namespace eon
 	TEST( MatchOrTest, group_binary )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/(alpha|beta){1,2}/)" ),
-			"Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(/(alpha|beta){1,2}/)" )
+			<< "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "alpha" ) ) << "Didn't match 'alpha'";
@@ -490,8 +479,11 @@ namespace eon
 
 	TEST( MiscTests, utf8_match )
 	{
-		string str_good{ u8"\xC6on is great!" };
-		string str_bad{ u8"\xC6Eon is not great!" };
+		string str_good, str_bad;
+		str_good += char_t( 0xC6 );
+		str_good += "on is great!";
+		str_bad += char_t( 0xC6 );
+		str_bad += "Eon is not great!";
 		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
 		WANT_TRUE( expr.match( str_good.substr() ) );
 		WANT_FALSE( expr.match( str_bad.substr() ) );

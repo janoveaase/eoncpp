@@ -39,7 +39,7 @@ namespace eon
 				Captures = std::move( other.Captures );
 				Pos = other.Pos; return *this; }
 
-			inline const string& source() const noexcept { return Src; }
+			inline const substring& source() const noexcept { return Src; }
 			inline const string::iterator& pos() const noexcept { return Pos; }
 			inline char_t operator()() const noexcept {
 				return Pos ? *Pos : NullChr; }

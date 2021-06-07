@@ -26,10 +26,10 @@ namespace eon
 		public:
 
 			inline rawval() : value( basic_type::raw_t ) {}
-			inline rawval( const std::vector<string>& value )
-				: value( basic_type::raw_t ) { Val = value; }
-			inline rawval( std::vector<string>&& value ) noexcept
-				: value( basic_type::raw_t ) { Val = std::move( value ); }
+			inline rawval( const std::vector<string>& val )
+				: value( basic_type::raw_t ) { Val = val; }
+			inline rawval( std::vector<string>&& val ) noexcept
+				: value( basic_type::raw_t ) { Val = std::move( val ); }
 
 
 

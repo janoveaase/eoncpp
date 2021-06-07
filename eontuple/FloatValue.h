@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline floatval() : value( basic_type::float_t ) {}
-			inline floatval( double value ) noexcept
-				: value( basic_type::float_t ) { Val = value; }
+			inline floatval( double val ) noexcept
+				: value( basic_type::float_t ) { Val = val; }
 
 
 

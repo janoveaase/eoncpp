@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline boolval() : value( basic_type::bool_t ) {}
-			inline boolval( bool value ) noexcept
-				: value( basic_type::bool_t ) { Val = value; }
+			inline boolval( bool val ) noexcept
+				: value( basic_type::bool_t ) { Val = val; }
 
 
 

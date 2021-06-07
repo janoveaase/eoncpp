@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline nameval() : value( basic_type::name_t ) {}
-			inline nameval( name_t value ) noexcept
-				: value( basic_type::name_t ) { Val = value; }
+			inline nameval( name_t val ) noexcept
+				: value( basic_type::name_t ) { Val = val; }
 
 
 

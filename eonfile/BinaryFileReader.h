@@ -32,7 +32,7 @@ namespace eon
 
 		binaryfilereader& operator=( const binaryfilereader& ) = delete;
 		inline binaryfilereader& operator=( binaryfilereader&& other ) noexcept {
-			Buffer = std::move( other.Buffer ); }
+			Buffer = std::move( other.Buffer ); return *this; }
 
 
 

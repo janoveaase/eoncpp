@@ -19,6 +19,10 @@ set(EON_BUILD_TUPLE ON CACHE BOOL "Build the Tuple package")
 set(EON_BUILD_ETF ON CACHE BOOL "Build the Eon Tuple Format package - ETF")
 set(EON_BUILD_DOCGEN ON CACHE BOOL "Build the Documentation generator package")
 
+if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+	add_definitions( -D_DEBUG )
+endif()
+
 if(EON_BUILD_TESTS)
 	add_subdirectory(eontest)
 endif()

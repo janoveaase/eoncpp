@@ -33,7 +33,7 @@ namespace eon
 
 		textfilereader& operator=( const textfilereader& ) = delete;
 		inline textfilereader& operator=( textfilereader&& other ) noexcept {
-			Buffer = std::move( other.Buffer ); }
+			Buffer = std::move( other.Buffer ); return *this; }
 
 
 

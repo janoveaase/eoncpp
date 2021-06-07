@@ -27,10 +27,10 @@ namespace eon
 		public:
 
 			inline regexval() : value( basic_type::regex_t ) {}
-			inline regexval( const regex& value )
-				: value( basic_type::regex_t ) { Val = value; }
-			inline regexval( regex&& value ) noexcept
-				: value( basic_type::regex_t ) { Val = std::move( value ); }
+			inline regexval( const regex& val )
+				: value( basic_type::regex_t ) { Val = val; }
+			inline regexval( regex&& val ) noexcept
+				: value( basic_type::regex_t ) { Val = std::move( val ); }
 
 
 

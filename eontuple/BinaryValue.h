@@ -26,10 +26,10 @@ namespace eon
 		public:
 
 			inline binaryval() : value( basic_type::binary_t ) {}
-			inline binaryval( const hex& value )
-				: value( basic_type::binary_t ) { Val = value; }
-			inline binaryval( hex&& value ) noexcept
-				: value( basic_type::binary_t ) { Val = std::move( value ); }
+			inline binaryval( const hex& val )
+				: value( basic_type::binary_t ) { Val = val; }
+			inline binaryval( hex&& val ) noexcept
+				: value( basic_type::binary_t ) { Val = std::move( val ); }
 
 
 

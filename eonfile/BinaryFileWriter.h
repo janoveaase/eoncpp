@@ -32,7 +32,7 @@ namespace eon
 
 		binaryfilewriter& operator=( const binaryfilewriter& ) = delete;
 		inline binaryfilewriter& operator=( binaryfilewriter&& other ) noexcept {
-			Buffer = std::move( other.Buffer ); }
+			Buffer = std::move( other.Buffer ); return *this; }
 
 
 

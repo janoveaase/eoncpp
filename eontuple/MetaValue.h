@@ -27,10 +27,10 @@ namespace eon
 		public:
 
 			inline metaval() : value( basic_type::meta_t ) {}
-			inline metaval( const tuple& value )
-				: value( basic_type::meta_t ) { Val = value; }
-			inline metaval( tuple&& value ) noexcept
-				: value( basic_type::meta_t ) { Val = std::move( value ); }
+			inline metaval( const tuple& val )
+				: value( basic_type::meta_t ) { Val = val; }
+			inline metaval( tuple&& val ) noexcept
+				: value( basic_type::meta_t ) { Val = std::move( val ); }
 
 
 

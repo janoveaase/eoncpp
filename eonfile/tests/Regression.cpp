@@ -28,8 +28,8 @@ namespace eon
 
 		string read, written{ "01aA?\b\t" };
 		written += '\0';
-		written += U'€';
-		written += U'Ø';
+		written += char_t( 0x20AC );
+		written += char_t( 0xD8 );
 
 		REQUIRE_NO_EXCEPT( writer.open() ) << "Failed to open output file";
 		REQUIRE_NO_EXCEPT( writer.write( written ) ) << "Failed to write";
