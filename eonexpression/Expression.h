@@ -82,8 +82,7 @@ namespace eon
 
 		// Evaluate expression
 		tup::valueptr evaluate() const;
-		tup::valueptr evaluate( tup::variables& vars )
-			const;
+		tup::valueptr evaluate( tup::variables& vars ) const;
 
 
 		bool equal( const expression& other, const tup::variables& vars )

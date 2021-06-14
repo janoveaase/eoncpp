@@ -24,7 +24,7 @@ namespace eon
 		return Root ? Root->inorderStr() : ""; }
 
 	tup::valueptr expression::evaluate() const {
-		return evaluate( tup::variables() ); }
+		tup::variables vars; return evaluate( vars ); }
 	tup::valueptr expression::evaluate( tup::variables& vars ) const {
 		return Root ? Root->evaluate( vars ) : tup::valueptr(); }
 
