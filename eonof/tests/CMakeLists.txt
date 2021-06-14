@@ -1,26 +1,26 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-project(EonTFTests LANGUAGES CXX)
-message(STATUS " - EonTFTests")
+project(EonOFTests LANGUAGES CXX)
+message(STATUS " - EonOFTests")
 
-set(ETFTEST_HEADERS
+set(EOFTEST_HEADERS
 	Regression.h
 )
-set(ETFTEST_SOURCES
+set(EOFTEST_SOURCES
 	Regression.cpp
 )
 
-add_executable(EonTFTests ${ETFTEST_HEADERS} ${ETFTEST_SOURCES})
+add_executable(EonOFTests ${EOFTEST_HEADERS} ${EOFTEST_SOURCES})
 set_target_properties(
-	EonTFTests
+	EonOFTests
 	PROPERTIES
-		OUTPUT_NAME_DEBUG eon_tf_tests
-		OUTPUT_NAME_RELEASE eon_tf_tests
+		OUTPUT_NAME_DEBUG eon_of_tests
+		OUTPUT_NAME_RELEASE eon_of_tests
 )
 
-target_link_libraries(EonTFTests PUBLIC EonTF EonTest)
+target_link_libraries(EonOFTests PUBLIC EonOF EonTest)
 	
-install(TARGETS EonTFTests
+install(TARGETS EonOFTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
 )
 
-target_include_directories(EonTFTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
+target_include_directories(EonOFTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
