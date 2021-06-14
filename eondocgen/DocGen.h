@@ -10,7 +10,10 @@ namespace eon
 	/**************************************************************************
 	  Eon Documentation Generator Class - eon::docgen
 
-	  The generator will scan through source files and based on supported 
+	  The generator will scan through source files of supported languages and
+	  generate HTML documentation.
+
+	  Language support is specified in ETF files.
 	**************************************************************************/
 	class docgen
 	{

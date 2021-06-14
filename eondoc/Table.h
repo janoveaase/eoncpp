@@ -115,6 +115,7 @@ namespace eon
 			// Attributes
 			//
 		private:
+			size_t LeadText{ SIZE_MAX }, TrailText{ SIZE_MAX };
 			std::unordered_map<size_t, std::unordered_map<size_t,Cell>> Cells;
 			std::vector<Column> Cols;
 			std::vector<Row> Rows;

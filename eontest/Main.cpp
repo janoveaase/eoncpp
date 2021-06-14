@@ -79,10 +79,12 @@ void runTests( const std::string& filter, std::list<std::string>& failed )
 		{
 			std::cerr << "FAIL\nERROR: std::exception:\n";
 			std::cerr << e.what() << "\n";
+			failed.push_back( test.TestClass + "." + test.TestName );
 		}
 		catch( ... )
 		{
 			std::cerr << "FAIL\nERROR: Unknown error\n";
+			failed.push_back( test.TestClass + "." + test.TestName );
 		}
 	}
 	std::cout << "\n";

@@ -82,8 +82,11 @@ namespace eon
 		  Read-only Methods
 		**********************************************************************/
 
+		//* Check if there is an expression
+		inline bool empty() const noexcept { return Raw.empty(); }
+
 		//* Get the complete pattern (boundary markers and flags included)
-		inline const string& raw() const noexcept { return Raw; }
+		inline const string& str() const noexcept { return Raw; }
 
 
 
@@ -98,6 +101,8 @@ namespace eon
 		//* [eon::rx::match::all()] to access the entire match (as an
 		//* [eon::substring]) or [eon::rx::match::group(name)] to get a
 		//* specific capture.
+		//* NOTE: The entire match is a group named "complete", so never
+		//*       specify a group with that name!
 		rx::match match( const substring& str ) const;
 		inline rx::match match( const string& str ) const {
 			return match( str.substr() ); }

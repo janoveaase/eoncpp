@@ -14,7 +14,7 @@ namespace eon
 			if( Val.empty() )
 			{
 				pos_on_line += 2;
-				return "()";
+				return "{}";
 			}
 			else
 			{
@@ -22,15 +22,15 @@ namespace eon
 					format );
 				if( !multiliner || ( !s.contains( NewlineChr )
 					&& pos_on_line + 2 <= 79 ) )
-					return "(" + s + ")";
+					return "{" + s + "}";
 				if( multiliner )
 				{
 					if( s.contains( NewlineChr ) )
 						return "- " + s;
 					else
-						return "(\n" + string( ( indentation_level + 1 ) * 2,
+						return "{\n" + string( ( indentation_level + 1 ) * 2,
 							SpaceChr ) + s + "\n" + string(
-								indentation_level * 2, SpaceChr ) + ")";
+								indentation_level * 2, SpaceChr ) + "}";
 				}
 				else
 					return s;

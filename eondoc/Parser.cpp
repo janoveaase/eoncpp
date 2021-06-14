@@ -448,6 +448,8 @@ namespace eon
 
 		void Parser::parseTable( document& doc, string&& anchor )
 		{
+			// Read column declaration first, possibly with horizontal headers
+
 		}
 
 		void Parser::parseParagraph( document& doc, block& parent,

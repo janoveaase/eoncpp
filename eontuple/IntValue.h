@@ -37,11 +37,22 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline int64_t int_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override {
+				return Val != 0; }
+			inline int64_t hardInt() const override { return Val; }
+			inline int64_t softInt( variables& vars ) const override {
+				return Val; }
+			inline double softFloat( variables& vars ) const override {
+				return static_cast<double>( Val ); }
+			inline const string& softString( variables& vars ) const override {
+				static string str; str = string( Val ); return str; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isInt() && Val == other->int_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto o = other->hardInt();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto o = other->softInt( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -60,9 +71,6 @@ namespace eon
 			  Write Methods
 			******************************************************************/
 		public:
-
-			//* Get modifiable value
-			inline int64_t& int_value() override { return Val; }
 
 			//* Clear value
 			inline void clear() noexcept override { Val = 0; }

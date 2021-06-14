@@ -11,7 +11,7 @@ namespace eon
 			bool oneliner = static_cast<bool>( format & perm::allow_oneliner );
 			bool multiliner = static_cast<bool>(
 				format & perm::allow_multiliner );
-			std::string s{ "#" };
+			std::string s{ "%" };
 			++pos_on_line;
 			if( !multiliner || ( Val.size() <= 79 - pos_on_line ) )
 				return s + Val.value();

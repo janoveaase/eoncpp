@@ -13,7 +13,8 @@ namespace eon
 		auto start = data.pos();
 		if( Graph.match( data ) )
 		{
-			data.registerCapture( no_name, substring( start, data.pos() ) );
+			data.registerCapture( name_complete,
+				substring( start, data.pos() ) );
 			return rx::match( data.claimCaptures() );
 		}
 		else

@@ -39,12 +39,18 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline const hex& binary_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override {
+				return !Val.empty(); }
+			inline const hex& hardBinary() const override { return Val; }
+			inline const hex& softBinary( variables& vars ) const override {
+				return Val; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isBinary()
-					&& Val == other->binary_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto& o = other->hardBinary();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto& o = other->softBinary( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -63,7 +69,6 @@ namespace eon
 			******************************************************************/
 		public:
 
-			//* Get modifiable value
 			inline hex& binary_value() override { return Val; }
 
 			//* Clear value

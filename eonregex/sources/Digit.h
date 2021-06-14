@@ -39,7 +39,7 @@ namespace eon
 
 		private:
 			inline bool _match( RxData& data, size_t steps ) override {
-				return string::isNumberDecimalDigit( data() )
+				return string::isNumberAsciiDigit( data() )
 					? data.advance() : false; }
 		};
 

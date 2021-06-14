@@ -4,13 +4,13 @@
 
 namespace eon
 {
-	bool etf::validate( name_t document, name_t pattern_document ) const
+	bool etf::validate( name_t document, name_t pattern_document )
 	{
 		auto doc = Docs.attribute( document );
 		if( !doc || !doc->isTuple() )
 			return false;
 
-		doc->tuple_value().validate();
+		doc->tuple_value().validate( Vars);
 
 		if( pattern_document != no_name )
 		{
@@ -22,8 +22,8 @@ namespace eon
 			if( !ptrn )
 				throw tup::Invalid( "Pattern document not available: "
 					+ *pattern_document );
-			if( ptrn->isTuple() && ptrn->tuple_value() )
-				ptrn->tuple_value().validate( doc->tuple_value() );
+			if( ptrn->isTuple() && ptrn->hardTuple() )
+				ptrn->tuple_value().validate( doc->hardTuple(), Vars );
 		}
 
 		return true;
@@ -54,11 +54,11 @@ namespace eon
 		while( true )
 		{
 			// Get document name and meta data - if any
-			auto result = parser.parseDocumentStart();
+			auto result = parser.parseDocumentStart( Vars );
 			if( !result )
 				break;
-			auto doc_name = result.attribute( 0 )->name_value();
-			auto doc_meta = result.attribute( 1 )->meta_value();
+			auto doc_name = result.attribute( 0 )->hardName();
+			auto doc_meta = result.attribute( 1 )->hardMeta();
 
 			// Use given name if no name in header
 			if( doc_name == no_name )
@@ -70,17 +70,17 @@ namespace eon
 				meta = tupleptr( new tuple( std::move( doc_meta ) ) );
 
 			// If this is a pattern document, we need to record it as such
-			if( meta && meta->containsUnnamedValue( name_pattern ) )
+			if( meta && meta->containsUnnamedValue( name_pattern, Vars ) )
 				Patterns.insert( doc_name );
 
 			// Create (empty) tuple with these details
-			Docs.append( tup::valueptr( new tup::tupleval() ),
+			Docs.append( tup::valueptr( new tup::tupleval() ), Vars,
 				doc_name, meta );
-			auto& doc = Docs.attribute(
-				Docs.numAttributes() - 1 )->tuple_value();
+			auto& doc = *(tuple*)&Docs.attribute(
+				Docs.numAttributes() - 1 )->hardTuple();
 
 			// Keep on parsing until end of document
-			while( parser.parseDocumentAttribute( doc ) )
+			while( parser.parseDocumentAttribute( doc, Vars ) )
 				;
 		}
 	}

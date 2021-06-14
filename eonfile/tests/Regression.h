@@ -16,7 +16,15 @@ namespace eon
 		void prepare() override
 		{
 #ifdef EON_WINDOWS
-			path testdir{ getenv( "TMP" ) };
+			char* buffer{ nullptr };
+			size_t bufsize{ 0 };
+			auto error = _dupenv_s( &buffer, &bufsize, "TMP" );
+			path testdir;
+			if( error == 0 )
+			{
+				testdir = string( buffer, bufsize );
+				free( buffer );
+			}
 #else
 			path testdir{ "/tmp" };
 #endif

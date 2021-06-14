@@ -10,22 +10,31 @@ set(TUPLE_HEADERS
 	FloatValue.h
 	NameValue.h
 	StringValue.h
-	BinaryValue.h
 	RawValue.h
+	BinaryValue.h
 	RegexValue.h
 	ReferenceValue.h
+	VariableValue.h
+	ExpressionValue.h
 	MetaValue.h
 	TupleValue.h
 	Path.h
 	Tuple.h
+	Operators.h
+	Variables.h
 )
 set(TUPLE_SOURCES
 	Value.cpp
-	BinaryValue.cpp
+	CharValue.cpp
 	RawValue.cpp
+	BinaryValue.cpp
+	VariableValue.cpp
+	ExpressionValue.cpp
 	TupleValue.cpp
 	Path.cpp
 	Tuple.cpp
+	Operators.cpp
+	Variables.cpp
 )
 
 add_library(EonTuple STATIC ${TUPLE_HEADERS} ${TUPLE_SOURCES})
@@ -36,7 +45,7 @@ set_target_properties(
 		OUTPUT_NAME_RELEASE eon_tuple
 )
 
-target_link_libraries(EonTuple PUBLIC EonString EonName EonExcept EonHex EonRegex)
+target_link_libraries(EonTuple PUBLIC EonString EonName EonExcept EonHex EonRegex EonExpression)
 target_include_directories(EonTuple PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonTuple

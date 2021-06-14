@@ -504,5 +504,13 @@ namespace eon
 		WANT_EQ( "Go back to @[Top_of_page].\n", docs.str( "test" ).stdstr() );
 	}
 
-	// Table
+/*	TEST( EdocTest, table_simple )
+	{
+		string in{ "  |++++++++++++|++++|\n  | 2019-12-12   43" };
+		edoc docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, "test" ) )
+			<< "Failed to parse";
+		REQUIRE_TRUE( docs.exists( "test" ) );
+		WANT_EQ( "  |++++++++++++|++++|\n  | 2019-12-12   43\n", docs.str( "test" ).stdstr() );
+	}*/
 }

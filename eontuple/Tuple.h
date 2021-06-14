@@ -14,6 +14,8 @@ namespace eon
 	class tuple;
 	using tupleptr = std::shared_ptr<tuple>;
 
+	EONEXCEPT( Incompatible );
+
 
 
 
@@ -49,20 +51,13 @@ namespace eon
 
 		tuple() = default;
 		inline tuple( form tuple_form ) { Form = tuple_form; }
-		tuple( form tuple_form,
+		tuple( form tuple_form, tup::variables& vars,
 			std::initializer_list<name_t> name_attributes );
 		inline tuple( const tuple& other ) { *this = other; }
 		inline tuple( tuple&& other ) noexcept {
 			*this = std::move( other ); }
 
 		~tuple() { clear(); }
-
-
-		tuple& operator=( const tuple& other );
-		inline tuple& operator=( tuple&& other ) noexcept {
-			Attributes = std::move( other.Attributes ); Named = std::move(
-				other.Named ); Form = other.Form; other.Form = form::plain;
-			return *this; }
 
 
 
@@ -85,7 +80,7 @@ namespace eon
 		//* Returns 'false' if invalid position.
 		inline const tup::valueptr attribute( size_t pos ) const noexcept {
 			return pos < Attributes.size()
-				? Attributes[ pos ]->Value : nullptr; }
+				? Attributes[ pos ]->Value : tup::valueptr(); }
 		inline const tup::valueptr attribute( int pos ) const noexcept {
 			return attribute( static_cast<size_t>( pos ) ); }
 
@@ -103,11 +98,13 @@ namespace eon
 		//* Returns 'false' if no attribute with that name.
 		inline const tup::valueptr attribute( name_t name ) const noexcept {
 			auto found = Named.find( name ); return found != Named.end()
-				? found->second->Value : nullptr; }
+				? found->second->Value : tup::valueptr(); }
 
 		//* Check if this tuple contains a value matching the specified value
-		bool containsUnnamedValue( name_t value ) const noexcept;
-		bool containsUnnamedValue( const tup::valueptr& value ) const noexcept;
+		bool containsUnnamedValue( name_t value, const tup::variables& vars )
+			const noexcept;
+		bool containsUnnamedValue( const tup::valueptr& value,
+			const tup::variables& vars ) const noexcept;
 
 		//* Get document (the top most parent that still has a parent)
 		//* Returns nullptr if 'this' has not parent.
@@ -117,7 +114,8 @@ namespace eon
 
 		//* Get full path to a named attribute of this tuple
 		//* Returns 'false' if 'attribute_name' isn't an attribute.
-		tup::path path( const tuple* subtuple = nullptr ) const noexcept;
+		tup::path path( const tup::variables& vars,
+			const tuple* subtuple = nullptr ) const noexcept;
 
 
 		//* Stringify the tuple
@@ -132,11 +130,11 @@ namespace eon
 
 		// Run internal validation (using meta data associated with named
 		// attributes)
-		void validate() const;
+		void validate( tup::variables& vars ) const;
 
 		//* Pattern tuples can validate other tuples according to the pattern
 		//* definition.
-		void validate( const tuple& other );
+		void validate( const tuple& other, tup::variables& vars ) const;
 
 
 
@@ -146,6 +144,12 @@ namespace eon
 		**********************************************************************/
 	public:
 
+		tuple& operator=( const tuple& other );
+		inline tuple& operator=( tuple&& other ) noexcept {
+			Attributes = std::move( other.Attributes ); Named = std::move(
+				other.Named ); Form = other.Form; other.Form = form::plain;
+			return *this; }
+
 		//* Set attribute value by position
 		//* Throws [eon::tup::WrongType] if meta data defines a different
 		//* type, or if the attribute value already exists with a different
@@ -153,15 +157,24 @@ namespace eon
 		//* existing attribute.
 		//* Throws [eon::tup::CircularReferencing] if circular referencing is
 		//* detected!
-		void set( size_t attribute_pos, const tup::valueptr& value );
+		void set( size_t attribute_pos, const tup::valueptr& value,
+			tup::variables& vars );
 
 		//* Append a new attribute
 		//* Throws [eon::tup::DuplicateName] if another attribute already
 		//* exists with the same name.
 		//* Throws [eon::tup::CircularReferencing] if circular referencing is
 		//* detected!
-		void append( const tup::valueptr& value, name_t name = no_name,
-			const tupleptr& metadata = tupleptr() );
+		void append( const tup::valueptr& value, tup::variables& vars,
+			name_t name = no_name, const tupleptr& metadata = tupleptr() );
+
+		//* Copy and append all attributes of the other tuple
+		//* Will not copy named attributes that already exists!
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
+		//* Throws [eon::Incompatible] if the tuples cannot be joined (such as
+		//* meta data joined with regular tuple).
+		void append( const tuple& other, tup::variables& vars );
 
 		//* Clear all attributes
 		inline void clear() noexcept { Attributes.clear(); Named.clear(); }
@@ -183,8 +196,9 @@ namespace eon
 		//* Find attribute at specified path
 		//* Returns 'false' if the path does not lead to an existing attribute.
 		inline tup::valueptr find( const tup::path& path ) const noexcept {
-			auto found = _find( path, 0, false, nullptr ); return found->isRef()
-				? dynamic_cast<tup::refval*>( &*found )->target() : found; }
+			auto found = _find( path, 0, false, nullptr ); return found
+				&& found->isRef() ? dynamic_cast<tup::refval*>(
+					&*found )->target() : found; }
 		inline tup::valueptr find( std::initializer_list<name_t> path )
 			const noexcept { return find( tup::path( path ) ); }
 
@@ -198,7 +212,7 @@ namespace eon
 
 		//* Two tuple objects are 'equal' if all attributes have the
 		//* same names, types and values.
-		bool equal( const tuple& other ) const noexcept;
+		bool equal( const tuple& other, const tup::variables& vars ) const noexcept;
 
 		//* The 'other' tuple object is compatible with 'this' if all
 		//* the named attributes have the same type and all the unnamed
@@ -225,7 +239,7 @@ namespace eon
 
 		//* Have all references include a pointer to their targets - if not
 		//* already
-		void _resolveReferences();
+		void _resolveReferences( const tup::variables& vars );
 
 		//* Get a target attribute from a path of attribute names
 		//* The 'pos' argument is the position of the attribute to get for
@@ -236,34 +250,34 @@ namespace eon
 			bool resolve_refs, tuple** parent ) const noexcept;
 
 
-		void _validate( tuple& metadata, const tuple* parent, const AttributePtr& value ) const;
+		void _validate( const tuple& metadata, const tuple* parent, const AttributePtr& value, tup::variables& vars ) const;
 
-		void _validateType( tup::valueptr meta, const tuple* location, const tup::valueptr& value ) const;
+		void _validateType( tup::valueptr meta, const tuple* location, const tup::valueptr& value, const tup::variables& vars ) const;
 
-		void _validateMaxDepth( tup::valueptr meta, const tuple* location, const tuple& value ) const;
+		void _validateMaxDepth( tup::valueptr meta, const tuple* location, const tuple& value, const tup::variables& vars ) const;
 
-		void _validateMinLength( tup::valueptr meta, const tuple* location, const hex& value ) const;
-		void _validateMinLength( tup::valueptr meta, const tuple* location, const string& value ) const;
-		void _validateMinLength( tup::valueptr meta, const tuple* location, const tuple& value ) const;
+		void _validateMinLength( tup::valueptr meta, const tuple* location, const hex& value, tup::variables& vars ) const;
+		void _validateMinLength( tup::valueptr meta, const tuple* location, const string& value, tup::variables& vars ) const;
+		void _validateMinLength( tup::valueptr meta, const tuple* location, const tuple& value, tup::variables& vars ) const;
 
-		void _validateMaxLength( tup::valueptr meta, const tuple* location, const hex& value ) const;
-		void _validateMaxLength( tup::valueptr meta, const tuple* location, const string& value ) const;
-		void _validateMaxLength( tup::valueptr meta, const tuple* location, const tuple& value ) const;
+		void _validateMaxLength( tup::valueptr meta, const tuple* location, const hex& value, tup::variables& vars ) const;
+		void _validateMaxLength( tup::valueptr meta, const tuple* location, const string& value, tup::variables& vars ) const;
+		void _validateMaxLength( tup::valueptr meta, const tuple* location, const tuple& value, tup::variables& vars ) const;
 
-		void _validateMin( tup::valueptr meta, const tuple* location, int64_t value ) const;
-		void _validateMin( tup::valueptr meta, const tuple* location, double value ) const;
+		void _validateMin( tup::valueptr meta, const tuple* location, int64_t value, tup::variables& vars ) const;
+		void _validateMin( tup::valueptr meta, const tuple* location, double value, tup::variables& vars ) const;
 
-		void _validateMax( tup::valueptr meta, const tuple* location, int64_t value ) const;
-		void _validateMax( tup::valueptr meta, const tuple* location, double value ) const;
+		void _validateMax( tup::valueptr meta, const tuple* location, int64_t value, tup::variables& vars ) const;
+		void _validateMax( tup::valueptr meta, const tuple* location, double value, tup::variables& vars ) const;
 
-		void _validateFormat( tup::valueptr meta, const tuple* location, const string& value ) const;
-		void _validateFormat( tup::valueptr meta, const tuple* location, const std::vector<string>& value ) const;
+		void _validateFormat( tup::valueptr meta, const tuple* location, const string& value, tup::variables& vars ) const;
+		void _validateFormat( tup::valueptr meta, const tuple* location, const std::vector<string>& value, tup::variables& vars ) const;
 
-		void _validateFlags( tup::valueptr meta, const tuple* location, const tuple& value ) const;
+		void _validateFlags( tup::valueptr meta, const tuple* location, const tuple& value, const tup::variables& vars ) const;
 
-		void _validateOptions( tup::valueptr meta, const tuple* location, name_t value ) const;
+		void _validateOptions( tup::valueptr meta, const tuple* location, name_t value, tup::variables& vars ) const;
 
-		void _mismatchingMeta( name_t attribute_name, const string& info ) const;
+		void _mismatchingMeta( name_t attribute_name, const string& info, const tup::variables& vars ) const;
 
 
 

@@ -71,13 +71,13 @@ namespace eon
 		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::etf::numDocs()].
 		inline const tuple& doc( size_t pos ) const {
 			auto doc = Docs.attribute( pos ); if( doc ) return
-				doc->tuple_value(); else throw NoSuchEtfDoc(); }
+				doc->hardTuple(); else throw NoSuchEtfDoc(); }
 
 		//* Get a const document (top level tuple) by name
 		//* Throws [eon::NoSuchEtfDoc] if no document has that name.
 		inline const tuple& doc( name_t name ) const {
 			auto dc = Docs.attribute( name ); if( dc ) return
-				dc->tuple_value(); else throw NoSuchEtfDoc(); }
+				dc->hardTuple(); else throw NoSuchEtfDoc(); }
 
 
 		//* Run validation on a document, optionally specify a (loaded)
@@ -89,8 +89,11 @@ namespace eon
 		//* 'pattern' document is violated.
 		//* Returns true if the document was validated, false if the document
 		//* could not be found!
-		bool validate( name_t document, name_t pattern_document = no_name )
-			const;
+		bool validate( name_t document, name_t pattern_document = no_name );
+
+		//* Access the variables used by documents
+		inline const tup::variables& variables() const noexcept {
+			return Vars; }
 
 
 
@@ -119,15 +122,28 @@ namespace eon
 		//* detected!
 		void parse( const string& str, name_t document_name = no_name );
 
+		//* Get a modifiable document (top level tuple) by position (in order
+		//* of appending)
+		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::etf::numDocs()].
+		inline tuple& doc( size_t pos ) {
+			auto doc = Docs.attribute( pos ); if( doc ) return *(tuple*)&doc
+				->hardTuple(); else throw NoSuchEtfDoc(); }
+
+		//* Get a modifiable document (top level tuple) by name
+		//* Throws [eon::NoSuchEtfDoc] if no document has that name.
+		inline tuple& doc( name_t name ) {
+			auto dc = Docs.attribute( name ); if( dc ) return *(tuple*)&dc
+				->hardTuple(); else throw NoSuchEtfDoc(); }
+
 
 		//* Set document by position
 		//* Replaces existing document, appends a new if given position is at
 		//* the end.
 		//* Throws [eon::tup::CircularReferencing] if circular referencing is
 		//* detected!
-		inline void set( size_t doc_pos, tuple&& document ) { Docs.set(
-			doc_pos, tup::valueptr( new tup::tupleval( std::move(
-				document ) ) ) ); }
+		inline void set( size_t doc_pos, tuple&& document ) {
+			Docs.set( doc_pos, tup::valueptr(
+				new tup::tupleval( std::move( document ) ) ), Vars ); }
 
 		//* Append a new document with or without a name
 		//* Throws [eon::tuple::DuplicateName] if another document already
@@ -135,11 +151,14 @@ namespace eon
 		//* Throws [eon::tup::CircularReferencing] if circular referencing is
 		//* detected!
 		inline void append( tuple&& document, name_t name = no_name ) {
-			Docs.append( tup::valueptr( new tup::tupleval( std::move(
-				document ) ) ), name ); }
+			Docs.append( tup::valueptr(
+				new tup::tupleval( std::move( document ) ) ), Vars, name ); }
 
 		//* Clear all documents
 		inline void clear() noexcept { Docs.clear(); }
+
+		//* Access the variables used by documents
+		inline tup::variables& variables() noexcept { return Vars; }
 
 
 
@@ -187,5 +206,8 @@ namespace eon
 
 		// Pattern documents
 		std::set<name_t> Patterns;
+
+		// Variables
+		tup::variables Vars;
 	};
 }

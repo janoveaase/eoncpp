@@ -13,6 +13,8 @@
 #include <eontuple/BinaryValue.h>
 #include <eontuple/RawValue.h>
 #include <eontuple/RegexValue.h>
+#include <eontuple/VariableValue.h>
+#include <eontuple/ExpressionValue.h>
 #include <eontuple/TupleValue.h>
 #include <eontuple/ReferenceValue.h>
 #include <eontuple/MetaValue.h>
@@ -38,7 +40,7 @@ namespace eon
 		{
 		public:
 
-			Parser() = delete;
+			Parser() = default;
 			Parser( const Parser& ) = delete;
 			Parser( Parser&& ) = delete;
 			Parser( const sourceref& source );
@@ -52,22 +54,33 @@ namespace eon
 			// by calling parse():
 			//   1. name    : Name of document, no_name if not specified.
 			//   2. metaval : Meta information for the document (if any).
-			tuple parseDocumentStart();
+			tuple parseDocumentStart( tup::variables& vars );
 
 			// Parse the next attribute of the current document
 			// Returns false when no more attributes.
 			// If false is returned, you should call parseDocumentStart to
 			// see if there are more documents.
-			bool parseDocumentAttribute( tuple& document );
+			bool parseDocumentAttribute( tuple& document,
+				tup::variables& vars );
+
+
+			// Parse a single value
+			enum class ContextType
+			{
+				plain,
+				expression
+			};
+			tup::valueptr parseValue( tokenparser& parser,
+				tup::variables& vars, ContextType context );
 
 
 		private:
 
 			// Parse an attribute, with optional name and meta data
-			void parseAttribute( tuple& result );
+			void parseAttribute( tuple& result, tup::variables& vars );
 
 			// Parse a value
-			tup::valueptr parseValue();
+			tup::valueptr parseValue( tup::variables& vars, ContextType context);
 
 			// Skip tokens, return false if nothing was skipped
 			bool skipComments();
@@ -78,15 +91,18 @@ namespace eon
 			tup::valueptr parseChar();
 			tup::valueptr parseInt( int64_t sign = 1 );
 			tup::valueptr parseFloat( double sign = 1.0 );
-			tup::valueptr parseName();	// This can return nullptr!
+			tup::valueptr parseName();
+			name_t parseRawName();	// This can return no_name!
 			tup::valueptr parseString();
 			tup::valueptr parseBinary();
 			tup::valueptr parseRaw();
 			tup::valueptr parseRegex();
 			tup::valueptr parseTuple( size_t base_indentation,
-				string group_end = string() );
+				tup::variables& vars, string group_end = string() );
 			tup::valueptr parseRef();
-			tup::valueptr parseMeta();
+//			tup::valueptr parseVar( tup::variables& vars );
+			tup::valueptr parseExpr( tup::variables& vars );
+			tup::valueptr parseMeta( tup::variables& vars );
 
 			std::string unescape( const std::string& str ) const noexcept;
 			inline bool inrange( byte_t c, byte_t lower, byte_t upper )

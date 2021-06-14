@@ -144,14 +144,14 @@ namespace eontest
 	catch( std::exception& e )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: {" << #expression << "} throws:\n";\
+		_Messages << "\nExpression: --|" << #expression << "|-- throws:\n";\
 		_Messages << e.what() << "\n";\
 		_Messages << "Expected no exceptions\n";\
 	}\
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: {" << #expression << "} throws\n";\
+		_Messages << "\nExpression: --|" << #expression << "|-- throws\n";\
 		_Messages << "Expected no exceptions\n"; }
 #define WANT_NO_EXCEPT( expression )\
 	_NO_EXCEPT( expression ); if( Failed ) NONFATAL_MESSAGE
@@ -162,14 +162,14 @@ namespace eontest
 #define _EXCEPT( expression, exception )\
 	try { expression;\
 		Failed = true;\
-		_Messages << "\nExpression: {" << #expression << "} doesn't throw\n";\
+		_Messages << "\nExpression: --|" << #expression << "|-- doesn't throw\n";\
 		_Messages << "Expected exception: " << #exception << "\n";\
 	}\
 	catch( exception ) { /* This is what we want! */ }\
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: {" << #expression << "} doesn't throw \""\
+		_Messages << "\nExpression: --|" << #expression << "|-- doesn't throw \""\
 			<< #exception << "\"\n";\
 		_Messages << "A different exception was thrown\n"; }
 #define WANT_EXCEPT( expression, exception )\
@@ -429,15 +429,15 @@ namespace eontest
 		bool _testTrue( bool value, const char* expression )
 		{
 			if( !value )
-				_Messages << "\nExpression: {" << expression
-					<< "}=false\nExpected true\n";
+				_Messages << "\nExpression: --|" << expression
+					<< "|--=false\nExpected true\n";
 			return value;
 		}
 		bool _testFalse( bool value, const char* expression )
 		{
 			if( value )
-				_Messages << "\nExpression: {" << expression
-					<< "}=true\nExpected false\n";
+				_Messages << "\nExpression: --|" << expression
+					<< "|--=true\nExpected false\n";
 			return !value;
 		}
 
@@ -463,8 +463,8 @@ namespace eontest
 			{
 				Failed = true;
 				_Messages << "\nFailed to compare equal\n";
-				_Messages << "Expected expression: {" << exp_expr << "}\n";
-				_Messages << "  Actual expression: {" << act_expr << "}\n";
+				_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+				_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 				_Messages << "Expected value: \"" << expected << "\"\n";
 				_Messages << "  Actual value: \"" << actual << "\"\n";
 				return false;
@@ -481,8 +481,8 @@ namespace eontest
 				return true;
 			Failed = true;
 			_Messages << "\nFailed to compare not equal\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			size_t dummy{ SIZE_MAX };
 			_Messages << "Expected value: \"" << encode( expected, dummy )
 				<< "\"\n";
@@ -499,8 +499,8 @@ namespace eontest
 				return true;
 			Failed = true;
 			_Messages << "\nFailed to compare less than\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			size_t dummy{ SIZE_MAX };
 			_Messages << "Expected value: \"" << encode( expected, dummy )
 				<< "\"\n";
@@ -517,8 +517,8 @@ namespace eontest
 				return true;
 			Failed = true;
 			_Messages << "\nFailed to compare less than or equal to\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			size_t dummy{ SIZE_MAX };
 			_Messages << "Expected value: \"" << encode( expected, dummy )
 				<< "\"\n";
@@ -535,8 +535,8 @@ namespace eontest
 				return true;
 			Failed = true;
 			_Messages << "\nFailed to compare greater than\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			size_t dummy{ SIZE_MAX };
 			_Messages << "Expected value: \"" << encode( expected, dummy )
 				<< "\"\n";
@@ -553,8 +553,8 @@ namespace eontest
 				return true;
 			Failed = true;
 			_Messages << "\nFailed to compare greater than or equal to\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			size_t dummy{ SIZE_MAX };
 			_Messages << "Expected value: \"" << encode( expected, dummy )
 				<< "\"\n";
