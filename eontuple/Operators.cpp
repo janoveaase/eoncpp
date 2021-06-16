@@ -11,9 +11,9 @@ namespace eon
 			OperatorDetails( code::value, 2, 0, 0 ),
 			OperatorDetails( code::open_brace, 2, 100, 0 ),
 			OperatorDetails( code::close_brace, 2, 0, 99 ),
-			OperatorDetails( code::and, 2, 23, 24 ),
-			OperatorDetails( code::or, 2, 21, 22 ),
-			OperatorDetails( code::not, 1, 73, 74 ),
+			OperatorDetails( code::_and, 2, 23, 24 ),
+			OperatorDetails( code::_or, 2, 21, 22 ),
+			OperatorDetails( code::_not, 1, 73, 74 ),
 			OperatorDetails( code::if_else, 3, 12, 11 ),
 			OperatorDetails( code::eq, 2, 31, 32 ),
 			OperatorDetails( code::ne, 2, 31, 32 ),
@@ -38,9 +38,9 @@ namespace eon
 			static std::unordered_map<string, code> types{
 				{ "(", code::open_brace },
 				{ ")", code::close_brace },
-				{ "and", code::and },
-				{ "or", code:: or },
-				{ "not", code::not },
+				{ "and", code::_and },
+				{ "or", code:: _or },
+				{ "not", code::_not },
 				{ "if", code::if_else },
 				{ "else", code::if_else2 },
 				{ "==", code::eq },
@@ -70,9 +70,9 @@ namespace eon
 			static std::unordered_map<code, string> types{
 				{ code::open_brace, "(" },
 				{ code::close_brace, ")" },
-				{ code::and, "and" },
-				{ code:: or , "or" },
-				{ code::not, "not" },
+				{ code::_and, "and" },
+				{ code::_or, "or" },
+				{ code::_not, "not" },
 				{ code::if_else, "if_else" },
 				{ code::eq, "==" },
 				{ code::ne, "!=" },
@@ -99,3 +99,4 @@ namespace eon
 		}
 	}
 }
+

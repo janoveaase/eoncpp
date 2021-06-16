@@ -13,6 +13,9 @@
 #include "ExpressionValue.h"
 #include "TupleValue.h"
 #include "MetaValue.h"
+#ifdef EON_UNIX
+#	include <cmath>
+#endif
 
 
 namespace eon
@@ -83,7 +86,7 @@ namespace eon
 			auto type = softType( vars );
 			switch( op_code )
 			{
-				case operators::code::not:
+				case operators::code::_not:
 					return valueptr( new boolval( !softBool( vars ) ) );
 				case operators::code::sqrt:
 					return valueptr( new floatval(
@@ -112,10 +115,10 @@ namespace eon
 			auto type2 = arg2->softType( vars );
 			switch( op_code )
 			{
-				case operators::code::and :
+				case operators::code::_and:
 					return valueptr( new boolval( softBool( vars )
 						&& arg2->softBool( vars ) ) );
-				case operators::code:: or :
+				case operators::code::_or:
 					return valueptr( new boolval( softBool( vars )
 						|| arg2->softBool( vars ) ) );
 				case operators::code::eq:

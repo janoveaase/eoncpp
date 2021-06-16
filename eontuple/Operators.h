@@ -39,9 +39,9 @@ namespace eon
 				value,				// Not an operator
 				open_brace,			// (
 				close_brace,		// )
-				and,				// a and b
-				or ,				// a or b
-				not,				// not a
+				_and,				// a and b
+				_or ,				// a or b
+				_not,				// not a
 				if_else,			// a if b else c
 				eq,					// a == b
 				ne,					// a != b
