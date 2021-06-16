@@ -19,7 +19,7 @@ set_target_properties(
 		OUTPUT_NAME_RELEASE eon_parser
 )
 
-target_link_libraries(EonParser PUBLIC EonString EonSource EonTokenizer EonRegex EonExcept)
+target_link_libraries(EonParser PUBLIC EonString EonSource EonTokenizer EonRegex EonExcept EonName EonPath EonOF)
 target_include_directories(EonParser PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonParser
@@ -34,3 +34,7 @@ endif()
 if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
+
+add_executable(EonParserApp main.cpp)
+target_link_libraries(EonParserApp EonParser)
+set_target_properties(EonParserApp PROPERTIES OUTPUT_NAME "eonparser")

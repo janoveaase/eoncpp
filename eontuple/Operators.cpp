@@ -12,7 +12,7 @@ namespace eon
 			OperatorDetails( code::open_brace, 2, 100, 0 ),
 			OperatorDetails( code::close_brace, 2, 0, 99 ),
 			OperatorDetails( code::and, 2, 23, 24 ),
-			OperatorDetails( code:: or , 2, 21, 22 ),
+			OperatorDetails( code::or, 2, 21, 22 ),
 			OperatorDetails( code::not, 1, 73, 74 ),
 			OperatorDetails( code::if_else, 3, 12, 11 ),
 			OperatorDetails( code::eq, 2, 31, 32 ),

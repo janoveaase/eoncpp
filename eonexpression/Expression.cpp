@@ -99,7 +99,8 @@ namespace eon
 			}
 		}
 		if( last_type != tup::operators::code::value
-			&& type != tup::operators::code::value )
+			&& type != tup::operators::code::value
+			&& last_type != tup::operators::code::close_brace )
 		{
 			if( type == tup::operators::code::minus )
 				type = tup::operators::code::unary_minus;

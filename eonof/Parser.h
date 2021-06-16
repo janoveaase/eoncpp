@@ -97,10 +97,15 @@ namespace eon
 			tup::valueptr parseBinary();
 			tup::valueptr parseRaw();
 			tup::valueptr parseRegex();
-			tup::valueptr parseTuple( size_t base_indentation,
-				tup::variables& vars, string group_end = string() );
+			enum class tupletype
+			{
+				plain,
+				dash,
+				curly,
+				meta
+			};
+			tup::valueptr parseTuple( tup::variables& vars, tupletype type );
 			tup::valueptr parseRef();
-//			tup::valueptr parseVar( tup::variables& vars );
 			tup::valueptr parseExpr( tup::variables& vars );
 			tup::valueptr parseMeta( tup::variables& vars );
 
@@ -116,7 +121,6 @@ namespace eon
 
 
 		private:
-
 			sourceref Source;
 			tokenparser TP;
 			string DecimalSep{ '.' };

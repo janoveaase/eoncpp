@@ -21,29 +21,29 @@ namespace eon
 
 
 	/**************************************************************************
-	  Eon Tuple Format Class - eon::etf
+	  Eon Object Format Class - eon::eonof
 
 	  Read tuple data from file or string, or save to file or to string.
 	  Note that all ETF 'documents' (top level tuples) you load or parse, are
-	  stored within the same etf object and can reference each other.
+	  stored within the same eonof object and can reference each other.
 	**************************************************************************/
-	class etf
+	class eonof
 	{
 		/**********************************************************************
 		  Construction
 		**********************************************************************/
 	public:
 
-		etf() = default;
-		inline etf( const etf& other ) { *this = other; }
-		inline etf( etf&& other ) noexcept { *this = std::move( other ); }
+		eonof() = default;
+		inline eonof( const eonof& other ) { *this = other; }
+		inline eonof( eonof&& other ) noexcept { *this = std::move( other ); }
 
-		~etf() = default;
+		~eonof() = default;
 
 
-		inline etf& operator=( const etf& other ) {
+		inline eonof& operator=( const eonof& other ) {
 			Docs = other.Docs; return *this; }
-		inline etf& operator=( etf&& other ) noexcept {
+		inline eonof& operator=( eonof&& other ) noexcept {
 			Docs = std::move( other.Docs ); return *this; }
 
 
@@ -59,7 +59,7 @@ namespace eon
 		//* Get number of documents
 		inline size_t numDocs() const noexcept { return Docs.numAttributes(); }
 
-		//* A 'false' etf object is an empty one
+		//* A 'false' eonof object is an empty one
 		inline operator bool() const noexcept { return empty(); }
 
 		//* Check if a document with a given name exists
@@ -68,7 +68,7 @@ namespace eon
 
 		//* Get a const document (top level tuple) by position (in order of
 		//* appending)
-		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::etf::numDocs()].
+		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::eonof::numDocs()].
 		inline const tuple& doc( size_t pos ) const {
 			auto doc = Docs.attribute( pos ); if( doc ) return
 				doc->hardTuple(); else throw NoSuchEtfDoc(); }
@@ -124,7 +124,7 @@ namespace eon
 
 		//* Get a modifiable document (top level tuple) by position (in order
 		//* of appending)
-		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::etf::numDocs()].
+		//* Throws [eon::NoSuchEtfDoc] if position >= [eon::eonof::numDocs()].
 		inline tuple& doc( size_t pos ) {
 			auto doc = Docs.attribute( pos ); if( doc ) return *(tuple*)&doc
 				->hardTuple(); else throw NoSuchEtfDoc(); }

@@ -884,4 +884,16 @@ namespace eon
 		tup::valueptr val;
 		REQUIRE_EXCEPT( val = expr.evaluate(), tup::NotFound );
 	}
+
+	TEST( ExpressionTest, double_parenthesis )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "((5-1)/(4-2))*3", vars ) );
+		WANT_EQ( "5 1 - 4 2 - / 3 *",
+			expr.postfixStr().stdstr() ) << "Bad postfix expression";
+		WANT_EQ(
+			"( 5 - 1 ) / ( 4 - 2 ) * 3",
+			expr.infixStr().stdstr() ) << "Bad infix expression";
+	}
 }

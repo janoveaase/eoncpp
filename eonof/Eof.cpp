@@ -4,7 +4,7 @@
 
 namespace eon
 {
-	bool etf::validate( name_t document, name_t pattern_document )
+	bool eonof::validate( name_t document, name_t pattern_document )
 	{
 		auto doc = Docs.attribute( document );
 		if( !doc || !doc->isTuple() )
@@ -32,14 +32,15 @@ namespace eon
 
 
 
-	void etf::load( const path& file )
+	void eonof::load( const path& file )
 	{
 		textfilereader reader( file );
+		reader.open();
 		auto name = eon::name::get( file.baseWithoutExt() );
 		source src( file.str(), reader.read( SIZE_MAX ) );
 		_parse( name, src );
 	}
-	void etf::parse( const string& str, name_t document_name )
+	void eonof::parse( const string& str, name_t document_name )
 	{
 		source src( *document_name, string( str ) );
 		_parse( document_name, src );
@@ -48,7 +49,7 @@ namespace eon
 
 
 
-	void etf::_parse( name_t name, source& src )
+	void eonof::_parse( name_t name, source& src )
 	{
 		tf::Parser parser{ sourceref( src ) };
 		while( true )

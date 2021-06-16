@@ -7,7 +7,7 @@ namespace eon
 	TEST( EtfTest, empty_unnamed_01 )
 	{
 		string in{ "---" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -17,7 +17,7 @@ namespace eon
 	TEST( EtfTest, empty_unnamed_02 )
 	{
 		string in{ "---\n" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -27,7 +27,7 @@ namespace eon
 	TEST( EtfTest, empty_named_01 )
 	{
 		string in{ "---title" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_title ) );
@@ -37,7 +37,7 @@ namespace eon
 	TEST( EtfTest, empty_named_02 )
 	{
 		string in{ "---       title              \n" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_title ) );
@@ -49,7 +49,7 @@ namespace eon
 		string in{ "---one\n---two\n" };
 		auto one = name::get( "one" );
 		auto two = name::get( "two" );
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_TRUE( docs.exists( one ) );
@@ -59,7 +59,7 @@ namespace eon
 	TEST( IntTest, true )
 	{
 		string in{ "true" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -71,7 +71,7 @@ namespace eon
 	TEST( IntTest, false )
 	{
 		string in{ "false" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -84,7 +84,7 @@ namespace eon
 	TEST( CharTest, null )
 	{
 		string in{ "'\\0'" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -96,7 +96,7 @@ namespace eon
 	TEST( CharTest, F )
 	{
 		string in{ "'F'" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -108,7 +108,7 @@ namespace eon
 	TEST( CharTest, unicode )
 	{
 		string in = string( "'\\U050E'" );
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -121,7 +121,7 @@ namespace eon
 	TEST( IntTest, zero )
 	{
 		string in{ "0" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -133,7 +133,7 @@ namespace eon
 	TEST( IntTest, positive )
 	{
 		string in{ "+45" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -145,7 +145,7 @@ namespace eon
 	TEST( IntTest, negative )
 	{
 		string in{ "-16" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -158,7 +158,7 @@ namespace eon
 	TEST( FloatTest, zero )
 	{
 		string in{ "0.0" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -170,7 +170,7 @@ namespace eon
 	TEST( FloatTest, trailing_zeros )
 	{
 		string in{ "0.0001000" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -182,7 +182,7 @@ namespace eon
 	TEST( FloatTest, positive )
 	{
 		string in{ "+5.98" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -194,7 +194,7 @@ namespace eon
 	TEST( FloatTest, negative )
 	{
 		string in{ "-9.87" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -207,7 +207,7 @@ namespace eon
 	TEST( NameTest, basic )
 	{
 		string in{ "name" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -220,7 +220,7 @@ namespace eon
 	TEST( StringTest, empty )
 	{
 		string in{ "\"\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -232,7 +232,7 @@ namespace eon
 	TEST( StringTest, plain )
 	{
 		string in{ "\"a string\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -244,7 +244,7 @@ namespace eon
 	TEST( StringTest, spaces )
 	{
 		string in{ "\"      x       \"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -256,7 +256,7 @@ namespace eon
 	TEST( StringTest, escapes )
 	{
 		string in{ "\"a \\\"string\\\"\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -268,7 +268,7 @@ namespace eon
 	TEST( StringTest, more_escapes )
 	{
 		string in{ "\"\\tSeveral \\\"\\n escapes'\\b\\v\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -281,7 +281,7 @@ namespace eon
 	TEST( RawTest, empty )
 	{
 		string in{ "|" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -293,7 +293,7 @@ namespace eon
 	TEST( RawTest, basic1 )
 	{
 		string in{ "|One line of raw" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -305,7 +305,7 @@ namespace eon
 	TEST( RawTest, basic2 )
 	{
 		string in{ "|\n  One line of raw" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -317,7 +317,7 @@ namespace eon
 	TEST( RawTest, soft_break )
 	{
 		string in{ "|\n  One line\\\n   of raw" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -329,7 +329,7 @@ namespace eon
 	TEST( RawTest, hard_break )
 	{
 		string in{ "|\n  Two lines\n  of raw" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -341,7 +341,7 @@ namespace eon
 	TEST( RawTest, multiline )
 	{
 		string in{ "|\n  one\n  two\n  three\n  four" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -354,7 +354,7 @@ namespace eon
 	TEST( BinaryTest, empty )
 	{
 		string in{ "%" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -366,7 +366,7 @@ namespace eon
 	TEST( BinaryTest, plain )
 	{
 		string in{ "%54657374" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -380,7 +380,7 @@ namespace eon
 		std::string bin{ "This is a long binary text that we want to see as two lines in ETF!" };
 		std::string exp{ "% 546869732069732061206C6F6E672062696E617279207465787420746861742077652077616E\n  7420746F207365652061732074776F206C696E657320696E2045544621" };
 		string in{ "%" + hex( bin ).value() };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -394,14 +394,14 @@ namespace eon
 	TEST( RegexTest, empty )
 	{
 		string in{ R"(?//)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_EXCEPT( docs.parse( in, name_test ), EtfBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RegexTest, basic )
 	{
 		string in{ R"(?/./)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -413,7 +413,7 @@ namespace eon
 	TEST( RegexTest, complex )
 	{
 		string in{ R"(?/^\d{1,4}\-\d{1,2}\-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?$/)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -425,7 +425,7 @@ namespace eon
 	TEST( RegexTest, flags_legal )
 	{
 		string in{ R"(?/./ilsSo)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -437,14 +437,14 @@ namespace eon
 	TEST( RegexTest, flags_illegal )
 	{
 		string in{ R"(?/./ilsxo)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_EXCEPT( docs.parse( in, name_test ), EtfBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RegexTest, boundary )
 	{
 		string in{ R"(?~^/b~)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -457,14 +457,14 @@ namespace eon
 	TEST( RefTest, empty )
 	{
 		string in{ "@" };
-		etf docs;
+		eonof docs;
 		REQUIRE_EXCEPT( docs.parse( in, name_test ), EtfBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RefTest, one )
 	{
 		string in{ "@one" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -476,7 +476,7 @@ namespace eon
 	TEST( RefTest, two )
 	{
 		string in{ "@one/two" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -488,7 +488,7 @@ namespace eon
 	TEST( RefTest, ref )
 	{
 		string in{ "a=one\nb=two\nc=@a" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -500,7 +500,7 @@ namespace eon
 	TEST( RefTest, find_one_step )
 	{
 		string in{ "a=one\nb=two\nc=@a" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -516,7 +516,7 @@ namespace eon
 	TEST( RefTest, find_two_steps )
 	{
 		string in{ "a=one\nb=@a\nc=@b" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -531,7 +531,7 @@ namespace eon
 	TEST( RefTest, find_circular )
 	{
 		string in{ "a=@c\nb=@a\nc=@b" };
-		etf docs;
+		eonof docs;
 		REQUIRE_EXCEPT( docs.parse( in, name_test ),
 			tup::CircularReferencing );
 	}
@@ -539,7 +539,7 @@ namespace eon
 	TEST( VarTest, basic )
 	{
 		string in{ "a=b" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -552,7 +552,7 @@ namespace eon
 	TEST( ExprTest, basic )
 	{
 		string in{ "x=(2 - 4)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -572,7 +572,7 @@ namespace eon
 	TEST( ExprTest, pi )
 	{
 		string in{ "x<var=pi>=3.14\ny<var=rad>=45.2\ncircumference=(2.0 * pi * rad)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -594,7 +594,7 @@ namespace eon
 	TEST( TupleTest, empty )
 	{
 		string in{ "{}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -606,7 +606,7 @@ namespace eon
 	TEST( TupleTest, singleton )
 	{
 		string in{ "{one}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -618,7 +618,7 @@ namespace eon
 	TEST( TupleTest, single_line )
 	{
 		string in{ "{one two three four}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -630,7 +630,7 @@ namespace eon
 	TEST( TupleTest, single_line_comma )
 	{
 		string in{ "{one, two, three, four}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -642,7 +642,7 @@ namespace eon
 	TEST( TupleTest, single_line_too_long )
 	{
 		string in{ "{one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -654,7 +654,7 @@ namespace eon
 	TEST( TupleTest, unnamed )
 	{
 		string in{ "one\ntwo\nthree\nfour" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -666,7 +666,7 @@ namespace eon
 	TEST( TupleTest, unnamed_unnamed )
 	{
 		string in{ "{one}\n{two three}\n{four five six}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -678,7 +678,7 @@ namespace eon
 	TEST( TupleTest, unnamed_unnamed_dash )
 	{
 		string in{ "- one\n- two\n  three\n- four\n  five\n  six" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -690,7 +690,7 @@ namespace eon
 	TEST( TupleTest, unnamed_unnamed_large )
 	{
 		string in{ "- one\n  number=1\n  alpha\n  uno\n- two\n  number=2\n  beta\n  dos\n- three\n  number=3\n  gamma\n  tres\n- four\n  number=4\n  delta\n  quatro" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -702,7 +702,7 @@ namespace eon
 	TEST( TupleTest, named )
 	{
 		string in{ "a=one\nb=two" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -714,7 +714,7 @@ namespace eon
 	TEST( TupleTest, named_named )
 	{
 		string in{ "a=\n  uno=one\nb=\n  dos=two" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -727,7 +727,7 @@ namespace eon
 	TEST( MetaTest, empty)
 	{
 		string in{ "<>" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -739,7 +739,7 @@ namespace eon
 	TEST( MetaTest, basic )
 	{
 		string in{ "<alpha>" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -748,10 +748,10 @@ namespace eon
 		auto out = doc.str();
 		WANT_EQ( in.stdstr(), out.stdstr() );
 	}
-	TEST( MetaTest, large )
+	TEST( MetaTest, large1 )
 	{
 		string in{ "<type=signed_int, format=?/[+\\-]\\d+/ options={alpha, beta gamma}>" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -760,10 +760,22 @@ namespace eon
 		auto out = doc.str();
 		WANT_EQ( "<type=signed_int format=?/[+\\-]\\d+/ options={alpha beta gamma}>", out.stdstr() );
 	}
+	TEST( MetaTest, large2 )
+	{
+		string in{ "<type={alpha beta gamma delta\n  epsilon zeta eta theta}>" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
+			<< "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto out = doc.str();
+		WANT_EQ( "<type={alpha beta gamma delta epsilon zeta eta theta}>", out.stdstr() );
+	}
 	TEST( MetaTest, for_name )
 	{
 		string in{ "a<alpha>=\"a\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
@@ -776,7 +788,7 @@ namespace eon
 	TEST( ValidateTest, max_depth_good )
 	{
 		string in{ "root<max_depth=1>=\n  (child1)\n  (child2)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -784,7 +796,7 @@ namespace eon
 	TEST( ValidateTest, max_depth_bad )
 	{
 		string in{ "root<max_depth=1>=\n  {child1}\n  child2=\n    {child21}\n    {child22}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -793,7 +805,7 @@ namespace eon
 	TEST( ValidateTest, min_length_string_good )
 	{
 		string in{ "root<min_length=5>=\"12345\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -801,7 +813,7 @@ namespace eon
 	TEST( ValidateTest, min_length_string_bad )
 	{
 		string in{ "root<min_length=5>=\"1234\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -810,7 +822,7 @@ namespace eon
 	TEST( ValidateTest, min_length_binary_good )
 	{
 		string in{ "root<min_length=5>=%5465737421" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -818,7 +830,7 @@ namespace eon
 	TEST( ValidateTest, min_length_binary_bad )
 	{
 		string in{ "root<min_length=5>=%54657374" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -827,7 +839,7 @@ namespace eon
 	TEST( ValidateTest, min_length_tuple_good )
 	{
 		string in{ "root<min_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -835,7 +847,7 @@ namespace eon
 	TEST( ValidateTest, min_length_tuple_bad )
 	{
 		string in{ "root<min_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -844,7 +856,7 @@ namespace eon
 	TEST( ValidateTest, max_length_string_good )
 	{
 		string in{ "root<max_length=5>=\"12345\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -852,7 +864,7 @@ namespace eon
 	TEST( ValidateTest, max_length_string_bad )
 	{
 		string in{ "root<max_length=5>=\"123456\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -861,7 +873,7 @@ namespace eon
 	TEST( ValidateTest, max_length_binary_good )
 	{
 		string in{ "root<max_length=5>=%5465737421" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -869,7 +881,7 @@ namespace eon
 	TEST( ValidateTest, max_length_binary_bad )
 	{
 		string in{ "root<max_length=5>=%546573742120" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -878,7 +890,7 @@ namespace eon
 	TEST( ValidateTest, max_length_tuple_good )
 	{
 		string in{ "root<max_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -886,7 +898,7 @@ namespace eon
 	TEST( ValidateTest, max_length_tuple_bad )
 	{
 		string in{ "root<max_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)\n  (child6)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -895,7 +907,7 @@ namespace eon
 	TEST( ValidateTest, min_int_good )
 	{
 		string in{ "root<min=5>=5" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -903,7 +915,7 @@ namespace eon
 	TEST( ValidateTest, min_int_bad )
 	{
 		string in{ "root<min=5>=4" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -912,7 +924,7 @@ namespace eon
 	TEST( ValidateTest, min_float_good )
 	{
 		string in{ "root<min=5.5>=5.5" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -920,7 +932,7 @@ namespace eon
 	TEST( ValidateTest, min_float_bad )
 	{
 		string in{ "root<min=5.5>=5.4" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -929,7 +941,7 @@ namespace eon
 	TEST( ValidateTest, max_int_good )
 	{
 		string in{ "root<max=5>=5" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -937,7 +949,7 @@ namespace eon
 	TEST( ValidateTest, max_int_bad )
 	{
 		string in{ "root<max=5>=6" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -946,7 +958,7 @@ namespace eon
 	TEST( ValidateTest, max_float_good )
 	{
 		string in{ "root<max=5.5>=5.5" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -954,7 +966,7 @@ namespace eon
 	TEST( ValidateTest, max_float_bad )
 	{
 		string in{ "root<max=5.5>=5.6" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -963,7 +975,7 @@ namespace eon
 	TEST( ValidateTest, format_string_good )
 	{
 		string in{ R"(root<format=?/\d{4}-\d\d-\d\d/>="2021-05-19")" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -971,7 +983,7 @@ namespace eon
 	TEST( ValidateTest, format_string_bad )
 	{
 		string in{ R"(root<format=?/\d{4}\-\d\d\-\d\d/>="2021-5-19")" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -980,7 +992,7 @@ namespace eon
 	TEST( ValidateTest, format_raw_good )
 	{
 		string in{ R"(root<format=?/\d{4}-\d\d-\d\d/>=|2021-05-19)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -988,7 +1000,7 @@ namespace eon
 	TEST( ValidateTest, format_raw_bad )
 	{
 		string in{ R"(root<format=?/\d{4}\-\d\d\-\d\d/>=|2021-5-19)" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -997,7 +1009,7 @@ namespace eon
 	TEST( ValidateTest, flags_good )
 	{
 		string in{ "root<flags={one two three}>={two one}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -1005,7 +1017,7 @@ namespace eon
 	TEST( ValidateTest, flags_bad )
 	{
 		string in{ "root<flags={one two three}>={two four}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -1014,7 +1026,7 @@ namespace eon
 	TEST( ValidateTest, options_good )
 	{
 		string in{ "root<options={one two three}>=two" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
@@ -1022,7 +1034,7 @@ namespace eon
 	TEST( ValidateTest, options_bad )
 	{
 		string in{ "root<options={one two three}>=four" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
@@ -1034,7 +1046,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=John\nage=30" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
@@ -1045,7 +1057,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
 			"\n---\nname=\n  first=John\n  last=\"Doe\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
@@ -1056,7 +1068,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nnames={one two three}"
 			"\n---\nnames={one two three}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
@@ -1067,7 +1079,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=John\nage=9" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
@@ -1078,7 +1090,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=\"John\"\nage=30" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
@@ -1089,7 +1101,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=John\nage=30.5" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
@@ -1100,7 +1112,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
 			"\n---\nname=\n  first=John\n  last=\"doe\"" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
@@ -1111,7 +1123,7 @@ namespace eon
 		auto pattern = name::get( "ptrn" );
 		string in{ "---ptrn<pattern>\nnames={one two three}"
 			"\n---\nnames={one tw three}" };
-		etf docs;
+		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parse( in, name_test ) )
 			<< "Failed to parse";
 		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )

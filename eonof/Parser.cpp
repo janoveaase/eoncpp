@@ -95,7 +95,18 @@ namespace eon
 		{
 			auto value = parseValue( vars, ContextType::plain );
 			if( !value )
-				return;
+			{
+				if( TP )
+				{
+					if( !TP.current().newline() )
+						throw EtfBadSyntax( Source.name() + ":"
+							+ string( TP.current().source().pos().line() + 1 ) + ":"
+							+ string( TP.current().source().pos().pos(
+								TP.current().source().source() ) + 1 )
+							+ "\nUnexpected: \"" + TP.current().substr() + "\"" );
+				}
+ 				return;
+			}
 
 			// If we have a name, it may be an attribute name
 			if( value->isName() )
@@ -113,12 +124,12 @@ namespace eon
 				if( TP && TP.current().match( "=" ) )
 				{
 					TP.forward();
-					auto& cur = TP.current();
+					auto pos = TP.current().source().pos();
 					skipNoise();
 					if( !TP )
 						throw EtfBadSyntax( Source.name() + ":"
-							+ string( cur.source().pos().line() + 1 ) + ":"
-							+ string( cur.source().pos().pos(
+							+ string( pos.line() + 1 ) + ":"
+							+ string( pos.pos(
 								TP.current().source().source() ) + 1 )
 							+ "\nExpected an attribute value following this!" );
 
@@ -137,7 +148,7 @@ namespace eon
 								+ string( TP.current().source().pos().pos(
 									TP.current().source().source() ) + 1 )
 								+ "\nInvalid indentation of sub-tuple value here!" );
-						value = parseTuple( indent, vars );
+						value = parseTuple( vars, tupletype::plain );
 						if( !value )
 							throw EtfBadSyntax( Source.name() + ":" + string(
 								cur.source().pos().line() + 1 ) + ":" + string(
@@ -158,9 +169,8 @@ namespace eon
 						value = parseValue( vars, ContextType::plain );
 						if( !value )
 							throw EtfBadSyntax( Source.name() + ":" + string(
-								cur.source().pos().line() + 1 ) + ":" + string(
-									cur.source().pos().pos(
-										TP.current().source().source() ) + 1 )
+								pos.line() + 1 ) + ":" + string( pos.pos(
+									TP.current().source().source() ) + 1 )
 								+ "\nExpected an attribute value here!" );
 						result.append( value, vars, name, meta
 							? tupleptr( new tuple(
@@ -179,11 +189,11 @@ namespace eon
 		{
 			// Parenthesized tuple?
 			if( TP.current().match( "{" ) )
-				return parseTuple( indentation() + 2, vars, "}" );
+				return parseTuple( vars, tupletype::curly );
 
 			// Dash-marked tuple?
 			else if( TP.match( { "-", " " } ) )
-				return parseTuple( indentation() + 2, vars );
+				return parseTuple( vars, tupletype::dash );
 
 			// Meta data tuple?
 			else if( TP.current().match( "<" ) )
@@ -296,7 +306,7 @@ namespace eon
 			{
 				if( TP.match( { "/", "/" } ) )
 				{
-					TP.skipPastEol();
+					TP.skipToEol();
 					skipped = true;
 				}
 				else if( TP.match( { "/", "-" } ) )
@@ -305,7 +315,10 @@ namespace eon
 					for( TP.forward( 2 ); TP; TP.forward() )
 					{
 						if( TP.match( { "-", "/" } ) )
-							TP.forward();
+						{
+							TP.forward( 2 );
+							break;
+						}
 					}
 				}
 				else
@@ -734,58 +747,79 @@ namespace eon
 					+ "\nExpected a name part of a path here!" );
 			return tup::valueptr( new tup::refval( std::move( path ) ) );
 		}
-/*		tup::valueptr Parser::parseVar( tup::variables& vars )
-		{
-			auto pos = TP.current().source().pos();
-			
-			// Expect a name
-			auto name = parseRawName();
-			if( name == no_name )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":"
-					+ string( pos.pos( TP.last().source().source() ) + 1 )
-					+ "\nExpected a variable (name) here!" );
-			return tup::valueptr( new tup::variableval(
-				name->hardName( vars ) ) );
-		}*/
 		tup::valueptr Parser::parseExpr( tup::variables& vars )
 		{
+			auto pos = TP.current().source().pos();
 			TP.forward();		// Skip opening '('
 
 			// Get everything up to the closing ')'
+			size_t nested = 1;
 			string expr;
 			while( TP )
 			{
+				if( TP.current().match( "(" ) )
+					++nested;
 				if( TP.current().match( ")" ) )
 				{
-					TP.forward();
-					break;
+					if( --nested == 0 )
+					{
+						TP.forward();
+						break;
+					}
 				}
 				expr += TP.current().substr();
 				TP.forward();
 			}
 
-			expression e( std::move( expr ), vars );
-			return tup::valueptr( new tup::expressionval( std::move( e ) ) );
+			expression ex;
+			try
+			{
+				ex = expression( std::move( expr ), vars );
+			}
+			catch( exception& e )
+			{
+				throw EtfBadSyntax( Source.name() + ":" + string(
+					pos.line() + 1 ) + ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+					+ "\n" + e.what() );
+			}
+			return tup::valueptr( new tup::expressionval( std::move( ex ) ) );
 		}
-		tup::valueptr Parser::parseTuple( size_t base_indentation,
-			tup::variables& vars, string group_end )
+		tup::valueptr Parser::parseTuple( tup::variables& vars, tupletype type )
 		{
-			// We have three types of tuples:
+			// We have four types of tuples:
 			// 1. By indentation (at or greater than 'base_indentation')
 			// 2. Started by dash + space
-			// 3. Ending in 'group_end' (greater than 'base_indentation' if
-			//    multi-line)
-			size_t main_indent = group_end.empty()
-				? base_indentation : base_indentation + 2;
+			// 3. Curly braced
+			// 4. Meta (angle braced)
+			size_t main_indent = indentation();
+			string group_end;
+			switch( type )
+			{
+				case tupletype::curly:
+					main_indent += 2;
+					group_end = "}";
+					break;
+				case tupletype::meta:
+					main_indent += 2;
+					group_end = ">";
+				case tupletype::dash:
+					main_indent += 2;
+					break;
+				default:
+					break;
+			}
+
+			auto pos = TP.current().source().pos();
 
 			// If we have dash-start, then skip dash + space
-			if( TP.current().match( "-" ) )
+			if( type == tupletype::dash )
 				TP.forward( 2 );
 
 			// If we have a group end, then skip the group start character
 			if( !group_end.empty() )
 				TP.forward();
+
+			skipNoise();
 
 			// Keep reading until the end of the tuple
 			tuple result;
@@ -820,9 +854,10 @@ namespace eon
 
 				// If we now have a comma, just skip it
 				if( TP && TP.current().match( "," ) )
+				{
 					TP.forward();
-
-				skipNoise();
+					skipNoise();
+				}
 			}
 			if( end_marker )
 			{
@@ -837,11 +872,14 @@ namespace eon
 					+ string( TP.last().source().pos().line() + 1 ) + ":"
 					+ string( TP.last().source().pos().pos(
 						TP.last().source().source() ) + 1 )
-					+ "\nExpected tuple to end in '" + group_end + "' here!" );
+					+ "\nExpected tuple starting at "
+					+ string( pos.line() + 1 ) + ":" + string( pos.pos(
+						TP.last().source().source() ) + 1 ) + " to end in '"
+					+ group_end + "' here!" );
 		}
 		tup::valueptr Parser::parseMeta( tup::variables& vars )
 		{
-			auto tuple = parseTuple( indentation(), vars, ">" );
+			auto tuple = parseTuple( vars, tupletype::meta );
 			return tup::valueptr( new tup::metaval(
 				((tup::metaval*)&*tuple)->claim() ) );
 		}
