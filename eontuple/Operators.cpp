@@ -30,7 +30,18 @@ namespace eon
 			OperatorDetails( code::mod, 2, 51, 52 ),
 			OperatorDetails( code::sqrt, 1, 71, 72 ),
 			OperatorDetails( code::match, 2, 33, 34 ),
-			OperatorDetails( code::assign, 2, 1, 2 )
+			OperatorDetails( code::assign, 2, 1, 2 ),
+			OperatorDetails( code::exists, 1, 71, 72 ),
+			OperatorDetails( code::trim, 1, 73, 74 ),
+			OperatorDetails( code::rtrim, 1, 73, 74 ),
+			OperatorDetails( code::ltrim, 1, 73, 74 ),
+			OperatorDetails( code::len, 1, 73, 74 ),
+			OperatorDetails( code::resize, 2, 43, 44 ),
+			OperatorDetails( code::typeof, 1, 91, 92 ),
+			OperatorDetails( code::isname, 1, 91, 92 ),
+			OperatorDetails( code::toname, 1, 73, 74 ),
+			OperatorDetails( code::topath, 1, 73, 74 ),
+			OperatorDetails( code::basename, 1, 73, 74 )
 		};
 
 		operators::code operators::mapCode( const string& str )
@@ -57,7 +68,18 @@ namespace eon
 				{ "mod", code::mod },
 				{ "sqrt", code::sqrt },
 				{ "match", code::match },
-				{ "=", code::assign }
+				{ "=", code::assign },
+				{ "exists", code::exists },
+				{ "trim", code::trim },
+				{ "rtrim", code::rtrim },
+				{ "ltrim", code::ltrim },
+				{ "len", code::len },
+				{ "resize", code::resize },
+				{ "typeof", code::typeof },
+				{ "isname", code::isname },
+				{ "toname", code::toname },
+				{ "topath", code::topath },
+				{ "basename", code::basename }
 			};
 			auto found = types.find( str );
 			if( found != types.end() )
@@ -89,7 +111,18 @@ namespace eon
 				{ code::mod, "mod" },
 				{ code::sqrt, "sqrt" },
 				{ code::match, "match" },
-				{ code::assign, "=" }
+				{ code::assign, "=" },
+				{ code::exists, "exists" },
+				{ code::trim, "trim" },
+				{ code::rtrim, "rtrim" },
+				{ code::ltrim, "ltrim" },
+				{ code::len, "len" },
+				{ code::resize, "resize" },
+				{ code::typeof, "typeof" },
+				{ code::isname, "isname" },
+				{ code::toname, "toname" },
+				{ code::topath, "topath" },
+				{ code::basename, "basename" }
 			};
 			auto found = types.find( op_code );
 			if( found != types.end() )

@@ -16,6 +16,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_hex_tests
 		OUTPUT_NAME_RELEASE eon_hex_tests
 )
+set_property(TARGET EonHexTests PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonHexTests PUBLIC EonHex EonTest EonExcept)
 	

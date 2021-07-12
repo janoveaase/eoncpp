@@ -76,25 +76,6 @@ namespace eon
 
 
 
-			/******************************************************************
-			  Evaluator Methods for operands
-			******************************************************************/
-		public:
-
-			inline tup::valueptr evaluate( tup::operators::code op_type,
-				tup::variables& vars ) const {
-				return Value->evaluate( op_type, vars ); }
-			inline tup::valueptr evaluate( tup::operators::code op_type,
-				const operandnode& operand2, tup::variables& vars ) const {
-				return Value->evaluate( op_type, operand2.Value, vars ); }
-			inline tup::valueptr evaluate( tup::operators::code op_type,
-				const operandnode& operand2, const operandnode& operand3,
-				tup::variables& vars ) const { return Value->evaluate(
-					op_type, operand2.Value, operand3.Value, vars ); }
-
-
-
-
 			///////////////////////////////////////////////////////////////////
 			//
 			// Attributes

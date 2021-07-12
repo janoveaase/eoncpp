@@ -19,6 +19,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_tokenizer
 		OUTPUT_NAME_RELEASE eon_tokenizer
 )
+set_property(TARGET EonTokenizer PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonTokenizer PUBLIC EonString EonSource)
 target_include_directories(EonTokenizer PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")

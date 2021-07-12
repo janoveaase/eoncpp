@@ -1,5 +1,6 @@
 #include "OperatorNode.h"
 #include "OperandNode.h"
+#include "Evaluate.h"
 #include <eontuple/Value.h>
 
 
@@ -113,24 +114,16 @@ namespace eon
 
 		tup::valueptr operatornode::evaluate( tup::variables& vars ) const
 		{
-			std::vector<operandnode> operands;
-			for( auto node : Children )
-			{
-				if( node->isOperator() )
-					operands.push_back( operandnode( node->evaluate( vars ) ) );
-				else
-					operands.push_back(
-						*dynamic_cast<operandnode*>( &*node ) );
-			}
 			switch( tup::operators::numOperands( Type ) )
 			{
 				case 1:
-					return operands[ 0 ].evaluate( Type, vars );
+					return evaluate::unary( Type, vars, Children[ 0 ] );
 				case 2:
-					return operands[ 1 ].evaluate( Type, operands[ 0 ], vars );
+					return evaluate::binary( Type, vars,
+						Children[ 1 ], Children[ 0 ] );
 				case 3:
-					return operands[ 1 ].evaluate(
-						Type, operands[ 2 ], operands[ 0 ], vars );
+					return evaluate::ternary( Type, vars,
+						Children[ 2 ], Children[ 1 ], Children[ 0 ] );
 			}
 			return tup::valueptr();
 		}

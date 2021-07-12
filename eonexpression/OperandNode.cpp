@@ -10,7 +10,7 @@ namespace eon
 			if( Value )
 			{
 				size_t pos{ 0 };
-				return Value->str( pos, 0, tup::perm::allow_oneliner );
+				return Value->str( pos, 0 );
 			}
 			else
 				return "N/A";

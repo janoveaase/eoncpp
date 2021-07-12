@@ -61,8 +61,7 @@ namespace eon
 
 
 			//* Write value to string
-			string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override;
 
 

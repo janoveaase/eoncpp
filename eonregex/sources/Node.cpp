@@ -20,6 +20,7 @@ namespace eon
 			Next = other.Next != nullptr ? other.Next->copy() : nullptr;
 			Quant = other.Quant;
 			Source = other.Source;
+			Name = other.Name;
 			Open = other.Open;
 			return *this;
 		}
@@ -27,6 +28,7 @@ namespace eon
 		{
 			Next = other.Next; other.Next = nullptr;
 			Quant = other.Quant; other.Quant = Quantifier();
+			Name = other.Name; other.Name = false;
 			Open = other.Open; other.Open = true;
 			Source = other.Source; other.Source.clear();
 			Type = other.Type;
@@ -59,6 +61,10 @@ namespace eon
 		{
 			RxData data_tmp{ data };
 			if( !_match( data_tmp, steps ) )
+				return false;
+
+			if( Name && !name::valid( substring(
+				data.pos(), data_tmp.pos() ) ) )
 				return false;
 
 			if( Next != nullptr )

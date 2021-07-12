@@ -10,12 +10,14 @@ set(FILE_HEADERS
 	TextFileWriter.h
 	BinaryFileReader.h
 	BinaryFileWriter.h
+	FSys.h
 )
 set(FILE_SOURCES
 	FileBuffer.cpp
 	TextFileReader.cpp
 	TextFileWriter.cpp
 	BinaryFileReader.cpp
+	FSys.cpp
 )
 
 add_library(EonFile STATIC ${FILE_HEADERS} ${FILE_SOURCES})
@@ -25,6 +27,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_file
 		OUTPUT_NAME_RELEASE eon_file
 )
+set_property(TARGET EonFile PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonFile PUBLIC EonString EonName EonExcept EonPath)
 target_include_directories(EonFile PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")

@@ -221,6 +221,15 @@ namespace eon
 						return setQuantifier( param, 1, SIZE_MAX );
 					case '{':
 					{
+						if( param.cur() != nullptr
+							&& substring(
+								param.pos() + 1, param.pos() + 5 ).compare(
+									substring( "name" ) ) == 0 )
+						{
+							param.pos( param.pos() + 6 );
+							param.cur()->Name = true;
+							break;
+						}
 						size_t min{ 0 }, max{ SIZE_MAX };
 						try
 						{
@@ -635,6 +644,12 @@ namespace eon
 						substring( start, param.pos() ) );
 				case '\"':
 					return new FixedValue( "\"",
+						substring( start, param.pos() ) );
+				case 'n':
+					return new FixedValue( "\n",
+						substring( start, param.pos() ) );
+				case 't':
+					return new FixedValue( "\t",
 						substring( start, param.pos() ) );
 
 				default:

@@ -35,6 +35,7 @@ namespace eon
 		enum class form
 		{
 			plain,
+			braced,
 			metadata
 		};
 
@@ -94,6 +95,16 @@ namespace eon
 		inline name_t name( size_t pos ) const noexcept { return
 			pos < Attributes.size() ? Attributes[ pos ]->Name : no_name; }
 
+		//* Get meta data for a named attribute
+		//* Returns 'false' tuple if no metadata
+		tupleptr metadata( name_t name ) const noexcept {
+			auto found = Named.find( name ); return found != Named.end()
+				? found->second->MetaData : tupleptr(); }
+
+		//* Check if a named attribute exists
+		inline bool exists( name_t name ) const noexcept {
+			return Named.find( name ) != Named.end(); }
+
 		//* Get a const attribute by name
 		//* Returns 'false' if no attribute with that name.
 		inline const tup::valueptr attribute( name_t name ) const noexcept {
@@ -106,10 +117,12 @@ namespace eon
 		bool containsUnnamedValue( const tup::valueptr& value,
 			const tup::variables& vars ) const noexcept;
 
-		//* Get document (the top most parent that still has a parent)
+		//* Get document
+		//* Documents are attributes under the Eof documents tuple
 		//* Returns nullptr if 'this' has not parent.
 		inline const tuple* document() const noexcept {
 			return Parent == nullptr || Parent->Parent == nullptr
+				? nullptr : Parent->Parent->Parent == nullptr
 				? Parent : Parent->document(); }
 
 		//* Get full path to a named attribute of this tuple
@@ -119,13 +132,16 @@ namespace eon
 
 
 		//* Stringify the tuple
-		inline string str() const noexcept {
-			size_t pos_on_line = 0; return str( pos_on_line, 0,
-				Parent == nullptr || Parent->Parent == nullptr
-					? tup::perm::allow_multiliner : tup::perm::allow_oneliner
-				| tup::perm::allow_multiliner ); }
-		string str( size_t& pos_on_line, size_t indentation_level,
-			tup::perm permissions ) const noexcept;
+		inline string str() const {
+			size_t pos_on_line = 0; return str( pos_on_line, 0 ); }
+		string str( size_t& pos_on_line, size_t indentation_level ) const;
+
+
+		//* Check if the tuple is braced
+		inline bool braced() const noexcept { return Form == form::braced; }
+
+		//* Check if this is a metadata tuple
+		inline bool metadata() const noexcept { return Form == form::metadata; }
 
 
 		// Run internal validation (using meta data associated with named
@@ -145,10 +161,7 @@ namespace eon
 	public:
 
 		tuple& operator=( const tuple& other );
-		inline tuple& operator=( tuple&& other ) noexcept {
-			Attributes = std::move( other.Attributes ); Named = std::move(
-				other.Named ); Form = other.Form; other.Form = form::plain;
-			return *this; }
+		tuple& operator=( tuple&& other ) noexcept;
 
 		//* Set attribute value by position
 		//* Throws [eon::tup::WrongType] if meta data defines a different
@@ -168,6 +181,19 @@ namespace eon
 		void append( const tup::valueptr& value, tup::variables& vars,
 			name_t name = no_name, const tupleptr& metadata = tupleptr() );
 
+		//* Add a new attribute - if one exists with the same name, replace it
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
+		void addReplace( const tup::valueptr& value, tup::variables& vars,
+			name_t name, const tupleptr& metadata = tupleptr() );
+
+		//* Add a new attribute - if one exists with the same name, merge with
+		//* it, replacing only attributes that are unmergeable
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
+		void addMerge( const tup::valueptr& value, tup::variables& vars,
+			name_t name, const tupleptr& metadata = tupleptr() );
+
 		//* Copy and append all attributes of the other tuple
 		//* Will not copy named attributes that already exists!
 		//* Throws [eon::tup::CircularReferencing] if circular referencing is
@@ -176,8 +202,27 @@ namespace eon
 		//* meta data joined with regular tuple).
 		void append( const tuple& other, tup::variables& vars );
 
+		//* Merge another tuple with this one
+		//* Named attributes existing in both will be overewritten in 'this'!
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
+		//* Throws [eon::Incompatible] if the tuples cannot be merged (such as
+		//* meta data joined with regular tuple).
+		void merge( const tuple& other, tup::variables& vars );
+
 		//* Clear all attributes
 		inline void clear() noexcept { Attributes.clear(); Named.clear(); }
+
+		//* Have all references include a pointer to their targets - if not
+		//* already.
+		//* References without a valid target will be accepted.
+		inline void resolveReferences( const tup::variables& vars ) {
+			_resolveReferences( vars, false ); }
+
+		//* Resolve all references, throw [eon::tup::NotFound] if a reference
+		//* target cannot be found.
+		inline void resolveAllReferences( const tup::variables& vars ) {
+			_resolveReferences( vars, true ); }
 
 
 
@@ -237,10 +282,6 @@ namespace eon
 		//
 	private:
 
-		//* Have all references include a pointer to their targets - if not
-		//* already
-		void _resolveReferences( const tup::variables& vars );
-
 		//* Get a target attribute from a path of attribute names
 		//* The 'pos' argument is the position of the attribute to get for
 		//* 'this' tuple.
@@ -248,6 +289,8 @@ namespace eon
 		//* attribute.
 		tup::valueptr _find( const tup::path& path, size_t pos,
 			bool resolve_refs, tuple** parent ) const noexcept;
+
+		void _resolveReferences( const tup::variables& vars, bool all );
 
 
 		void _validate( const tuple& metadata, const tuple* parent, const AttributePtr& value, tup::variables& vars ) const;
@@ -278,6 +321,10 @@ namespace eon
 		void _validateOptions( tup::valueptr meta, const tuple* location, name_t value, tup::variables& vars ) const;
 
 		void _mismatchingMeta( name_t attribute_name, const string& info, const tup::variables& vars ) const;
+
+
+		string _strCompact( size_t& pos_on_line, size_t indentation_level ) const;
+		string _strMultiline( size_t& pos_on_line, size_t indentation_level ) const;
 
 
 

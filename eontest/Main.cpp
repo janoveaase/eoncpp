@@ -13,6 +13,7 @@ void usage( const std::string& prog )
 class Args
 {
 public:
+	std::string Exe;
 	std::string Filter;
 	int Result = 0;
 };
@@ -21,15 +22,14 @@ Args processArgs( int argc, const char* argv[] )
 	if( argc == 0 )
 		exit( 4 );
 
-	std::string exe( argv[ 0 ] );
-
 	Args args;
+	args.Exe = argv[ 0 ];
 	for( int i = 1; i < argc; ++i )
 	{
 		std::string arg( argv[ i ] );
 		if( arg == "--help" )
 		{
-			usage( exe );
+			usage( args.Exe );
 			args.Result = -1;
 			break;
 		}
@@ -40,12 +40,12 @@ Args processArgs( int argc, const char* argv[] )
 	return args;
 }
 
-bool runTest( eontest::EonTest::TestRef& test )
+bool runTest( const std::string& exe, eontest::EonTest::TestRef& test )
 {
 	auto test_obj = test.Factory->createTest( test.TestClass, test.TestName );
 	try
 	{
-		test_obj->runTest();
+		test_obj->runTest( exe );
 	}
 	catch( std::string& )
 	{
@@ -56,7 +56,7 @@ bool runTest( eontest::EonTest::TestRef& test )
 	return !failed;
 }
 
-void runTests( const std::string& filter, std::list<std::string>& failed )
+void runTests( const std::string& exe, const std::string& filter, std::list<std::string>& failed )
 {
 	if( !eontest::EonTest::Tests )
 		throw TestError( "No tests have been defined!" );
@@ -72,7 +72,7 @@ void runTests( const std::string& filter, std::list<std::string>& failed )
 			<< ": ";
 		try
 		{
-			if( !runTest( test ) )
+			if( !runTest( exe, test ) )
 				failed.push_back( test.TestClass + "." + test.TestName );
 		}
 		catch( std::exception& e )
@@ -106,7 +106,7 @@ int main( int argc, const char* argv[] )
 		return args.Result < 0 ? 0 : args.Result;
 
 	std::list<std::string> failed;
-	runTests( args.Filter, failed );
+	runTests( args.Exe, args.Filter, failed );
 
 	eontest::EonTest::reset();
 

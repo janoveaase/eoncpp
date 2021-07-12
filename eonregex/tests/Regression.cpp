@@ -235,6 +235,35 @@ namespace eon
 			<< "Wrong value for unicode";
 	}
 
+	TEST( RegExTest, match_newline_tab )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(/one\n\ttwo/)" ) << "Failed to parse";
+		rx::match result;
+
+		WANT_TRUE( result = expr.match( "one\n	two" ) );
+		WANT_FALSE( result = expr.match( "one\n  two" ) );
+	}
+
+	TEST( RegExTest, match_name1 )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(/(\w+){name}/)" ) << "Failed to parse";
+		rx::match result;
+
+		WANT_TRUE( result = expr.match( "12_" ) );
+		WANT_FALSE( result = expr.match( "123" ) );
+	}
+	TEST( RegExTest, match_name2 )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(/\s+(\w+){name}\s+/)" ) << "Failed to parse";
+		rx::match result;
+
+		WANT_TRUE( result = expr.match( "   12_   " ) );
+		WANT_FALSE( result = expr.match( " 123     " ) );
+	}
+
 	TEST( MatchOrTest, simple_binary )
 	{
 		regex expr;

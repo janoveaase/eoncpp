@@ -65,78 +65,108 @@ namespace eon
 	}
 
 
-	string tuple::str( size_t& pos_on_line, size_t indentation_level,
-		tup::perm format ) const noexcept
+	string tuple::str( size_t& pos_on_line, size_t indentation_level ) const
 	{
-		bool allow_oneliner = static_cast<bool>(
-			format & tup::perm::allow_oneliner );
-		bool allow_multiliner = static_cast<bool>(
-			format & tup::perm::allow_multiliner );
-
-		// Check if we can/must put everything on a single line
-		if( ( Parent != nullptr && Parent->Parent != nullptr )
-			|| allow_oneliner || !allow_multiliner )
+		// If we have braced or meta data, we will keep things compact (one
+		// line if possible). Otherwise, we will have each attribute on its
+		// own line.
+		if( Form == form::braced || Form == form::metadata )
+			return _strCompact( pos_on_line, indentation_level );
+		else
+			return _strMultiline( pos_on_line, indentation_level );
+	}
+	string tuple::_strCompact( size_t& pos_on_line, size_t indentation_level ) const
+	{
+		string str, indent( indentation_level * 2, SpaceChr );
+		for( auto& attribute : Attributes )
 		{
-			string s;
-			auto pos = pos_on_line;
-			for( auto attribute : Attributes )
+			string sub, separator;
+			if( !str.empty() )
+				separator = " ";
+			if( attribute->Name != no_name )
 			{
-				if( allow_multiliner && (
-					( attribute->Value->type()
-						>= tup::basic_type::tuple_t )
-					|| ( attribute->Name != no_name ) ) )
+				sub += *attribute->Name + "=";
+				if( pos_on_line + sub.numChars() + separator.numChars() >= 79 )
 				{
-					s = "";
-					break;
+					str += "\n  " + indent + sub;
+					pos_on_line = 2 + indent.numChars() + sub.numChars();
+					separator = "";
+					sub = "";
 				}
 				else
 				{
-					if( !s.empty() )
-						s += " ";
-					if( attribute->Name != no_name )
-						s += *attribute->Name + "=";
-					s += attribute->Value->str( pos, indentation_level,
-						attribute->Name != no_name ? tup::perm::allow_oneliner : format );
-					if( allow_multiliner
-						&& Form != form::metadata && s.numChars() >= 79 )
-					{
-						s = "";
-						break;
-					}
+					str += separator + sub;
+					pos_on_line += separator.numChars() + sub.numChars();
+					separator = "";
+					sub = "";
 				}
 			}
-			if( !s.empty() )
-				return s;
-		}
 
-		// Use indentation to express the tuple
-		string s, indent( indentation_level * 2, SpaceChr );
+			auto pos = pos_on_line + separator.numChars();
+			sub += attribute->Value->str( pos, indentation_level );
+			if( pos >= 79 )
+			{
+				str += "\n" + indent;
+				pos_on_line = indent.numChars();
+				separator = "";
+				pos = pos_on_line;
+				sub = attribute->Value->str( pos, indentation_level );
+			}
+			str += separator + sub;
+			pos_on_line = pos;
+			separator = "";
+			sub = "";
+		}
+		return str;
+	}
+	string tuple::_strMultiline( size_t& pos_on_line, size_t indentation_level ) const
+	{
+		string str, indent( indentation_level * 2, SpaceChr );
+		auto pos = pos_on_line;
+		bool new_line = false;
 		for( auto attribute : Attributes )
 		{
-			if( !s.empty() )
+			if( !str.empty() )
 			{
-				s += NewlineChr;
-				s += indent;
-				pos_on_line = indent.numChars();
+				str += NewlineChr;
+				str += indent;
+				pos = indent.numChars();
+				new_line = true;
 			}
 			if( attribute->Name != no_name )
 			{
-				s += *attribute->Name;
-				pos_on_line += attribute->Name->numChars();
+				str += *attribute->Name;
+				pos += attribute->Name->numChars();
 				if( attribute->MetaData )
 				{
-					s += "<" + attribute->MetaData->str( ++pos_on_line,
-						indentation_level, format ) + ">";
-					++pos_on_line;
+					str += "<" + attribute->MetaData->str( ++pos,
+						indentation_level + 1 ) + ">";
+					++pos;
 				}
-				s += "=";
-				++pos_on_line;
+				str += "=";
+				new_line = false;
+				++pos;
 			}
-			s += attribute->Value->str( pos_on_line, indentation_level,
-				attribute->Name != no_name ? tup::perm::allow_oneliner
-					: format );
+			auto sub = attribute->Value->str( pos, indentation_level );
+			if( !new_line && !str.empty() && attribute->Value->isTuple() && (
+				sub.contains( NewlineChr ) || ( str.endsWith( '=' )
+					&& !attribute->Value->hardTuple().braced() ) ) )
+			{
+				str += "\n  " + indent;
+				pos = indent.numChars();
+			}
+			if( attribute->Value->isTuple()
+				&& !attribute->Value->hardTuple().empty()
+				&& !attribute->Value->hardTuple().braced()
+				&& !sub.startsWith( '-' ) && attribute->Name == no_name )
+			{
+				str += "- ";
+				pos += 2;
+			}
+			str += sub;
 		}
-		return s;
+		pos_on_line = pos;
+		return str;
 	}
 
 
@@ -166,8 +196,7 @@ namespace eon
 					throw tup::Invalid( "Attribute \""
 						+ other.path( vars ).str()
 						+ "\": Expected tuple value to contain: "
-						+ attribute->Value->str(
-							pos, 0, tup::perm::allow_oneliner ) );
+						+ attribute->Value->str( pos, 0 ) );
 				}
 				continue;
 			}
@@ -219,8 +248,7 @@ namespace eon
 					throw tup::Invalid( "Attribute \""
 						+ other.path( vars ).str() + "\": Expected value of \""
 						+ *attribute->Name + "\" to be: "
-						+ attribute->Value->str( pos, 0,
-							tup::perm::allow_oneliner ) );
+						+ attribute->Value->str( pos, 0 ) );
 				}
 			}
 		}
@@ -234,11 +262,29 @@ namespace eon
 		clear();
 		for( auto a : other.Attributes )
 		{
+			if( a->Value->isTuple() )
+				a->Value->tuple_value().Parent = this;
+			else if( a->Value->isMeta() )
+				a->Value->meta_value().Parent = this;
 			Attributes.push_back( a );
 			if( a->Name != no_name )
 				Named[ a->Name ] = Attributes[ Attributes.size() - 1 ];
 		}
 		Form = other.Form;
+		return *this;
+	}
+	tuple& tuple::operator=( tuple&& other ) noexcept
+	{
+		Attributes = std::move( other.Attributes );
+		for( auto& attribute : Attributes )
+		{
+			if( attribute->Value->isTuple() )
+				attribute->Value->tuple_value().Parent = this;
+			else if( attribute->Value->isMeta() )
+				attribute->Value->meta_value().Parent = this;
+		}
+		Named = std::move( other.Named );
+		Form = other.Form; other.Form = form::plain;
 		return *this;
 	}
 
@@ -261,8 +307,8 @@ namespace eon
 			attribute->Value = value;
 			if( attribute->Value->isTuple() )
 				attribute->Value->tuple_value().Parent = this;
-			if( attribute->Value->isRef() || attribute->Value->isTuple() )
-				_resolveReferences( vars );
+			else if( attribute->Value->isMeta() )
+				attribute->Value->meta_value().Parent = this;
 		}
 		else if( attribute_pos == Attributes.size() )
 			append( value, vars );
@@ -279,7 +325,7 @@ namespace eon
 		attribute->Name = name;
 		attribute->Pos = Attributes.size();
 		attribute->Value = value;
-		if( Form == form::plain )
+		if( Form != form::metadata )
 		{
 			attribute->MetaData = metadata;
 			if( attribute->MetaData )
@@ -290,8 +336,8 @@ namespace eon
 		Attributes.push_back( attribute );
 		if( attribute->Name != no_name )
 			Named[ attribute->Name ] = attribute;
-		if( attribute->Value->isRef() || attribute->Value->isTuple() )
-			_resolveReferences( vars );
+		else if( attribute->Value->isMeta() )
+			attribute->Value->meta_value().Parent = this;
 
 		if( metadata )
 		{
@@ -305,6 +351,99 @@ namespace eon
 			}
 		}
 	}
+
+	void tuple::addReplace( const tup::valueptr& value, tup::variables& vars,
+		name_t name, const tupleptr& metadata )
+	{
+		auto found = Named.find( name );
+		if( found == Named.end() )
+		{
+			append( value, vars, name, metadata );
+			return;
+		}
+		auto& attribute = *found->second;
+		attribute.MetaData = metadata;
+		attribute.Value = value;
+		if( attribute.Value->isTuple() )
+			attribute.Value->tuple_value().Parent = this;
+		else if( attribute.Value->isMeta() )
+			attribute.Value->meta_value().Parent = this;
+
+		if( metadata )
+		{
+			auto var = metadata->find( { name_var } );
+			if( var )
+			{
+				if( var->isName() )
+					vars.set( var->hardName(), attribute.Value );
+				else if( var->isVar() )
+					vars.set( var->hardVar(), attribute.Value );
+			}
+		}
+	}
+	void tuple::addMerge( const tup::valueptr& value, tup::variables& vars,
+		name_t name, const tupleptr& metadata )
+	{
+		if( name == no_name )
+		{
+			append( value, vars, name, metadata );
+			return;
+		}
+		auto found = Named.find( name );
+		if( found == Named.end() )
+		{
+			append( value, vars, name, metadata );
+			return;
+		}
+		auto& attribute = *found->second;
+		if( attribute.MetaData )
+		{
+			if( metadata )
+				attribute.MetaData->merge( *metadata, vars );
+		}
+		else if( metadata )
+		{
+			attribute.MetaData = metadata;
+			attribute.MetaData->Parent = this;
+		}
+		if( attribute.Value->isTuple() )
+		{
+			if( value->isTuple() )
+				attribute.Value->tuple_value().merge(
+					value->tuple_value(), vars );
+			else
+			{
+				attribute.Value = value;
+				attribute.Value->tuple_value().Parent = this;
+			}
+		}
+		else if( attribute.Value->isMeta() )
+		{
+			if( value->isMeta() )
+				attribute.Value->meta_value().merge(
+					value->meta_value(), vars );
+			else
+			{
+				attribute.Value = value;
+				attribute.Value->meta_value().Parent = this;
+			}
+		}
+		else
+			attribute.Value = value;
+
+		if( metadata )
+		{
+			auto var = metadata->find( { name_var } );
+			if( var )
+			{
+				if( var->isName() )
+					vars.set( var->hardName(), attribute.Value );
+				else if( var->isVar() )
+					vars.set( var->hardVar(), attribute.Value );
+			}
+		}
+	}
+
 	void tuple::append( const tuple& other, tup::variables& vars )
 	{
 		if( Form != other.Form )
@@ -313,6 +452,73 @@ namespace eon
 		{
 			if( Named.find( attribute->Name ) == Named.end() )
 				append( attribute->Value, vars, attribute->Name );
+		}
+	}
+	void tuple::merge( const tuple& other, tup::variables& vars )
+	{
+		for( auto& attribute : other.Attributes )
+		{
+			addMerge( attribute->Value, vars, attribute->Name,
+				attribute->MetaData );
+		}
+	}
+
+	void tuple::_resolveReferences( const tup::variables& vars, bool all )
+	{
+		for( auto attribute : Attributes )
+		{
+			if( attribute->Value->isRef() )
+			{
+				auto ref = dynamic_cast<tup::refval*>( &*attribute->Value );
+				if( !ref->target() )
+				{
+					tup::valueptr found;
+					tuple* parent{ nullptr };
+					auto i_am_root = Parent == nullptr;
+					auto i_am_doc = !i_am_root && Parent->Parent == nullptr;
+					auto possible_rel_path = ref->hardRef().at( 0 )
+						!= name_docs;
+
+					if( possible_rel_path )
+					{
+						found = _find( ref->hardRef(), 0, false,
+							&parent );
+						if( !found && !i_am_doc && !i_am_root )
+							found = document()->_find(
+								ref->hardRef(), 0, false, &parent );
+					}
+					if( !found )
+					{
+						if( i_am_doc )
+							found = Parent->_find(
+								ref->hardRef(), 0, false, &parent );
+						else if( !i_am_root )
+						{
+							found = document()->Parent->_find(
+								ref->hardRef(), 0, false, &parent );
+						}
+					}
+
+					std::set<tup::path> seen{ ref->hardRef() };
+					while( found && found->isRef() && parent != nullptr )
+					{
+						if( seen.find( found->hardRef() ) != seen.end() )
+						{
+							throw tup::CircularReferencing( "The reference \""
+								+ found->hardRef().str()
+								+ "\" leads to a circle" );
+						}
+						seen.insert( found->hardRef() );
+						found = parent->_find(
+							found->hardRef(), 0, false, &parent );
+					}
+					if( all & !found )
+						throw tup::NotFound( "Reference to \"" + ref->hardRef().str() + "\" not found!" );
+					ref->target( found );
+				}
+			}
+			else if( attribute->Value->isTuple() )
+				attribute->Value->tuple_value()._resolveReferences( vars, all );
 		}
 	}
 
@@ -366,61 +572,6 @@ namespace eon
 
 
 
-
-	void tuple::_resolveReferences( const tup::variables& vars )
-	{
-		for( auto attribute : Attributes )
-		{
-			if( attribute->Value->isRef() )
-			{
-				auto ref = dynamic_cast<tup::refval*>( &*attribute->Value );
-				if( !ref->target() )
-				{
-					tup::valueptr found;
-					tuple* parent{ nullptr };
-					auto i_am_root = Parent == nullptr;
-					auto i_am_doc = !i_am_root && Parent->Parent == nullptr;
-					auto possible_rel_path = ref->hardRef().at( 0 )
-						!= name_docs;
-
-					if( possible_rel_path )
-					{
-						found = _find( ref->hardRef(), 0, false,
-							&parent );
-						if( !found && !i_am_doc && !i_am_root )
-							found = document()->_find(
-								ref->hardRef(), 0, false, &parent );
-					}
-					if( !found )
-					{
-						if( i_am_doc )
-							found = Parent->_find(
-								ref->hardRef(), 0, false, &parent );
-						else if( !i_am_root )
-							found = document()->Parent->_find(
-								ref->hardRef(), 0, false, &parent );
-					}
-
-					std::set<tup::path> seen{ ref->hardRef() };
-					while( found && found->isRef() && parent != nullptr )
-					{
-						if( seen.find( found->hardRef() ) != seen.end() )
-						{
-							throw tup::CircularReferencing( "The reference \""
-								+ found->hardRef().str()
-								+ "\" leads to a circle" );
-						}
-						seen.insert( found->hardRef() );
-						found = parent->_find(
-							found->hardRef(), 0, false, &parent );
-					}
-					ref->target( found );
-				}
-			}
-			else if( attribute->Value->isTuple() )
-				attribute->Value->tuple_value()._resolveReferences( vars );
-		}
-	}
 
 	tup::valueptr tuple::_find( const tup::path& path, size_t pos,
 		bool resolve_refs, tuple** parent ) const noexcept

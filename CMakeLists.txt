@@ -20,9 +20,11 @@ set(EON_BUILD_EOF ON CACHE BOOL "Build the Eon Object Format package - EOF")
 set(EON_BUILD_EXPRESSION ON CACHE BOOL "Build the Eon Expression package")
 set(EON_BUILD_PARSER ON CACHE BOOL "Build the Eon Parser package")
 
-if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-	add_definitions( -D_DEBUG )
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-D_DEBUG)
 endif()
+set(CMAKE_CXX_STANDARD 17)
+add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 
 if(EON_BUILD_TESTS)
 	add_subdirectory(eontest)

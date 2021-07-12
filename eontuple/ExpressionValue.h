@@ -63,6 +63,8 @@ namespace eon
 				return Val.evaluate( vars )->softRef( vars ); }
 			inline const expression& hardExpression() const override {
 				return Val; }
+			inline const expression& softExpression( variables& vars )
+				const override { return Val; }
 			inline const tuple& softTuple( variables& vars ) const override {
 				return Val.evaluate( vars )->softTuple( vars ); }
 			inline const tuple& softMeta( variables& vars ) const override {
@@ -81,8 +83,7 @@ namespace eon
 
 
 			//* Write value to string
-			string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override { auto s = Val.infixStr(); pos_on_line
 					+= s.numChars() + 2; return "(" + s + ")"; }
 

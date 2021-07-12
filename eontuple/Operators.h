@@ -59,6 +59,17 @@ namespace eon
 				sqrt,				// sqrt a
 				match,				// a match b
 				assign,				// a = b
+				exists,				// exists a
+				trim,				// trim a
+				rtrim,				// rtrim a
+				ltrim,				// ltrim a
+				len,				// len a
+				resize,				// a resize b
+				typeof,				// typeof a
+				isname,				// isname a
+				toname,				// toname a
+				topath,				// topath a
+				basename,			// basename a
 
 				dummies,
 				if_else2,			// The "else" part of if_else

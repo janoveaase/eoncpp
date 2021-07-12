@@ -64,6 +64,7 @@ namespace eon
 		private:
 			Node* Next{ nullptr };
 			Quantifier Quant;
+			bool Name{ false };
 			bool Open{ true };
 		protected:
 			substring Source;

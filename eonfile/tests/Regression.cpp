@@ -39,4 +39,20 @@ namespace eon
 		REQUIRE_NO_EXCEPT( read = reader.read( 99 ) ) << "Failed to read";
 		WANT_EQ( written, read ) << "Wrong data read";
 	}
+
+	TEST( FileTest, fsys )
+	{
+		WANT_FALSE( fsys::exists( testfile ) )
+			<< "Test file exists before created";
+
+		std::ofstream out;
+		out.open( testfile.stdstr() );
+		out << "0123456789";
+		out.close();
+
+		WANT_TRUE( fsys::exists( testfile ) )
+			<< "Failed to verify file existence";
+
+		WANT_EQ( 10, fsys::size( testfile ) ) << "Wrong size";
+	}
 }

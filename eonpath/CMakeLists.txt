@@ -16,6 +16,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_path
 		OUTPUT_NAME_RELEASE eon_path
 )
+set_property(TARGET EonPath PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonPath PUBLIC EonString EonName EonExcept)
 target_include_directories(EonPath PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")

@@ -18,8 +18,11 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_parser
 		OUTPUT_NAME_RELEASE eon_parser
 )
+set_property(TARGET EonParser PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonParser PUBLIC EonString EonSource EonTokenizer EonRegex EonExcept EonName EonPath EonOF)
+target_link_libraries(EonParser PUBLIC
+	EonString EonSource EonTokenizer EonRegex EonExcept EonName EonPath EonOF
+	EonFile)
 target_include_directories(EonParser PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonParser

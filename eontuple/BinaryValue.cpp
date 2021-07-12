@@ -5,16 +5,17 @@ namespace eon
 {
 	namespace tup
 	{
-		string binaryval::str( size_t& pos_on_line, size_t indentation_level,
-			perm format ) const noexcept
+		string binaryval::str( size_t& pos_on_line, size_t indentation_level )
+			const noexcept
 		{
-			bool oneliner = static_cast<bool>( format & perm::allow_oneliner );
-			bool multiliner = static_cast<bool>(
-				format & perm::allow_multiliner );
 			std::string s{ "%" };
 			++pos_on_line;
-			if( !multiliner || ( Val.size() <= 79 - pos_on_line ) )
-				return s + Val.value();
+			if( pos_on_line + Val.size() <= 79 )
+			{
+				s += Val.value();
+				pos_on_line += Val.size();
+				return s;
+			}
 			s += " ";
 			++pos_on_line;
 			auto indent = pos_on_line;

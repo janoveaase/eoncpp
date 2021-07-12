@@ -16,6 +16,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_name_tests
 		OUTPUT_NAME_RELEASE eon_name_tests
 )
+set_property(TARGET EonNameTests PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonNameTests PUBLIC EonName EonTest)
 	

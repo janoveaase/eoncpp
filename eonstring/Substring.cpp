@@ -531,7 +531,7 @@ namespace eon
 			if( characters.contains( *i ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 	string_iterator substring::findLastOf( const substring& characters )
 		const noexcept
@@ -541,7 +541,7 @@ namespace eon
 			if( characters.contains( *i ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 
 	string_iterator substring::findFirstNotOf( const substring& characters )
@@ -552,7 +552,7 @@ namespace eon
 			if( !characters.contains( *i ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 	string_iterator substring::findLastNotOf( const substring& characters )
 		const noexcept
@@ -562,7 +562,7 @@ namespace eon
 			if( !characters.contains( *i ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 
 	inline string_iterator substring::findFirstDiff( const substring& other )
@@ -577,7 +577,7 @@ namespace eon
 		if( i != end() )
 			return i;
 		else
-			return end();
+			return end().getEnd();
 	}
 
 	substring substring::findFirstIgnoreSections(
@@ -675,7 +675,7 @@ namespace eon
 			if( chars.is( *i, category ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 	string_iterator substring::findLast( charcat category ) const noexcept
 	{
@@ -685,7 +685,7 @@ namespace eon
 			if( chars.is( *i, category ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 
 	string_iterator substring::findFirstOtherThan( charcat category )
@@ -697,7 +697,7 @@ namespace eon
 			if( !chars.is( *i, category ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 	string_iterator substring::findLastOtherThan( charcat category )
 		const noexcept
@@ -708,7 +708,7 @@ namespace eon
 			if( !chars.is( *i, category ) )
 				return i;
 		}
-		return end();
+		return end().getEnd();
 	}
 
 	substring substring::beforeFirst( const substring& delimiter )

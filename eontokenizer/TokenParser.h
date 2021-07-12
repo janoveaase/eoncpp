@@ -73,8 +73,9 @@ namespace eon
 
 
 		//* Skip to next [eon::token] if current is spaces
-		inline void skipSpaces() noexcept {
-			if( *this && current().space() ) ++Cur; }
+		//* Returns true if skipped
+		inline bool skipSpaces() noexcept { if( *this && current().space() ) {
+			++Cur; return true; } return false; }
 
 		//* Skip to the end of the current [eon::token]'s line
 		inline void skipToEol() noexcept {

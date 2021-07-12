@@ -105,4 +105,19 @@ namespace eon
 	const name_t name_negative = name::get( "negative" );
 	const name_t name_cancel = name::get( "cancel" );
 	const name_t name_abort = name::get( "abort" );
+	const name_t name_output = name::get( "output" );
+	const name_t name_token = name::get( "token" );
+	const name_t name_scan = name::get( "scan" );
+	const name_t name_while = name::get( "while" );
+	const name_t name_loop = name::get( "loop" );
+	const name_t name_match = name::get( "match" );
+	const name_t name_condition = name::get( "condition" );
+	const name_t name_id = name::get( "id" );
+	const name_t name_include = name::get( "include" );
+	const name_t name_structure = name::get( "structure" );
+	const name_t name_locate = name::get( "locate" );
+	const name_t name_section = name::get( "section" );
+	const name_t name_if = name::get( "if" );
+	const name_t name_skip = name::get( "skip" );
+	const name_t name_space = name::get( "space" );
 }

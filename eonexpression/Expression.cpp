@@ -106,8 +106,6 @@ namespace eon
 				type = tup::operators::code::unary_minus;
 		}
 		last_type = type;
-		if( type > tup::operators::code::dummies )
-			return;
 		switch( type )
 		{
 			case tup::operators::code::value:
@@ -138,6 +136,27 @@ namespace eon
 					op_stack.pop();
 				else
 					throw BadExpression( "Unbalanced parenthesis" );
+				break;
+			case tup::operators::code::if_else2:
+				while( op_stack.top() != tup::operators::code::if_else )
+				{
+					auto root = expr::nodeptr(
+						new expr::operatornode( op_stack.top() ) );
+					for( size_t i = 0,
+						num_ops = tup::operators::numOperands( op_stack.top() );
+						i < num_ops;
+						++i )
+					{
+						if( tree_stack.empty() )
+							throw BadExpression( "Operator '" + root->str()
+								+ "' is missing " + string( num_ops - i )
+								+ " operand(s)" );
+						root->addChild( tree_stack.top() );
+						tree_stack.pop();
+					}
+					op_stack.pop();
+					tree_stack.push( std::move( root ) );
+				}
 				break;
 			default:
 				while( tup::operators::inputPrecedence( type )
@@ -170,7 +189,7 @@ namespace eon
 	{
 		tf::Parser tfparser;
 		auto value = tfparser.parseValue( parser, vars,
-			tf::Parser::ContextType::expression );
+			tf::Parser::ContextType::expression, false );
 		if( value )
 			return expr::nodeptr( new expr::operandnode( value ) );
 		else

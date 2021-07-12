@@ -60,10 +60,10 @@ namespace eon
 
 
 			//* Write value to string
-			inline string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
-				const noexcept override { pos_on_line += 2;
-					return "'" + string( Val ).escape() + "'"; }
+			inline string str( size_t& pos_on_line, size_t indentation_level )
+				const noexcept override {
+				pos_on_line += 2; return "'" + ( Val == '"' ? string( Val )
+					: string( Val ).escape() ) + "'"; }
 
 
 

@@ -38,9 +38,6 @@ namespace eon
 		//* Exception thrown when document validation fails
 		EONEXCEPT( Invalid );
 
-		//* Exception throw when dividing by zero
-		EONEXCEPT( DivisionByZero );
-
 		//* Exception throw when trying to use a variable that doesn't exist or
 		//* a reference that doesn't lead anywhere.
 		EONEXCEPT( NotFound );
@@ -67,10 +64,12 @@ namespace eon
 		};
 		name_t mapBasicType( basic_type type );
 
-		//* Formatting permissions heeded by value types that can span multiple
+/*		//* Formatting permissions heeded by value types that can span multiple
 		//* lines.
 		enum class perm
 		{
+			zero = 0x00,
+
 			//* Allow the value to appear on a single line
 			allow_oneliner = 0x01,
 
@@ -82,7 +81,7 @@ namespace eon
 				| static_cast<int>( b ) ); }
 		inline perm operator&( perm a, perm b ) noexcept {
 			return static_cast<perm>( static_cast<int>( a )
-				& static_cast<int>( b ) ); }
+				& static_cast<int>( b ) ); }*/
 
 		class value;
 		using valueptr = std::shared_ptr<value>;
@@ -193,13 +192,13 @@ namespace eon
 			virtual const string& hardString() const { throw WrongType(); }
 			virtual const string& softString( variables& vars ) const {
 				throw WrongType(); }
-			virtual const hex& hardBinary() const { throw WrongType(); }
-			virtual const hex& softBinary( variables& vars ) const {
-				throw WrongType(); }
 			virtual const std::vector<string>& hardRaw() const {
 				throw WrongType(); }
 			virtual const std::vector<string>& softRaw( variables& vars )
 				const { throw WrongType(); }
+			virtual const hex& hardBinary() const { throw WrongType(); }
+			virtual const hex& softBinary( variables& vars ) const {
+				throw WrongType(); }
 			virtual const regex& hardRegex() const { throw WrongType(); }
 			virtual const regex& softRegex( variables& vars ) const {
 				throw WrongType(); }
@@ -243,38 +242,6 @@ namespace eon
 
 
 			/******************************************************************
-			  Simple expression evaluation
-
-			  For Æon and EOF, it is always the first operand that implements
-			  the operators that are supported for that type. These methods
-			  will evaluate an operator on 'this' (first operand) and zero or
-			  more arguments.
-			  Throws [eon::tup::UnsupportedOperand] if the operator isn't
-			  supported for the value type of 'this'.
-			******************************************************************/
-		public:
-
-			//* Evaluate a unary operator
-			valueptr evaluate( operators::code op_code, variables& vars )
-				const;
-
-			//* Evaluate a binary operator
-			//* Throws [eon::tup::DivisionByZero] if the operator is 'divide'
-			//* and the second argument is zero!
-			valueptr evaluate( operators::code op_code, const valueptr& arg2,
-				variables& vars ) const;
-
-			//* Evaluate a (the) ternary operator
-			//* This is an exception to the rule of implementing operators for
-			//* the first operand. Here, the second operand is the prominent
-			//* one (the condition of the if-else operator).
-			valueptr evaluate( operators::code op_code, const valueptr& arg1,
-				const valueptr& arg3, variables& vars ) const;
-
-
-
-
-			/******************************************************************
 			  Read-only Methods
 			******************************************************************/
 		public:
@@ -284,8 +251,7 @@ namespace eon
 
 
 			//* Write value to string
-			virtual string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			virtual string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept = 0;
 
 

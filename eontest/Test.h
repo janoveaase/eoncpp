@@ -275,6 +275,7 @@ namespace eontest
 	class EonTest
 	{
 	public:
+		std::string _TestExe;
 		std::string _TestID;
 		_stringstream _Messages;
 		bool Failed{ false };
@@ -290,8 +291,9 @@ namespace eontest
 		}
 
 
-		void runTest()
+		void runTest( const std::string& exe )
 		{
+			_TestExe = exe;
 			try { prepare(); }
 			catch( ... )
 			{

@@ -54,14 +54,14 @@ namespace eon
 			// by calling parse():
 			//   1. name    : Name of document, no_name if not specified.
 			//   2. metaval : Meta information for the document (if any).
-			tuple parseDocumentStart( tup::variables& vars );
+			tuple parseDocumentStart( tup::variables& vars, bool merge );
 
 			// Parse the next attribute of the current document
 			// Returns false when no more attributes.
 			// If false is returned, you should call parseDocumentStart to
 			// see if there are more documents.
-			bool parseDocumentAttribute( tuple& document,
-				tup::variables& vars );
+			bool parseDocumentAttribute( tuple& document, tup::variables& vars,
+				bool merge );
 
 
 			// Parse a single value
@@ -71,16 +71,17 @@ namespace eon
 				expression
 			};
 			tup::valueptr parseValue( tokenparser& parser,
-				tup::variables& vars, ContextType context );
+				tup::variables& vars, ContextType context, bool merge );
 
 
 		private:
 
 			// Parse an attribute, with optional name and meta data
-			void parseAttribute( tuple& result, tup::variables& vars );
+			void parseAttribute( tuple& result, tup::variables& vars
+				, bool merge );
 
 			// Parse a value
-			tup::valueptr parseValue( tup::variables& vars, ContextType context);
+			tup::valueptr parseValue( tup::variables& vars, ContextType context, bool merge );
 
 			// Skip tokens, return false if nothing was skipped
 			bool skipComments();
@@ -104,10 +105,10 @@ namespace eon
 				curly,
 				meta
 			};
-			tup::valueptr parseTuple( tup::variables& vars, tupletype type );
+			tup::valueptr parseTuple( tup::variables& vars, tupletype type, bool merge );
 			tup::valueptr parseRef();
 			tup::valueptr parseExpr( tup::variables& vars );
-			tup::valueptr parseMeta( tup::variables& vars );
+			tup::valueptr parseMeta( tup::variables& vars, bool merge );
 
 			std::string unescape( const std::string& str ) const noexcept;
 			inline bool inrange( byte_t c, byte_t lower, byte_t upper )

@@ -41,10 +41,55 @@ namespace eon
 		~eonof() = default;
 
 
+
+
+		/**********************************************************************
+		  Copy and Move
+		**********************************************************************/
+	public:
+
 		inline eonof& operator=( const eonof& other ) {
 			Docs = other.Docs; return *this; }
 		inline eonof& operator=( eonof&& other ) noexcept {
 			Docs = std::move( other.Docs ); return *this; }
+
+
+
+
+		/**********************************************************************
+		  Loading Documents
+		**********************************************************************/
+	public:
+
+		//* Load one or more documents from a file
+		//* Note that if the file contains only a single unnamed document and
+		//* the base file name (without extenstion) is a valid Æon name, that
+		//* name will be used for the document!
+		//* Exclusive: Existing documents with same name will be replaced!
+		//* Merge    : New documents with same name as existing will be merged
+		//*            into existing, adding new elements and overwriting
+		//*            existing common elements.
+		//* Throws [eon::EtfBadSyntax] if formatting is incorrect.
+		//* Throws [eon::EtfInvalid] if validation fails.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
+		void loadExclusive( const path& file );
+		void loadMerge( const path& file );
+
+		//* Parse one or more documents from a string
+		//* If you provide a document name, that name will be used if the
+		//* string contains only a single, unnamed document.
+		//* Exclusive: Existing documents with same name will be replaced!
+		//* Merge    : New documents with same name as existing will be merged
+		//*            into existing, adding new elements and overwriting
+		//*            existing common elements.
+		//* Throws [eon::EtfBadSyntax] if formatting is incorrect.
+		//* Throws [eon::EtfInvalid] if validation fails.
+		//* Throws [eon::tup::CircularReferencing] if circular referencing is
+		//* detected!
+		void parseExclusive( const string& str,
+			name_t document_name = no_name );
+		void parseMerge( const string& str, name_t document_name = no_name );
 
 
 
@@ -79,6 +124,15 @@ namespace eon
 			auto dc = Docs.attribute( name ); if( dc ) return
 				dc->hardTuple(); else throw NoSuchEtfDoc(); }
 
+		//* Get name of document at given position
+		//* Returns no_name if not named
+		inline name_t name( size_t pos ) const { return Docs.name( pos ); }
+
+		//* Get metadata for named document
+		//* Returns 'false' tupleptr if not found or no metadata
+		inline tupleptr metadata( name_t name ) const noexcept {
+			return Docs.metadata( name ); }
+
 
 		//* Run validation on a document, optionally specify a (loaded)
 		//* 'pattern' document (for which all references in other pattern
@@ -102,25 +156,6 @@ namespace eon
 		  Write Methods
 		**********************************************************************/
 	public:
-
-		//* Load one or more documents from a file
-		//* Note that if the file contains only a single unnamed document and
-		//* the base file name (without extenstion) is a valid Æon name, that
-		//* name will be used for the document!
-		//* Throws [eon::EtfBadSyntax] if formatting is incorrect.
-		//* Throws [eon::EtfInvalid] if validation fails.
-		//* Throws [eon::tup::CircularReferencing] if circular referencing is
-		//* detected!
-		void load( const path& file );
-
-		//* Parse one or more documents from a string
-		//* If you provide a document name, that name will be used if the
-		//* string contains only a single, unnamed document.
-		//* Throws [eon::EtfBadSyntax] if formatting is incorrect.
-		//* Throws [eon::EtfInvalid] if validation fails.
-		//* Throws [eon::tup::CircularReferencing] if circular referencing is
-		//* detected!
-		void parse( const string& str, name_t document_name = no_name );
 
 		//* Get a modifiable document (top level tuple) by position (in order
 		//* of appending)
@@ -190,7 +225,7 @@ namespace eon
 		//
 	private:
 
-		void _parse( name_t name, source& src );
+		void _parse( name_t name, source& src, bool merge );
 
 
 

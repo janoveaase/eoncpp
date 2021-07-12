@@ -16,6 +16,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_parser_tests
 		OUTPUT_NAME_RELEASE eon_parser_tests
 )
+set_property(TARGET EonParserTests PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonParserTests PUBLIC EonParser EonTest)
 	

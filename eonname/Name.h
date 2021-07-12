@@ -93,7 +93,21 @@ namespace eon
 	extern const name_t name_negative;
 	extern const name_t name_cancel;
 	extern const name_t name_abort;
-
+	extern const name_t name_output;
+	extern const name_t name_token;
+	extern const name_t name_scan;
+	extern const name_t name_loop;
+	extern const name_t name_while;
+	extern const name_t name_match;
+	extern const name_t name_condition;
+	extern const name_t name_id;
+	extern const name_t name_include;
+	extern const name_t name_structure;
+	extern const name_t name_locate;
+	extern const name_t name_section;
+	extern const name_t name_if;
+	extern const name_t name_skip;
+	extern const name_t name_space;
 
 
 

@@ -1,5 +1,6 @@
 #include "Regression.h"
 #include <eontuple/IntValue.h>
+#include <eontuple/StringValue.h>
 
 
 
@@ -583,8 +584,8 @@ namespace eon
 		REQUIRE_NO_EXCEPT( expr = expression( "1 + 2.9", vars ) );
 		tup::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
-		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
-		WANT_EQ( 3, val->hardInt() ) << "Wrong value";
+		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
+		WANT_EQ( 3.9, val->hardFloat() ) << "Wrong value";
 	}
 	TEST( ExpressionTest, plus5 )
 	{
@@ -655,8 +656,8 @@ namespace eon
 		REQUIRE_NO_EXCEPT( expr = expression( "3 * 6.0", vars ) );
 		tup::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
-		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
-		WANT_EQ( 18, val->hardInt() ) << "Wrong value";
+		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
+		WANT_EQ( 18, val->hardFloat() ) << "Wrong value";
 	}
 	TEST( ExpressionTest, multiply3 )
 	{
@@ -697,7 +698,7 @@ namespace eon
 		tup::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
-		WANT_EQ( 6.6 / 3.3, val->hardFloat() ) << "Wrong value";
+		WANT_EQ( 2, val->hardFloat() ) << "Wrong value";
 	}
 	TEST( ExpressionTest, divide3 )
 	{
@@ -705,7 +706,7 @@ namespace eon
 		tup::variables vars;
 		REQUIRE_NO_EXCEPT( expr = expression( "6 / 0", vars ) );
 		tup::valueptr val;
-		REQUIRE_EXCEPT( val = expr.evaluate(), eon::tup::DivisionByZero );
+		REQUIRE_EXCEPT( val = expr.evaluate(), eon::expr::DivisionByZero );
 	}
 
 	TEST( ExpressionTest, pow1 )
@@ -783,7 +784,7 @@ namespace eon
 	{
 		expression expr;
 		tup::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6.9 mod 5", vars ) );
+		REQUIRE_NO_EXCEPT( expr = expression( "{9, 5} mod 5", vars ) );
 		tup::valueptr val;
 		REQUIRE_EXCEPT( val = expr.evaluate(), tup::UnsupportedOperand );
 	}
@@ -885,6 +886,224 @@ namespace eon
 		REQUIRE_EXCEPT( val = expr.evaluate(), tup::NotFound );
 	}
 
+	TEST( ExpressionTest, exists_yes )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = 1 if exists \""
+			+ string( _TestExe ).replace( '\\', '/' ) + "\" else 0", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 1, var->hardInt() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, exists_no )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = 1 if exists \""
+			"somethingimpossiblewhateverblahblah\" else 0", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 0, var->hardInt() ) << "Wrong variable value";
+	}
+
+	TEST( ExpressionTest, trim )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "b = trim (a = trim \"  str  \")", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto vara = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( vara && vara->isString() ) << "Didn't get variable a";
+		WANT_EQ( "str", vara->hardString().stdstr() ) << "Wrong variable value a";
+		auto varb = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( varb && varb->isString() ) << "Didn't get variable b";
+		WANT_EQ( "str", varb->hardString().stdstr() ) << "Wrong variable value b";
+	}
+	TEST( ExpressionTest, rtrim )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "b = rtrim (a = rtrim \"  str  \")", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto vara = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( vara && vara->isString() ) << "Didn't get variable a";
+		WANT_EQ( "  str", vara->hardString().stdstr() ) << "Wrong variable value a";
+		auto varb = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( varb && varb->isString() ) << "Didn't get variable b";
+		WANT_EQ( "  str", varb->hardString().stdstr() ) << "Wrong variable value b";
+	}
+	TEST( ExpressionTest, ltrim )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "b = ltrim (a = ltrim \"  str  \")", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto vara = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( vara && vara->isString() ) << "Didn't get variable a";
+		WANT_EQ( "str  ", vara->hardString().stdstr() ) << "Wrong variable value a";
+		auto varb = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( varb && varb->isString() ) << "Didn't get variable b";
+		WANT_EQ( "str  ", varb->hardString().stdstr() ) << "Wrong variable value b";
+	}
+
+	TEST( ExpressionTest, len_str )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len \"0123456789\"", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 10, var->hardInt() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, len_raw )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len |\n  one\n  two\n  three", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 3, var->hardInt() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, len_bin)
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len %0A417D", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 3, var->hardInt() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, len_tuple )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len {one two three}", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 3, var->hardInt() ) << "Wrong variable value";
+	}
+
+	TEST( ExpressionTest, resize_grow )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = \"one\" resize 5", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
+		WANT_EQ( "one  ", var->hardString().stdstr() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, resize_shrink )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = \"one\" resize 1", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
+		WANT_EQ( "o", var->hardString().stdstr() ) << "Wrong variable value";
+	}
+
+	TEST( ExpressionTest, type1 )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "typeof \"str\"", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isName() );
+		WANT_TRUE( val->hardName() == name_string );
+	}
+	TEST( ExpressionTest, type2 )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "typeof 3.14", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isName() );
+		WANT_TRUE( val->hardName() == name_float );
+	}
+
+	TEST( ExpressionTest, isname1 )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "isname \"012alpha_21\"", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isBool() );
+		WANT_TRUE( val->hardBool() );
+	}
+	TEST( ExpressionTest, isname2 )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "isname \"012al pha_21\"", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isBool() );
+		WANT_FALSE( val->hardBool() );
+	}
+
+	TEST( ExpressionTest, name )
+	{
+		expression expr;
+		tup::variables vars;
+		REQUIRE_NO_EXCEPT( expr = expression( "toname(\"a\" + 2) = 99.9", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "a2" ) );
+		REQUIRE_TRUE( var && var->isFloat() ) << "Didn't get variable";
+		WANT_EQ( 99.9, var->hardFloat() ) << "Wrong variable value";
+	}
+
 	TEST( ExpressionTest, double_parenthesis )
 	{
 		expression expr;
@@ -895,5 +1114,36 @@ namespace eon
 		WANT_EQ(
 			"( 5 - 1 ) / ( 4 - 2 ) * 3",
 			expr.infixStr().stdstr() ) << "Bad infix expression";
+	}
+	TEST( ExpressionTest, complex_len )
+	{
+		expression expr;
+		tup::variables vars;
+		vars.set( name_token, tup::valueptr( new tup::stringval( "    " ) ) );
+		REQUIRE_NO_EXCEPT( expr = expression(
+			"(indentation = len token if not (ltrim token) else 0)", vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "indentation" ) );
+		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
+		WANT_EQ( 4, var->hardInt() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, complex_if_else )
+	{
+		expression expr;
+		tup::variables vars;
+		vars.set( name_name, tup::valueptr( new tup::stringval( "one" ) ) );
+		REQUIRE_NO_EXCEPT( expr = expression(
+			"id=\"namespace__\" + ((parent_id + \"__\") if parent_id else \"\") + name",
+			vars ) );
+		tup::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+			<< "Failed to evaluate";
+		REQUIRE_TRUE( val->isVar() ) << "Wrong value type";
+		auto var = vars.get( name::get( "id" ) );
+		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
+		WANT_EQ( "namespace__one", var->hardString().stdstr() ) << "Wrong variable value";
 	}
 }

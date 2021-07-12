@@ -630,8 +630,7 @@ namespace eon
 				if( end )
 				{
 					auto num = substr( i + 2, end.begin() );
-					if( num.findFirstOtherThan( charcat::number_ascii_digit )
-						== num.end() )
+					if( !num.findFirstOtherThan( charcat::number_ascii_digit ) )
 					{
 						result += static_cast<char_t>( num.toUInt32() );
 						i = end.begin();

@@ -21,6 +21,12 @@ namespace eon
 	**************************************************************************/
 	namespace expr
 	{
+		//* Exception thrown when dividing by zero
+		EONEXCEPT( DivisionByZero );
+
+
+
+
 		/**********************************************************************
 		  Eon Node Class - eon::expr::node
 

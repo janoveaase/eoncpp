@@ -57,7 +57,7 @@ namespace eon
 				return vars.get( Val )->softRegex( vars ); }
 			inline const path& softRef( variables& vars ) const override {
 				return vars.get( Val )->softRef( vars ); }
-			inline name_t hardVar(  ) const override { return Val; }
+			inline name_t hardVar() const override { return Val; }
 			inline const tuple& softTuple( variables& vars ) const override {
 				return vars.get( Val )->softTuple( vars ); }
 			inline const tuple& softMeta( variables& vars ) const override {
@@ -75,8 +75,7 @@ namespace eon
 
 
 			//* Write value to string
-			string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override {
 				pos_on_line += Val->numChars(); return *Val; }
 
