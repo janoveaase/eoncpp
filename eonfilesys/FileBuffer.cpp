@@ -1,6 +1,9 @@
 #include "FileBuffer.h"
 
-#ifndef EON_WINDOWS
+#include <fcntl.h>
+#ifdef EON_WINDOWS
+#	include <io.h>
+#else
 #	include <errno.h>
 #	include <sys/stat.h>
 #	include <fcntl.h>
@@ -29,7 +32,7 @@ namespace eon
 	filebuffer& filebuffer::operator=( filebuffer&& other ) noexcept
 	{
 		close();
-		FPath = std::move( other.FPath );
+		Path = std::move( other.Path );
 		Handle = other.Handle; other.Handle = -1;
 		Mode = other.Mode;
 		Buffer = other.Buffer; other.Buffer = nullptr;
@@ -52,20 +55,19 @@ namespace eon
 		int perm = _S_IREAD;
 		switch( Mode )
 		{
-			case FileMode::input:
+			case filesys::mode::input:
 				mode |= _O_RDONLY;
 				sharing |= _SH_DENYNO;
 				break;
-			case FileMode::output:
+			case filesys::mode::output:
 				mode |= _O_CREAT | _O_TRUNC | _O_WRONLY;
 				sharing |= _SH_DENYWR;
 				perm |= _S_IWRITE;
 				break;
 		}
-		auto error = _sopen_s( &Handle, FPath.str().c_str(),
-			mode, sharing, perm );
+		auto error = _sopen_s( &Handle, Path.c_str(), mode, sharing, perm );
 		if( error != 0 )
-			throw FileOpenError( "File: " + FPath.stdstr() + "\nError: "
+			throw filesys::OpenError( "File: " + Path + "\nError: "
 				+ errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];
 		BufferSize = 0;
@@ -80,16 +82,16 @@ namespace eon
 		int perm = S_IRUSR | S_IWUSR;
 		switch( Mode )
 		{
-			case FileMode::input:
+			case filesys::mode::input:
 				flags |= O_RDONLY;
 				break;
-			case FileMode::output:
+			case filesys::mode::output:
 				flags |= O_CREAT | O_TRUNC | O_WRONLY;
 				break;
 		}
-		Handle = ::open( FPath.str().c_str(), flags, perm );
+		Handle = ::open( Path.c_str(), flags, perm );
 		if( Handle == -1 )
-			throw FileOpenError( "File: " + FPath.stdstr() + "\nError: "
+			throw filesys::OpenError( "File: " + Path + "\nError: "
 				+ errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];
 		BufferSize = 0;
@@ -102,7 +104,7 @@ namespace eon
 	{
 		if( Handle != -1 )
 		{
-			if( Mode == FileMode::output )
+			if( Mode == filesys::mode::output )
 				flush();
 			_close( Handle );
 			Handle = -1;
@@ -181,7 +183,7 @@ namespace eon
 			return;
 		auto bytes = _write( Handle, Buffer, static_cast<int>( BufPos ) );
 		if( bytes < 0 )
-			throw FileIOError( "File: " + FPath.stdstr()
+			throw filesys::RWError( "File: " + Path.stdstr()
 				+ "\nError: " + errnoMessage().stdstr() );
 		BufPos = 0;
 	}
@@ -195,7 +197,7 @@ namespace eon
 		if( bytes >= 0 )
 			BufferSize = bytes;
 		else
-			throw FileIOError( "File: " + FPath.stdstr() + "\nError: "
+			throw filesys::RWError( "File: " + Path.stdstr() + "\nError: "
 				+ errnoMessage().stdstr() );
 		BufPos = 0;
 	}

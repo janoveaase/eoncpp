@@ -9,7 +9,9 @@ set(EXPRESSIONTEST_SOURCES
 	Regression.cpp
 )
 
-add_executable(EonExpressionTests ${EXPRESSIONTEST_HEADERS} ${EXPRESSIONTEST_SOURCES})
+add_executable(EonExpressionTests
+	${EXPRESSIONTEST_HEADERS} ${EXPRESSIONTEST_SOURCES}
+)
 set_target_properties(
 	EonExpressionTests
 	PROPERTIES
@@ -18,10 +20,12 @@ set_target_properties(
 )
 set_property(TARGET EonExpressionTests PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonExpressionTests PUBLIC EonExpression EonTest EonExcept)
+target_link_libraries(EonExpressionTests PUBLIC EonExpression
+	EonTest EonExcept)
 	
 install(TARGETS EonExpressionTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
 )
 
-target_include_directories(EonExpressionTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
+target_include_directories(EonExpressionTests PUBLIC "${EON_SOURCES_DIR}"
+	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")

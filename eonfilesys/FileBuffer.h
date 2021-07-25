@@ -1,6 +1,8 @@
 #pragma once
 
-#include "FileDefs.h"
+#include <eonstring/String.h>
+#include <eonexcept/Exception.h>
+#include "Path.h"
 
 
 /******************************************************************************
@@ -8,6 +10,23 @@
 ******************************************************************************/
 namespace eon
 {
+	namespace filesys
+	{
+		//* File open modes
+		//* A file can be opened for input or for output.
+		enum class mode : uint8_t
+		{
+			input,
+			output
+		};
+
+		//* Exception thrown when unable to open file
+		EONEXCEPT( OpenError );
+
+		//* Exception thrown when unable to read or write
+		EONEXCEPT( RWError );
+	}
+
 	/**************************************************************************
 	  Eon File Buffer Class - eon::filebuffer
 
@@ -27,9 +46,9 @@ namespace eon
 		inline filebuffer( filebuffer&& other ) noexcept {
 			*this = std::move( other ); }
 
-		inline filebuffer( const path& file_path, FileMode mode,
-			int buffer_size = 4096 ) {
-				FPath = file_path; Mode = mode; BufferCapacity = buffer_size; }
+		inline filebuffer( const path& file_path,
+			filesys::mode mode, int buffer_size = 4096 ) {
+			Path = file_path; Mode = mode; BufferCapacity = buffer_size; }
 
 		~filebuffer() { close(); }
 
@@ -45,7 +64,7 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		inline const path& filePath() const noexcept { return FPath; }
+		inline const path& filePath() const noexcept { return Path; }
 
 		inline size_t bufferSize() const noexcept { return BufferCapacity; }
 
@@ -120,9 +139,9 @@ namespace eon
 		// Attributes
 		//
 	private:
-		path FPath;
+		path Path;
 		int Handle{ -1 };
-		FileMode Mode{ FileMode::input };
+		filesys::mode Mode{ filesys::mode::input };
 		bool Eof{ false };
 		char* Buffer{ nullptr };
 		int BufferCapacity{ 4096 };

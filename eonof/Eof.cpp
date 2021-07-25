@@ -36,20 +36,14 @@ namespace eon
 
 	void eonof::loadExclusive( const path& file )
 	{
-		textfilereader reader( file );
-		reader.open();
-		auto name = eon::name::get( file.baseWithoutExt() );
-		source src( file.str(), reader.read( SIZE_MAX ) );
-		reader.close();
+		auto name = eon::name::get( file.name() );
+		source src( file.str(), eon::file( file ).loadText() );
 		_parse( name, src, false );
 	}
 	void eonof::loadMerge( const path& file )
 	{
-		textfilereader reader( file );
-		reader.open();
-		auto name = eon::name::get( file.baseWithoutExt() );
-		source src( file.str(), reader.read( SIZE_MAX ) );
-		reader.close();
+		auto name = eon::name::get( file.name() );
+		source src( file.str(), eon::file( file ).loadText() );
 		_parse( name, src, true );
 	}
 

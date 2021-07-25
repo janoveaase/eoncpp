@@ -25,16 +25,24 @@ set_target_properties(
 )
 set_property(TARGET EonExpression PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonExpression PUBLIC EonString EonExcept EonTokenizer EonOF EonTuple EonFile)
-target_include_directories(EonExpression PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
+target_link_libraries(EonExpression PUBLIC EonString
+	EonExcept EonTokenizer EonOF EonTuple EonFileSys
+)
+target_include_directories(EonExpression PUBLIC "${EON_SOURCES_DIR}"
+	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
+)
 
 install(TARGETS EonExpression
 	LIBRARY DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"
 	ARCHIVE DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"
 )
-install(FILES ${EXPRESSION_HEADERS} DESTINATION "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}/eonexpression")
+install(FILES ${EXPRESSION_HEADERS} DESTINATION
+	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}/eonexpression"
+)
 if(WIN32)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/EonExpression.dir/Debug/EonExpression.pdb DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}" OPTIONAL)
+	install(FILES
+		${CMAKE_CURRENT_BINARY_DIR}/EonExpression.dir/Debug/EonExpression.pdb
+		DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}" OPTIONAL)
 endif()
 
 if(EON_BUILD_TESTS)

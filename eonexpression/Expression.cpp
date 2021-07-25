@@ -118,7 +118,8 @@ namespace eon
 					auto root = expr::nodeptr(
 						new expr::operatornode( op_stack.top() ) );
 					for( size_t i = 0,
-							num_ops = tup::operators::numOperands( op_stack.top() );
+						num_ops = tup::operators::numOperands(
+							op_stack.top() );
 						i < num_ops;
 						++i )
 					{
@@ -143,7 +144,8 @@ namespace eon
 					auto root = expr::nodeptr(
 						new expr::operatornode( op_stack.top() ) );
 					for( size_t i = 0,
-						num_ops = tup::operators::numOperands( op_stack.top() );
+						num_ops = tup::operators::numOperands(
+							op_stack.top() );
 						i < num_ops;
 						++i )
 					{
@@ -165,7 +167,8 @@ namespace eon
 					auto root = expr::nodeptr(
 						new expr::operatornode( op_stack.top() ) );
 					for( size_t i = 0,
-						num_ops = tup::operators::numOperands( op_stack.top() );
+						num_ops = tup::operators::numOperands(
+							op_stack.top() );
 						i < num_ops;
 						++i )
 					{

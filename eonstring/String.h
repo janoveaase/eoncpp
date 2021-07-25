@@ -1800,7 +1800,7 @@ namespace eon
 
 	/**************************************************************************
 	  Unattatched Concatenators
-	/*************************************************************************/
+	**************************************************************************/
 	inline string operator+( const substring& a, const substring& b ) {
 		return string( a ) += b; }
 	inline string operator+( const substring& a, const std::string& b ) {

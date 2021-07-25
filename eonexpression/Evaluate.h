@@ -39,10 +39,11 @@ namespace eon
 			static tup::valueptr unary( tup::operators::code op_code,
 				tup::variables& vars, const nodeptr& arg1 );
 			static tup::valueptr binary( tup::operators::code op_code,
-				tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2 );
-			static tup::valueptr ternary( tup::operators::code op_code,
 				tup::variables& vars,
-				const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 );
+				const nodeptr& arg1, const nodeptr& arg2 );
+			static tup::valueptr ternary( tup::operators::code op_code,
+				tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2,
+				const nodeptr& arg3 );
 
 
 
@@ -54,10 +55,11 @@ namespace eon
 			static tup::valueptr _unary( tup::operators::code op_code,
 				tup::variables& vars, const nodeptr& arg1 );
 			static tup::valueptr _binary( tup::operators::code op_code,
-				tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2 );
-			static tup::valueptr _ternary( tup::operators::code op_code,
 				tup::variables& vars,
-				const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 );
+				const nodeptr& arg1, const nodeptr& arg2 );
+			static tup::valueptr _ternary( tup::operators::code op_code,
+				tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2,
+				const nodeptr& arg3 );
 		};
 	}
 }

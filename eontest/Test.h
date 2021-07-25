@@ -62,7 +62,7 @@ namespace eontest
 				else Strm << value;
 			return *this; }
 		inline _stringstream& operator<<( bool value ) {
-			Strm << value ? "true" : "false"; return *this; }
+			Strm << ( value ? "true" : "false" ); return *this; }
 		std::string str() const
 		{
 			const std::string& in = Strm.str();
