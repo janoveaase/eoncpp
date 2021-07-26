@@ -16,7 +16,7 @@
 #ifdef EON_UNIX
 #	include <cmath>
 #endif
-#include <eonfile/File.h>
+#include <eonfilesys/FileSys.h>
 
 
 namespace eon

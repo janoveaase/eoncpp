@@ -35,10 +35,7 @@ namespace eon
 			// Next must be a name or we have an error
 			auto name = parseRawName();
 			if( name == no_name )
-				throw EtfBadSyntax( Source.name() + ":"
-					+ string( TP.current().source().pos().line() + 1 ) + ":"
-					+ string( TP.current().source().pos().pos(
-						TP.current().source().source() ) + 1 )
+				throw EofBadSyntax( TP.current().source().textRefRange()
 					+ "\nExpected a document name here!" );
 			result.set( 0, tup::valueptr( new tup::nameval( name ) ), vars );
 
@@ -51,10 +48,7 @@ namespace eon
 			// Expect meta information to follow
 			auto meta = parseMeta( vars, merge );
 			if( !meta )
-				throw EtfBadSyntax( Source.name() + ":"
-					+ string( TP.current().source().pos().line() + 1 ) + ":"
-					+ string( TP.current().source().pos().pos(
-						TP.current().source().source() ) + 1 )
+				throw EofBadSyntax( TP.current().source().textRefRange()
 					+ "\nExpected document meta information here!" );
 			result.set( 1, meta, vars );
 			return result;
@@ -100,11 +94,9 @@ namespace eon
 				if( TP )
 				{
 					if( !TP.current().newline() )
-						throw EtfBadSyntax( Source.name() + ":"
-							+ string( TP.current().source().pos().line() + 1 ) + ":"
-							+ string( TP.current().source().pos().pos(
-								TP.current().source().source() ) + 1 )
-							+ "\nUnexpected: \"" + TP.current().substr() + "\"" );
+						throw EofBadSyntax(
+							TP.current().source().textRefRange()
+							+ "\nUnexpected!" );
 				}
  				return;
 			}
@@ -129,10 +121,8 @@ namespace eon
 					auto pos = TP.current().source().pos();
 					skipNoise();
 					if( !TP )
-						throw EtfBadSyntax( Source.name() + ":"
-							+ string( pos.line() + 1 ) + ":"
-							+ string( pos.pos(
-								TP.current().source().source() ) + 1 )
+						throw EofBadSyntax(
+							sourceref( Source.source(), pos ).textRefPos()
 							+ "\nExpected an attribute value following this!" );
 
 					auto name = value->hardName();
@@ -149,17 +139,11 @@ namespace eon
 						}
 						auto indent = indentationStrict();
 						if( indent < main_indent + 2 )
-							throw EtfBadSyntax( Source.name() + ":" + string(
-								TP.current().source().pos().line() + 1 ) + ":"
-								+ string( TP.current().source().pos().pos(
-									TP.current().source().source() ) + 1 )
+							throw EofBadSyntax( TP.current().source().textRefRange()
 								+ "\nInvalid indentation of sub-tuple value here!" );
 						value = parseTuple( vars, tupletype::plain, merge );
 						if( !value )
-							throw EtfBadSyntax( Source.name() + ":" + string(
-								cur.source().pos().line() + 1 ) + ":" + string(
-									cur.source().pos().pos(
-										TP.current().source().source() ) + 1 )
+							throw EofBadSyntax( cur.source().textRefPos()
 								+ "\nExpected an indented sub-tuple value here!" );
 
 						if( merge )
@@ -180,9 +164,8 @@ namespace eon
 					{
 						value = parseValue( vars, ContextType::plain, merge );
 						if( !value )
-							throw EtfBadSyntax( Source.name() + ":" + string(
-								pos.line() + 1 ) + ":" + string( pos.pos(
-									TP.current().source().source() ) + 1 )
+							throw EofBadSyntax( sourceref(
+								Source.source(), pos ).textRefRange()
 								+ "\nExpected an attribute value here!" );
 						if( merge )
 							result.addMerge( value, vars, name, meta
@@ -254,11 +237,11 @@ namespace eon
 			else if( TP.current().match( "+" ) )
 			{
 				TP.forward();
-				if( !TP || !TP.current().number() )
-					throw EtfBadSyntax( Source.name() + ":"
-						+ string( TP.current().source().pos().line() + 1 )
-						+ ":" + string( TP.current().source().pos().pos(
-							TP.current().source().source() ) + 1 )
+				if( !TP )
+					throw EofBadSyntax( TP.last().source().textRefRange()
+						+ "\nExpected a number to follow this!" );
+				if( !TP.current().number() )
+					throw EofBadSyntax( TP.current().source().textRefRange()
 						+ "\nExpected a number here!" );
 				if( TP.exists() && TP.ahead().match(
 					DecimalSep.substr() ) )
@@ -271,11 +254,11 @@ namespace eon
 			else if( TP.current().match( "-" ) )
 			{
 				TP.forward();
-				if( !TP || !TP.current().number() )
-					throw EtfBadSyntax( Source.name() + ":"
-						+ string( TP.current().source().pos().line() + 1 )
-						+ ":" + string( TP.current().source().pos().pos(
-							TP.current().source().source() ) + 1 )
+				if( !TP )
+					throw EofBadSyntax( TP.last().source().textRefRange()
+						+ "\nExpected a number to follow this!" );
+				if( !TP.current().number() )
+					throw EofBadSyntax( TP.current().source().textRefRange()
 						+ "\nExpected a number here!" );
 				if( TP.exists() && TP.ahead().match(
 					DecimalSep.substr() ) )
@@ -385,16 +368,17 @@ namespace eon
 		tup::valueptr Parser::parseChar()
 		{
 			TP.forward();	// Skip opening "'"
-			if( !TP || TP.current().substr().numChars() != 1 )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					TP.current().source().pos().line() + 1 ) + ":" + string( TP.current().source().pos().pos( TP.current().source().source() ) + 1 )
+			if( !TP )
+				throw EofBadSyntax( TP.last().source().textRefRange()
+					+ "\nExpected a character value to follow this!" );
+			if( TP.current().substr().numChars() != 1 )
+				throw EofBadSyntax( TP.current().source().textRefRange()
 					+ "\nExpected a character value here!" );
 			auto value = *TP.current().substr().begin();
 			auto& pos = TP.current().source().pos();
 			TP.forward();
 			if( !TP )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					TP.current().source().pos().line() + 1 ) + ":" + string( TP.current().source().pos().pos( TP.current().source().source() ) + 1 )
+				throw EofBadSyntax( TP.last().source().textRefRange()
 					+ "\nMissing end of char value!" );
 			if( value == '\\' )
 			{
@@ -406,16 +390,18 @@ namespace eon
 				}
 				tmp = tmp.unescape();
 				if( tmp.numChars() != 1 )
-					throw EtfBadSyntax( Source.name() + ":" + string(
-						pos.line() + 1 ) + ":" + string( pos.pos( TP.current().source().source() ) + 1 )
+					throw EofBadSyntax(
+						sourceref( Source.source(), pos ).textRefPos()
 						+ "\nInvalid escape sequence!" );
 				value = *tmp.begin();
 			}
 			else
 			{
-				if( !TP || !TP.current().match( "'" ) )
-					throw EtfBadSyntax( Source.name() + ":" + string(
-						TP.current().source().pos().line() + 1 ) + ":" + string( TP.current().source().pos().pos( TP.current().source().source() ) + 1 )
+				if( !TP )
+					throw EofBadSyntax( TP.last().source().textRefRange()
+						+ "\nExpected a single quote character to follow this!" );
+				if( !TP.current().match( "'" ) )
+					throw EofBadSyntax( TP.current().source().textRefPos()
 						+ "\nExpected a single quote character here!" );
 			}
 			TP.forward();
@@ -443,18 +429,15 @@ namespace eon
 			auto pos = TP.current().source().pos();
 			TP.forward();		// Skip the "#"
 			if( !TP )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":"
-					+ string( pos.pos( TP.last().source().source() ) + 1 )
-					+ "\nExpected a name here!" );
+				throw EofBadSyntax( TP.last().source().textRefRange()
+					+ "\nExpected a name to follow this!" );
 			pos = TP.current().source().pos();
 
 			// Expect a name
 			auto name = parseRawName();
 			if( name == no_name )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":"
-					+ string( pos.pos( TP.last().source().source() ) + 1 )
+				throw EofBadSyntax(
+					sourceref( Source.source(), pos ).textRefPos()
 					+ "\nExpected a name here!" );
 			return tup::valueptr( new tup::nameval( name ) );
 		}
@@ -486,9 +469,8 @@ namespace eon
 			auto start_line = TP.current().source().pos().line();
 			auto start_pos = TP.current().source().pos().pos( TP.current().source().source() );
 			if( !TP )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					TP.current().source().pos().line() + 1 ) + ":" + string( TP.current().source().pos().pos( TP.current().source().source() ) + 1 )
-					+ "\nExpected a string value here!" );
+				throw EofBadSyntax( TP.last().source().textRefRange()
+					+ "\nExpected a string value to follow this!" );
 			string value;
 			bool escape = false;
 			for( ; TP; TP.forward() )
@@ -512,7 +494,7 @@ namespace eon
 				}
 			}
 			if( !TP || !TP.current().match( "\"" ) )
-				throw EtfBadSyntax( Source.name() + ":" + string(
+				throw EofBadSyntax( Source.name() + ":" + string(
 					start_line + 1 ) + ":" + string( start_pos + 1 )
 					+ "\nExpected a double quote character here!" );
 			TP.forward();
@@ -544,8 +526,8 @@ namespace eon
 						}
 						catch( ... )
 						{
-							throw EtfBadSyntax( Source.name() + ":" + string(
-								pos.line() + 1 ) + ":" + string( pos.pos( TP.current().source().source() ) + 1 )
+							throw EofBadSyntax( sourceref(
+								Source.source(), pos ).textRefRange()
 								+ "\nNot a valid hex digits section!" );
 						}
 						value += hx;
@@ -567,8 +549,8 @@ namespace eon
 				}
 				catch( ... )
 				{
-					throw EtfBadSyntax( Source.name() + ":" + string(
-						pos.line() + 1 ) + ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+					throw EofBadSyntax( sourceref(
+						Source.source(), pos ).textRefRange()
 						+ "\nNot a valid hex digits section!" );
 				}
 				value += hx;
@@ -659,9 +641,11 @@ namespace eon
 		tup::valueptr Parser::parseRegex()
 		{
 			TP.forward();	// Skip opening "?"
-			if( !TP || TP.current().substr().numChars() != 1 )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					TP.current().source().pos().line() + 1 ) + ":" + string( TP.current().source().pos().pos( TP.current().source().source() ) + 1 )
+			if( !TP )
+				throw EofBadSyntax( TP.last().source().textRefRange()
+					+ "\nExpected a regex boundary character to follow this!" );
+			if( TP.current().substr().numChars() != 1 )
+				throw EofBadSyntax( TP.current().source().textRefPos()
 					+ "\nExpected a regex boundary character here!" );
 			auto start_line = TP.current().source().pos().line();
 			auto start_pos = TP.current().source().pos().pos( TP.current().source().source() );
@@ -669,11 +653,8 @@ namespace eon
 			string pattern{ boundary };
 			TP.forward();
 			if( !TP )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					TP.last().source().pos().line() + 1 ) + ":" + string(
-						TP.last().source().pos().pos(
-							TP.last().source().source() ) + 1 )
-					+ "\nExpected a regex expression here!" );
+				throw EofBadSyntax( TP.last().source().textRefRange()
+					+ "\nExpected a regex expression to follow this!" );
 
 			// Keep reading until we see the boundary character again
 			bool escape = false;
@@ -706,8 +687,8 @@ namespace eon
 			{
 				auto pos = TP ? TP.current().source().pos()
 					: TP.last().source().pos();
-				throw EtfBadSyntax( Source.name() + ":" + string( pos.line() + 1 )
-					+ ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+				throw EofBadSyntax(
+					sourceref( Source.source(), pos ).textRefRange()
 					+ "\nExpected the boundary character to end the regular expression!" );
 			}
 
@@ -717,8 +698,7 @@ namespace eon
 				string flags = TP.current().substr();
 				if( TP.current().substr().containsOtherThan(
 					substring( "ilsSo" ) ) )
-					throw EtfBadSyntax( Source.name() + ":" + string(
-						TP.current().source().pos().line() + 1 ) + ":" + string( TP.current().source().pos().pos( TP.current().source().source() ) + 1 )
+					throw EofBadSyntax( TP.current().source().textRefRange()
 						+ "\nOnly legal regex flags are: ilsSo!" );
 				pattern += TP.current().substr();
 				TP.forward();
@@ -731,7 +711,7 @@ namespace eon
 			}
 			catch( rx::InvalidExpression& e )
 			{
-				throw EtfBadSyntax( Source.name() + ":" + string( start_line + 1 )
+				throw EofBadSyntax( Source.name() + ":" + string( start_line + 1 )
 					+ ":" + string( start_pos + 1 ) + "\n" + e.what() );
 			}
 
@@ -749,10 +729,7 @@ namespace eon
 				// Expect a name
 				auto name = parseRawName();
 				if( name == no_name )
-					throw EtfBadSyntax( Source.name() + ":" + string(
-						TP.current().source().pos().line() + 1 ) + ":"
-						+ string( TP.current().source().pos().pos(
-							TP.current().source().source() ) + 1 )
+					throw EofBadSyntax( TP.current().source().textRefRange()
 						+ "\nExpected a name part of a path here!" );
 				path.add( name );
 
@@ -762,8 +739,8 @@ namespace eon
 				TP.forward();
 			}
 			if( path.empty() )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+				throw EofBadSyntax(
+					sourceref( Source.source(), pos ).textRefRange()
 					+ "\nExpected a name part of a path here!" );
 			return tup::valueptr( new tup::refval( std::move( path ) ) );
 		}
@@ -791,12 +768,12 @@ namespace eon
 				TP.forward();
 			}
 			if( nested == 1 )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+				throw EofBadSyntax(
+					sourceref( Source.source(), pos ).textRefRange()
 					+ "\nExpression must end in ')'" );
 			else if( nested > 1 )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+				throw EofBadSyntax(
+					sourceref( Source.source(), pos ).textRefRange()
 					+ "\nInvalid expression (Check parenthesis!)" );
 
 			expression ex;
@@ -806,8 +783,8 @@ namespace eon
 			}
 			catch( exception& e )
 			{
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					pos.line() + 1 ) + ":" + string( pos.pos( TP.last().source().source() ) + 1 )
+				throw EofBadSyntax(
+					sourceref( Source.source(), pos ).textRefPos()
 					+ "\n" + e.what() );
 			}
 			return tup::valueptr( new tup::expressionval( std::move( ex ) ) );
@@ -910,14 +887,11 @@ namespace eon
 					return tup::valueptr( new tup::tupleval() );
 			}
 			else
-				throw EtfBadSyntax( Source.name() + ":"
-					+ string( TP.last().source().pos().line() + 1 ) + ":"
-					+ string( TP.last().source().pos().pos(
-						TP.last().source().source() ) + 1 )
-					+ "\nExpected tuple starting at "
-					+ string( pos.line() + 1 ) + ":" + string( pos.pos(
-						TP.last().source().source() ) + 1 ) + " to end in '"
-					+ group_end + "' here!" );
+				throw EofBadSyntax( TP.last().source().textRefRange()
+					+ "\nExpected tuple starting at line "
+					+ string( pos.line() + 1 ) + " position "
+					+ string( pos.pos( TP.last().source().source() ) + 1 )
+					+ " to end in '" + group_end + "' here!" );
 		}
 		tup::valueptr Parser::parseMeta( tup::variables& vars, bool merge )
 		{
@@ -1029,10 +1003,7 @@ namespace eon
 			auto indent = TP.at( TP.lineStart() ).space() ? TP.at(
 				TP.lineStart() ).substr().numChars() : 0;
 			if( indent % 2 != 0 )
-				throw EtfBadSyntax( Source.name() + ":" + string(
-					TP.current().source().pos().line() + 1 ) + ":" + string(
-						TP.current().source().pos().pos(
-							TP.current().source().source() ) + 1 )
+				throw EofBadSyntax( TP.current().source().textRefRange()
 					+ "\nIndentation must be a factor of 2!" );
 			return indent;
 		}

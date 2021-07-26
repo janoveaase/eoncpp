@@ -25,8 +25,8 @@
 ******************************************************************************/
 namespace eon
 {
-	//* Exception thrown if an ETF document has a syntax error
-	EONEXCEPT( EtfBadSyntax );
+	//* Exception thrown if an EOF document has a syntax error
+	EONEXCEPT( EofBadSyntax );
 
 
 

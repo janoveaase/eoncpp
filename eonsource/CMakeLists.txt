@@ -5,10 +5,12 @@ message(STATUS " - EonSource")
 set(SOURCE_HEADERS
 	Source.h
 	SourceRef.h
+	SourcePos.h
 )
 set(SOURCE_SOURCES
 	Source.cpp
 	SourceRef.cpp
+	SourcePos.cpp
 )
 
 add_library(EonSource STATIC ${SOURCE_HEADERS} ${SOURCE_SOURCES})

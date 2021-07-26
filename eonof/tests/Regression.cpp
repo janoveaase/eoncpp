@@ -395,7 +395,7 @@ namespace eon
 	{
 		string in{ R"(?//)" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EtfBadSyntax )
+		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RegexTest, basic )
@@ -438,7 +438,7 @@ namespace eon
 	{
 		string in{ R"(?/./ilsxo)" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EtfBadSyntax )
+		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RegexTest, boundary )
@@ -458,7 +458,7 @@ namespace eon
 	{
 		string in{ "@" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EtfBadSyntax )
+		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RefTest, one )
@@ -613,7 +613,7 @@ namespace eon
 		// Missing closing ')' in expression
 		string in{ "loop<while(token != '}'>=one" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EtfBadSyntax )
+		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
 			<< "Failed to parse";
 	}
 
