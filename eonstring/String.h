@@ -1400,10 +1400,12 @@ namespace eon
 	public:
 
 		//* Get a 32-bit hash value
-		inline uint32_t hash32() const noexcept { return substr().hash32(); }
+		inline uint32_t hash32() const noexcept {
+			return substring::hash32( begin().byteData(), end().byteData() ); }
 
 		//* Get a 64-bit hash value
-		inline uint64_t hash64() const noexcept { return substr().hash64(); }
+		inline uint64_t hash64() const noexcept {
+			return substring::hash64( begin().byteData(), end().byteData() ); }
 
 		//* Get a 'size_t'size hash value
 		inline size_t hash() const noexcept { return static_cast<size_t>(
