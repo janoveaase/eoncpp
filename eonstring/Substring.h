@@ -267,10 +267,10 @@ namespace eon
 
 		//* FNV-1a hash algorithm used for producing hash values from the
 		//* source string that is covered by the substring.
-#define FNV_PRIME32 16777619;
-#define FNV_PRIME64 1099511628211;
-#define FNV_OFFSET32 2166136261;
-#define FNV_OFFSET64 14695981039346656037LLU;
+#define FNV_PRIME32 16777619
+#define FNV_PRIME64 1099511628211
+#define FNV_OFFSET32 2166136261
+#define FNV_OFFSET64 14695981039346656037LLU
 		inline uint32_t hash32() const noexcept {
 			return hash32( begin().byteData(), end().byteData() ); }
 		inline uint64_t hash64() const noexcept {
