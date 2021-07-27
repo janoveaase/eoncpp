@@ -1409,11 +1409,11 @@ namespace eon
 
 		//* Get a 'size_t'size hash value
 #if defined(_WIN64) || defined(__x86_64__)
-		inline size_t hash() const noexcept {
-			return static_cast<size_t>( hash64() ); }
+		inline size_t hash() const noexcept { return substring::hash64(
+			Bytes.c_str(), Bytes.c_str() + Bytes.size() ); }
 #else
-		inline size_t hash() const noexcept {
-			return static_cast<size_t>( hash32() ); }
+		inline size_t hash() const noexcept { return substring::hash32(
+			Bytes.c_str(), Bytes.c_str() + Bytes.size() ); }
 #endif
 
 

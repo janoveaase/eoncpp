@@ -463,7 +463,10 @@ namespace eon
 		for( auto& str : s_strings )
 			e_strings.push_back( string( str ) );
 
-		size_t rounds = 100000;
+		size_t rounds = 1000000;
+#ifdef _DEBUG
+		rounds /= 10;
+#endif
 		size_t e_sum{ 0 };
 		std::hash<string> e_hasher;
 		std::chrono::steady_clock clock;
@@ -492,9 +495,9 @@ namespace eon
 		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 			s_time );
 
-		std::cout << "\nEon string: " << string::toString( e_ms.count() )
+		std::cout << "\nEon string (" << e_sum << "): " << string::toString( e_ms.count() )
 			<< "ms\n";
-		std::cout << "Std string: " << string::toString( s_ms.count() )
+		std::cout << "Std string (" << s_sum << "): " << string::toString( s_ms.count() )
 			<< "ms\n";
 	}
 
