@@ -127,8 +127,8 @@ namespace eon
 
 
 		//* Load the contents of the file
-		string loadText( std::uintmax_t max_chars = UINTMAX_MAX );
-		std::string loadBinary( std::uintmax_t max_bytes = UINTMAX_MAX );
+		string loadText( std::uintmax_t max_chars = UINTMAX_MAX ) const;
+		std::string loadBinary( std::uintmax_t max_bytes = UINTMAX_MAX ) const;
 
 		//* Load the file, line by line
 		class iterator;

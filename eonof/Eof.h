@@ -73,8 +73,8 @@ namespace eon
 		//* Throws [eon::EtfInvalid] if validation fails.
 		//* Throws [eon::tup::CircularReferencing] if circular referencing is
 		//* detected!
-		void loadExclusive( const path& file );
-		void loadMerge( const path& file );
+		void loadExclusive( const file& input_file );
+		void loadMerge( const file& input_file );
 
 		//* Parse one or more documents from a string
 		//* If you provide a document name, that name will be used if the

@@ -34,16 +34,16 @@ namespace eon
 
 
 
-	void eonof::loadExclusive( const path& file )
+	void eonof::loadExclusive( const file& input_file )
 	{
-		auto name = eon::name::get( file.name() );
-		source src( file.str(), eon::file( file ).loadText() );
+		auto name = eon::name::get( input_file.path().str() );
+		source src( input_file.path(), input_file.loadText() );
 		_parse( name, src, false );
 	}
-	void eonof::loadMerge( const path& file )
+	void eonof::loadMerge( const file& input_file )
 	{
-		auto name = eon::name::get( file.name() );
-		source src( file.str(), eon::file( file ).loadText() );
+		auto name = eon::name::get( input_file.path().str() );
+		source src( input_file.path(), input_file.loadText() );
 		_parse( name, src, true );
 	}
 

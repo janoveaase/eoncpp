@@ -1,6 +1,6 @@
 #include "Parser.h"
 #include <eontuple/StringValue.h>
-#include <eonfile/File.h>
+#include <eonfilesys/FileSys.h>
 
 
 namespace eon
@@ -48,9 +48,9 @@ namespace eon
 	void parser::_showUsage()
 	{
 		std::cout << "Eon Parser Usage\n";
-		std::cout << App.base() + " <input> <output> <how>\n";
+		std::cout << App.path().base() + " <input> <output> <how>\n";
 		std::cout << "  input=<source>  : The source can be a file path, a directory path,\n";
-		std::cout << "                    (ending in a slahs), a directory path (optionally\n";
+		std::cout << "                    (ending in a slash), a directory path (optionally\n";
 		std::cout << "                    ending in slash) followed by '::' and a regular\n";
 		std::cout << "                    expression identifying files within it, or or a\n";
 		std::cout << "                    comma-separated list of any combinations of the\n";
@@ -101,9 +101,9 @@ namespace eon
 			{
 				path item = source;
 				if( item.str().endsWith( "/" ) )
-					InputDirs.insert( item.noEndSlash() );
+					InputDirs.insert( item );
 				else
-					InputFiles.push( std::move( item ) );
+					InputFiles.push( item );
 			}
 		}
 	}
@@ -124,7 +124,7 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		{
 			auto file = InputFiles.front();
 			InputFiles.pop();
-			std::cout << " - " << file.stdstr() << "\n";
+			std::cout << " - " << file.path().stdstr() << "\n";
 			_parse( file );
 		}
 		return 0;
@@ -164,15 +164,12 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		std::cout << " files, generating ";
 		std::cout << Doc->find( { name_output } )->hardString();
 		std::cout << " output inside \"";
-		std::cout << OutputDir.stdstr() << "\".\n";
+		std::cout << OutputDir.path().stdstr() << "\".\n";
 	}
 
-	void parser::_parse( const path& file )
+	void parser::_parse( const file& input_file )
 	{
-		textfilereader reader( file );
-		reader.open();
-		source src( file.str(), reader.read( SIZE_MAX ) );
-		reader.close();
+		source src( input_file.path(), input_file.loadText() );
 		_parse( src );
 	}
 	void parser::_parse( source& src )
@@ -481,10 +478,11 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		bool condition = false;
 
 		if( func == fexists )
-			condition = fsys::exists(
+			condition = path(
 				args.attribute( 1 )->softExpression(
 					Docs.variables() ).evaluate(
-						Docs.variables() )->softString( Docs.variables() ) );
+						Docs.variables() )->softString(
+							Docs.variables() ) ).exists();
 
 		if( !condition )
 			return;

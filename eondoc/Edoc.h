@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Document.h"
-#include <eonfile/File.h>
+#include <eonfilesys/FileSys.h>
 #include "Parser.h"
 
 
@@ -85,7 +85,7 @@ namespace eon
 		//* The file base name will be used as document name, unless an
 		//* override name is specified.
 		//* Throws [eon::edocBadSyntax] if formatting is incorrect.
-		void load( const path& file, const string& override_name = "" );
+		void load( const file& input_file, const string& override_name = "" );
 
 		//* Parse a document from a string
 		//* You must provide a name for the document!

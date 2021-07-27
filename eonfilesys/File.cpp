@@ -150,7 +150,7 @@ namespace eon
 		}
 	}
 
-	string file::loadText( std::uintmax_t max_chars )
+	string file::loadText( std::uintmax_t max_chars ) const
 	{
 		filebuffer buffer( Path, filesys::mode::input );
 		buffer.open();
@@ -165,7 +165,7 @@ namespace eon
 		}
 		return str;
 	}
-	std::string file::loadBinary( std::uintmax_t max_bytes )
+	std::string file::loadBinary( std::uintmax_t max_bytes ) const
 	{
 		filebuffer buffer( Path, filesys::mode::input );
 		buffer.open();

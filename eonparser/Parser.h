@@ -1,6 +1,6 @@
 #pragma once
 #include "DocNode.h"
-#include <eonpath/Path.h>
+#include <eonfilesys/FileSys.h>
 #include <eonregex/RegEx.h>
 #include <eonof/Eof.h>
 #include <queue>
@@ -59,7 +59,7 @@ namespace eon
 		void _findDocument();
 		void _showInfo();
 
-		void _parse( const path& file );
+		void _parse( const file& input_file );
 		void _parse( source& src );
 		bool _parseStructure( tokenparser& tp, const tuple& structure );
 
@@ -87,11 +87,11 @@ namespace eon
 
 
 	private:
-		path App;
-		std::set<path> InputDirs;
+		file App;
+		std::set<directory> InputDirs;
 //		std::queue<std::pair<path, regex>> ScanDirs;
-		std::queue<path> InputFiles;
-		path OutputDir;
+		std::queue<file> InputFiles;
+		directory OutputDir;
 		eonof Docs;
 		tuple* Doc{ nullptr };
 
