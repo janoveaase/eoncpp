@@ -347,34 +347,6 @@ namespace eon
 
 
 
-	uint32_t substring::hash32( const char* begin, const char* end ) noexcept
-	{
-		if( end == begin )
-			return 0;
-		uint32_t h = FNV_OFFSET32;
-		for( auto c = begin; c != end; ++c )
-		{
-			h ^= static_cast<unsigned char>( *c );
-			h *= FNV_PRIME32;
-		}
-		return h;
-	}
-	uint64_t substring::hash64( const char* begin, const char* end ) noexcept
-	{
-		if( end == begin )
-			return 0;
-		uint64_t h = FNV_OFFSET64;
-		for( auto c = begin; c != end; ++c )
-		{
-			h ^= static_cast<unsigned char>( *c );
-			h *= FNV_PRIME64;
-		}
-		return h;
-	}
-
-
-
-
 	substring substring::findFirst( const substring& to_find ) const noexcept
 	{
 		if( empty() || to_find.empty() )

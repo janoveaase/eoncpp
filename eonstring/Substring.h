@@ -268,19 +268,32 @@ namespace eon
 		//* FNV-1a hash algorithm used for producing hash values from the
 		//* source string that is covered by the substring.
 #define FNV_PRIME32 16777619
-#define FNV_PRIME64 1099511628211
+#define FNV_PRIME64 1099511628211LLU
 #define FNV_OFFSET32 2166136261
 #define FNV_OFFSET64 14695981039346656037LLU
 		inline uint32_t hash32() const noexcept {
-			return hash32( begin().byteData(), end().byteData() ); }
+			return hash32( Beg.byteData(), End.byteData() ); }
 		inline uint64_t hash64() const noexcept {
-			return hash64( begin().byteData(), end().byteData() ); }
-		inline size_t hash() const noexcept { return static_cast<size_t>(
-			sizeof( size_t ) == 4 ? hash32() : hash64() ); }
+			return hash64( Beg.byteData(), End.byteData() ); }
+#if defined(_WIN64) || defined(__x86_64__)
+		inline size_t hash() const noexcept {
+			return hash64( Beg.byteData(), End.byteData() ); }
+#else
+		inline size_t hash() const noexcept {
+			return hash32( Beg.byteData(), End.byteData() ); }
+#endif
 
 		//* Static hash method for raw bytes
-		static uint32_t hash32( const char* begin, const char* end ) noexcept;
-		static uint64_t hash64( const char* begin, const char* end ) noexcept;
+		static inline uint32_t hash32( const char* begin, const char* end,
+			uint32_t h = FNV_OFFSET32 ) noexcept {
+			for( auto c = begin; c != end; ++c ) {
+				h ^= static_cast<unsigned char>( *c ); h *= FNV_PRIME32; }
+			return h; }
+		static inline uint64_t hash64( const char* begin, const char* end,
+			uint64_t h = FNV_OFFSET64 ) noexcept {
+			for( auto c = begin; c != end; ++c ) {
+				h ^= static_cast<unsigned char>( *c ); h *= FNV_PRIME64; }
+			return h; }
 
 
 
