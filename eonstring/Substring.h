@@ -271,10 +271,16 @@ namespace eon
 #define FNV_PRIME64 1099511628211;
 #define FNV_OFFSET32 2166136261;
 #define FNV_OFFSET64 14695981039346656037LLU;
-		uint32_t hash32() const noexcept;
-		uint64_t hash64() const noexcept;
+		inline uint32_t hash32() const noexcept {
+			return hash32( begin().byteData(), end().byteData() ); }
+		inline uint64_t hash64() const noexcept {
+			return hash64( begin().byteData(), end().byteData() ); }
 		inline size_t hash() const noexcept { return static_cast<size_t>(
 			sizeof( size_t ) == 4 ? hash32() : hash64() ); }
+
+		//* Static hash method for raw bytes
+		static uint32_t hash32( const char* begin, const char* end ) noexcept;
+		static uint64_t hash64( const char* begin, const char* end ) noexcept;
 
 
 
