@@ -442,6 +442,61 @@ namespace eon
 			? 2984921202 : 10092224619179044402llu;
 		WANT_EQ( expected, eon::string( str ).hash() ) << "Wrong hash value";
 	}
+	TEST( String, hash_speed )
+	{
+		std::vector<std::string> s_strings{
+			"alpha", "beta", "gamma", "delta", "epsilon", "zeta",
+			"eta", "theta", "iota", "kappa", "lambda", "mu", "nu",
+			"xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon",
+			"phi", "chi", "psi", "omega",
+			"Norway", "United States of America", "France", "United Kingdom",
+			"Sweeden", "Denmark", "Italy", "Iceland", "Germany", "Australia",
+			"Philippines", "Peru", "Puerto Rico", "North Macedonia",
+			"New Caledonia", "Republic of Korea", "Romania", "Saint Helena",
+			"Ascension Island", "Saint Kitts and Nevis", "Sudan",
+			"Switzerland", "Trinidad and Tobago", "Uruguay", "Uzbekistan",
+			"Zambia", "Zimbabwe", "Western Sahara", "Djibouti",
+			"Dominican Republic", "Egypt",
+			"The quick brown fox jumps over the lazy dog"
+		};
+		std::vector<string> e_strings;
+		for( auto& str : s_strings )
+			e_strings.push_back( string( str ) );
+
+		size_t rounds = 100000;
+		size_t e_sum{ 0 };
+		std::hash<string> e_hasher;
+		std::chrono::steady_clock clock;
+		auto e_start = clock.now();
+		for( size_t i = 0; i < rounds; ++i )
+		{
+			for( auto& e_str : e_strings )
+				e_sum += e_hasher( e_str );
+		}
+		auto e_end = clock.now();
+
+		size_t s_sum{ 0 };
+		std::hash<std::string> s_hasher;
+		auto s_start = clock.now();
+		for( size_t i = 0; i < rounds; ++i )
+		{
+			for( auto& s_str : s_strings )
+				s_sum += s_hasher( s_str );
+		}
+		auto s_end = clock.now();
+
+		auto e_time = e_end - e_start;
+		auto s_time = s_end - s_start;
+		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+			e_time );
+		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+			s_time );
+
+		std::cout << "\nEon string: " << string::toString( e_ms.count() )
+			<< "ms\n";
+		std::cout << "Std string: " << string::toString( s_ms.count() )
+			<< "ms\n";
+	}
 
 	TEST( String, replace )
 	{

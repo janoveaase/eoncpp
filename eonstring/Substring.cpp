@@ -354,7 +354,7 @@ namespace eon
 		uint32_t h = FNV_OFFSET32;
 		for( auto c = begin; c != end; ++c )
 		{
-			h ^= *c;
+			h ^= static_cast<unsigned char>( *c );
 			h *= FNV_PRIME32;
 		}
 		return h;
@@ -366,7 +366,7 @@ namespace eon
 		uint64_t h = FNV_OFFSET64;
 		for( auto c = begin; c != end; ++c )
 		{
-			h ^= *c;
+			h ^= static_cast<unsigned char>( *c );
 			h *= FNV_PRIME64;
 		}
 		return h;

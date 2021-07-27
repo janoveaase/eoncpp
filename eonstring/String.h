@@ -1400,16 +1400,21 @@ namespace eon
 	public:
 
 		//* Get a 32-bit hash value
-		inline uint32_t hash32() const noexcept {
-			return substring::hash32( begin().byteData(), end().byteData() ); }
+		inline uint32_t hash32() const noexcept { return substring::hash32(
+			Bytes.c_str(), Bytes.c_str() + Bytes.size() ); }
 
 		//* Get a 64-bit hash value
-		inline uint64_t hash64() const noexcept {
-			return substring::hash64( begin().byteData(), end().byteData() ); }
+		inline uint64_t hash64() const noexcept { return substring::hash64(
+			Bytes.c_str(), Bytes.c_str() + Bytes.size() ); }
 
 		//* Get a 'size_t'size hash value
-		inline size_t hash() const noexcept { return static_cast<size_t>(
-			sizeof( size_t ) == 4 ? hash32() : hash64() ); }
+#if defined(_WIN64) || defined(__x86_64__)
+		inline size_t hash() const noexcept {
+			return static_cast<size_t>( hash64() ); }
+#else
+		inline size_t hash() const noexcept {
+			return static_cast<size_t>( hash32() ); }
+#endif
 
 
 
@@ -1833,7 +1838,7 @@ namespace std
 	template<>
 	struct hash<::eon::string> {
 		inline size_t operator()( const ::eon::string& rhs ) const {
-			return static_cast<size_t>( rhs.hash64() ); } };
+			return static_cast<size_t>( rhs.hash() ); } };
 	template<>
 	struct equal_to<::eon::string> {
 		inline bool operator()( const ::eon::string& lhs,
@@ -1844,7 +1849,7 @@ namespace std
 	template<>
 	struct hash<::eon::string_ptr> {
 		inline size_t operator()( const ::eon::string_ptr& rhs ) const {
-			return static_cast<size_t>( rhs->hash64() ); } };
+			return static_cast<size_t>( rhs->hash() ); } };
 	template<>
 	struct equal_to<::eon::string_ptr> {
 		inline bool operator()( const ::eon::string_ptr& lhs,
