@@ -282,7 +282,7 @@ namespace eontest
 
 	public:
 		EonTest() = default;
-		~EonTest()
+		virtual ~EonTest()
 		{
 			std::cout << ( Failed ? "FAIL" : "OK" ) << "\n";
 			auto str = _Messages.str();

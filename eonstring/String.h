@@ -170,7 +170,14 @@ namespace eon
 		inline explicit string( long value ) { *this = toString( value ); }
 		inline explicit string( unsigned long value ) {
 			*this = toString( value ); }
-#ifndef EON_WINDOWS
+#ifdef EON_WINDOWS
+		inline explicit string( int16_t value ) { *this = toString( value ); }
+		inline explicit string( uint16_t value ) { *this = toString( value ); }
+		inline explicit string( int32_t value ) { *this = toString( value ); }
+		inline explicit string( uint32_t value ) { *this = toString( value ); }
+		inline explicit string( int64_t value ) { *this = toString( value ); }
+		inline explicit string( uint64_t value ) { *this = toString( value ); }
+#else
 		inline explicit string( short value ) { *this = toString( value ); }
 		inline explicit string( unsigned short value ) {
 			*this = toString( value ); }
@@ -180,18 +187,6 @@ namespace eon
 		inline explicit string( int8_t value ) { *this = toString( value ); }
 		inline explicit string( long long unsigned int value ) {
 			*this = toString( value ); }
-#endif
-#ifndef EON_UNIX
-		inline explicit string( int16_t value ) { *this = toString( value ); }
-		inline explicit string( uint16_t value ) { *this = toString( value ); }
-		inline explicit string( int32_t value ) { *this = toString( value ); }
-		inline explicit string( uint32_t value ) { *this = toString( value ); }
-		inline explicit string( int64_t value ) { *this = toString( value ); }
-		inline explicit string( uint64_t value ) { *this = toString( value ); }
-#endif
-#ifdef EON_APPLE
-		inline explicit string( size_t value ) {
-			*this = static_cast<uint64_t>( value ); }
 #endif
 		inline explicit string( float value ) {
 			*this = toString( static_cast<double>( value ) ); }
