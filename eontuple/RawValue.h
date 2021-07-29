@@ -26,10 +26,10 @@ namespace eon
 		public:
 
 			inline rawval() : value( basic_type::raw_t ) {}
-			inline rawval( const std::vector<string>& value )
-				: value( basic_type::raw_t ) { Val = value; }
-			inline rawval( std::vector<string>&& value ) noexcept
-				: value( basic_type::raw_t ) { Val = std::move( value ); }
+			inline rawval( const std::vector<string>& val )
+				: value( basic_type::raw_t ) { Val = val; }
+			inline rawval( std::vector<string>&& val ) noexcept
+				: value( basic_type::raw_t ) { Val = std::move( val ); }
 
 
 
@@ -39,12 +39,21 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline const std::vector<string>& raw_value() const override {
+			inline bool softBool( variables& vars ) const override {
+				return !Val.empty(); }
+			inline const string& softString( variables& vars ) const override {
+				static string str; str = "\n"; str.join( Val ); return str; }
+			inline const std::vector<string>& hardRaw() const override {
 				return Val; }
+			inline const std::vector<string>& softRaw( variables& vars )
+				const override { return Val; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isRaw() && Val == other->raw_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto o = other->hardRaw();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto o = other->softRaw( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -52,8 +61,7 @@ namespace eon
 
 
 			//* Write value to string
-			string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override;
 
 
@@ -63,7 +71,6 @@ namespace eon
 			******************************************************************/
 		public:
 
-			//* Get modifiable value
 			inline std::vector<string>& raw_value() override { return Val; }
 
 			//* Clear value

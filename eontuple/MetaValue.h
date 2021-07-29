@@ -27,10 +27,10 @@ namespace eon
 		public:
 
 			inline metaval() : value( basic_type::meta_t ) {}
-			inline metaval( const tuple& value )
-				: value( basic_type::meta_t ) { Val = value; }
-			inline metaval( tuple&& value ) noexcept
-				: value( basic_type::meta_t ) { Val = std::move( value ); }
+			inline metaval( const tuple& val )
+				: value( basic_type::meta_t ) { Val = val; }
+			inline metaval( tuple&& val ) noexcept
+				: value( basic_type::meta_t ) { Val = std::move( val ); }
 
 
 
@@ -40,12 +40,22 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline const tuple& meta_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override {
+				return !Val.empty(); }
+			inline const string& softString( variables& vars ) const override {
+				static string str; str = Val.str(); return str; }
+			inline const tuple& softTuple( variables& vars ) const override {
+				return Val; }
+			inline const tuple& hardMeta() const override { return Val; }
+			inline const tuple& softMeta( variables& vars ) const override {
+				return Val; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isMeta()
-					&& Val == other->meta_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto& o = other->hardMeta();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto& o = other->softMeta( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -53,11 +63,10 @@ namespace eon
 
 
 			//* Write value to string
-			inline string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
-				const noexcept override { auto s = Val.str( pos_on_line,
-					indentation_level, tup::perm::allow_oneliner );
-					pos_on_line += 2; return "<" + s + ">"; }
+			inline string str( size_t& pos_on_line, size_t indentation_level )
+				const noexcept override {
+				auto s = Val.str( pos_on_line, indentation_level );
+				pos_on_line += 2; return "<" + s + ">"; }
 
 
 
@@ -66,7 +75,6 @@ namespace eon
 			******************************************************************/
 		public:
 
-			//* Get modifiable value
 			inline tuple& meta_value() override { return Val; }
 
 			//* Claim ownership of the tuple

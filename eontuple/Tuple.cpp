@@ -7,66 +7,56 @@
 
 namespace eon
 {
-	tuple::tuple( form tuple_form,
+	tuple::tuple( form tuple_form, tup::variables& vars,
 		std::initializer_list<name_t> name_attributes )
 	{
 		Form = tuple_form;
 		for( auto name : name_attributes )
-			append( tup::valueptr( new tup::nameval( name ) ) );
-	}
-
-	tuple& tuple::operator=( const tuple& other )
-	{
-		clear();
-		for( auto a : other.Attributes )
-		{
-			Attributes.push_back( a );
-			if( a->Name != no_name )
-				Named[ a->Name ] = Attributes[ Attributes.size() - 1 ];
-		}
-		Form = other.Form;
-		return *this;
+			append( tup::valueptr( new tup::nameval( name ) ), vars );
 	}
 
 
 
 
-	bool tuple::containsUnnamedValue( name_t value ) const noexcept
+	bool tuple::containsUnnamedValue( name_t value,
+		const tup::variables& vars ) const noexcept
 	{
 		for( auto attribute : Attributes )
 		{
 			if( attribute->Name == no_name && attribute->Value->isName()
-				&& attribute->Value->name_value() == value )
+				&& attribute->Value->hardName() == value )
 				return true;
 		}
 		return false;
 	}
-	bool tuple::containsUnnamedValue( const tup::valueptr& value ) const noexcept
+	bool tuple::containsUnnamedValue( const tup::valueptr& value,
+		const tup::variables& vars ) const noexcept
 	{
 		for( auto attribute : Attributes )
 		{
 			if( attribute->Name == no_name
-				&& attribute->Value->basicType() == value->basicType() )
+				&& attribute->Value->type() == value->type() )
 			{
-				if( attribute->Value->equal( value ) )
+				if( attribute->Value->hardCompare( value ) == 0 )
 					return true;
 			}
 		}
 		return false;
 	}
 
-	tup::path tuple::path( const tuple* subtuple ) const noexcept
+	tup::path tuple::path( const tup::variables& vars, const tuple* subtuple )
+		const noexcept
 	{
 		tup::path p;
 		if( Parent != nullptr )
-			p = Parent->path( this );
+			p = Parent->path( vars, this );
 
 		if( subtuple != nullptr )
 		{
 			for( auto attribute : Attributes )
 			{
 				if( attribute->Value->isTuple()
-					&& &attribute->Value->tuple_value() == subtuple
+					&& &attribute->Value->hardTuple() == subtuple
 					&& attribute->Name != no_name )
 					p.add( attribute->Name );
 			}
@@ -75,94 +65,124 @@ namespace eon
 	}
 
 
-	string tuple::str( size_t& pos_on_line, size_t indentation_level,
-		tup::perm format ) const noexcept
+	string tuple::str( size_t& pos_on_line, size_t indentation_level ) const
 	{
-		bool allow_oneliner = static_cast<bool>(
-			format & tup::perm::allow_oneliner );
-		bool allow_multiliner = static_cast<bool>(
-			format & tup::perm::allow_multiliner );
-
-		// Check if we can/must put everything on a single line
-		if( ( Parent != nullptr && Parent->Parent != nullptr )
-			|| allow_oneliner || !allow_multiliner )
+		// If we have braced or meta data, we will keep things compact (one
+		// line if possible). Otherwise, we will have each attribute on its
+		// own line.
+		if( Form == form::braced || Form == form::metadata )
+			return _strCompact( pos_on_line, indentation_level );
+		else
+			return _strMultiline( pos_on_line, indentation_level );
+	}
+	string tuple::_strCompact( size_t& pos_on_line, size_t indentation_level ) const
+	{
+		string str, indent( indentation_level * 2, SpaceChr );
+		for( auto& attribute : Attributes )
 		{
-			string s;
-			auto pos = pos_on_line;
-			for( auto attribute : Attributes )
+			string sub, separator;
+			if( !str.empty() )
+				separator = " ";
+			if( attribute->Name != no_name )
 			{
-				if( allow_multiliner && (
-					( attribute->Value->basicType()
-						>= tup::basic_type::tuple_t )
-					|| ( attribute->Name != no_name ) ) )
+				sub += *attribute->Name + "=";
+				if( pos_on_line + sub.numChars() + separator.numChars() >= 79 )
 				{
-					s = "";
-					break;
+					str += "\n  " + indent + sub;
+					pos_on_line = 2 + indent.numChars() + sub.numChars();
+					separator = "";
+					sub = "";
 				}
 				else
 				{
-					if( !s.empty() )
-						s += " ";
-					if( attribute->Name != no_name )
-						s += *attribute->Name + "=";
-					s += attribute->Value->str( pos, indentation_level,
-						attribute->Name != no_name ? tup::perm::allow_oneliner : format );
-					if( allow_multiliner
-						&& Form != form::metadata && s.numChars() >= 79 )
-					{
-						s = "";
-						break;
-					}
+					str += separator + sub;
+					pos_on_line += separator.numChars() + sub.numChars();
+					separator = "";
+					sub = "";
 				}
 			}
-			if( !s.empty() )
-				return s;
-		}
 
-		// Use indentation to express the tuple
-		string s, indent( indentation_level * 2, SpaceChr );
+			auto pos = pos_on_line + separator.numChars();
+			sub += attribute->Value->str( pos, indentation_level );
+			if( pos >= 79 )
+			{
+				str += "\n" + indent;
+				pos_on_line = indent.numChars();
+				separator = "";
+				pos = pos_on_line;
+				sub = attribute->Value->str( pos, indentation_level );
+			}
+			str += separator + sub;
+			pos_on_line = pos;
+			separator = "";
+			sub = "";
+		}
+		return str;
+	}
+	string tuple::_strMultiline( size_t& pos_on_line, size_t indentation_level ) const
+	{
+		string str, indent( indentation_level * 2, SpaceChr );
+		auto pos = pos_on_line;
+		bool new_line = false;
 		for( auto attribute : Attributes )
 		{
-			if( !s.empty() )
+			if( !str.empty() )
 			{
-				s += NewlineChr;
-				s += indent;
-				pos_on_line = indent.numChars();
+				str += NewlineChr;
+				str += indent;
+				pos = indent.numChars();
+				new_line = true;
 			}
 			if( attribute->Name != no_name )
 			{
-				s += *attribute->Name;
-				pos_on_line += attribute->Name->numChars();
+				str += *attribute->Name;
+				pos += attribute->Name->numChars();
 				if( attribute->MetaData )
 				{
-					s += "<" + attribute->MetaData->str( ++pos_on_line,
-						indentation_level, format ) + ">";
-					++pos_on_line;
+					str += "<" + attribute->MetaData->str( ++pos,
+						indentation_level + 1 ) + ">";
+					++pos;
 				}
-				s += "=";
-				++pos_on_line;
+				str += "=";
+				new_line = false;
+				++pos;
 			}
-			s += attribute->Value->str( pos_on_line, indentation_level,
-				attribute->Name != no_name ? tup::perm::allow_oneliner
-					: format );
+			auto sub = attribute->Value->str( pos, indentation_level );
+			if( !new_line && !str.empty() && attribute->Value->isTuple() && (
+				sub.contains( NewlineChr ) || ( str.endsWith( '=' )
+					&& !attribute->Value->hardTuple().braced() ) ) )
+			{
+				str += "\n  " + indent;
+				pos = indent.numChars();
+			}
+			if( attribute->Value->isTuple()
+				&& !attribute->Value->hardTuple().empty()
+				&& !attribute->Value->hardTuple().braced()
+				&& !sub.startsWith( '-' ) && attribute->Name == no_name )
+			{
+				str += "- ";
+				pos += 2;
+			}
+			str += sub;
 		}
-		return s;
+		pos_on_line = pos;
+		return str;
 	}
 
 
-	void tuple::validate() const
+	void tuple::validate( tup::variables& vars ) const
 	{
 		for( auto attribute : Attributes )
 		{
 			if( attribute->MetaData && !attribute->MetaData->empty() )
 				_validate( *attribute->MetaData, attribute->MetaData->Parent,
-					attribute );
+					attribute, vars );
 			if( attribute->Value->isTuple() )
-				attribute->Value->tuple_value().validate();
+				attribute->Value->hardTuple().validate( vars );
 		}
 	}
 
-	void tuple::validate( const tuple& other )
+	void tuple::validate( const tuple& other, tup::variables& vars ) const
 	{
 		for( auto attribute : Attributes )
 		{
@@ -170,13 +190,13 @@ namespace eon
 			//* unnamed value that matches.
 			if( attribute->Name == no_name )
 			{
-				if( !other.containsUnnamedValue( attribute->Value ) )
+				if( !other.containsUnnamedValue( attribute->Value, vars ) )
 				{
 					size_t pos{ 0 };
-					throw tup::Invalid( "Attribute \"" + other.path().str()
+					throw tup::Invalid( "Attribute \""
+						+ other.path( vars ).str()
 						+ "\": Expected tuple value to contain: "
-						+ attribute->Value->str( pos, 0,
-							tup::perm::allow_oneliner ) );
+						+ attribute->Value->str( pos, 0 ) );
 				}
 				continue;
 			}
@@ -185,47 +205,50 @@ namespace eon
 			{
 				if( !attribute->MetaData
 					|| !attribute->MetaData->containsUnnamedValue(
-						name_optional ) )
-					throw tup::Invalid( "Attribute \"" + other.path().str()
+						name_optional, vars ) )
+					throw tup::Invalid( "Attribute \""
+						+ other.path( vars ).str()
 						+ "\": Missing non-optional \"" + *attribute->Name
 						+ "\" attribute!" );
 				continue;
 			}
 			if( attribute->Value->isMeta()
-				&& !attribute->Value->meta_value().empty() )
-				_validate( attribute->Value->meta_value(), &other,
-					other.Named.at( attribute->Name ) );
+				&& !attribute->Value->hardMeta().empty() )
+				_validate( attribute->Value->hardMeta(), &other,
+					other.Named.at( attribute->Name ), vars );
 			else if( attribute->Value->isRef() )
 			{
-				auto refd = find( attribute->Value->ref_value() );
+				auto refd = find( attribute->Value->hardRef() );
 				if( !refd || refd->isRef() )
-					throw tup::Invalid( "Attribute \"" + other.path().str()
-						+ "\": Reference for \"" + *attribute->Name
+					throw tup::Invalid( "Attribute \""
+						+ other.path( vars ).str() + "\": Reference for \""
+						+ *attribute->Name
 						+ "\" doesn't lead to a valid target!" );
 			}
 			else if( attribute->Value->isTuple() )
 			{
 				if( !value->isTuple() )
-					throw tup::Invalid( "Attribute \"" + other.path().str()
-						+ "\": Value of \"" + *attribute->Name
-						+ "\" must be a tuple!" );
-				attribute->Value->tuple_value().validate(
-					value->tuple_value() );
+					throw tup::Invalid( "Attribute \""
+						+ other.path( vars ).str() + "\": Value of \""
+						+ *attribute->Name + "\" must be a tuple!" );
+				attribute->Value->hardTuple().validate(
+					value->hardTuple(), vars );
 			}
 			else
 			{
-				if( attribute->Value->basicType() != value->basicType() )
-					throw tup::Invalid( "Attribute \"" + other.path().str()
+				if( attribute->Value->type() != value->type() )
+					throw tup::Invalid( "Attribute \""
+						+ other.path( vars ).str()
 						+ "\": Expected basic type of \"" + *attribute->Name
 						+ "\" to be " + *tup::mapBasicType(
-							attribute->Value->basicType() ) + "!" );
-				if( !attribute->Value->equal( value ) )
+							attribute->Value->type() ) + "!" );
+				if( attribute->Value->hardCompare( value ) != 0 )
 				{
 					size_t pos{ 0 };
-					throw tup::Invalid( "Attribute \"" + other.path().str()
-						+ "\": Expected value of \"" + *attribute->Name
-						+ "\" to be: " + attribute->Value->str( pos, 0,
-							tup::perm::allow_oneliner ) );
+					throw tup::Invalid( "Attribute \""
+						+ other.path( vars ).str() + "\": Expected value of \""
+						+ *attribute->Name + "\" to be: "
+						+ attribute->Value->str( pos, 0 ) );
 				}
 			}
 		}
@@ -234,12 +257,44 @@ namespace eon
 
 
 
-	void tuple::set( size_t attribute_pos, const tup::valueptr& value )
+	tuple& tuple::operator=( const tuple& other )
+	{
+		clear();
+		for( auto a : other.Attributes )
+		{
+			if( a->Value->isTuple() )
+				a->Value->tuple_value().Parent = this;
+			else if( a->Value->isMeta() )
+				a->Value->meta_value().Parent = this;
+			Attributes.push_back( a );
+			if( a->Name != no_name )
+				Named[ a->Name ] = Attributes[ Attributes.size() - 1 ];
+		}
+		Form = other.Form;
+		return *this;
+	}
+	tuple& tuple::operator=( tuple&& other ) noexcept
+	{
+		Attributes = std::move( other.Attributes );
+		for( auto& attribute : Attributes )
+		{
+			if( attribute->Value->isTuple() )
+				attribute->Value->tuple_value().Parent = this;
+			else if( attribute->Value->isMeta() )
+				attribute->Value->meta_value().Parent = this;
+		}
+		Named = std::move( other.Named );
+		Form = other.Form; other.Form = form::plain;
+		return *this;
+	}
+
+	void tuple::set( size_t attribute_pos, const tup::valueptr& value,
+		tup::variables& vars )
 	{
 		if( attribute_pos < Attributes.size() )
 		{
 			auto attribute = Attributes[ attribute_pos ];
-			if( attribute->Value->basicType() != value->basicType() )
+			if( attribute->Value->type() != value->type() )
 				throw tup::WrongType();
 			if( Form == form::plain )
 			{
@@ -252,16 +307,16 @@ namespace eon
 			attribute->Value = value;
 			if( attribute->Value->isTuple() )
 				attribute->Value->tuple_value().Parent = this;
-			if( attribute->Value->isRef() || attribute->Value->isTuple() )
-				_resolveReferences();
+			else if( attribute->Value->isMeta() )
+				attribute->Value->meta_value().Parent = this;
 		}
 		else if( attribute_pos == Attributes.size() )
-			append( value );
+			append( value, vars );
 		else
 			throw tup::WrongType();
 	}
-	void tuple::append( const tup::valueptr& value, name_t name,
-		const tupleptr& metadata )
+	void tuple::append( const tup::valueptr& value, tup::variables& vars,
+		name_t name, const tupleptr& metadata )
 	{
 		if( name != no_name && Named.find( name ) != Named.end() )
 			throw tup::DuplicateName();
@@ -270,7 +325,7 @@ namespace eon
 		attribute->Name = name;
 		attribute->Pos = Attributes.size();
 		attribute->Value = value;
-		if( Form == form::plain )
+		if( Form != form::metadata )
 		{
 			attribute->MetaData = metadata;
 			if( attribute->MetaData )
@@ -281,14 +336,197 @@ namespace eon
 		Attributes.push_back( attribute );
 		if( attribute->Name != no_name )
 			Named[ attribute->Name ] = attribute;
-		if( attribute->Value->isRef() || attribute->Value->isTuple() )
-			_resolveReferences();
+		else if( attribute->Value->isMeta() )
+			attribute->Value->meta_value().Parent = this;
+
+		if( metadata )
+		{
+			auto var = metadata->find( { name_var } );
+			if( var )
+			{
+				if( var->isName() )
+					vars.set( var->hardName(), attribute->Value );
+				else if( var->isVar() )
+					vars.set( var->hardVar(), attribute->Value );
+			}
+		}
+	}
+
+	void tuple::addReplace( const tup::valueptr& value, tup::variables& vars,
+		name_t name, const tupleptr& metadata )
+	{
+		auto found = Named.find( name );
+		if( found == Named.end() )
+		{
+			append( value, vars, name, metadata );
+			return;
+		}
+		auto& attribute = *found->second;
+		attribute.MetaData = metadata;
+		attribute.Value = value;
+		if( attribute.Value->isTuple() )
+			attribute.Value->tuple_value().Parent = this;
+		else if( attribute.Value->isMeta() )
+			attribute.Value->meta_value().Parent = this;
+
+		if( metadata )
+		{
+			auto var = metadata->find( { name_var } );
+			if( var )
+			{
+				if( var->isName() )
+					vars.set( var->hardName(), attribute.Value );
+				else if( var->isVar() )
+					vars.set( var->hardVar(), attribute.Value );
+			}
+		}
+	}
+	void tuple::addMerge( const tup::valueptr& value, tup::variables& vars,
+		name_t name, const tupleptr& metadata )
+	{
+		if( name == no_name )
+		{
+			append( value, vars, name, metadata );
+			return;
+		}
+		auto found = Named.find( name );
+		if( found == Named.end() )
+		{
+			append( value, vars, name, metadata );
+			return;
+		}
+		auto& attribute = *found->second;
+		if( attribute.MetaData )
+		{
+			if( metadata )
+				attribute.MetaData->merge( *metadata, vars );
+		}
+		else if( metadata )
+		{
+			attribute.MetaData = metadata;
+			attribute.MetaData->Parent = this;
+		}
+		if( attribute.Value->isTuple() )
+		{
+			if( value->isTuple() )
+				attribute.Value->tuple_value().merge(
+					value->tuple_value(), vars );
+			else
+			{
+				attribute.Value = value;
+				attribute.Value->tuple_value().Parent = this;
+			}
+		}
+		else if( attribute.Value->isMeta() )
+		{
+			if( value->isMeta() )
+				attribute.Value->meta_value().merge(
+					value->meta_value(), vars );
+			else
+			{
+				attribute.Value = value;
+				attribute.Value->meta_value().Parent = this;
+			}
+		}
+		else
+			attribute.Value = value;
+
+		if( metadata )
+		{
+			auto var = metadata->find( { name_var } );
+			if( var )
+			{
+				if( var->isName() )
+					vars.set( var->hardName(), attribute.Value );
+				else if( var->isVar() )
+					vars.set( var->hardVar(), attribute.Value );
+			}
+		}
+	}
+
+	void tuple::append( const tuple& other, tup::variables& vars )
+	{
+		if( Form != other.Form )
+			throw Incompatible();
+		for( auto attribute : Attributes )
+		{
+			if( Named.find( attribute->Name ) == Named.end() )
+				append( attribute->Value, vars, attribute->Name );
+		}
+	}
+	void tuple::merge( const tuple& other, tup::variables& vars )
+	{
+		for( auto& attribute : other.Attributes )
+		{
+			addMerge( attribute->Value, vars, attribute->Name,
+				attribute->MetaData );
+		}
+	}
+
+	void tuple::_resolveReferences( const tup::variables& vars, bool all )
+	{
+		for( auto attribute : Attributes )
+		{
+			if( attribute->Value->isRef() )
+			{
+				auto ref = dynamic_cast<tup::refval*>( &*attribute->Value );
+				if( !ref->target() )
+				{
+					tup::valueptr found;
+					tuple* parent{ nullptr };
+					auto i_am_root = Parent == nullptr;
+					auto i_am_doc = !i_am_root && Parent->Parent == nullptr;
+					auto possible_rel_path = ref->hardRef().at( 0 )
+						!= name_docs;
+
+					if( possible_rel_path )
+					{
+						found = _find( ref->hardRef(), 0, false,
+							&parent );
+						if( !found && !i_am_doc && !i_am_root )
+							found = document()->_find(
+								ref->hardRef(), 0, false, &parent );
+					}
+					if( !found )
+					{
+						if( i_am_doc )
+							found = Parent->_find(
+								ref->hardRef(), 0, false, &parent );
+						else if( !i_am_root )
+						{
+							found = document()->Parent->_find(
+								ref->hardRef(), 0, false, &parent );
+						}
+					}
+
+					std::set<tup::path> seen{ ref->hardRef() };
+					while( found && found->isRef() && parent != nullptr )
+					{
+						if( seen.find( found->hardRef() ) != seen.end() )
+						{
+							throw tup::CircularReferencing( "The reference \""
+								+ found->hardRef().str()
+								+ "\" leads to a circle" );
+						}
+						seen.insert( found->hardRef() );
+						found = parent->_find(
+							found->hardRef(), 0, false, &parent );
+					}
+					if( all & !found )
+						throw tup::NotFound( "Reference to \"" + ref->hardRef().str() + "\" not found!" );
+					ref->target( found );
+				}
+			}
+			else if( attribute->Value->isTuple() )
+				attribute->Value->tuple_value()._resolveReferences( vars, all );
+		}
 	}
 
 
 
 
-	bool tuple::equal( const tuple& other ) const noexcept
+	bool tuple::equal( const tuple& other, const tup::variables& vars )
+		const noexcept
 	{
 		if( Attributes.size() != other.Attributes.size() )
 			return false;
@@ -302,7 +540,7 @@ namespace eon
 				|| a->MetaData != b->MetaData )	//    and meta data
 				return false;
 
-			if( !a->Value->equal( b->Value ) )
+			if( a->Value->hardCompare( b->Value ) != 0 )
 				return false;
 		}
 		return true;
@@ -320,10 +558,10 @@ namespace eon
 				auto found = Named.find( b->Name );
 				if( found == Named.end() )
 					return false;
-				if( b->Value->basicType()
-					!= found->second->Value->basicType() )
+				if( b->Value->type()
+					!= found->second->Value->type() )
 					return false;
-				if( b->Value->basicType() == tup::basic_type::tuple_t
+				if( b->Value->type() == tup::basic_type::tuple_t
 					&& b->Value->tupleType()
 						!= found->second->Value->tupleType() )
 					return false;
@@ -334,60 +572,6 @@ namespace eon
 
 
 
-
-	void tuple::_resolveReferences()
-	{
-		for( auto attribute : Attributes )
-		{
-			if( attribute->Value->isRef() )
-			{
-				auto ref = dynamic_cast<tup::refval*>( &*attribute->Value );
-				if( !ref->target() )
-				{
-					tup::valueptr found;
-					tuple* parent{ nullptr };
-					auto i_am_root = Parent == nullptr;
-					auto i_am_doc = !i_am_root && Parent->Parent == nullptr;
-					auto possible_rel_path = ref->ref_value().at( 0 )
-						!= name_docs;
-
-					if( possible_rel_path )
-					{
-						found = _find( ref->ref_value(), 0, false, &parent );
-						if( !found && !i_am_doc && !i_am_root )
-							found = document()->_find(
-								ref->ref_value(), 0, false, &parent );
-					}
-					if( !found )
-					{
-						if( i_am_doc )
-							found = Parent->_find(
-								ref->ref_value(), 0, false, &parent );
-						else if( !i_am_root )
-							found = document()->Parent->_find(
-								ref->ref_value(), 0, false, &parent );
-					}
-
-					std::set<tup::path> seen{ ref->ref_value() };
-					while( found && found->isRef() && parent != nullptr )
-					{
-						if( seen.find( found->ref_value() ) != seen.end() )
-						{
-							throw tup::CircularReferencing( "The reference \""
-								+ found->ref_value().str()
-								+ "\" leads to a circle" );
-						}
-						seen.insert( found->ref_value() );
-						found = parent->_find(
-							found->ref_value(), 0, false, &parent );
-					}
-					ref->target( found );
-				}
-			}
-			else if( attribute->Value->isTuple() )
-				attribute->Value->tuple_value()._resolveReferences();
-		}
-	}
 
 	tup::valueptr tuple::_find( const tup::path& path, size_t pos,
 		bool resolve_refs, tuple** parent ) const noexcept
@@ -408,7 +592,7 @@ namespace eon
 			if( name != no_name )
 			{
 				auto attrib = attribute( name );
-				if( attrib != nullptr )
+				if( attrib )
 				{
 					if( pos + 1 == path.size() )
 					{
@@ -432,8 +616,8 @@ namespace eon
 	}
 
 
-	void tuple::_validate( tuple& metadata, const tuple* parent,
-		const AttributePtr& value ) const
+	void tuple::_validate( const tuple& metadata, const tuple* parent,
+		const AttributePtr& value, tup::variables& vars ) const
 	{
 		static name_t max_depth = name::get( "max_depth" ),
 			min_length = name::get( "min_length" ),
@@ -452,99 +636,99 @@ namespace eon
 				{
 					auto name = metadata.name( i );
 					if( name == name_type )
-						_validateType( meta, parent, value->Value );
+						_validateType( meta, parent, value->Value, vars );
 					else if( name == max_depth )
 					{
 						if( value->Value->isTuple() )
-							_validateMaxDepth( meta, parent, value->Value->tuple_value() );
+							_validateMaxDepth( meta, parent, value->Value->hardTuple(), vars );
 						else
-							_mismatchingMeta( value->Name, "'max_depth' meta data can only be applied on 'tuple' values!" );
+							_mismatchingMeta( value->Name, "'max_depth' meta data can only be applied on 'tuple' values!", vars );
 					}
 					else if( name == min_length )
 					{
 						if( value->Value->isString() )
-							_validateMinLength( meta, parent, value->Value->string_value() );
+							_validateMinLength( meta, parent, value->Value->hardString(), vars );
 						else if( value->Value->isBinary() )
-							_validateMinLength( meta, parent, value->Value->binary_value() );
+							_validateMinLength( meta, parent, value->Value->hardBinary(), vars );
 						else if( value->Value->isTuple() )
-							_validateMinLength( meta, parent, value->Value->tuple_value() );
+							_validateMinLength( meta, parent, value->Value->hardTuple(), vars );
 						else
-							_mismatchingMeta( value->Name, "'min_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!" );
+							_mismatchingMeta( value->Name, "'min_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!", vars );
 					}
 					else if( name == max_length )
 					{
 						if( value->Value->isString() )
-							_validateMaxLength( meta, parent, value->Value->string_value() );
+							_validateMaxLength( meta, parent, value->Value->hardString(), vars );
 						else if( value->Value->isBinary() )
-							_validateMaxLength( meta, parent, value->Value->binary_value() );
+							_validateMaxLength( meta, parent, value->Value->hardBinary(), vars );
 						else if( value->Value->isTuple() )
-							_validateMaxLength( meta, parent, value->Value->tuple_value() );
+							_validateMaxLength( meta, parent, value->Value->hardTuple(), vars );
 						else
-							_mismatchingMeta( value->Name, "'max_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!" );
+							_mismatchingMeta( value->Name, "'max_length' meta data can only be applied on 'bytes', 'string', and 'tuple' values!", vars );
 					}
 					else if( name == min )
 					{
 						if( value->Value->isInt() )
-							_validateMin( meta, parent, value->Value->int_value() );
+							_validateMin( meta, parent, value->Value->hardInt(), vars );
 						else if( value->Value->isFloat() )
-							_validateMin( meta, parent, value->Value->float_value() );
+							_validateMin( meta, parent, value->Value->hardFloat(), vars );
 						else
-							_mismatchingMeta( value->Name, "'min' meta data can only be applied on 'int' and 'float' values!" );
+							_mismatchingMeta( value->Name, "'min' meta data can only be applied on 'int' and 'float' values!", vars );
 					}
 					else if( name == max )
 					{
 						if( value->Value->isInt() )
-							_validateMax( meta, parent, value->Value->int_value() );
+							_validateMax( meta, parent, value->Value->hardInt(), vars );
 						else if( value->Value->isFloat() )
-							_validateMax( meta, parent, value->Value->float_value() );
+							_validateMax( meta, parent, value->Value->hardFloat(), vars );
 						else
-							_mismatchingMeta( value->Name, "'max' meta data can only be applied on 'int' and 'float' values!" );
+							_mismatchingMeta( value->Name, "'max' meta data can only be applied on 'int' and 'float' values!", vars );
 					}
 					else if( name == format )
 					{
 						if( value->Value->isString() )
-							_validateFormat( meta, parent, value->Value->string_value() );
+							_validateFormat( meta, parent, value->Value->hardString(), vars );
 						else if( value->Value->isRaw() )
-							_validateFormat( meta, parent, value->Value->raw_value() );
+							_validateFormat( meta, parent, value->Value->hardRaw(), vars );
 						else
-							_mismatchingMeta( value->Name, "'format' meta data can only be applied on 'string' and 'raw' values!" );
+							_mismatchingMeta( value->Name, "'format' meta data can only be applied on 'string' and 'raw' values!", vars );
 					}
 					else if( name == flags )
 					{
 						if( value->Value->isTuple() )
-							_validateFlags( meta, parent, value->Value->tuple_value() );
+							_validateFlags( meta, parent, value->Value->hardTuple(), vars );
 						else
-							_mismatchingMeta( value->Name, "'flags' meta data can only be applied on 'tuple' values!" );
+							_mismatchingMeta( value->Name, "'flags' meta data can only be applied on 'tuple' values!", vars );
 					}
 					else if( name == options )
 					{
 						if( value->Value->isName() )
-							_validateOptions( meta, parent, value->Value->name_value() );
+							_validateOptions( meta, parent, value->Value->hardName(), vars );
 						else
-							_mismatchingMeta( value->Name, "'options' meta data can only be applied on 'name' values!" );
+							_mismatchingMeta( value->Name, "'options' meta data can only be applied on 'name' values!", vars );
 					}
 				}
 			}
 		}
 	}
 
-	void tuple::_validateType( tup::valueptr meta, const tuple* location, const tup::valueptr& value ) const
+	void tuple::_validateType( tup::valueptr meta, const tuple* location, const tup::valueptr& value, const tup::variables& vars ) const
 	{
 		if( !meta->isName() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'type' meta data must have a 'name' value!" );
-		if( tup::mapBasicType( value->basicType() ) != meta->name_value() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
-				+ "\": Type of \"" + path().str()
-				+ "\" must be \"" + *meta->name_value() + "\"!" );
+		if( tup::mapBasicType( value->type() ) != meta->hardName() )
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
+				+ "\": Type of \"" + path( vars ).str()
+				+ "\" must be \"" + *meta->hardName() + "\"!" );
 	}
 
-	void tuple::_validateMaxDepth( tup::valueptr meta, const tuple* location, const tuple& tupl ) const
+	void tuple::_validateMaxDepth( tup::valueptr meta, const tuple* location, const tuple& tupl, const tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_depth' meta data must have an 'int' value!" );
-		auto max_depth = meta->int_value();
+		auto max_depth = meta->hardInt();
 
 		std::queue<std::pair<AttributePtr, size_t>> queue;
 		for( auto attribute : tupl.Attributes )
@@ -570,166 +754,175 @@ namespace eon
 			}
 		}
 		if( depth >= max_depth )
-			throw tup::Invalid( "Depth of \"" + path().str()
+			throw tup::Invalid( "Depth of \"" + path( vars ).str()
 				+ "\" is exceeding " + string( max_depth ) + "!" );
 	}
 
-	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const hex& value ) const
+	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const hex& value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min_length' meta data must have an 'int' value!" );
-		auto min_length = meta->int_value();
+		auto min_length = meta->softInt( vars );
 		if( value.size() < static_cast<size_t>( min_length * 2 ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min_length' has been exceeded!" );
 	}
-	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const string& value ) const
+	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const string& value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min_length' meta data must have an 'int' value!" );
-		auto min_length = meta->int_value();
+		auto min_length = meta->softInt( vars );
 		if( value.numChars() < static_cast<size_t>( min_length ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min_length' has been exceeded!" );
 	}
-	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const tuple& value ) const
+	void tuple::_validateMinLength( tup::valueptr meta, const tuple* location, const tuple& value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min_length' meta data must have an 'int' value!" );
-		auto min_length = meta->int_value();
+		auto min_length = meta->softInt( vars );
 		if( value.numAttributes() < static_cast<size_t>( min_length ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min_length' has been exceeded!" );
 	}
 
-	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const hex& value ) const
+	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const hex& value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_length' meta data must have an 'int' value!" );
-		auto max_length = meta->int_value();
+		auto max_length = meta->softInt( vars );
 		if( value.size() > static_cast<size_t>( max_length * 2 ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_length' has been exceeded!" );
 	}
-	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const string& value ) const
+	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const string& value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_length' meta data must have an 'int' value!" );
-		auto max_length = meta->int_value();
+		auto max_length = meta->softInt( vars );
 		if( value.numChars() > static_cast<size_t>( max_length ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_length' has been exceeded!" );
 	}
-	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const tuple& value ) const
+	void tuple::_validateMaxLength( tup::valueptr meta, const tuple* location, const tuple& value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_length' meta data must have an 'int' value!" );
-		auto max_length = meta->int_value();
+		auto max_length = meta->softInt( vars );
 		if( value.numAttributes() > static_cast<size_t>( max_length ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max_length' has been exceeded!" );
 	}
 
-	void tuple::_validateMin( tup::valueptr meta, const tuple* location, int64_t value ) const
+	void tuple::_validateMin( tup::valueptr meta, const tuple* location, int64_t value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min' meta data must have an 'int' value!" );
-		auto min = meta->int_value();
+		auto min = meta->softInt( vars );
 		if( value < min )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min' has been exceeded!" );
 	}
-	void tuple::_validateMin( tup::valueptr meta, const tuple* location, double value ) const
+	void tuple::_validateMin( tup::valueptr meta, const tuple* location, double value, tup::variables& vars ) const
 	{
 		if( !meta->isFloat() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min' meta data must have a 'float' value!" );
-		auto min = meta->float_value();
+		auto min = meta->softFloat( vars );
 		if( value < min )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'min' has been exceeded!" );
 	}
 
-	void tuple::_validateMax( tup::valueptr meta, const tuple* location, int64_t value ) const
+	void tuple::_validateMax( tup::valueptr meta, const tuple* location, int64_t value, tup::variables& vars ) const
 	{
 		if( !meta->isInt() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max' meta data must have an 'int' value!" );
-		auto max = meta->int_value();
+		auto max = meta->softInt( vars );
 		if( value > max )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max' has been exceeded!" );
 	}
-	void tuple::_validateMax( tup::valueptr meta, const tuple* location, double value ) const
+	void tuple::_validateMax( tup::valueptr meta, const tuple* location, double value, tup::variables& vars ) const
 	{
 		if( !meta->isFloat() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max' meta data must have a 'float' value!" );
-		auto max = meta->float_value();
+		auto max = meta->softFloat( vars );
 		if( value > max )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'max' has been exceeded!" );
 	}
 
-	void tuple::_validateFormat( tup::valueptr meta, const tuple* location, const string& value ) const
+	void tuple::_validateFormat( tup::valueptr meta, const tuple* location, const string& value, tup::variables& vars ) const
 	{
 		if( !meta->isRegex() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'format' meta data must have a 'regex' value!" );
-		auto format = meta->regex_value();
+		auto format = meta->softRegex( vars );
 		if( !format.match( value ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'format' validation failed!" );
 	}
-	void tuple::_validateFormat( tup::valueptr meta, const tuple* location, const std::vector<string>& value ) const
+	void tuple::_validateFormat( tup::valueptr meta, const tuple* location, const std::vector<string>& value, tup::variables& vars ) const
 	{
 		if( !meta->isRegex() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'format' meta data must have a 'regex' value!" );
-		auto format = meta->regex_value();
-		if( value.empty() || !format.match( value[ 0 ] ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+		auto format = meta->softRegex( vars );
+		bool match = !value.empty();
+		for( auto& line : value )
+		{
+			if( !format.match( line ) )
+			{
+				match = false;
+				break;
+			}
+		}
+		if( !match )
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'format' validation failed!" );
 	}
 
-	void tuple::_validateFlags( tup::valueptr meta, const tuple* location, const tuple& value ) const
+	void tuple::_validateFlags( tup::valueptr meta, const tuple* location, const tuple& value, const tup::variables& vars ) const
 	{
 		if( !meta->isTuple() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'flags' meta data must have a 'tuple' value (with unnamed name attributes)!" );
 		auto flags = meta->tuple_value();
 		for( auto attribute : value.Attributes )
 		{
 			if( !attribute->Value->isName() )
-				throw tup::Invalid( "Attribute \"" + location->path().str()
+				throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 					+ "\": 'flags' validation failed (value contains non-name attribute(s))!" );
-			if( !flags.containsUnnamedValue( attribute->Value->name_value() ) )
-				throw tup::Invalid( "Attribute \"" + location->path().str()
-					+ "\": 'flags' validation failed (\"" + *attribute->Value->name_value() + "\" is not a valid flag)!" );
+			if( !flags.containsUnnamedValue( attribute->Value->hardName(), vars ) )
+				throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
+					+ "\": 'flags' validation failed (\"" + *attribute->Value->hardName() + "\" is not a valid flag)!" );
 		}
 	}
 
-	void tuple::_validateOptions( tup::valueptr meta, const tuple* location, name_t value ) const
+	void tuple::_validateOptions( tup::valueptr meta, const tuple* location, name_t value, tup::variables& vars ) const
 	{
 		if( !meta->isTuple() )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'options' meta data must have a 'tuple' value (with unnamed name attributes)!" );
-		auto options = meta->tuple_value();
-		if( !options.containsUnnamedValue( value ) )
-			throw tup::Invalid( "Attribute \"" + location->path().str()
+		auto options = meta->softTuple( vars );
+		if( !options.containsUnnamedValue( value, vars ) )
+			throw tup::Invalid( "Attribute \"" + location->path( vars ).str()
 				+ "\": 'options' validation failed (\"" + *value + "\" is not a valid option)!" );
 	}
 
-	void tuple::_mismatchingMeta( name_t attribute_name, const string& info ) const
+	void tuple::_mismatchingMeta( name_t attribute_name, const string& info, const tup::variables& vars ) const
 	{
-		auto location = path();
+		auto location = path( vars );
 		location.add( attribute_name );
 		throw tup::Invalid( "Attribute \"" + location.str() + "\": " + info );
 	}
@@ -752,7 +945,7 @@ namespace eon
 		Name = other.Name; other.Name = no_name;
 		MetaData = std::move( other.MetaData );
 		Pos = other.Pos; other.Pos = 0;
-		Value = other.Value; other.Value = nullptr;
+		Value = other.Value; other.Value = tup::valueptr();
 		return *this;
 	}
 }

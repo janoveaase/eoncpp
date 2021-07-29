@@ -35,7 +35,7 @@ namespace eon
 				&& category <= charcat::separator_paragraph )
 				scanSameChar( tokencat::separator );
 			else if( category >= charcat::punctuation_connector
-				&& category <= charcat::punctuation_other )
+				&& category <= charcat::punctuation_open )
 				scanSingleChar( tokencat::punctuation );
 			else if( category >= charcat::symbol_currency
 				&& category <= charcat::symbol_other )

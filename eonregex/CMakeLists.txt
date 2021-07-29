@@ -47,6 +47,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_regex
 		OUTPUT_NAME_RELEASE eon_regex
 )
+set_property(TARGET EonRegex PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonRegex PUBLIC EonString EonName EonExcept EonSource EonTokenizer)
 target_include_directories(EonRegex PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")

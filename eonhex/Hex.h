@@ -72,6 +72,8 @@ namespace eon
 
 		inline hex& operator+=( const hex& other ) {
 			Value += other.Value; return *this; }
+		inline friend hex operator+( const hex& a, const hex& b ) {
+			hex c{ a }; return c += b; }
 
 		//* Set hex value
 		void setHex( const std::string& hex );

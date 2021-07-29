@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline floatval() : value( basic_type::float_t ) {}
-			inline floatval( double value ) noexcept
-				: value( basic_type::float_t ) { Val = value; }
+			inline floatval( double val ) noexcept
+				: value( basic_type::float_t ) { Val = val; }
 
 
 
@@ -37,12 +37,22 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline double float_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override {
+				return Val != 0.0; }
+			inline int64_t softInt( variables& vars ) const override {
+				return static_cast<int64_t>( Val ); }
+			inline double hardFloat() const override { return Val; }
+			inline double softFloat( variables& vars ) const override {
+				return Val; }
+			inline const string& softString( variables& vars ) const override {
+				static string str; str = string( Val ); return str; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isFloat()
-					&& Val == other->float_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto o = other->hardFloat();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto o = other->softFloat( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -50,8 +60,7 @@ namespace eon
 
 
 			//* Write value to string
-			inline string str( size_t& pos_on_line, size_t indentation_leve,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			inline string str( size_t& pos_on_line, size_t indentation_leve )
 				const noexcept override { string val( Val );
 					pos_on_line += val.numChars(); return val; }
 
@@ -61,9 +70,6 @@ namespace eon
 			  Write Methods
 			******************************************************************/
 		public:
-
-			//* Get modifiable value
-			inline double& float_value() override { return Val; }
 
 			//* Clear value
 			inline void clear() noexcept override { Val = 0.0; }

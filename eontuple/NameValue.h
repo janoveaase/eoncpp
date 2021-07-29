@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline nameval() : value( basic_type::name_t ) {}
-			inline nameval( name_t value ) noexcept
-				: value( basic_type::name_t ) { Val = value; }
+			inline nameval( name_t val ) noexcept
+				: value( basic_type::name_t ) { Val = val; }
 
 
 
@@ -37,12 +37,22 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline name_t name_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override { return !(
+				Val == no_name || Val == name_false || Val == name_no
+				|| Val == name_off || Val == name_negative
+				|| Val == name_cancel || Val == name_abort ); }
+			inline name_t hardName() const override { return Val; }
+			inline name_t softName( variables& vars ) const override {
+				return Val; }
+			inline const string& softString( variables& vars ) const override {
+				static string str; return Val == no_name ? str : *Val; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept {
-				return other && other->isName()
-					&& Val == other->name_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto o = other->hardName();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto o = other->softName( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const {
@@ -50,8 +60,7 @@ namespace eon
 
 
 			//* Write value to string
-			inline string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			inline string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override {
 					pos_on_line += Val->numChars(); return *Val; }
 

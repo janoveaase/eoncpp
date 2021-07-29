@@ -36,7 +36,7 @@ namespace eon
 				*this = std::move( other ); }
 
 			//* Construct from a map of [eon::name_t] to [eon::substring]
-			inline match( std::map<name_t, substring>& captures ) noexcept {
+			inline match( std::map<name_t, substring>&& captures ) noexcept {
 				Captures = std::move( captures ); }
 
 
@@ -72,12 +72,17 @@ namespace eon
 			inline size_t size() const noexcept { return Captures.size(); }
 
 			//* Get the entire match
-			inline substring all() const noexcept { return group( no_name ); }
+			inline substring all() const noexcept {
+				return group( name_complete ); }
 
 			//* Get a capture
 			inline substring group( const name_t name ) const noexcept {
 				auto found = Captures.find( name ); return found
 					!= Captures.end() ? found->second : substring(); }
+
+			using iterator = std::map<name_t, substring>::const_iterator;
+			inline iterator begin() const noexcept { return Captures.begin(); }
+			inline iterator end() const noexcept { return Captures.end(); }
 
 
 

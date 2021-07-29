@@ -27,10 +27,10 @@ namespace eon
 		public:
 
 			inline refval() : value( basic_type::ref_t ) {}
-			inline refval( const path& value )
-				: value( basic_type::ref_t ) { Val = value; }
-			inline refval( path&& value ) noexcept
-				: value( basic_type::ref_t ) { Val = std::move( value ); }
+			inline refval( const path& val )
+				: value( basic_type::ref_t ) { Val = val; }
+			inline refval( path&& val ) noexcept
+				: value( basic_type::ref_t ) { Val = std::move( val ); }
 
 
 
@@ -40,11 +40,20 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline const path& ref_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override {
+				return !Val.empty(); }
+			inline const string& softString( variables& vars ) const override {
+				static string str; str = Val.str(); return str; }
+			inline const path& hardRef() const override { return Val; }
+			inline const path& softRef( variables& vars ) const override {
+				return Val; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isRef() && Val == other->ref_value(); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto& o = other->hardRef();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto& o = other->softRef( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -55,8 +64,7 @@ namespace eon
 
 
 			//* Write value to string
-			inline string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			inline string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override { auto s = Val.str();
 					pos_on_line += s.numChars() + 1; return "@" + s; }
 
@@ -66,9 +74,6 @@ namespace eon
 			  Write Methods
 			******************************************************************/
 		public:
-
-			//* Get modifiable value
-			inline path& ref_value() override { return Val; }
 
 			//* Clear value
 			inline void clear() noexcept override { Val.clear(); }

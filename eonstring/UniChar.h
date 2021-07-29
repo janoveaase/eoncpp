@@ -192,6 +192,9 @@ namespace eon
 		inline bool isLetterOther( char_t c ) const noexcept {
 			return c >= 0xAA && std::binary_search( letter_other->begin(),
 				letter_other->end(), c ); }
+		// ASCII letters only
+		inline bool isAsciiLetter( char_t c ) const noexcept {
+			return ( c >= 'A' && c <= 'Z' ) || ( c >= 'a' && c <= 'z' ); }
 
 		//* Check if a character belongs to the "mark" categotry
 		inline bool isMarkSpacingCombining( char_t c ) const noexcept {

@@ -99,7 +99,6 @@ namespace eon
 
 			private:
 				substring Source;
-//				substring Str;
 				string_iterator CurPos;
 				int GroupCount{ 0 };
 				Node* HeadNode{ nullptr };

@@ -16,6 +16,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_regex_tests
 		OUTPUT_NAME_RELEASE eon_regex_tests
 )
+set_property(TARGET EonRegexTests PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonRegexTests PUBLIC EonRegex EonString EonTest)
 	

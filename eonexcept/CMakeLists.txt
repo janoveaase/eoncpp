@@ -7,8 +7,8 @@ set(EXCEPT_HEADERS
 )
 
 add_library(EonExcept INTERFACE)
+set_property(TARGET EonExcept PROPERTY CXX_STANDARD 17)
 
-#target_link_libraries(EonExcept PUBLIC EonName EonString)
 target_include_directories(EonExcept INTERFACE "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonExcept

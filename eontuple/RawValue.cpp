@@ -6,26 +6,22 @@ namespace eon
 {
 	namespace tup
 	{
-		string rawval::str( size_t& pos_on_line, size_t indentation_level,
-			perm format ) const noexcept
+		string rawval::str( size_t& pos_on_line, size_t indentation_level )
+			const noexcept
 		{
-			bool oneliner = static_cast<bool>( format & perm::allow_oneliner );
-			bool multiliner = static_cast<bool>(
-				format & perm::allow_multiliner );
 			string s{ BarChr };
-			++pos_on_line;
-			string indent( indentation_level * 2, SpaceChr );
-			if( multiliner && ( Val.size() > 1 || ( Val.size() == 1
-				&& Val[ 0 ].numChars() + pos_on_line > 79 ) ) )
+			if( Val.size() == 0 )
+				return s;
+			else if( Val.size() == 1 )
 			{
-				s += NewlineChr;
-				indent += "  ";
-				s += indent;
-				pos_on_line = indent.numChars();
+				s += Val[ 0 ];
+				pos_on_line = Val[ 0 ].numChars();
+				return s;
 			}
-			else
-				indent += SpaceChr;
-			bool new_line = false;
+
+			++pos_on_line;
+			string indent( ( 1 + indentation_level ) * 2, SpaceChr );
+			bool new_line = true;
 			for( auto& line : Val )
 			{
 				if( new_line )
@@ -34,17 +30,9 @@ namespace eon
 					s += indent;
 					pos_on_line = indent.numChars();
 				}
-				if( line.numChars() - pos_on_line - indentation_level <= 79 )
-				{
-					s += line;
-					new_line = true;
-				}
-				else
-				{
-					// TODO: Split into lines of max 79 characters right margin!
-					s += line;
-					new_line = true;
-				}
+				s += line;
+				pos_on_line += line.numChars();
+				new_line = true;
 			}
 			return s;
 		}

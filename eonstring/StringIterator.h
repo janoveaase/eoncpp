@@ -77,6 +77,13 @@ namespace eon
 	**************************************************************************/
 	class string_iterator
 	{
+	public:
+		using iterator_category = std::input_iterator_tag;
+		using value_type = char_t;
+		using difference_type = char_t;
+		using pointer = const char_t*;
+		using reference = char_t;
+
 		/**********************************************************************
 		  Construction
 		**********************************************************************/

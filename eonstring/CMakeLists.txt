@@ -26,6 +26,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_string
 		OUTPUT_NAME_RELEASE eon_string
 )
+set_property(TARGET EonString PROPERTY CXX_STANDARD 17)
 
 install(TARGETS EonString
 	LIBRARY DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"

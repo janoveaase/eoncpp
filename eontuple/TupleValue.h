@@ -27,12 +27,11 @@ namespace eon
 		public:
 
 			inline tupleval() : value( basic_type::tuple_t ) {}
-			inline tupleval( const tuple& value, bool pattern = false )
+			inline tupleval( const tuple& val, bool pattern = false )
+				: value( basic_type::tuple_t ) { Val = val; Pattern = pattern; }
+			inline tupleval( tuple&& val, bool pattern = false ) noexcept
 				: value( basic_type::tuple_t ) {
-				Val = value; Pattern = pattern; }
-			inline tupleval( tuple&& value, bool pattern = false ) noexcept
-				: value( basic_type::tuple_t ) {
-				Val = std::move( value ); Pattern = pattern; }
+				Val = std::move( val ); Pattern = pattern; }
 
 
 
@@ -42,12 +41,22 @@ namespace eon
 		public:
 
 			//* Get read-only value
-			inline const tuple& tuple_value() const override { return Val; }
+			inline bool softBool( variables& vars ) const override 
+			{ return !Val.empty(); }
+			inline const string& softString( variables& vars ) const override {
+				static string str; str = Val.str(); return str; }
+			inline const tuple& hardTuple() const override { return Val; }
+			inline const tuple& softTuple( variables& vars ) const override {
+				return Val; }
+			inline const tuple& softMeta( variables& vars ) const override {
+				return Val; }
 
-			//* Check if equal to another value of the same type
-			inline bool equal( const valueptr other ) const noexcept override {
-				return other && other->isTuple()
-					&& Val.equal( other->tuple_value() ); }
+			inline int hardCompare( const valueptr& other ) const override {
+				auto& o = other->hardTuple();
+				return Val < o ? -1 : Val == o ? 0 : 1; }
+			inline int softCompare( const valueptr& other, variables& vars )
+				const override { auto& o = other->softTuple( vars );
+					return Val < o ? -1 : Val == o ? 0 : 1; }
 
 			//* Get an identical copy
 			inline valueptr copy() const override {
@@ -55,8 +64,7 @@ namespace eon
 
 
 			//* Write value to string
-			string str( size_t& pos_on_line, size_t indentation_level,
-				perm format = perm::allow_oneliner | perm::allow_multiliner )
+			string str( size_t& pos_on_line, size_t indentation_level )
 				const noexcept override;
 
 
@@ -66,7 +74,6 @@ namespace eon
 			******************************************************************/
 		public:
 
-			//* Get modifiable value
 			inline tuple& tuple_value() override { return Val; }
 
 			//* Claim ownership of the value

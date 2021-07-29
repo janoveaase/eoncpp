@@ -23,6 +23,25 @@ namespace eon
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
 
+	TEST( TokenizerTest, special )
+	{
+		string raw{ "++(())<<>>[[]]{{}}--**//" };
+		source src( "test", std::move( raw ) );
+		auto tokens = tokenizer()( src );
+		REQUIRE_EQ( 24, tokens.size() ) << "Wrong number of tokens";
+
+		string expected{
+			"+;+;(;(;););<;<;>;>;[;[;];];{;{;};};-;-;*;*;/;/" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ";";
+			actual += token.substr();
+		}
+		WANT_EQ( expected.stdstr(), actual.stdstr() );
+	}
+
 	TEST( TokenizerTest, larger )
 	{
 		string raw{ "TEST( TokenizerTest, basic )\n"

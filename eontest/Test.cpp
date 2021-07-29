@@ -53,8 +53,8 @@ namespace eontest
 		{
 			_Messages << "\nFailed to compare equal (at line "
 				<< std::to_string( diff_line + 1 ) << ")\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			if( diff_line < exp_lines.size() )
 				_Messages << "Expected value: \"" << _extractLine(
 					exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"n";
@@ -69,19 +69,19 @@ namespace eontest
 			_Messages << "\nFailed to compare equal (at line "
 				<< std::to_string( diff_line + 1 ) << ", position "
 				<< std::to_string( diff_pos + 1 ) << ")\n";
-			_Messages << "Expected expression: {" << exp_expr << "}\n";
-			_Messages << "  Actual expression: {" << act_expr << "}\n";
+			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
+			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			_Messages << "Expected value: \"" << _extractLine(
-				exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+				exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
 			_Messages << "  Actual value: \"" << _extractLine(
-				act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
-			_Messages << std::string( diff_pos + 17, ' ' ) << "^\n";
+				act_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
+			_Messages << std::string( diff_pos - start_pos + 17, ' ' ) << "^\n";
 			std::string marker{ "Different here" };
 			if( diff_pos > marker.size() + 2 )
-				_Messages << std::string( diff_pos + 17 - marker.size() - 1, ' ' )
+				_Messages << std::string( diff_pos - start_pos + 17 - marker.size() - 1, ' ' )
 					<< marker << "-'\n";
 			else
-				_Messages << std::string( diff_pos + 17, ' ' ) << "'-"
+				_Messages << std::string( diff_pos - start_pos + 17, ' ' ) << "'-"
 				<< marker << "\n";
 		}
 		return false;
@@ -145,7 +145,7 @@ namespace eontest
 		else
 		{
 			start = diff_pos - 13;
-			start_pos = start + 3;
+			start_pos = start - 3;
 		}
 		end = available_size - diff_pos;
 		if( end < line.size() )

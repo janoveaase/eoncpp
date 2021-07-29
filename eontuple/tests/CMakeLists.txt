@@ -16,6 +16,7 @@ set_target_properties(
 		OUTPUT_NAME_DEBUG eon_tuple_tests
 		OUTPUT_NAME_RELEASE eon_tuple_tests
 )
+set_property(TARGET EonTupleTests PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonTupleTests PUBLIC EonTuple EonTest)
 	
