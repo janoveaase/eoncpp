@@ -234,6 +234,8 @@ namespace eontest
 	class FactoryMain
 	{
 	public:
+		FactoryMain() = default;
+		virtual ~FactoryMain() = default;
 		virtual EonTest* createTest( const std::string& test_class,
 			const std::string& test_name ) = 0;
 	};

@@ -10,7 +10,7 @@ set(EON_LIBRARY_DIR "lib" CACHE STRING "Where to install libraries under EON_INS
 set(EON_INCLUDE_DIR "include" CACHE STRING "Where to install headers under EON_INSTALL_DIR")
 set(EON_TESTS_DIR "eontests" CACHE PATH "Where to install tests under EON_INSTALL_DIR")
 set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Postfix to debug builds")
-set(EON_BUILD_TESTS OFF CACHE BOOL "Include tests in build?")
+set(EON_BUILD_TESTS ON CACHE BOOL "Include tests in build?")
 set(EON_BUILD_FILESYS OFF CACHE BOOL "Include the File System package")
 set(EON_BUILD_TOKENIZER OFF CACHE BOOL "Build the Tokenizer package")
 set(EON_BUILD_REGEX OFF CACHE BOOL "Build the Regex package")
