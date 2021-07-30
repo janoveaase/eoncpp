@@ -184,7 +184,7 @@ namespace eon
 		inline explicit string( int8_t value ) { *this = toString( value ); }
 		inline explicit string( long long unsigned int value ) { *this = toString( value ); }
 #endif
-#ifdef EON_MAC
+#ifdef EON_APPLE
 		inline explicit string( int64_t value ) { *this = toString( value ); }
 #endif
 		inline explicit string( float value ) { *this = toString( static_cast<double>( value ) ); }
