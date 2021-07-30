@@ -168,28 +168,26 @@ namespace eon
 
 		/** Construct as conversion from number **/
 		inline explicit string( long value ) { *this = toString( value ); }
-		inline explicit string( unsigned long value ) {
-			*this = toString( value ); }
+		inline explicit string( unsigned long value ) { *this = toString( value ); }
 #ifdef EON_WINDOWS
 		inline explicit string( int16_t value ) { *this = toString( value ); }
 		inline explicit string( uint16_t value ) { *this = toString( value ); }
 		inline explicit string( int32_t value ) { *this = toString( value ); }
 		inline explicit string( uint32_t value ) { *this = toString( value ); }
+		inline explicit string( int64_t value ) { *this = toString( value ); }
 		inline explicit string( uint64_t value ) { *this = toString( value ); }
 #else
 		inline explicit string( short value ) { *this = toString( value ); }
-		inline explicit string( unsigned short value ) {
-			*this = toString( value ); }
+		inline explicit string( unsigned short value ) { *this = toString( value ); }
 		inline explicit string( int value ) { *this = toString( value ); }
-		inline explicit string( unsigned int value ) {
-			*this = toString( value ); }
+		inline explicit string( unsigned int value ) { *this = toString( value ); }
 		inline explicit string( int8_t value ) { *this = toString( value ); }
-		inline explicit string( long long unsigned int value ) {
-			*this = toString( value ); }
+		inline explicit string( long long unsigned int value ) { *this = toString( value ); }
 #endif
+#ifdef EON_MAC
 		inline explicit string( int64_t value ) { *this = toString( value ); }
-		inline explicit string( float value ) {
-			*this = toString( static_cast<double>( value ) ); }
+#endif
+		inline explicit string( float value ) { *this = toString( static_cast<double>( value ) ); }
 		inline explicit string( double value ) { *this = toString( value ); }
 
 
