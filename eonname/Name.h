@@ -78,6 +78,8 @@ namespace eon
 	extern const name_t name_value;
 	extern const name_t name_raw;
 	extern const name_t name_meta;
+	extern const name_t name_function;
+	extern const name_t name_functions;
 	extern const name_t name_reference;
 	extern const name_t name_variable;
 	extern const name_t name_var;
@@ -88,10 +90,16 @@ namespace eon
 	extern const name_t name_title;
 	extern const name_t name_pattern;
 	extern const name_t name_optional;
+	extern const name_t name_yes;
 	extern const name_t name_no;
+	extern const name_t name_on;
 	extern const name_t name_off;
+	extern const name_t name_positive;
 	extern const name_t name_negative;
+	extern const name_t name_ok;
 	extern const name_t name_cancel;
+	extern const name_t name_active;
+	extern const name_t name_inactive;
 	extern const name_t name_abort;
 	extern const name_t name_output;
 	extern const name_t name_token;
@@ -108,6 +116,9 @@ namespace eon
 	extern const name_t name_if;
 	extern const name_t name_skip;
 	extern const name_t name_space;
+	extern const name_t name_source;
+	extern const name_t name_target;
+	extern const name_t name_args;
 
 
 

@@ -8,7 +8,7 @@ namespace eon
 	{
 		string in{ "---" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -18,7 +18,7 @@ namespace eon
 	{
 		string in{ "---\n" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -28,7 +28,7 @@ namespace eon
 	{
 		string in{ "---title" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_title ) );
 		auto& doc = docs.doc( name_title );
@@ -38,7 +38,7 @@ namespace eon
 	{
 		string in{ "---       title              \n" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_title ) );
 		auto& doc = docs.doc( name_title );
@@ -50,7 +50,7 @@ namespace eon
 		auto one = name::get( "one" );
 		auto two = name::get( "two" );
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_TRUE( docs.exists( one ) );
 		WANT_TRUE( docs.exists( two ) );
@@ -60,7 +60,7 @@ namespace eon
 	{
 		string in{ "true" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -72,7 +72,7 @@ namespace eon
 	{
 		string in{ "false" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -85,7 +85,7 @@ namespace eon
 	{
 		string in{ "'\\0'" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -97,7 +97,7 @@ namespace eon
 	{
 		string in{ "'F'" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -109,7 +109,7 @@ namespace eon
 	{
 		string in = string( "'\\U050E'" );
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -122,7 +122,7 @@ namespace eon
 	{
 		string in{ "0" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -134,7 +134,7 @@ namespace eon
 	{
 		string in{ "+45" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -146,7 +146,7 @@ namespace eon
 	{
 		string in{ "-16" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -159,7 +159,7 @@ namespace eon
 	{
 		string in{ "0.0" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -171,7 +171,7 @@ namespace eon
 	{
 		string in{ "0.0001000" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -183,7 +183,7 @@ namespace eon
 	{
 		string in{ "+5.98" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -195,7 +195,7 @@ namespace eon
 	{
 		string in{ "-9.87" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -208,7 +208,7 @@ namespace eon
 	{
 		string in{ "name" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -221,7 +221,7 @@ namespace eon
 	{
 		string in{ "\"\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -233,7 +233,7 @@ namespace eon
 	{
 		string in{ "\"a string\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -245,7 +245,7 @@ namespace eon
 	{
 		string in{ "\"      x       \"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -257,7 +257,7 @@ namespace eon
 	{
 		string in{ "\"a \\\"string\\\"\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -269,7 +269,7 @@ namespace eon
 	{
 		string in{ "\"\\tSeveral \\\"\\n escapes'\\b\\v\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -282,7 +282,7 @@ namespace eon
 	{
 		string in{ "|" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -294,7 +294,7 @@ namespace eon
 	{
 		string in{ "|One line of raw" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -306,7 +306,7 @@ namespace eon
 	{
 		string in{ "|\n  One line of raw" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -318,7 +318,7 @@ namespace eon
 	{
 		string in{ "|\n  One line\\\n   of raw" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -330,7 +330,7 @@ namespace eon
 	{
 		string in{ "|\n  Two lines\n  of raw" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -342,7 +342,7 @@ namespace eon
 	{
 		string in{ "|\n  one\n  two\n  three\n  four" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -355,7 +355,7 @@ namespace eon
 	{
 		string in{ "%" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -367,7 +367,7 @@ namespace eon
 	{
 		string in{ "%54657374" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -381,28 +381,28 @@ namespace eon
 		std::string exp{ "% 546869732069732061206C6F6E672062696E617279207465787420746861742077652077616E\n  7420746F207365652061732074776F206C696E657320696E2045544621" };
 		string in{ "%" + hex( bin ).value() };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
 		WANT_EQ( exp, out.stdstr() );
-		WANT_EQ( bin, doc.attribute( 0 )->binary_value().binary() );
+		WANT_EQ( bin, doc.at( 0 )->binary_value().binary() );
 	}
 
 	TEST( RegexTest, empty )
 	{
 		string in{ R"(?//)" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
+		REQUIRE_EXCEPT( docs.parseReplace( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RegexTest, basic )
 	{
 		string in{ R"(?/./)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -414,7 +414,7 @@ namespace eon
 	{
 		string in{ R"(?/^\d{1,4}\-\d{1,2}\-\d{1,2}T\d{1,2}:\d{1,2}(:\d{1,2})?$/)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -426,7 +426,7 @@ namespace eon
 	{
 		string in{ R"(?/./ilsSo)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -438,14 +438,14 @@ namespace eon
 	{
 		string in{ R"(?/./ilsxo)" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
+		REQUIRE_EXCEPT( docs.parseReplace( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RegexTest, boundary )
 	{
 		string in{ R"(?~^/b~)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -458,14 +458,14 @@ namespace eon
 	{
 		string in{ "@" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
+		REQUIRE_EXCEPT( docs.parseReplace( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";
 	}
 	TEST( RefTest, one )
 	{
 		string in{ "@one" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -477,7 +477,7 @@ namespace eon
 	{
 		string in{ "@one/two" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -489,7 +489,7 @@ namespace eon
 	{
 		string in{ "@mappers/scan_include" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -501,7 +501,7 @@ namespace eon
 	{
 		string in{ "a=one\nb=two\nc=@a" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -513,52 +513,52 @@ namespace eon
 	{
 		string in{ "a=one\nb=two\nc=@a" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
-		tup::variables vars;
+		vars::variables vars;
 		REQUIRE_NO_EXCEPT( doc.resolveAllReferences( vars ) );
 
 		auto elm = doc.find( { name::get( "c" ) } );
 		REQUIRE_TRUE( elm ) << "Didn't get value referenced by 'c'";
-		WANT_TRUE( elm->hardName() == name::get( "one" ) )
+		WANT_TRUE( elm->actualName() == name::get( "one" ) )
 			<< "Wrong value referenced by 'c'";
 	}
 	TEST( RefTest, find_two_steps )
 	{
 		string in{ "a=one\nb=@a\nc=@b" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
-		tup::variables vars;
+		vars::variables vars;
 		REQUIRE_NO_EXCEPT( docs.doc( name_test ).resolveAllReferences( vars ) );
 
 		auto elm = docs.find(
 			{ name::get( "docs" ), name_test, name::get( "c" ) } );
 		REQUIRE_TRUE( elm ) << "Didn't get 'c'";
 		REQUIRE_TRUE( elm->isName() ) << "Found value of 'c' must be a 'name'";
-		WANT_TRUE( elm->hardName() == name::get( "one" ) )
+		WANT_TRUE( elm->actualName() == name::get( "one" ) )
 			<< "Wrong value referenced by 'c'";
 	}
 	TEST( RefTest, find_circular )
 	{
 		string in{ "a=@c\nb=@a\nc=@b" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) );
-		tup::variables vars;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) );
+		vars::variables vars;
 		REQUIRE_EXCEPT( docs.doc( name_test ).resolveAllReferences( vars ),
-			tup::CircularReferencing );
+			tuple::CircularReferencing );
 	}
 
 	TEST( VarTest, basic )
 	{
 		string in{ "a=b" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -569,9 +569,9 @@ namespace eon
 
 	TEST( ExprTest, basic )
 	{
-		string in{ "x=(2 - 4)" };
+		string in{ "x=&(2 - 4)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -581,17 +581,17 @@ namespace eon
 		auto x = doc.find( { name::get( "x" ) } );
 		REQUIRE_TRUE( x ) << "Didn't find 'x'";
 		REQUIRE_TRUE( x->isExpression() ) << "Wrong type for 'x'";
-		auto& expr = x->hardExpression();
-		tup::valueptr result;
+		auto& expr = x->actualExpression();
+		vars::valueptr result;
 		REQUIRE_NO_EXCEPT( result = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( result && result->isInt() ) << "Bad result";
-		WANT_EQ( -2, result->hardInt() ) << "Wrong value";
+		WANT_EQ( -2, result->actualInt() ) << "Wrong value";
 	}
 	TEST( ExprTest, pi )
 	{
-		string in{ "x<var=pi>=3.14\ny<var=rad>=45.2\ncircumference=(2.0 * pi * rad)" };
+		string in{ "x<var=pi>=3.14\ny<var=rad>=45.2\ncircumference=&(2.0 * pi * rad)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -601,19 +601,19 @@ namespace eon
 		auto circumference = doc.find( { name::get( "circumference" ) } );
 		REQUIRE_TRUE( circumference ) << "Didn't find 'circumference'";
 		REQUIRE_TRUE( circumference->isExpression() ) << "Wrong type for 'circumference'";
-		auto& expr = circumference->hardExpression();
-		tup::valueptr result;
+		auto& expr = circumference->actualExpression();
+		vars::valueptr result;
 		REQUIRE_NO_EXCEPT( result = expr.evaluate( docs.variables() ) ) << "Failed to evaluate";
 		REQUIRE_TRUE( result && result->isFloat() ) << "Bad result";
-		WANT_EQ( 2.0 * 3.14 * 45.2, result->hardFloat() ) << "Wrong value";
-		REQUIRE_EQ( 2.0 * 3.14 * 45.2, circumference->softFloat( docs.variables() ) );
+		WANT_EQ( 2.0 * 3.14 * 45.2, result->actualFloat() ) << "Wrong value";
+		REQUIRE_EQ( 2.0 * 3.14 * 45.2, circumference->targetFloat( docs.variables() ) );
 	}
 	TEST( ExprTest, invalid )
 	{
 		// Missing closing ')' in expression
 		string in{ "loop<while(token != '}'>=one" };
 		eonof docs;
-		REQUIRE_EXCEPT( docs.parseExclusive( in, name_test ), EofBadSyntax )
+		REQUIRE_EXCEPT( docs.parseReplace( in, name_test ), EofBadSyntax )
 			<< "Failed to parse";
 	}
 
@@ -621,7 +621,7 @@ namespace eon
 	{
 		string in{ "{}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -633,7 +633,7 @@ namespace eon
 	{
 		string in{ "{one}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -645,7 +645,7 @@ namespace eon
 	{
 		string in{ "a={one two three four}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -657,7 +657,7 @@ namespace eon
 	{
 		string in{ "{one, two, three, four}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -667,9 +667,9 @@ namespace eon
 	}
 	TEST( TupleTest, multiline )
 	{
-		string in{ "first=\n  - one\n    two\n    three\n  - alpha\n    beta\nsecond=2" };
+		string in{ "first:\n  - one\n    two\n    three\n  - alpha\n    beta\nsecond=2" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -681,7 +681,7 @@ namespace eon
 	{
 		string in{ "{one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -693,7 +693,7 @@ namespace eon
 	{
 		string in{ "one\ntwo\nthree\nfour" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -705,7 +705,7 @@ namespace eon
 	{
 		string in{ "{one}\n{two three}\n{four five six}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -717,7 +717,7 @@ namespace eon
 	{
 		string in{ "- one\n- two\n  three\n- four\n  five\n  six" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -729,7 +729,7 @@ namespace eon
 	{
 		string in{ "- one\n  number=1\n  alpha\n  uno\n- two\n  number=2\n  beta\n  dos\n- three\n  number=3\n  gamma\n  tres\n- four\n  number=4\n  delta\n  quatro" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -741,7 +741,7 @@ namespace eon
 	{
 		string in{ "a=one\nb=two" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -751,9 +751,9 @@ namespace eon
 	}
 	TEST( TupleTest, named_named )
 	{
-		string in{ "a=\n  uno=one\nb=\n  dos=two" };
+		string in{ "a:\n  uno=one\nb:\n  dos=two" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -765,7 +765,7 @@ namespace eon
 	{
 		string in{ "---test\none=1\n---test\none=2" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -777,7 +777,7 @@ namespace eon
 	{
 		string in{ "---test\none={alpha, beta}\n---test\none={alpha gamma}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -811,9 +811,9 @@ namespace eon
 	}
 	TEST( TupleTest, levels1 )
 	{
-		string in{ "alpha=\n  one=\n    - <a b>\n    <c d>\n  two=\n    - <e f>\n    gh\n  three=\n    - <i j>" };
+		string in{ "alpha:\n  one:\n    - <a b>\n    <c d>\n  two:\n    - <e f>\n    gh\n  three:\n    - <i j>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -823,9 +823,9 @@ namespace eon
 	}
 	TEST( TupleTest, levels2 )
 	{
-		string in{ "- quoted=\n    <match '\"'>\n    alpha\n  braced=\n    <match '<'>\n    beta" };
+		string in{ "- quoted:\n    <match '\"'>\n    alpha\n  braced:\n    <match '<'>\n    beta" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -835,10 +835,54 @@ namespace eon
 	}
 	TEST( TupleTest, levels3 )
 	{
-		string in{ "mappers=\n  //- *Includes* are references to other files, that the doc-gen should\n  //- follow.\n  include=\n    <skip {space '\n'}>\n    <match '#'>                     // Match the hash sign\n    <skip space>\n    <match include>                 // Match \"include\"\n    <skip space>\n    - quoted=                       // Sub-section of alternate options\n        <match '\"'>                // Start with double quotes\n        (_path=\"\")                // Create/reset '_path' variable\n        loop<while(token != '\"')>=\n          <append (token) to _path> // Build path from tokens\n          <skip>                    // Move forward to next token\n        (trim _path)                // Remove leading and trailing spaces\n        <match '\"'>                // Match the finishing double quote\n        @mappers/scan_include       // Scan the file\n      braced=                       // Second option for what to match next\n        <match '<'>                 // Opening angle brace\n        loop<while(token != '>')>=\n          <append (token) to _path> // Build path from tokens\n          <skip>                    // Move forward to next token\n        (trim _path)                // Remove leading and trailing spaces\n        <match '>'>                 // And the closing angle brace\n        @mappers/scan_include       // Scan the file\n  //- Scan included source file\n  scan_include=\n    if<(exists _path)>=\n      <scan (_path)>\n      <return>\n    loop<list=known_include_paths element=include_path>=\n      (file_path = include_path + '/' + _path)\n      if<(exists file_path)>=\n        <scan (file_path)>\n        <return>" };
-		string exp{ "mappers=\n  include=\n    <skip {space '\\n'}>\n    <match '#'>\n    <skip space>\n    <match include>\n    <skip space>\n    - quoted=\n        <match '\"'>\n        (_path = \"\")\n        loop<while (token != '\"')>=\n          <append (token) to _path>\n          <skip>\n        (trim _path)\n        <match '\"'>\n        @mappers/scan_include\n      braced=\n        <match '<'>\n        loop<while (token != '>')>=\n          <append (token) to _path>\n          <skip>\n        (trim _path)\n        <match '>'>\n        @mappers/scan_include\n  scan_include=\n    if<(exists _path)>=\n      <scan (_path)>\n      <return>\n    loop<list=known_include_paths element=include_path>=\n      (file_path = include_path + '/' + _path)\n      if<(exists file_path)>=\n        <scan (file_path)>\n        <return>" };
+		string in{ "mappers:\n"
+			"  //- *Includes* are references to other files, that the doc-gen should\n"
+			"  //- follow.\n"
+			"  include:\n"
+			"    <skip {space '\n'}>\n"
+			"    <match '#'>"
+			"                     // Match the hash sign\n"
+			"    <skip space>\n"
+			"    <match include>                 // Match \"include\"\n"
+			"    <skip space>\n"
+			"    - quoted:                       // Sub-section of alternate options\n"
+			"        <match '\"'>                // Start with double quotes\n"
+			"        &(_path=\"\")               // Create/reset '_path' variable\n"
+			"        loop<while&(token != '\"')>:\n"
+			"          <append &(token) to _path>// Build path from tokens\n"
+			"          <skip>                    // Move forward to next token\n"
+			"        &(trim _path)               // Remove leading and trailing spaces\n"
+			"        <match '\"'>                // Match the finishing double quote\n"
+			"        @mappers/scan_include       // Scan the file\n"
+			"      braced:                       // Second option for what to match next\n"
+			"        <match '<'>                 // Opening angle brace\n"
+			"        loop<while&(token != '>')>:\n"
+			"          <append&(token) to _path>// Build path from tokens\n"
+			"          <skip>                    // Move forward to next token\n"
+			"        &(trim _path)               // Remove leading and trailing spaces\n"
+			"        <match '>'>                 // And the closing angle brace\n"
+			"        @mappers/scan_include       // Scan the file\n"
+			"  //- Scan included source file\n"
+			"  scan_include:\n"
+			"    if<&(exists _path)>:\n"
+			"      <scan &(_path)>\n"
+			"      <return>\n"
+			"    loop<list=known_include_paths element=include_path>:\n"
+			"      &(file_path = include_path + '/' + _path)\n"
+			"      if<&(exists file_path)>:\n"
+			"        <scan &(file_path)>\n"
+			"        <return>" };
+		string exp{ "mappers:\n  include:\n    <skip {space '\\n'}>\n    <match '#'>\n    <skip space>\n"
+			"    <match include>\n    <skip space>\n    - quoted:\n        <match '\"'>\n        &(_path = \"\")\n"
+			"        loop<while &(token != '\"')>:\n          <append &(token) to _path>\n          <skip>\n"
+			"        &(trim _path)\n        <match '\"'>\n        @mappers/scan_include\n      braced:\n"
+			"        <match '<'>\n        loop<while &(token != '>')>:\n          <append &(token) to _path>\n"
+			"          <skip>\n        &(trim _path)\n        <match '>'>\n        @mappers/scan_include\n"
+			"  scan_include:\n    if<&(exists _path)>:\n      <scan &(_path)>\n      <return>\n"
+			"    loop<list=known_include_paths element=include_path>:\n      &(file_path = include_path + '/' + _path)\n"
+			"      if<&(exists file_path)>:\n        <scan &(file_path)>\n        <return>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -848,22 +892,21 @@ namespace eon
 	}
 	TEST( TupleTest, levels4 )
 	{
-		string in{ "alpha=\n\n  one=a\n\n  two=b" };
-//		string in{ "output=\"EDOC\"\noutput_suffix=\".edoc\"\nsource_type=\"C++\"\nsource_pattern=?/.+\\.h/i\nmappers=\n  include=\n    <skip {space '\\n'}>\n    <match '#'>\n    <skip space>\n    <match include>\n    <skip space>\n    - quoted=\n        <match '\"'>\n        (_path = \"\")\n        loop<while (token != '\"')>=\n          <append (token) to _path>\n          <skip>\n        (trim _path)\n        <match '\"'>\n        @mappers/scan_include\n      braced=\n        <match '<'>\n        loop<while (token != '>')>=\n          <append (token) to _path>\n          <skip>\n        (trim _path)\n        <match '>'>\n        @mappers/scan_include\n  scan_include=\n    if<(exists _path)>=\n      <scan (_path)>\n      <return>\n    loop<list=known_include_paths element=include_path>=\n      (file_path = include_path + '/' + _path)\n      if<(exists file_path)>=\n        <scan (file_path)>\n        <return>\n\n  documentation_comments=\n    loop<while (token)>=\n      <skip {space '\\n'}>\n      <match '/'>\nscan=\n  loop<while(token)>={@mappers/global}" };
+		string in{ "alpha:\n\n  one=a\n\n  two=b" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
-		WANT_EQ( "alpha=\n  one=a\n  two=b", out.stdstr() );
+		WANT_EQ( "alpha:\n  one=a\n  two=b", out.stdstr() );
 	}
 	TEST( TupleTest, metaval1 )
 	{
 		string in{ "include=<skip {space '\\n'}>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -873,9 +916,9 @@ namespace eon
 	}
 	TEST( TupleTest, metaval2 )
 	{
-		string in{ "include=\n  <skip {space '\\n'}>\n  <another>" };
+		string in{ "include:\n  <skip {space '\\n'}>\n  <another>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -888,7 +931,7 @@ namespace eon
 	{
 		string in{ "<>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -900,7 +943,7 @@ namespace eon
 	{
 		string in{ "<alpha>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -912,7 +955,7 @@ namespace eon
 	{
 		string in{ "<type=signed_int, format=?/[+\\-]\\d+/ options={alpha, beta gamma}>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -924,7 +967,7 @@ namespace eon
 	{
 		string in{ "<type={alpha beta gamma delta\n  epsilon zeta eta theta}>" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -936,7 +979,7 @@ namespace eon
 	{
 		string in{ "a<alpha>=\"a\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
@@ -947,43 +990,175 @@ namespace eon
 	TEST( MetaTest, multiline )
 	{
 		string in{
-			"loop<init (i=1), (type=toname(\"tpl_spec_type_\" + i)),\n"
-			"  (name=toname(\"tpl_spec_name_\" + i)), while(i<num_tpl_specs),"
-			" (i=i+1)>=one" };
+			"loop<init &(i=1), &(type=toname(\"tpl_spec_type_\" + i)),\n"
+			"  &(name=toname(\"tpl_spec_name_\" + i)), while&(i<num_tpl_specs),"
+			" &(i=i+1)>=one" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
-			<< "Failed to parse";
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
 		REQUIRE_TRUE( docs.exists( name_test ) );
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
-		WANT_EQ( "loop<init (i = 1) (type = toname \"tpl_spec_type_\" + i)\n  "
-			"(name = toname \"tpl_spec_name_\" + i) while (i < num_tpl_specs) "
-			"(i = i + 1)>=one", out.stdstr() );
+		WANT_EQ( "loop<init &(i = 1) &(type = toname \"tpl_spec_type_\" + i)\n"
+			"  &(name = toname \"tpl_spec_name_\" + i) while &(i < num_tpl_specs)\n"
+			"  &(i = i + 1)>=one", out.stdstr() );
+	}
+
+	TEST( FunctionTest, basic_format )
+	{
+		string in{
+			"maxint<function, args={a=int, b=int}>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint ->{a=5, b=7})\n"
+			"&(largest2 = @maxint->{a=7,b=5})"};
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto out = doc.str();
+		WANT_EQ( "maxint<function args={a=int b=int}>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint -> {a=5 b=7})\n"
+			"&(largest2 = @maxint -> {a=7 b=5})", out.stdstr() );
+	}
+	TEST( FunctionTest, basic_execute )
+	{
+		string in{
+			"maxint<function, args={a=int, b=int}>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint ->{a=5, b=7})\n"
+			"&(largest2 = @maxint->{a=7,b=5})" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto l1 = doc.at( 1 );
+		auto l2 = doc.at( 2 );
+		REQUIRE_TRUE( l1 );
+		REQUIRE_TRUE( l2 );
+		int64_t v1{ 0 }, v2{ 0 };
+		WANT_NO_EXCEPT( v1 = l1->targetInt( docs.variables() ) );
+		WANT_NO_EXCEPT( v2 = l2->targetInt( docs.variables() ) );
+		WANT_EQ( v1, 7 );
+		WANT_EQ( v2, 7 );
+	}
+	TEST( FunctionTest, double_format )
+	{
+		string in{
+			"maxint<function, args={a=int, b=int}>:\n"
+			"  return @realmaxint -> {a=a, b=b}\n"
+			"realmaxint<function, args={a=int, b=int}>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint ->{a=5, b=7})\n"
+			"&(largest2 = @maxint->{a=7,b=5})" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto out = doc.str();
+		WANT_EQ( "maxint<function args={a=int b=int}>:\n"
+			"  return @realmaxint -> {a=a b=b}\n"
+			"realmaxint<function args={a=int b=int}>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint -> {a=5 b=7})\n"
+			"&(largest2 = @maxint -> {a=7 b=5})", out.stdstr() );
+	}
+	TEST( FunctionTest, double_execute )
+	{
+		string in{
+			"maxint<function, args={a=int, b=int}>:\n"
+			"  return @realmaxint -> {a=&(a), b=&(b)}\n"
+			"realmaxint<function, args={a=int, b=int}>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint ->{a=5, b=7})\n"
+			"&(largest2 = @maxint->{a=7,b=5})" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto l1 = doc.at( 2 );
+		auto l2 = doc.at( 3 );
+		REQUIRE_TRUE( l1 );
+		REQUIRE_TRUE( l2 );
+		int64_t v1{ 0 }, v2{ 0 };
+		WANT_NO_EXCEPT( v1 = l1->targetInt( docs.variables() ) );
+		WANT_NO_EXCEPT( v2 = l2->targetInt( docs.variables() ) );
+		WANT_EQ( v1, 7 );
+		WANT_EQ( v2, 7 );
+	}
+	TEST( FunctionTest, declared_format )
+	{
+		string in{
+			"addint=<function, target=@add_int, args={a=int, b=int}>\n"
+			"&(sum = @addint -> {a=2 b=5})" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto out = doc.str();
+		WANT_EQ( "addint=<function target=@add_int args={a=int b=int}>\n"
+			"&(sum = @addint -> {a=2 b=5})", out.stdstr() );
+	}
+	TEST( FunctionTest, declared_nonexisting )
+	{
+		string in{
+			"addint=<function, target=@add_int, args={a=int, b=int}>\n"
+			"&(sum = @addint -> {a=2 b=5})" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto l1 = doc.at( 1 );
+		REQUIRE_TRUE( l1 );
+		int64_t v1{ 0 };
+		WANT_EXCEPT( v1 = l1->targetInt( docs.variables() ), vars::BadFunction );
+	}
+	TEST( FunctionTest, declared_existing )
+	{
+		string in{
+			"addint=<function, target=@add_int, args={a=int, b=int}>\n"
+			"&(sum = @addint -> {a=2 b=5})" };
+		eonof docs;
+		docs.variables().setFunction( nameref( "add_int" ), vars::functionptr( new addInt() ) );
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto l1 = doc.at( 1 );
+		REQUIRE_TRUE( l1 );
+		int64_t v1{ 0 };
+		WANT_NO_EXCEPT( v1 = l1->targetInt( docs.variables() ) );
+		WANT_EQ( v1, 7 );
 	}
 
 	TEST( ValidateTest, max_depth_good )
 	{
-		string in{ "root<max_depth=1>=\n  (child1)\n  (child2)" };
+		string in{ "root<max_depth=1>:\n  &(child1)\n  &(child2)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
 	TEST( ValidateTest, max_depth_bad )
 	{
-		string in{ "root<max_depth=1>=\n  {child1}\n  child2=\n    {child21}\n    {child22}" };
+		string in{ "root<max_depth=1>:\n  {child1}\n  child2:\n    {child21}\n    {child22}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, min_length_string_good )
 	{
 		string in{ "root<min_length=5>=\"12345\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -991,16 +1166,16 @@ namespace eon
 	{
 		string in{ "root<min_length=5>=\"1234\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, min_length_binary_good )
 	{
 		string in{ "root<min_length=5>=%5465737421" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1008,33 +1183,33 @@ namespace eon
 	{
 		string in{ "root<min_length=5>=%54657374" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, min_length_tuple_good )
 	{
-		string in{ "root<min_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)" };
+		string in{ "root<min_length=5>:\n  &(child1)\n  &(child2)\n  &(child3)\n  &(child4)\n  &(child5)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
 	TEST( ValidateTest, min_length_tuple_bad )
 	{
-		string in{ "root<min_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)" };
+		string in{ "root<min_length=5>:\n  &(child1)\n  &(child2)\n  &(child3)\n  &(child4)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, max_length_string_good )
 	{
 		string in{ "root<max_length=5>=\"12345\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1042,16 +1217,16 @@ namespace eon
 	{
 		string in{ "root<max_length=5>=\"123456\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, max_length_binary_good )
 	{
 		string in{ "root<max_length=5>=%5465737421" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1059,33 +1234,33 @@ namespace eon
 	{
 		string in{ "root<max_length=5>=%546573742120" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, max_length_tuple_good )
 	{
-		string in{ "root<max_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)" };
+		string in{ "root<max_length=5>:\n  &(child1)\n  &(child2)\n  &(child3)\n  &(child4)\n  &(child5)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
 	TEST( ValidateTest, max_length_tuple_bad )
 	{
-		string in{ "root<max_length=5>=\n  (child1)\n  (child2)\n  (child3)\n  (child4)\n  (child5)\n  (child6)" };
+		string in{ "root<max_length=5>:\n  &(child1)\n  &(child2)\n  &(child3)\n  &(child4)\n  &(child5)\n  &(child6)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, min_int_good )
 	{
 		string in{ "root<min=5>=5" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1093,16 +1268,16 @@ namespace eon
 	{
 		string in{ "root<min=5>=4" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, min_float_good )
 	{
 		string in{ "root<min=5.5>=5.5" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1110,16 +1285,16 @@ namespace eon
 	{
 		string in{ "root<min=5.5>=5.4" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, max_int_good )
 	{
 		string in{ "root<max=5>=5" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1127,16 +1302,16 @@ namespace eon
 	{
 		string in{ "root<max=5>=6" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, max_float_good )
 	{
 		string in{ "root<max=5.5>=5.5" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1144,16 +1319,16 @@ namespace eon
 	{
 		string in{ "root<max=5.5>=5.6" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, format_string_good )
 	{
 		string in{ R"(root<format=?/\d{4}-\d\d-\d\d/>="2021-05-19")" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1161,16 +1336,16 @@ namespace eon
 	{
 		string in{ R"(root<format=?/\d{4}\-\d\d\-\d\d/>="2021-5-19")" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, format_raw_good )
 	{
 		string in{ R"(root<format=?/\d{4}-\d\d-\d\d/>=|2021-05-19)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1178,16 +1353,16 @@ namespace eon
 	{
 		string in{ R"(root<format=?/\d{4}\-\d\d\-\d\d/>=|2021-5-19)" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, flags_good )
 	{
 		string in{ "root<flags={one two three}>={two one}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1195,16 +1370,16 @@ namespace eon
 	{
 		string in{ "root<flags={one two three}>={two four}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 	TEST( ValidateTest, options_good )
 	{
 		string in{ "root<options={one two three}>=two" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test ) ) << "Failed to validate";
 	}
@@ -1212,9 +1387,9 @@ namespace eon
 	{
 		string in{ "root<options={one two three}>=four" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test ), tuple::Invalid )
 			<< "Failed to detect invalid document";
 	}
 
@@ -1224,7 +1399,7 @@ namespace eon
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=John\nage=30" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
 			<< "Failed to validate";
@@ -1232,10 +1407,10 @@ namespace eon
 	TEST( ValidateTest, pattern_good_2 )
 	{
 		auto pattern = name::get( "ptrn" );
-		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
-			"\n---\nname=\n  first=John\n  last=\"Doe\"" };
+		string in{ "---ptrn<pattern>\nname:\n  first=<type=name>\n  last=\"Doe\""
+			"\n---\nname:\n  first=John\n  last=\"Doe\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
 			<< "Failed to validate";
@@ -1246,7 +1421,7 @@ namespace eon
 		string in{ "---ptrn<pattern>\nnames={one two three}"
 			"\n---\nnames={one two three}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
 		WANT_NO_EXCEPT( docs.validate( name_test, pattern ) )
 			<< "Failed to validate";
@@ -1257,9 +1432,9 @@ namespace eon
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=John\nage=9" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tuple::Invalid )
 			<< "Failed to validate";
 	}
 	TEST( ValidateTest, pattern_bad_2 )
@@ -1268,9 +1443,9 @@ namespace eon
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=\"John\"\nage=30" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tuple::Invalid )
 			<< "Failed to validate";
 	}
 	TEST( ValidateTest, pattern_bad_3 )
@@ -1279,20 +1454,20 @@ namespace eon
 		string in{ "---ptrn<pattern>\nname=<type=name>\nage=<type=int min=10>"
 			"\n---\nname=John\nage=30.5" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tuple::Invalid )
 			<< "Failed to validate";
 	}
 	TEST( ValidateTest, pattern_bad_4)
 	{
 		auto pattern = name::get( "ptrn" );
-		string in{ "---ptrn<pattern>\nname=\n  first=<type=name>\n  last=\"Doe\""
-			"\n---\nname=\n  first=John\n  last=\"doe\"" };
+		string in{ "---ptrn<pattern>\nname:\n  first=<type=name>\n  last=\"Doe\""
+			"\n---\nname:\n  first=John\n  last=\"doe\"" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tuple::Invalid )
 			<< "Failed to validate";
 	}
 	TEST( ValidateTest, pattern_bad_5 )
@@ -1301,9 +1476,9 @@ namespace eon
 		string in{ "---ptrn<pattern>\nnames={one two three}"
 			"\n---\nnames={one tw three}" };
 		eonof docs;
-		REQUIRE_NO_EXCEPT( docs.parseExclusive( in, name_test ) )
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
-		WANT_EXCEPT( docs.validate( name_test, pattern ), tup::Invalid )
+		WANT_EXCEPT( docs.validate( name_test, pattern ), tuple::Invalid )
 			<< "Failed to validate";
 	}
 }

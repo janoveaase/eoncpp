@@ -4,9 +4,11 @@ message(STATUS " - EonName")
 
 set(NAME_HEADERS
 	Name.h
+	NameRef.h
 )
 set(NAME_SOURCES
 	Name.cpp
+	NameRef.cpp
 )
 
 if(WIN32)
