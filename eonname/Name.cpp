@@ -131,4 +131,5 @@ namespace eon
 	const name_t name_source = name::get( "source" );
 	const name_t name_target = name::get( "target" );
 	const name_t name_args = name::get( "args" );
+	const name_t name_return = name::get( "return" );
 }

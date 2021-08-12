@@ -344,6 +344,9 @@ namespace eon
 				else if( var->isVariable() )
 					varcache.set( var->actualVariable(), attr->value() );
 			}
+
+			if( value->isFunction() )
+				dynamic_cast<vars::functionval*>( &*value )->functionMeta( metadata );
 		}
 	}
 
@@ -373,6 +376,9 @@ namespace eon
 				else if( var->isVariable() )
 					varcache.set( var->actualVariable(), attr.value() );
 			}
+
+			if( value->isFunction() )
+				dynamic_cast<vars::functionval*>( &*value )->functionMeta( metadata );
 		}
 	}
 	void tuple::addMerge( const vars::valueptr& value, vars::variables& varcache, name_t name, const tupleptr& metadata )
@@ -434,6 +440,9 @@ namespace eon
 				else if( var->isVariable() )
 					varcache.set( var->actualVariable(), attr.value() );
 			}
+
+			if( value->isFunction() )
+				dynamic_cast<vars::functionval*>( &*value )->functionMeta( metadata );
 		}
 	}
 

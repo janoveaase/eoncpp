@@ -119,6 +119,7 @@ namespace eon
 	extern const name_t name_source;
 	extern const name_t name_target;
 	extern const name_t name_args;
+	extern const name_t name_return;
 
 
 

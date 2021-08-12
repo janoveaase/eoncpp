@@ -1007,7 +1007,7 @@ namespace eon
 	TEST( FunctionTest, basic_format )
 	{
 		string in{
-			"maxint<function, args={a=int, b=int}>:\n"
+			"maxint<function, args={a=int, b=int}, return=int>:\n"
 			"  return a if a >= b else b\n"
 			"&(largest1 = @maxint ->{a=5, b=7})\n"
 			"&(largest2 = @maxint->{a=7,b=5})"};
@@ -1017,7 +1017,7 @@ namespace eon
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
-		WANT_EQ( "maxint<function args={a=int b=int}>:\n"
+		WANT_EQ( "maxint<function args={a=int b=int} return=int>:\n"
 			"  return a if a >= b else b\n"
 			"&(largest1 = @maxint -> {a=5 b=7})\n"
 			"&(largest2 = @maxint -> {a=7 b=5})", out.stdstr() );
@@ -1025,7 +1025,7 @@ namespace eon
 	TEST( FunctionTest, basic_execute )
 	{
 		string in{
-			"maxint<function, args={a=int, b=int}>:\n"
+			"maxint<function, args={a=int, b=int}, return=int>:\n"
 			"  return a if a >= b else b\n"
 			"&(largest1 = @maxint ->{a=5, b=7})\n"
 			"&(largest2 = @maxint->{a=7,b=5})" };
@@ -1044,12 +1044,34 @@ namespace eon
 		WANT_EQ( v1, 7 );
 		WANT_EQ( v2, 7 );
 	}
+	TEST( FunctionTest, positional_args_execute )
+	{
+		string in{
+			"maxint<function, args={a=int, b=int}, return=int>:\n"
+			"  return a if a >= b else b\n"
+			"&(largest1 = @maxint ->{5, 7})\n"
+			"&(largest2 = @maxint->{7,5})" };
+		eonof docs;
+		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
+		REQUIRE_TRUE( docs.exists( name_test ) );
+		auto& doc = docs.doc( name_test );
+		REQUIRE_TRUE( doc ) << "Got no document";
+		auto l1 = doc.at( 1 );
+		auto l2 = doc.at( 2 );
+		REQUIRE_TRUE( l1 );
+		REQUIRE_TRUE( l2 );
+		int64_t v1{ 0 }, v2{ 0 };
+		WANT_NO_EXCEPT( v1 = l1->targetInt( docs.variables() ) );
+		WANT_NO_EXCEPT( v2 = l2->targetInt( docs.variables() ) );
+		WANT_EQ( v1, 7 );
+		WANT_EQ( v2, 7 );
+	}
 	TEST( FunctionTest, double_format )
 	{
 		string in{
-			"maxint<function, args={a=int, b=int}>:\n"
+			"maxint<function, args={a=int, b=int}, return=int>:\n"
 			"  return @realmaxint -> {a=a, b=b}\n"
-			"realmaxint<function, args={a=int, b=int}>:\n"
+			"realmaxint<function, args={a=int, b=int}, return=int>:\n"
 			"  return a if a >= b else b\n"
 			"&(largest1 = @maxint ->{a=5, b=7})\n"
 			"&(largest2 = @maxint->{a=7,b=5})" };
@@ -1059,9 +1081,9 @@ namespace eon
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
-		WANT_EQ( "maxint<function args={a=int b=int}>:\n"
+		WANT_EQ( "maxint<function args={a=int b=int} return=int>:\n"
 			"  return @realmaxint -> {a=a b=b}\n"
-			"realmaxint<function args={a=int b=int}>:\n"
+			"realmaxint<function args={a=int b=int} return=int>:\n"
 			"  return a if a >= b else b\n"
 			"&(largest1 = @maxint -> {a=5 b=7})\n"
 			"&(largest2 = @maxint -> {a=7 b=5})", out.stdstr() );
@@ -1069,9 +1091,9 @@ namespace eon
 	TEST( FunctionTest, double_execute )
 	{
 		string in{
-			"maxint<function, args={a=int, b=int}>:\n"
+			"maxint<function, args={a=int, b=int}, return=int>:\n"
 			"  return @realmaxint -> {a=&(a), b=&(b)}\n"
-			"realmaxint<function, args={a=int, b=int}>:\n"
+			"realmaxint<function, args={a=int, b=int}, return=int>:\n"
 			"  return a if a >= b else b\n"
 			"&(largest1 = @maxint ->{a=5, b=7})\n"
 			"&(largest2 = @maxint->{a=7,b=5})" };
@@ -1093,7 +1115,7 @@ namespace eon
 	TEST( FunctionTest, declared_format )
 	{
 		string in{
-			"addint=<function, target=@add_int, args={a=int, b=int}>\n"
+			"addint=<function, target=@add_int, args={a=int, b=int}, return=int>\n"
 			"&(sum = @addint -> {a=2 b=5})" };
 		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
@@ -1101,13 +1123,13 @@ namespace eon
 		auto& doc = docs.doc( name_test );
 		REQUIRE_TRUE( doc ) << "Got no document";
 		auto out = doc.str();
-		WANT_EQ( "addint=<function target=@add_int args={a=int b=int}>\n"
+		WANT_EQ( "addint=<function target=@add_int args={a=int b=int} return=int>\n"
 			"&(sum = @addint -> {a=2 b=5})", out.stdstr() );
 	}
 	TEST( FunctionTest, declared_nonexisting )
 	{
 		string in{
-			"addint=<function, target=@add_int, args={a=int, b=int}>\n"
+			"addint=<function, target=@add_int, args={a=int, b=int}, return=int>\n"
 			"&(sum = @addint -> {a=2 b=5})" };
 		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) ) << "Failed to parse";
@@ -1122,7 +1144,7 @@ namespace eon
 	TEST( FunctionTest, declared_existing )
 	{
 		string in{
-			"addint=<function, target=@add_int, args={a=int, b=int}>\n"
+			"addint=<function, target=@add_int, args={a=int, b=int}, return=int>\n"
 			"&(sum = @addint -> {a=2 b=5})" };
 		eonof docs;
 		docs.variables().setFunction( nameref( "add_int" ), vars::functionptr( new addInt() ) );

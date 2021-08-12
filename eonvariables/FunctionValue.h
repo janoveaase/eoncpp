@@ -70,8 +70,14 @@ namespace eon
 
 			//* Get argument requirements
 			inline const tuple* args() const noexcept {
-				return Meta && Meta->exists( name_args ) && Meta->at( name_args )->isTuple()
-					? &Meta->at( name_args )->actualTuple() : nullptr; }
+				if( FuncMeta ) { auto val = FuncMeta->at( name_args );
+					if( val && val->isTuple() ) return &val->actualTuple(); }
+				return nullptr; }
+
+			//* Get return type
+			inline const valueptr returnType() const noexcept {
+				if( FuncMeta ) { auto val = FuncMeta->at( name_return ); if( val ) return val; }
+				return valueptr(); }
 
 			//* Execute function
 			valueptr execute( variables& varcache, const tuple& args ) const override;
@@ -90,7 +96,7 @@ namespace eon
 				if( new_value && new_value->isFunction() ) Val = new_value->actualFunction(); else throw WrongType(); }
 
 			//* Set meta data from key
-			inline void setMeta( tuple* meta_data ) noexcept { Meta = meta_data; }
+			inline void functionMeta( tupleptr meta_data ) noexcept { FuncMeta = meta_data; }
 
 			//* Access modifyable tuple of expressions
 			inline tuple& function_value() override { return Val; }
@@ -108,7 +114,7 @@ namespace eon
 		private:
 
 			tuple Val;
-			tuple* Meta{ nullptr };		// Same as for the key
+			tupleptr FuncMeta;		// Same as for the key
 		};
 	}
 }

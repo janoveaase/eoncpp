@@ -10,10 +10,21 @@ namespace eon
 		{
 			valueptr return_value;
 			varcache.push();
-			for( auto arg : args )
+			auto params = this->args();
+			if( params )
 			{
-				if( arg->named() )
-					varcache.setTop( arg->name(), arg->value()->target( varcache, arg->value() ) );
+				for( auto arg : *params )
+				{
+					auto param_name = arg->name();
+					valueptr val;
+					if( args.exists( param_name ) )
+						val = args.at( param_name );
+					else if( arg->pos() < args.numAttributes() )
+						val = args.at( arg->pos() );
+					else
+						throw NotFound( "Missing '" + *param_name + "' argument in function call!" );
+					varcache.setTop( param_name, val->target( varcache, val ) );
+				}
 			}
 			for( auto& expr : Val )
 			{

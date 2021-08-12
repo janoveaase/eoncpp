@@ -130,7 +130,7 @@ namespace eon
 
 		//* Get a const attribute by name
 		//* Returns 'false' if no attribute with that name.
-		inline const vars::valueptr at( name_t name ) const noexcept {
+		inline vars::valueptr at( name_t name ) const noexcept {
 			auto found = Named.find( name ); return found != Named.end() ? found->second->value() : vars::valueptr(); }
 
 		//* Check if this tuple contains a value matching the specified value
