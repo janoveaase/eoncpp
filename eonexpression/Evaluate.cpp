@@ -177,6 +177,27 @@ namespace eon
 					auto val = arg1->evaluate( varcache );
 					return vars::controlval::create( vars::ctrl_t::_return, val->target( varcache, val ) );
 				}
+				case vars::operators::code::loadstr:
+					return vars::stringval::create(
+						file( arg1->evaluate( varcache )->targetString( varcache ) ).loadText() );
+				case vars::operators::code::loadraw:
+				{
+					auto str = file( arg1->evaluate( varcache )->targetString( varcache ) ).loadText();
+					return vars::rawval::create( str.splitSequential<std::vector<string>>( '\n' ) );
+				}
+				case vars::operators::code::loadbin:
+					return vars::binaryval::create(
+						file( arg1->evaluate( varcache )->targetString( varcache ) ).loadBinary() );
+				case vars::operators::code::_delete:
+					try
+					{
+						file( arg1->evaluate( varcache )->targetString( varcache ) ).remove();
+					}
+					catch( ... )
+					{
+						return vars::boolval::create( false );
+					}
+					return vars::boolval::create( true );
 			}
 			throw vars::UnsupportedOperand( "Unary operator '"
 				+ vars::operators::mapCode( op_code ) + "' not supported for "
@@ -481,6 +502,55 @@ namespace eon
 					else
 						str = str.padRight( sz, ' ' );
 					return vars::stringval::create( str );
+				}
+				case vars::operators::code::saveto:
+				{
+					auto val_obj = arg1->evaluate( varcache );
+					auto val = val_obj->target( varcache, val_obj );
+					path filename = arg2->evaluate( varcache )->targetString( varcache );
+					try
+					{
+						if( val->isString() )
+							file( filename ).save( val->actualString() );
+						else if( val->isRaw() )
+							file( filename ).save( string( "\n" ).join( val->actualRaw() ) );
+						else if( val->isBinary() )
+							file( filename ).save( val->actualBinary().binary() );
+						else
+							return vars::boolval::create( false );
+					}
+					catch( ... )
+					{
+						return vars::boolval::create( false );
+					}
+					return vars::boolval::create( true );
+				}
+				case vars::operators::code::open_square:
+				{
+					auto a1 = arg1->evaluate( varcache );
+					auto obj = a1->target( varcache, a1 );
+					switch( obj->type() )
+					{
+						case vars::type_code::string_t:
+							return vars::charval::create( *( obj->actualString().begin() + static_cast<size_t>(
+								arg2->evaluate( varcache )->targetInt( varcache ) ) ) );
+						case vars::type_code::raw_t:
+							return vars::stringval::create(
+								obj->actualRaw().at( arg2->evaluate( varcache )->targetInt( varcache ) ) );
+						case vars::type_code::binary_t:
+							return vars::intval::create( static_cast<int64_t>(
+								obj->actualBinary().byte( arg2->evaluate( varcache )->targetInt( varcache ) ) ) );
+						case vars::type_code::tuple_t:
+						{
+							auto a2 = arg2->evaluate( varcache );
+							auto pos = a2->target( varcache, a2 );
+							if( pos->isInt() )
+								return obj->actualTuple().at( static_cast<size_t>( pos->actualInt() ) );
+							else if( pos->isName() )
+								return obj->actualTuple().at( pos->actualName() );
+						}
+					}
+					break;
 				}
 			}
 			throw vars::UnsupportedOperand( "Binary operator '"

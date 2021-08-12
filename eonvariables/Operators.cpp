@@ -14,7 +14,7 @@ namespace eon
 			OperatorDetails( code::_and, 2, 23, 24 ),
 			OperatorDetails( code::_or, 2, 21, 22 ),
 			OperatorDetails( code::_not, 1, 73, 74 ),
-			OperatorDetails( code::if_else, 3, 12, 11 ),
+			OperatorDetails( code::if_else, 3, 14, 13 ),
 			OperatorDetails( code::call, 2, 90, 91 ),
 			OperatorDetails( code::eq, 2, 31, 32 ),
 			OperatorDetails( code::ne, 2, 31, 32 ),
@@ -52,6 +52,14 @@ namespace eon
 			OperatorDetails( code::toref, 1, 75, 76 ),
 			OperatorDetails( code::tovar, 1, 75, 76 ),
 			OperatorDetails( code::_return, 1, 1, 2 ),
+			OperatorDetails( code::loadstr, 1, 11, 12 ),
+			OperatorDetails( code::loadraw, 1, 11, 12 ),
+			OperatorDetails( code::loadbin, 1, 11, 12 ),
+			OperatorDetails( code::saveto, 2, 11, 12 ),
+			OperatorDetails( code::_delete, 1, 11, 12 ),
+			OperatorDetails( code::open_square, 2, 98, 0 ),
+			OperatorDetails( code::close_square, 2, 0, 97 ),
+
 			OperatorDetails( code::separator, 0, 0, -1 )
 		};
 
@@ -101,6 +109,14 @@ namespace eon
 				{ "toref", code::toref},
 				{ "tovar", code::tovar},
 				{ "return", code::_return },
+				{ "loadstr", code::loadstr },
+				{ "loadraw", code::loadraw },
+				{ "loadbin", code::loadbin },
+				{ "saveto", code::saveto },
+				{ "delete", code::_delete },
+				{ "[", code::open_square },
+				{ "]", code::close_square },
+
 				{ ";", code::separator },
 				{ "\n", code::separator }
 			};
@@ -157,6 +173,14 @@ namespace eon
 				{ code::toref, "toref" },
 				{ code::tovar, "tovar" },
 				{ code::_return, "return" },
+				{ code::loadstr, "loadstr" },
+				{ code::loadraw, "loadraw" },
+				{ code::loadbin, "loadbin" },
+				{ code::saveto, "saveto" },
+				{ code::_delete, "delete" },
+				{ code::open_square, "[]" },
+				{ code::close_square, "]" },
+
 				{ code::separator, ";" }
 			};
 			auto found = types.find( op_code );

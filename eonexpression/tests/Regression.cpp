@@ -2,6 +2,8 @@
 #include <eonvariables/IntValue.h>
 #include <eonvariables/FloatValue.h>
 #include <eonvariables/StringValue.h>
+#include <eonvariables/RawValue.h>
+#include <eonvariables/BinaryValue.h>
 
 
 
@@ -959,6 +961,67 @@ namespace eon
 		auto var = vars.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 0, var->actualInt() ) << "Wrong variable value";
+	}
+	
+	TEST( FileTest, save_load_delete )
+	{
+		vars::variables vars;
+		vars::valueptr result;
+		auto name_str = name::get( "str" );
+		file myfile{ testdir.dpath() + "myfile.txt" };
+
+		REQUIRE_NO_EXCEPT( testdir.ensureExists() );
+		
+		expression save{ "\"Hello World!\" saveto \"" + myfile.fpath().str() + "\"", vars };
+		REQUIRE_NO_EXCEPT( result = save.evaluate( vars ) ) << "Failed to save!";
+		REQUIRE_TRUE( result->actualBool() ) << "Failed to save!";
+		WANT_TRUE( myfile.exists() ) << "File not created!";
+
+		expression load{ "str = loadstr \"" + myfile.fpath().str() + "\"", vars };
+		REQUIRE_NO_EXCEPT( load.evaluate( vars ) ) << "Failed to load!";
+		WANT_EQ( "Hello World!", vars.get( name_str )->actualString().stdstr() ) << "Wrong value loaded!";
+
+		expression del{ "delete \"" + myfile.fpath().str() + "\"", vars };
+		WANT_NO_EXCEPT( result = del.evaluate( vars ) ) << "Failed to delete!";
+		WANT_FALSE( myfile.exists() ) << "File not deleted!";
+	}
+
+	TEST( ExpressionTest, str_elm )
+	{
+		vars::variables vars;
+		expression expr{ "x = \"Hello World!\"[4]", vars };
+		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
+		WANT_EQ( 'o', static_cast<char>( vars.get( name::get( "x" ) )->actualChar() ) );
+	}
+	TEST( ExpressionTest, raw_elm )
+	{
+		vars::variables vars;
+		vars.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
+		expression expr{ "x = r[1]", vars };
+		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
+		WANT_EQ( "two", vars.get( name::get( "x" ) )->actualString().stdstr() );
+	}
+	TEST( ExpressionTest, bin_elm )
+	{
+		vars::variables vars;
+		vars.set( name::get( "b" ), vars::valueptr( new vars::binaryval( hex( "abc" ) ) ) );
+		expression expr{ "x = b[1]", vars };
+		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
+		WANT_EQ( 98, vars.get( name::get( "x" ) )->actualInt() );
+	}
+	TEST( ExpressionTest, tuple_pos_elm )
+	{
+		vars::variables vars;
+		expression expr{ "x = {1, a=test, three=3.0}[1]", vars };
+		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
+		WANT_EQ( name_test, vars.get( name::get( "x" ) )->actualName() );
+	}
+	TEST( ExpressionTest, tuple_name_elm )
+	{
+		vars::variables vars;
+		expression expr{ "x = {1, a=test, three=3.0}[#a]", vars };
+		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
+		WANT_EQ( name_test, vars.get( name::get( "x" ) )->actualName() );
 	}
 
 	TEST( ExpressionTest, trim )

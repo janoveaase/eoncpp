@@ -116,6 +116,22 @@ namespace eon
 			Roots.push_back( node );
 	}
 
+	inline void runStack( tokenparser& parser,
+		std::stack<vars::operators::code>& op_stack, std::stack<expr::nodeptr>& tree_stack )
+	{
+		auto root = expr::nodeptr( new expr::operatornode( op_stack.top() ) );
+		for( size_t i = 0, num_ops = vars::operators::numOperands( op_stack.top() ); i < num_ops; ++i )
+		{
+			if( tree_stack.empty() )
+				throw BadExpression(
+					( parser ? parser.current().source().textRefRange() : parser.last().source().textRefRange() )
+					+ ": Operator '" + root->str() + "' is missing " + string( num_ops - i ) + " operand(s)!" );
+			root->addChild( tree_stack.top() );
+			tree_stack.pop();
+		}
+		op_stack.pop();
+		tree_stack.push( std::move( root ) );
+	}
 	void expression::_processToken( tokenparser& parser, vars::variables& vars, vars::operators::code& last_type,
 		std::stack<vars::operators::code>& op_stack, std::stack<expr::nodeptr>& tree_stack )
 	{
@@ -161,21 +177,7 @@ namespace eon
 				break;
 			case vars::operators::code::separator:
 				while( !op_stack.empty() && op_stack.top() != vars::operators::code::undef )
-				{
-					auto root = expr::nodeptr( new expr::operatornode( op_stack.top() ) );
-					auto num_ops = vars::operators::numOperands( op_stack.top() );
-					for( size_t i = 0; i < num_ops; ++i )
-					{
-						if( tree_stack.empty() )
-							throw BadExpression(
-								( parser ? parser.current().source().textRefRange() : parser.last().source().textRefRange() )
-								+ ": Operator '" + root->str() + "' is missing " + string( num_ops - i ) + " operand(s)" );
-						root->addChild( tree_stack.top() );
-						tree_stack.pop();
-					}
-					op_stack.pop();
-					tree_stack.push( std::move( root ) );
-				}
+					runStack( parser, op_stack, tree_stack );
 				if( op_stack.size() > 1 )
 					throw BadExpression(
 						( parser ? parser.current().source().textRefRange() : parser.last().source().textRefRange() )
@@ -183,61 +185,31 @@ namespace eon
 				break;
 			case vars::operators::code::close_brace:
 				while( !op_stack.empty() && op_stack.top() != vars::operators::code::open_brace )
-				{
-					auto root = expr::nodeptr( new expr::operatornode( op_stack.top() ) );
-					auto num_ops = vars::operators::numOperands( op_stack.top() );
-					for( size_t i = 0; i < num_ops; ++i )
-					{
-						if( tree_stack.empty() )
-							throw BadExpression(
-								( parser ? parser.current().source().textRefRange() : parser.last().source().textRefRange() )
-								+ ": Operator '" + root->str() + "' is missing " + string( num_ops - i ) + " operand(s)" );
-						root->addChild( tree_stack.top() );
-						tree_stack.pop();
-					}
-					op_stack.pop();
-					tree_stack.push( std::move( root ) );
-				}
+					runStack( parser, op_stack, tree_stack );
 				if( op_stack.top() == vars::operators::code::open_brace )
 					op_stack.pop();
 				else
-					throw BadExpression( "Unbalanced parenthesis" );
+					throw BadExpression( "Unbalanced parenthesis!" );
 				break;
 			case vars::operators::code::if_else2:
 				while( op_stack.top() != vars::operators::code::if_else )
+					runStack( parser, op_stack, tree_stack );
+				break;
+			case vars::operators::code::close_square:
+				while( !op_stack.empty() )
 				{
-					auto root = expr::nodeptr( new expr::operatornode( op_stack.top() ) );
-					auto num_ops = vars::operators::numOperands( op_stack.top() );
-					for( size_t i = 0; i < num_ops; ++i )
-					{
-						if( tree_stack.empty() )
-							throw BadExpression(
-								( parser ? parser.current().source().textRefRange() : parser.last().source().textRefRange() )
-								+ ": Operator '" + root->str() + "' is missing " + string( num_ops - i ) + " operand(s)" );
-						root->addChild( tree_stack.top() );
-						tree_stack.pop();
-					}
-					op_stack.pop();
-					tree_stack.push( std::move( root ) );
+					auto opensq = op_stack.top() == vars::operators::code::open_square;
+					runStack( parser, op_stack, tree_stack );
+					if( opensq )
+						break;
 				}
+				if( op_stack.empty() )
+					throw BadExpression( "Unbalanced square brackets!" );
 				break;
 			default:
 				while( vars::operators::inputPrecedence( type )
 					<= vars::operators::stackPrecedence( op_stack.top() ) )
-				{
-					auto root = expr::nodeptr( new expr::operatornode( op_stack.top() ) );
-					for( size_t i = 0, num_ops = vars::operators::numOperands( op_stack.top() ); i < num_ops; ++i )
-					{
-						if( tree_stack.empty() )
-							throw BadExpression(
-								( parser ? parser.current().source().textRefRange() : parser.last().source().textRefRange() )
-								+ ": Operator '" + root->str() + "' is missing " + string( num_ops - i ) + " operand(s)" );
-						root->addChild( tree_stack.top() );
-						tree_stack.pop();
-					}
-					op_stack.pop();
-					tree_stack.push( std::move( root ) );
-				}
+					runStack( parser, op_stack, tree_stack );
 				op_stack.push( type );
 				break;
 		}

@@ -80,6 +80,14 @@ namespace eon
 				toref,				// toref a
 				tovar,				// tovar a
 				_return,			// return a
+				loadstr,			// loadstr a
+				loadraw,			// loadraw a
+				loadbin,			// loadbin a
+				saveto,				// a saveto b
+				_delete,			// delete a
+				open_square,		// [
+				close_square,		// ]
+
 				separator,			// ';' and newline
 
 				dummies,
