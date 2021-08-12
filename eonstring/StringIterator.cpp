@@ -24,21 +24,17 @@ namespace eon
 		1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, // s5..s6
 		1, 3, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // s7..s8
 	};
-	inline char32_t _utf8Decode( char32_t& state, char32_t& codep,
-		char32_t byte )
+	inline char32_t _utf8Decode( char32_t& state, char32_t& codep, char32_t byte )
 	{
 		char32_t type = utf8d[ byte ];
-		codep = ( state != UTF8_ACCEPT ) ?
-			( byte & 0x3fu ) | ( codep << 6 ) :
-			( 0xff >> type ) & ( byte );
+		codep = ( state != UTF8_ACCEPT ) ? ( byte & 0x3fu ) | ( codep << 6 ) : ( 0xff >> type ) & ( byte );
 		state = utf8d[ 256 + state * 16 + type ];
 		return state;
 	}
 
 
 
-	string_iterator::string_iterator( const string_iterator& source,
-		const char* pos, size_t num_char ) noexcept
+	string_iterator::string_iterator( const string_iterator& source, const char* pos, size_t num_char ) noexcept
 	{
 		Begin = source.Begin;
 		End = source.End;
@@ -49,21 +45,6 @@ namespace eon
 		if( NumChar == 0 && Pos != Begin )
 			_utf8CharacterCount();
 		_translateCodepoint();
-	}
-
-
-
-	string_iterator& string_iterator::operator=( const string_iterator& other )
-		noexcept
-	{
-		Begin = other.Begin;
-		End = other.End;
-		Pos = other.Pos;
-		Codepoint = other.Codepoint;
-		CodepointSize = other.CodepointSize;
-		NumChar = other.NumChar;
-		NumChars = other.NumChars;
-		return *this;
 	}
 
 	string_iterator& string_iterator::reset() noexcept
@@ -126,8 +107,7 @@ namespace eon
 		size_t max_char_len = ( End - Pos ) < 4 ? ( End - Pos ) : 4;
 		for( size_t i = 0; i < max_char_len; ++i, ++CodepointSize )
 		{
-			if( !_utf8Decode( state, Codepoint,
-				static_cast<unsigned char>( *( Pos + i ) ) ) )
+			if( !_utf8Decode( state, Codepoint, static_cast<unsigned char>( *( Pos + i ) ) ) )
 				break;
 		}
 		++NumChar;
@@ -201,8 +181,7 @@ namespace eon
 
 
 
-	size_t string_iterator::bytesToUnicode( const char* start, const char* end,
-		char_t& cp )
+	size_t string_iterator::bytesToUnicode( const char* start, const char* end, char_t& cp )
 	{
 		auto size = end - start;
 		if( size > 4 )
@@ -218,8 +197,7 @@ namespace eon
 		}
 		return 0;
 	}
-	size_t string_iterator::unicodeToBytes( char_t cp,
-		uint32_t& bytes )
+	size_t string_iterator::unicodeToBytes( char_t cp, uint32_t& bytes )
 	{
 		if( !isValidCodepoint( cp ) )
 			throw InvalidUTF8();
@@ -256,8 +234,7 @@ namespace eon
 			throw InvalidUTF8();
 	}
 
-	char32_t string_iterator::utf8Decode( char32_t& state, char32_t& codep,
-		char32_t byte ) noexcept
+	char32_t string_iterator::utf8Decode( char32_t& state, char32_t& codep, char32_t byte ) noexcept
 	{
 		return _utf8Decode( state, codep, byte );
 	}
@@ -280,12 +257,9 @@ namespace eon
 
 
 
-	void string_iterator::_prep( const char* begin, const char* end,
-		const char* pos ) noexcept
+	void string_iterator::_prep( const char* begin, const char* end, const char* pos ) noexcept
 	{
-		Begin = begin;
-		End = end;
-		Pos = pos;
+		Begin = begin; End = end; Pos = pos;
 		if( NumChars == 0 || ( pos > begin && NumChar == 0 ) )
 			_utf8CharacterCount();
 		if( Pos < End )
@@ -298,8 +272,7 @@ namespace eon
 		NumChars = 0;
 		for( auto c = Begin; c != End; ++c )
 		{
-			if( !_utf8Decode( state, cp,
-				static_cast<unsigned char>( *c ) ) )
+			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
 			{
 				if( c == Pos )
 					NumChar = NumChars;

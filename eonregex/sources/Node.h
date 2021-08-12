@@ -25,9 +25,9 @@ namespace eon
 		protected:
 			Node() = default;
 		public:
-			Node( const substring& source ) { Source = source; }
-			Node( const Node& other ) { *this = other; }
-			Node( Node&& other ) noexcept { *this = std::move( other ); }
+			inline Node( const substring& source ) { Source = source; }
+			inline Node( const Node& other ) { *this = other; }
+			inline Node( Node&& other ) noexcept { *this = std::move( other ); }
 			virtual ~Node();
 
 			Node& operator=( const Node& other );
@@ -41,13 +41,42 @@ namespace eon
 
 			bool match( RxData& data, size_t steps = nsize );
 
+
+			// Get node structure as a string
+			string strStruct() const;
+
+
+			// Node comparison flags
+			enum class cmpflag
+			{
+				none = 0x00,	// No flags
+				deep = 0x01,	// Go deep (compare chained nodes)
+				quant = 0x02	// Compare quantifiers
+			};
+			friend inline bool operator&( cmpflag a, cmpflag b ) noexcept {
+				return static_cast<int>( a ) & static_cast<int>( b ); }
+			friend inline cmpflag operator|( cmpflag a, cmpflag b ) noexcept {
+				return static_cast<cmpflag>( static_cast<int>( a ) | static_cast<int>( b ) ); }
+			friend inline cmpflag& operator|=( cmpflag& a, cmpflag b ) noexcept {
+				return a = static_cast<cmpflag>( static_cast<int>( a ) | static_cast<int>( b ) ); }
+
+			// Comparison
+			bool equal( const Node& other, cmpflag flags = cmpflag::none ) const noexcept;
+
+
+			// Optimizations
+			void removeDuplicates( std::set<Node*>& removed );
+
 		protected:
 			virtual bool _match( RxData& data, size_t steps ) = 0;
 
+			virtual string _strStruct() const { return string(); }
+
+			virtual bool _equal( const Node& other, cmpflag flags ) const noexcept { return true; }
+			virtual void _removeDuplicates( std::set<Node*>& removed ) {}
+
 			using stack = std::stack<RxData, std::vector<RxData>>;
-			inline stack _stack() {
-				std::vector<RxData> data; data.reserve( 75 );
-				return stack( std::move( data ) ); }
+			inline stack _stack() { std::vector<RxData> data; data.reserve( 53 ); return stack( std::move( data ) ); }
 
 
 		private:

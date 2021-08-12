@@ -27,6 +27,42 @@ namespace eon
 			rx::InvalidExpression );
 	}
 
+	TEST( RegExTest, removeDuplicates )
+	{
+		regex ex{ R"(/a+a+/)" };
+		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a+a*/)" };
+		WANT_EQ( "a+", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a*a+/)" };
+		WANT_EQ( "a+", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a+a+?/)" };
+		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a+?a+/)" };
+		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a+?a+?/)" };
+		WANT_EQ( "a{2,}?", ex.strStruct().stdstr() );
+		ex = regex{ R"(/(a+a+)/)" };
+		WANT_EQ( "(a{2,})", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a+a+a+a+/)" };
+		WANT_EQ( "a{4,}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a+?a+?a+?a+?/)" };
+		WANT_EQ( "a{4,}?", ex.strStruct().stdstr() );
+		ex = regex{ R"(/(a+a+)(a+a+)/)" };
+		WANT_EQ( "(a{2,}){2}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a{1,5}a{1,5}/)" };
+		WANT_EQ( "a{2,10}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a{1,5}a{2,6}/)" };
+		WANT_EQ( "a{3,11}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/a{2,5}a{1,5}/)" };
+		WANT_EQ( "a{3,10}", ex.strStruct().stdstr() );
+		ex = regex{ R"(/\d\d+:/)" };
+		WANT_EQ( "\\d{2,}:", ex.strStruct().stdstr() );
+		ex = regex{ R"(/(x+x+)+y/)" };
+		WANT_EQ( "(x{2,})+y", ex.strStruct().stdstr() );
+		ex = regex{ R"(/(x+?x+?)+?y/)" };
+		WANT_EQ( "(x{2,}?)+?y", ex.strStruct().stdstr() );
+	}
+
 
 	TEST( RegExTest, match_any_single )
 	{
@@ -234,6 +270,24 @@ namespace eon
 		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() )
 			<< "Wrong value for unicode";
 	}
+	TEST( RegExTest, match_capture_issue1 )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = "/^.*?@<m>(p.*i).*$/" ) << "Failed to parse";
+		rx::match result;
+
+		WANT_FALSE( result = expr.match( "alpha" ) ) << "Matched alpha";
+		WANT_TRUE( result = expr.match( "pi" ) ) << "Didn't match pi";
+		if( result )
+		{
+			WANT_EQ( "pi", string( result.group( eon::name::get( "m" ) ) ).stdstr() ) << "Wrong capture for pi";
+		}
+		WANT_TRUE( result = expr.match( "spring" ) ) << "Didn't match spring";
+		if( result )
+		{
+			WANT_EQ( "pri", string( result.group( eon::name::get( "m" ) ) ).stdstr() ) << "Wrong capture for spring";
+		}
+	}
 
 	TEST( RegExTest, match_newline_tab )
 	{
@@ -331,14 +385,124 @@ namespace eon
 	}
 
 
+	TEST( MiscTests, basic_match )
+	{
+		string str_good{ "Eon is great!" };
+		string str_bad{ "Eon is not great!" };
+		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
+		WANT_TRUE( expr.match( str_good.substr() ) );
+		WANT_FALSE( expr.match( str_bad.substr() ) );
+	}
+	TEST( MiscTests, group_match )
+	{
+		string str_good{ "Eon is great!" };
+		regex expr{ R"(/@<one>(\w+) is @<2_>(\w+)@<three>(.)/)" };
+		
+		rx::match match;
+		REQUIRE_NO_EXCEPT( match = expr.match( str_good.substr() ) );
+		WANT_TRUE( match );
+		REQUIRE_EQ( 4, match.size() ) << "Wrong number of groups";
+		WANT_EQ( str_good.stdstr(), match.all().stdstr() )
+			<< "Wrong complete match";
+		WANT_EQ( "Eon", match.group( name::get( "one" ) ).stdstr() )
+			<< "Wrong first group";
+		WANT_EQ( "great", match.group( name::get( "2_" ) ).stdstr() )
+			<< "Wrong second group";
+		WANT_EQ( "!", match.group( name::get( "three" ) ).stdstr() )
+			<< "Wrong third group";
+	}
+
+	TEST( MiscTests, utf8_match )
+	{
+		string str_good, str_bad;
+		str_good += char_t( 0xC6 );
+		str_good += "on is great!";
+		str_bad += char_t( 0xC6 );
+		str_bad += "Eon is not great!";
+		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
+		WANT_TRUE( expr.match( str_good.substr() ) );
+		WANT_FALSE( expr.match( str_bad.substr() ) );
+	}
+
+	TEST( MiscTests, horror1 )
+	{
+		regex expr{ R"(/(x+x+)+y/)" };
+		WANT_FALSE( expr.match( "xxxxxxxxxxxxxxxxxxxx" ) );
+	}
+	TEST( MiscTests, horror2 )
+	{
+		regex expr{ R"(/(x+?x+?)+?y/)" };
+		WANT_FALSE( expr.match( "xxxxxxxxxxxxxxxxxxxx" ) );
+	}
+
+	TEST( MiscTests, repetitions1 )
+	{
+		regex expr{ R"(/\d\d+:/)" };
+		WANT_FALSE( expr.match( "9:" ) );
+		WANT_TRUE( expr.match( "99:" ) );
+		WANT_TRUE( expr.match( "999:" ) );
+		WANT_TRUE( expr.match( "9999:" ) );
+	}
+
+	TEST( MiscTests, advanced1 )
+	{
+		string str{ "alpha: 1:99:7 beta ." };
+		regex expr{ R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" };
+		WANT_TRUE( expr.match( str ) );
+	}
+
+
+/*	TEST( OptimizeTests, basic )
+	{
+		std::chrono::steady_clock clock;
+		string str{ "alpha: 1:99:7 beta ." };
+
+		int iterations = 10000;
+#ifdef _DEBUG
+		iterations /= 10;
+#endif
+		std::chrono::steady_clock::time_point start, end;
+		std::chrono::nanoseconds time1{ 0 }, time2{ 0 };
+
+		regex expr1{ R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" };
+		regex expr2{ R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/o)" };
+		int matches1 = 0, matches2 = 0;
+		std::cout << "\n";
+
+		for( auto i = 0; i < iterations; ++i )
+		{
+			start = clock.now();
+			if( expr1.match( str ) )
+				++matches1;
+			end = clock.now();
+			time1 += end - start;
+
+			start = clock.now();
+			if( expr2.match( str ) )
+				++matches2;
+			end = clock.now();
+			time2 += end - start;
+		}
+
+		auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>( time1 );
+		auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>( time2 );
+		std::cout << "Non-optimized: " << string::toString( duration1.count() ).separateThousands() << " microsecs\n";
+		std::cout << "    Optimized: " << string::toString( duration2.count() ).separateThousands() << " microsecs\n";
+
+		WANT_EQ( iterations, matches1 );
+		WANT_EQ( iterations, matches2 );
+		WANT_TRUE( duration2 <= ( duration1 / 4 ) * 3 ) << "Optimized must be <= "
+			<< string( ( ( duration1 / 4 ) * 3 ).count() ).separateThousands().stdstr() << " microsecs";
+	}*/
+
+
 	TEST( SpeedCmp, eon_std_parse )
 	{
 		eon::regex erx;
 		std::regex srx;
-#ifdef _DEBUG
-		size_t count = 1000;
-#else
 		size_t count = 50000;
+#ifdef _DEBUG
+		count /= 50;
 #endif
 		std::chrono::steady_clock clock;
 		string e_pattern{
@@ -368,10 +532,8 @@ namespace eon
 
 		auto e_time = e_end - e_start;
 		auto s_time = s_end - s_start;
-		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			e_time );
-		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			s_time );
+		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
 		std::cout << "\nEon regex (" + string::toString( e_list.size() )
 			<< "): " << string::toString( e_ms.count() ) << "ms\n";
@@ -381,17 +543,16 @@ namespace eon
 	TEST( SpeedCmp, eon_std_match )
 	{
 		eon::regex erx;
-		REQUIRE_NO_EXCEPT(
-			erx = R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" )
+		REQUIRE_NO_EXCEPT( erx =
+			R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" )
 			<< "Failed to parse Eon regex";
 		std::regex srx;
 		REQUIRE_NO_EXCEPT( srx = std::regex(
 			R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) )
 			<< "Failed to parse std regex";
-#ifdef _DEBUG
-		size_t count = 500;
-#else
 		size_t count = 5000;
+#ifdef _DEBUG
+		count /= 10;
 #endif
 		std::map<std::string, bool> s_text{
 			{ "alpha: 1:99:7 beta .", true },
@@ -431,14 +592,10 @@ namespace eon
 			for( auto& details : e_text )
 			{
 				bool match = false;
-				REQUIRE_NO_EXCEPT(
-					match = static_cast<bool>( erx.match( details.first ) ) )
-					<< "Eon failed match on round #"
-					<< string::toString( i + 1 ) << ", text \""
-					<< details.first << "\"";
+				REQUIRE_NO_EXCEPT( match = static_cast<bool>( erx.match( details.first ) ) )
+					<< "Eon failed match on round #" << string::toString( i + 1 ) << ", text \"" << details.first << "\"";
 				WANT_TRUE( match == details.second )
-					<< "Eon bad match on round #" << string::toString( i + 1 )
-					<< ", text \"" << details.first + "\"";
+					<< "Eon bad match on round #" << string::toString( i + 1 ) << ", text \"" << details.first + "\"";
 				if( match == details.second )
 					++e_successes;
 			}
@@ -467,54 +624,12 @@ namespace eon
 
 		auto e_time = e_end - e_start;
 		auto s_time = s_end - s_start;
-		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			e_time );
-		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			s_time );
+		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
 		std::cout << "\nEon regex (" << string::toString( e_successes )
 			<< "): " << string::toString( e_ms.count() ) << "ms\n";
 		std::cout << "Std regex (" << string::toString( s_successes )
 			<< "): " << string::toString( s_ms.count() ) << "ms\n";
-	}
-
-
-	TEST( MiscTests, basic_match )
-	{
-		string str_good{ "Eon is great!" };
-		string str_bad{ "Eon is not great!" };
-		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
-		WANT_TRUE( expr.match( str_good.substr() ) );
-		WANT_FALSE( expr.match( str_bad.substr() ) );
-	}
-	TEST( MiscTests, group_match )
-	{
-		string str_good{ "Eon is great!" };
-		regex expr{ R"(/@<one>(\w+) is @<2_>(\w+)@<three>(.)/)" };
-		
-		rx::match match;
-		REQUIRE_NO_EXCEPT( match = expr.match( str_good.substr() ) );
-		WANT_TRUE( match );
-		REQUIRE_EQ( 4, match.size() ) << "Wrong number of groups";
-		WANT_EQ( str_good.stdstr(), match.all().stdstr() )
-			<< "Wrong complete match";
-		WANT_EQ( "Eon", match.group( name::get( "one" ) ).stdstr() )
-			<< "Wrong first group";
-		WANT_EQ( "great", match.group( name::get( "2_" ) ).stdstr() )
-			<< "Wrong second group";
-		WANT_EQ( "!", match.group( name::get( "three" ) ).stdstr() )
-			<< "Wrong third group";
-	}
-
-	TEST( MiscTests, utf8_match )
-	{
-		string str_good, str_bad;
-		str_good += char_t( 0xC6 );
-		str_good += "on is great!";
-		str_bad += char_t( 0xC6 );
-		str_bad += "Eon is not great!";
-		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
-		WANT_TRUE( expr.match( str_good.substr() ) );
-		WANT_FALSE( expr.match( str_bad.substr() ) );
 	}
 }

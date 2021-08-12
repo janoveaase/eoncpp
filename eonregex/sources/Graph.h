@@ -23,15 +23,13 @@ namespace eon
 		public:
 			Graph() = default;
 			inline Graph( const Graph& other ) { *this = other; }
-			inline Graph( Graph&& other ) noexcept {
-				*this = std::move( other ); }
+			inline Graph( Graph&& other ) noexcept { *this = std::move( other ); }
 			virtual ~Graph() { clear(); };
 
 			Graph& operator=( const Graph& other );
 			Graph& operator=( Graph&& other ) noexcept;
 
-			inline void clear() noexcept {
-				if( Head != nullptr ) { delete Head; Head = nullptr; } }
+			inline void clear() noexcept { if( Head != nullptr ) { delete Head; Head = nullptr; } }
 
 			void parse( const substring& source );
 
@@ -39,16 +37,14 @@ namespace eon
 
 			inline bool empty() const noexcept { return Head == nullptr; }
 
-			inline bool match( RxData& param ) const {
-				return Head != nullptr ? Head->match( param ) : false; }
+			inline bool match( RxData& param ) const { return Head != nullptr ? Head->match( param ) : false; }
 
-			inline const substring& source() const noexcept {
-				return Source; }
-			inline const substring& expressionSub() const noexcept {
-				return ExprSub; }
-			inline const substring& flagsSub() const noexcept {
-				return FlagsSub; }
+			inline const substring& source() const noexcept { return Source; }
+			inline const substring& expressionSub() const noexcept { return ExprSub; }
+			inline const substring& flagsSub() const noexcept { return FlagsSub; }
 			inline char_t separator() const noexcept { return Separator; }
+
+			inline string strStruct() const { return Head ? Head->strStruct() : string(); }
 
 		private:
 			void parse();
@@ -60,42 +56,31 @@ namespace eon
 			public:
 				ParseParam() = delete;
 				inline ParseParam( const ParseParam& other ) {
-					Copy = true; GroupCount = other.GroupCount;
-					Source = other.Source; CurPos = other.CurPos; }
+					Copy = true; GroupCount = other.GroupCount; Source = other.Source; CurPos = other.CurPos; }
 				ParseParam( ParseParam&& ) = delete;
-				inline ParseParam( const substring& source ) {
-					Source = source; CurPos = Source.begin();}
-				~ParseParam() {
-					if( !Copy && HeadNode != nullptr ) delete HeadNode; }
+				inline ParseParam( const substring& source ) { Source = source; CurPos = Source.begin();}
+				~ParseParam() { if( !Copy && HeadNode != nullptr ) delete HeadNode; }
 
-				inline operator bool() const noexcept {
-					return static_cast<bool>(
-						CurPos && CurPos != Source.end() ); }
+				inline operator bool() const noexcept { return static_cast<bool>( CurPos && CurPos != Source.end() ); }
 
 				inline char_t operator()() noexcept { return *CurPos; }
 				inline bool advance() noexcept { return ++CurPos; }
 				inline string_iterator pos() const noexcept { return CurPos; }
-				inline void pos( const string_iterator& pos ) noexcept {
-					CurPos = pos; }
+				inline void pos( const string_iterator& pos ) noexcept { CurPos = pos; }
 
 				inline void startGroup() noexcept { ++GroupCount; }
 				inline bool inGroup() const noexcept { return GroupCount > 0; }
 				inline void endGroup() noexcept { --GroupCount; }
 
-				inline const substring& source() const noexcept {
-					return Source; }
+				inline const substring& source() const noexcept { return Source; }
 
-				inline size_t strSize() const noexcept {
-					return Source.numChars(); }
+				inline size_t strSize() const noexcept { return Source.numChars(); }
 
 				void set( Node* node ) noexcept;
 				inline Node* head() const noexcept { return HeadNode; }
 				inline Node* cur() const noexcept { return CurNode; }
 				void replaceCur( Node* node ) noexcept;
-				inline Node* extract() noexcept {
-					auto node = HeadNode;
-					HeadNode = nullptr; CurNode = nullptr; return node;
-				}
+				inline Node* extract() noexcept { auto node = HeadNode; HeadNode = nullptr; CurNode = nullptr; return node; }
 
 			private:
 				substring Source;
@@ -114,34 +99,27 @@ namespace eon
 			Node* parseNode( ParseParam& param );
 
 			Node* parseNot( ParseParam& param, const string_iterator& start );
-			Node* parseOr( OpOr* node_or, ParseParam& param,
-				const string_iterator& start );
+			Node* parseOr( OpOr* node_or, ParseParam& param, const string_iterator& start );
 
-			Node* parseCharGroup( ParseParam& param,
-				const string_iterator& start );
-			void parseCharGroupRange( ParseParam& param,
-				CharGroup::CharGrp& value, char_t start );
+			Node* parseCharGroup( ParseParam& param, const string_iterator& start );
+			void parseCharGroupRange( ParseParam& param, CharGroup::CharGrp& value, char_t start );
 
-			Node* parseCaptureRelated( ParseParam& param,
-				const string_iterator& start );
-			Node* parseCapture( ParseParam& param,
-				const string_iterator& start );
-			Node* parseBackref( ParseParam& param,
-				const string_iterator& start );
+			Node* parseCaptureRelated( ParseParam& param, const string_iterator& start );
+			Node* parseCapture( ParseParam& param, const string_iterator& start );
+			Node* parseBackref( ParseParam& param, const string_iterator& start );
 
-			Node* parseEscaped( ParseParam& param,
-				const string_iterator& start );
+			Node* parseEscaped( ParseParam& param, const string_iterator& start );
 
-			bool parseQuantifier( ParseParam& param, size_t& min, size_t& max,
-				const string_iterator& start );
+			bool parseQuantifier( ParseParam& param, size_t& min, size_t& max, const string_iterator& start );
 
-			Node* parseNodeGroup( ParseParam& param,
-				const string_iterator& start );
+			Node* parseNodeGroup( ParseParam& param, const string_iterator& start );
 
-			Node* parseFixed( ParseParam& param,
-				const string_iterator& start );
+			Node* parseFixed( ParseParam& param, const string_iterator& start );
 
 			Node* setQuantifier( ParseParam& param, size_t min, size_t max );
+
+			void optimize();
+			void removeDuplicates();
 
 
 

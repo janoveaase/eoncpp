@@ -53,13 +53,11 @@ namespace eon
 		inline substring( const substring& other ) noexcept { *this = other; }
 
 		//* Construct from a pair of [eon::string_iterator]s
-		inline substring( const string_iterator& begin,
-			const string_iterator& end ) { begin.assertCompatibleWith(
-				end ); Beg = begin, End = end; }
+		inline substring( const string_iterator& begin, const string_iterator& end ) {
+			begin.assertCompatibleWith( end ); Beg = begin, End = end; }
 
 		//* Construct an empty substring for an actual [eon::string_iterator]
-		inline explicit substring( const string_iterator& itr ) noexcept {
-			Beg = itr; End = itr; }
+		inline explicit substring( const string_iterator& itr ) noexcept { Beg = itr; End = itr; }
 
 		//* Construct for an 'std::string' (the entire string)
 		inline explicit substring( const std::string& stdstr ) noexcept {
@@ -67,8 +65,7 @@ namespace eon
 
 		//* Construct for a 'C-string' (the entire string)
 		inline explicit substring( const char* cstr ) noexcept {
-			Beg = string_iterator( cstr, strlen( cstr ) ); End = Beg
-				+ Beg.numChars(); }
+			Beg = string_iterator( cstr, strlen( cstr ) ); End = Beg + Beg.numChars(); }
 
 		//* Default destruction
 		~substring() = default;
@@ -79,10 +76,6 @@ namespace eon
 		  Modifier Methods
 		**********************************************************************/
 	public:
-		
-		//* Copy another substring
-		inline substring& operator=( const substring& other ) noexcept {
-			Beg = other.Beg; End = other.End; return *this; }
 
 		//* Clear the substring (make it empty and invalid)
 		inline void clear() noexcept { Beg.reset(); End.reset(); }
@@ -98,8 +91,7 @@ namespace eon
 		//* Check if 'this' substring is for a string starting at the specified
 		//* raw buffer address
 		inline bool sameBuffer( const char* buffer_start ) const noexcept {
-			return Beg.sameBuffer( buffer_start )
-				&& End.sameBuffer( buffer_start ); }
+			return Beg.sameBuffer( buffer_start ) && End.sameBuffer( buffer_start ); }
 
 		//* Check that 'this' substring is for a string starting at the
 		//* specified raw buffer address, throws [eon::WrongSource] if not
@@ -153,8 +145,8 @@ namespace eon
 		//* NOTE: This produces a copy of the byte-data from the source string.
 		//* NOTE: If the substring is high-to-low, the std::string will be
 		//*       reversed compared to the source string.
-		inline std::string stdstr() const noexcept { return isHighToLow()
-			? _getReverse() : std::string( Beg.byteData(), numBytes() ); }
+		inline std::string stdstr() const noexcept {
+			return isHighToLow() ? _getReverse() : std::string( Beg.byteData(), numBytes() ); }
 
 		//* Access a byte inside the substring
 		//* Returns zero if the substring is invalid or position is out of
@@ -164,10 +156,9 @@ namespace eon
 
 		//* Check if the substring is enclosed by a specific pair of characters
 		//* - such as quotation marks or parenthesis
-		inline bool enclosed( char_t start_char,
-			char_t end_char = same_char ) const noexcept {
-			return numChars() > 1 && *begin() == start_char && *last() == (
-				end_char == same_char ? start_char : end_char ); }
+		inline bool enclosed( char_t start_char, char_t end_char = same_char ) const noexcept {
+			return numChars() > 1 && *begin() == start_char
+				&& *last() == ( end_char == same_char ? start_char : end_char ); }
 
 
 		//* Check if the substring is blank (empty or space characters only)
@@ -185,8 +176,7 @@ namespace eon
 
 		//* Get number of indentations for the first (possibly only) line of
 		//* text in the string
-		size_t indentationLevel( char_t indentation_char = TabChr )
-			const noexcept;
+		size_t indentationLevel( char_t indentation_char = TabChr ) const noexcept;
 
 
 		//* Get characters as a vector of codepoint elements
@@ -228,11 +218,9 @@ namespace eon
 		//* Convert String to number
 		//* Non-numbers (including non-ASCII numerals) will be returned as
 		//* zero!
-		inline int32_t toInt32() const {
-			return static_cast<int32_t>( toInt64() ); }
+		inline int32_t toInt32() const { return static_cast<int32_t>( toInt64() ); }
 		int64_t toInt64() const;
-		inline uint32_t toUInt32() const {
-			return static_cast<uint32_t>( toUInt64() ); }
+		inline uint32_t toUInt32() const { return static_cast<uint32_t>( toUInt64() ); }
 		int64_t toUInt64() const;
 		inline size_t toSize() const { return (size_t)toUInt64(); }
 		double toDouble( char_t decimal_separator = PointChr ) const;
@@ -271,29 +259,19 @@ namespace eon
 #define FNV_PRIME64 1099511628211LLU
 #define FNV_OFFSET32 2166136261
 #define FNV_OFFSET64 14695981039346656037LLU
-		inline uint32_t hash32() const noexcept {
-			return hash32( Beg.byteData(), End.byteData() ); }
-		inline uint64_t hash64() const noexcept {
-			return hash64( Beg.byteData(), End.byteData() ); }
+		inline uint32_t hash32() const noexcept { return hash32( Beg.byteData(), End.byteData() ); }
+		inline uint64_t hash64() const noexcept { return hash64( Beg.byteData(), End.byteData() ); }
 #if defined(_WIN64) || defined(__x86_64__)
-		inline size_t hash() const noexcept {
-			return hash64( Beg.byteData(), End.byteData() ); }
+		inline size_t hash() const noexcept { return hash64( Beg.byteData(), End.byteData() ); }
 #else
-		inline size_t hash() const noexcept {
-			return hash32( Beg.byteData(), End.byteData() ); }
+		inline size_t hash() const noexcept { return hash32( Beg.byteData(), End.byteData() ); }
 #endif
 
 		//* Static hash method for raw bytes
-		static inline uint32_t hash32( const char* begin, const char* end,
-			uint32_t h = FNV_OFFSET32 ) noexcept {
-			for( auto c = begin; c != end; ++c ) {
-				h ^= static_cast<unsigned char>( *c ); h *= FNV_PRIME32; }
-			return h; }
-		static inline uint64_t hash64( const char* begin, const char* end,
-			uint64_t h = FNV_OFFSET64 ) noexcept {
-			for( auto c = begin; c != end; ++c ) {
-				h ^= static_cast<unsigned char>( *c ); h *= FNV_PRIME64; }
-			return h; }
+		static inline uint32_t hash32( const char* begin, const char* end, uint32_t h = FNV_OFFSET32 ) noexcept {
+			for( auto c = begin; c != end; ++c ) { h ^= static_cast<unsigned char>( *c ); h *= FNV_PRIME32; } return h; }
+		static inline uint64_t hash64( const char* begin, const char* end, uint64_t h = FNV_OFFSET64 ) noexcept {
+			for( auto c = begin; c != end; ++c ) { h ^= static_cast<unsigned char>( *c ); h *= FNV_PRIME64; } return h; }
 
 
 
@@ -313,8 +291,7 @@ namespace eon
 
 		//* Get iterator for the last character in the substring
 		//* Returns 'end()' if 'high-to-low' ordering or empty substring.
-		inline const string_iterator last() const noexcept {
-			return Beg < End ? End - 1 : End; }
+		inline const string_iterator last() const noexcept { return Beg < End ? End - 1 : End; }
 
 
 
@@ -372,16 +349,14 @@ namespace eon
 		//* on a 'low-to-high' substring!
 		//* Returns iterator for the found character - invalid iterator if not
 		//* found.
-		string_iterator findFirstOf( const substring& characters )
-			const noexcept;
+		string_iterator findFirstOf( const substring& characters ) const noexcept;
 
 		//* Find last occurrence of any of the specified 'characters'
 		//* If the substring is 'high-to-low', this is the same as
 		//* [findFirstOf] on a 'low-to-high' substring!
 		//* Returns iterator for the found character - invalid iterator if not
 		//* found.
-		string_iterator findLastOf( const substring& characters )
-			const noexcept;
+		string_iterator findLastOf( const substring& characters ) const noexcept;
 
 
 		//* Find first occurrence of any character not among the specified
@@ -390,8 +365,7 @@ namespace eon
 		//* [findLastNotOf] on a 'low-to-high' substring!
 		//* Returns iterator for the found character - invalid iterator if not
 		//* found.
-		string_iterator findFirstNotOf( const substring& characters )
-			const noexcept;
+		string_iterator findFirstNotOf( const substring& characters ) const noexcept;
 
 		//* Find last occurrence of any character not among the specified
 		//* 'characters'
@@ -399,8 +373,7 @@ namespace eon
 		//* [findFirstNotOf] on a 'low-to-high' substring!
 		//* Returns iterator for the found character - invalid iterator if not
 		//* found.
-		string_iterator findLastNotOf( const substring& characters )
-			const noexcept;
+		string_iterator findLastNotOf( const substring& characters ) const noexcept;
 
 
 		//* Find the first character in 'this' substring that differs from
@@ -418,12 +391,9 @@ namespace eon
 		//* section (start/end) characters will be ignored (not taken as
 		//* section start or end).
 		//* NOTE: Both substrings must be 'low-to-high'!
-		substring findFirstIgnoreSections( const substring& other,
-			char_t start_sect, char_t end_sect = same_char )
+		substring findFirstIgnoreSections( const substring& other, char_t start_sect, char_t end_sect = same_char )
 			const noexcept;
-		substring findFirstIgnoreSections( char_t cp,
-			char_t start_sect, char_t end_sect = same_char )
-			const noexcept;
+		substring findFirstIgnoreSections( char_t cp, char_t start_sect, char_t end_sect = same_char ) const noexcept;
 
 
 		//* Find first occurrence of a character from a [charcat] character
@@ -499,8 +469,7 @@ namespace eon
 		//* If a max number of elements is specified, the last element will
 		//* reference the unsplit remainder.
 		template<typename container_t>
-		container_t splitSequential( const substring& delimiter,
-			size_t max_elements = SIZE_MAX ) const
+		container_t splitSequential( const substring& delimiter, size_t max_elements = SIZE_MAX ) const
 		{
 			container_t elms;
 			auto start = begin();
@@ -516,8 +485,7 @@ namespace eon
 			return elms;
 		}
 		template<typename container_t>
-		container_t splitSequential( char_t delimiter,
-			size_t max_elements = SIZE_MAX ) const
+		container_t splitSequential( char_t delimiter, size_t max_elements = SIZE_MAX ) const
 		{
 			container_t elms;
 			auto start = begin();
@@ -587,37 +555,26 @@ namespace eon
 
 		//* Check if the substring starts with a specific 'value'
 		inline bool startsWith( const substring& value ) const noexcept {
-			return memcmp( begin().byteData(), value.begin().byteData(),
-				value.numBytes() ) == 0; }
-		inline bool startsWith( char_t value ) const noexcept {
-			return *begin() == value; }
+			return memcmp( begin().byteData(), value.begin().byteData(), value.numBytes() ) == 0; }
+		inline bool startsWith( char_t value ) const noexcept { return *begin() == value; }
 
 		//* Check if string ends with a specific 'value'
 		inline bool endsWith( const substring& value ) const noexcept {
-			return numChars() < value.numChars() ? false : memcmp(
-				begin().byteData() + ( numBytes() - value.numBytes() ),
+			return numChars() < value.numChars() ? false : memcmp( begin().byteData() + ( numBytes() - value.numBytes() ),
 				value.begin().byteData(), value.numBytes() ) == 0; }
-		inline bool endsWith( char_t value ) const noexcept {
-			return *last() == value; }
+		inline bool endsWith( char_t value ) const noexcept { return *last() == value; }
 
 		//* Do normal comparison
 		//* Assumes both 'this' and 'other' are 'low-to-high'!
-		int compare( const substring& other,
-			CompareType type = CompareType::faster ) const noexcept;
+		int compare( const substring& other, CompareType type = CompareType::faster ) const noexcept;
 
 		//* Comparison operators - all using [CompareType]::faster
-		inline bool operator<( const substring& other ) const noexcept {
-			return compare( other ) < 0; }
-		inline bool operator<=( const substring& other ) const noexcept {
-			return compare( other ) <= 0; }
-		inline bool operator>( const substring& other ) const noexcept {
-			return compare( other ) > 0; }
-		inline bool operator>=( const substring& other ) const noexcept {
-			return compare( other ) >= 0; }
-		inline bool operator==( const substring& other ) const noexcept {
-			return compare( other ) == 0; }
-		inline bool operator!=( const substring& other ) const noexcept {
-			return compare( other ) != 0; }
+		inline bool operator<( const substring& other ) const noexcept { return compare( other ) < 0; }
+		inline bool operator<=( const substring& other ) const noexcept { return compare( other ) <= 0; }
+		inline bool operator>( const substring& other ) const noexcept { return compare( other ) > 0; }
+		inline bool operator>=( const substring& other ) const noexcept { return compare( other ) >= 0; }
+		inline bool operator==( const substring& other ) const noexcept { return compare( other ) == 0; }
+		inline bool operator!=( const substring& other ) const noexcept { return compare( other ) != 0; }
 
 		//* Compare while ignoring case
 		//* Assumes both 'this' and 'other' are 'low-to-high'!
@@ -627,8 +584,7 @@ namespace eon
 		//* Compare by iterator positions, rather than characters
 		//* Returns -1, 0 or 1.
 		inline int comparePos( const substring& other ) const noexcept {
-			return Beg < other.Beg ? -1 : other.Beg < Beg
-				? 1 : End < other.End ? -1 : other.End < End ? 1 : 0; }
+			return Beg < other.Beg ? -1 : other.Beg < Beg ? 1 : End < other.End ? -1 : other.End < End ? 1 : 0; }
 
 
 
@@ -639,15 +595,14 @@ namespace eon
 		// Helpers
 		//
 	private:
-		static inline const char* _findFirst( const char* str, size_t str_size,
-			char c ) noexcept { return (char*)memchr( str, c, str_size ); }
-		const char* _findFirst( const char* source, size_t source_size,
-			const char* substr, size_t substr_size ) const noexcept;
+		static inline const char* _findFirst( const char* str, size_t str_size, char c ) noexcept {
+			return (char*)memchr( str, c, str_size ); }
+		const char* _findFirst( const char* source, size_t source_size, const char* substr, size_t substr_size )
+			const noexcept;
 		
-		static const char* _findLast( const char* str, size_t str_size,
-			char chr ) noexcept;
-		const char* _findLast( const char* source, size_t source_size,
-			const char* substr, size_t substr_size ) const noexcept;
+		static const char* _findLast( const char* str, size_t str_size, char chr ) noexcept;
+		const char* _findLast( const char* source, size_t source_size, const char* substr, size_t substr_size )
+			const noexcept;
 
 		std::string _getReverse() const;
 

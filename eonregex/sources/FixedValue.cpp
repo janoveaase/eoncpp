@@ -8,6 +8,7 @@ namespace eon
 		bool FixedValue::_match( RxData& data, size_t steps )
 		{
 			RxData param_b{ data };
+
 			for( auto c : Value )
 			{
 				if( param_b() == c )

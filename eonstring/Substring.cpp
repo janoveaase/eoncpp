@@ -41,11 +41,9 @@ namespace eon
 		if( empty() )
 			return 0;
 		if( Beg < End )
-			return pos < static_cast<size_t>( End.Begin - Beg.Begin )
-			? *( Beg.Begin + pos ) : 0;
+			return pos < static_cast<size_t>( End.Begin - Beg.Begin ) ? *( Beg.Begin + pos ) : 0;
 		else
-			return pos < static_cast<size_t>( Beg.Begin - End.Begin )
-			? *( End.Begin + pos ) : 0;
+			return pos < static_cast<size_t>( Beg.Begin - End.Begin ) ? *( End.Begin + pos ) : 0;
 	}
 
 	bool substring::blank() const noexcept
@@ -81,8 +79,7 @@ namespace eon
 		return begin() + num_char;
 	}
 
-	size_t substring::indentationLevel( char_t indentation_char )
-		const noexcept
+	size_t substring::indentationLevel( char_t indentation_char ) const noexcept
 	{
 		size_t level = 0;
 		for( auto cp : *this )
@@ -292,7 +289,7 @@ namespace eon
 				if( first_non_zero > begin() )
 					return substring( begin(), begin() + 1 );
 				else if( last_non_zero < end() )
-					substring( last_non_zero + 1, last_non_zero + 2 );
+					return substring( last_non_zero + 1, last_non_zero + 2 );
 				else
 					return substring( first_non_zero, last_non_zero );
 			}
@@ -360,14 +357,11 @@ namespace eon
 			if( !to_find.begin().bytesOnly() )
 				return substring( End.getEnd() );
 
-			auto found = _findFirst( Beg.Pos, numBytes(),
-				to_find.begin().Pos, to_find.numBytes() );
+			auto found = _findFirst( Beg.Pos, numBytes(), to_find.begin().Pos, to_find.numBytes() );
 			if( found != nullptr )
 			{
-				return substring(
-					string_iterator( Beg, found, found - Beg.Begin ),
-					string_iterator( Beg, found + to_find.numBytes(), (
-						found + to_find.numBytes() ) - Beg.Begin ) );
+				return substring( string_iterator( Beg, found, found - Beg.Begin ),
+					string_iterator( Beg, found + to_find.numBytes(), ( found + to_find.numBytes() ) - Beg.Begin ) );
 			}
 			else
 				return substring( End.getEnd() );
@@ -398,13 +392,10 @@ namespace eon
 			if( to_find > 127 && Beg.ValidUTF8 )
 				return substring( End.getEnd() );
 
-			auto found = _findFirst( Beg.Pos, numBytes(),
-				static_cast<char>( to_find ) );
+			auto found = _findFirst( Beg.Pos, numBytes(), static_cast<char>( to_find ) );
 			if( found != nullptr )
-				return substring(
-					string_iterator( Beg, found, found - Beg.Begin ),
-					string_iterator( Beg, found + 1,
-						( found + 1 ) - Beg.Begin ) );
+				return substring( string_iterator( Beg, found, found - Beg.Begin ),
+					string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Begin ) );
 			else
 				return substring( End.getEnd() );
 		}
@@ -431,14 +422,11 @@ namespace eon
 			if( !to_find.begin().bytesOnly() )
 				return substring( End.getEnd() );
 
-			auto found = _findLast( Beg.Pos, numBytes(),
-				to_find.begin().Pos, to_find.numBytes() );
+			auto found = _findLast( Beg.Pos, numBytes(), to_find.begin().Pos, to_find.numBytes() );
 			if( found != nullptr )
 			{
-				return substring(
-					string_iterator( Beg, found, found - Beg.Begin ),
-					string_iterator( Beg, found + to_find.numBytes(), (
-						found + to_find.numBytes() ) - Beg.Begin ) );
+				return substring( string_iterator( Beg, found, found - Beg.Begin ),
+					string_iterator( Beg, found + to_find.numBytes(), ( found + to_find.numBytes() ) - Beg.Begin ) );
 			}
 			else
 				return substring( End.getEnd() );
@@ -469,15 +457,12 @@ namespace eon
 			if( to_find > 127 && Beg.ValidUTF8 )
 				return substring( End.getEnd() );
 
-			auto found = _findLast( Beg.Pos, numBytes(),
-				static_cast<char>( to_find ) );
+			auto found = _findLast( Beg.Pos, numBytes(), static_cast<char>( to_find ) );
 			if( found != nullptr )
 			{
 				if( found < Beg.End )
-					return substring(
-						string_iterator( Beg, found, found - Beg.Begin ),
-						string_iterator( Beg, found + 1, ( found + 1 )
-							- Beg.Begin ) );
+					return substring( string_iterator( Beg, found, found - Beg.Begin ),
+						string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Begin ) );
 				else
 					return substring( string_iterator( Beg, found,
 						found - Beg.Begin ), End );
@@ -495,8 +480,7 @@ namespace eon
 		return substring( End.getEnd() );
 	}
 
-	string_iterator substring::findFirstOf( const substring& characters )
-		const noexcept
+	string_iterator substring::findFirstOf( const substring& characters ) const noexcept
 	{
 		for( auto i = begin(); i != end(); ++i )
 		{
@@ -505,8 +489,7 @@ namespace eon
 		}
 		return end().getEnd();
 	}
-	string_iterator substring::findLastOf( const substring& characters )
-		const noexcept
+	string_iterator substring::findLastOf( const substring& characters ) const noexcept
 	{
 		for( auto i = begin(); i != end(); --i )
 		{
@@ -516,8 +499,7 @@ namespace eon
 		return end().getEnd();
 	}
 
-	string_iterator substring::findFirstNotOf( const substring& characters )
-		const noexcept
+	string_iterator substring::findFirstNotOf( const substring& characters ) const noexcept
 	{
 		for( auto i = begin(); i != end(); ++i )
 		{
@@ -526,8 +508,7 @@ namespace eon
 		}
 		return end().getEnd();
 	}
-	string_iterator substring::findLastNotOf( const substring& characters )
-		const noexcept
+	string_iterator substring::findLastNotOf( const substring& characters ) const noexcept
 	{
 		for( auto i = begin(); i != end(); --i )
 		{
@@ -537,8 +518,7 @@ namespace eon
 		return end().getEnd();
 	}
 
-	inline string_iterator substring::findFirstDiff( const substring& other )
-		const noexcept
+	inline string_iterator substring::findFirstDiff( const substring& other ) const noexcept
 	{
 		auto i = begin(), j = other.begin();
 		for( ; i != end() && j != other.end(); ++i, ++j )
@@ -552,9 +532,7 @@ namespace eon
 			return end().getEnd();
 	}
 
-	substring substring::findFirstIgnoreSections(
-		const substring& other, char_t start_sect, char_t end_sect )
-		const noexcept
+	substring substring::findFirstIgnoreSections( const substring& other, char_t start_sect, char_t end_sect ) const noexcept
 	{
 		end_sect = end_sect == same_char ? start_sect : end_sect;
 		int sections = 0;
@@ -589,8 +567,7 @@ namespace eon
 				else
 				{
 					auto j = other.begin(), k = i;
-					for( ; j != other.end() && k != end() && *k == *j;
-						++j, ++k )
+					for( ; j != other.end() && k != end() && *k == *j; ++j, ++k )
 						;
 					if( j == other.end() )
 						return substring( i, k );
@@ -599,8 +576,7 @@ namespace eon
 		}
 		return substring( End.getEnd() );
 	}
-	substring substring::findFirstIgnoreSections( char_t cp,
-		char_t start_sect, char_t end_sect ) const noexcept
+	substring substring::findFirstIgnoreSections( char_t cp, char_t start_sect, char_t end_sect ) const noexcept
 	{
 		end_sect = end_sect == same_char ? start_sect : end_sect;
 		int sections = 0;
@@ -660,8 +636,7 @@ namespace eon
 		return end().getEnd();
 	}
 
-	string_iterator substring::findFirstOtherThan( charcat category )
-		const noexcept
+	string_iterator substring::findFirstOtherThan( charcat category ) const noexcept
 	{
 		auto& chars = Characters::get();
 		for( auto i = begin(); i != end(); ++i )
@@ -671,8 +646,7 @@ namespace eon
 		}
 		return end().getEnd();
 	}
-	string_iterator substring::findLastOtherThan( charcat category )
-		const noexcept
+	string_iterator substring::findLastOtherThan( charcat category ) const noexcept
 	{
 		auto& chars = Characters::get();
 		for( auto i = begin(); i != end(); --i )
@@ -683,8 +657,7 @@ namespace eon
 		return end().getEnd();
 	}
 
-	substring substring::beforeFirst( const substring& delimiter )
-		const noexcept
+	substring substring::beforeFirst( const substring& delimiter ) const noexcept
 	{
 		auto found = findFirst( delimiter );
 		if( found )
@@ -700,8 +673,7 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::beforeLast( const substring& delimiter )
-		const noexcept
+	substring substring::beforeLast( const substring& delimiter ) const noexcept
 	{
 		auto found = findLast( delimiter );
 		if( found )
@@ -717,8 +689,7 @@ namespace eon
 		else
 			return substring( end() );
 	}
-	substring substring::afterFirst( const substring& delimiter )
-		const noexcept
+	substring substring::afterFirst( const substring& delimiter ) const noexcept
 	{
 		auto found = findFirst( delimiter );
 		if( found )
@@ -766,8 +737,7 @@ namespace eon
 	}
 	size_t substring::count( const substring& to_count ) const noexcept
 	{
-		if( numBytes() > 0
-			&& static_cast<size_t>( numBytes() ) < to_count.numChars() )
+		if( numBytes() > 0 && static_cast<size_t>( numBytes() ) < to_count.numChars() )
 			return 0;
 
 		size_t cnt = 0;
@@ -783,8 +753,7 @@ namespace eon
 
 
 
-	int substring::compare( const substring& other, CompareType type )
-		const noexcept
+	int substring::compare( const substring& other, CompareType type ) const noexcept
 	{
 		if( !*this )
 			return other ? -1 : 0;
@@ -793,12 +762,8 @@ namespace eon
 
 		if( type == CompareType::faster )
 		{
-			auto cmp = memcmp( Beg.Pos, other.Beg.Pos,
-				numBytes() < other.numBytes()
-				? numBytes()
-				: other.numBytes() );
-			return cmp != 0 || numBytes() == other.numBytes()
-				? cmp : numBytes() < other.numBytes() ? -1 : 1;
+			auto cmp = memcmp( Beg.Pos, other.Beg.Pos, numBytes() < other.numBytes() ? numBytes() : other.numBytes() );
+			return cmp != 0 || numBytes() == other.numBytes() ? cmp : numBytes() < other.numBytes() ? -1 : 1;
 		}
 		else
 		{
@@ -811,8 +776,7 @@ namespace eon
 				else if( *other_i < *i )
 					return pos;
 			}
-			return i == End && other_i == other.End
-				? 0 : i != End ? pos : -pos;
+			return i == End && other_i == other.End ? 0 : i != End ? pos : -pos;
 		}
 	}
 	int substring::iCompare( const substring& other ) const noexcept
@@ -839,8 +803,8 @@ namespace eon
 
 
 
-	const char* substring::_findFirst( const char* source, size_t source_size,
-		const char* substr, size_t substr_size ) const noexcept
+	const char* substring::_findFirst( const char* source, size_t source_size, const char* substr, size_t substr_size )
+		const noexcept
 	{
 		const char* end = source + source_size - ( substr_size - 1 );
 		for( auto c = _findFirst( source, source_size, *substr );
@@ -852,17 +816,17 @@ namespace eon
 		}
 		return nullptr;
 	}
-	const char* substring::_findLast( const char* str, size_t str_size,
-		char chr )
-		noexcept
+	const char* substring::_findLast( const char* str, size_t str_size, char chr ) noexcept
 	{
 		for( auto c = str, end = str - str_size; c != end; --c )
+		{
 			if( *c == chr )
 				return c;
+		}
 		return nullptr;
 	}
-	const char* substring::_findLast( const char* source, size_t source_size,
-		const char* substr, size_t substr_size ) const noexcept
+	const char* substring::_findLast( const char* source, size_t source_size, const char* substr, size_t substr_size )
+		const noexcept
 	{
 		const char* last = source + source_size - substr_size;
 		for( auto c = last; ; --c )

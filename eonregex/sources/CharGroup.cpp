@@ -5,6 +5,21 @@ namespace eon
 {
 	namespace rx
 	{
+		string CharGroup::CharGrp::str() const
+		{
+			string s{ "[" };
+			if( Negate )
+				s += "!";
+			for( auto c : Chars )
+				s += c;
+			for( auto& r : Ranges )
+				s += r.first + string( "-" ) + r.second;
+			for( auto c : Special )
+				s += string( "\\" ) + c;
+			return s + "]";
+		}
+
+
 		bool CharGroup::_match( RxData& data, size_t steps )
 		{
 			if( data )
@@ -20,14 +35,12 @@ namespace eon
 						if( data() == l )
 						{
 							if( _match( u ) )
-								return Value.Negate ? false
-								: data.advance();
+								return Value.Negate ? false : data.advance();
 						}
 						else
 						{
 							if( _match( l ) )
-								return Value.Negate ? false
-								: data.advance();
+								return Value.Negate ? false : data.advance();
 						}
 					}
 				}

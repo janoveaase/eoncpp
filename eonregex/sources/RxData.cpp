@@ -7,11 +7,13 @@ namespace eon
 	{
 		substring RxData::findCapture( name_t name ) const noexcept
 		{
-			auto found = Captures.find( name );
-			if( found != Captures.end() )
-				return found->second;
-			else
-				return substring();
+			if( Captures )
+			{
+				auto found = Captures->find( name );
+				if( found != Captures->end() )
+					return found->second;
+			}
+			return substring();
 		}
 	}
 }

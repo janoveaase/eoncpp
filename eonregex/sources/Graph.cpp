@@ -62,6 +62,13 @@ namespace eon
 
 			if( *( chr + 1 ) != Separator )
 				parse();
+
+			// Do cheap optimizations without being asked
+			// TODO: Find out why matching runs slower with this done!
+//			removeDuplicates();
+
+			if( MyFlags & Flag::optimize )
+				optimize();
 		}
 
 
@@ -104,8 +111,7 @@ namespace eon
 			FlagsSub = substring( last + 1, Source.end() );
 			if( !invalid.empty() )
 				throw InvalidExpression( "At position "
-					+ string( FlagsSub.begin() - Source.begin() )
-					+ ": Invalid flag(s): " + invalid );
+					+ string( FlagsSub.begin() - Source.begin() ) + ": Invalid flag(s): " + invalid );
 		}
 
 		void Graph::ParseParam::set( Node* node ) noexcept
@@ -198,8 +204,7 @@ namespace eon
 					case '?':
 						param.advance();
 						if( param.cur() == nullptr )
-							return new FixedValue( "?", substring(
-								start, param.pos() ) );
+							return new FixedValue( "?", substring( start, param.pos() ) );
 						if( param.cur()->Quant )
 						{
 							if( param.cur()->Quant.Greedy )
@@ -208,8 +213,7 @@ namespace eon
 								return nullptr;
 							}
 							else
-								return new FixedValue( "?", substring(
-									start, param.pos() ) );
+								return new FixedValue( "?", substring( start, param.pos() ) );
 						}
 						else
 							return setQuantifier( param, 0, 1 );
@@ -222,9 +226,7 @@ namespace eon
 					case '{':
 					{
 						if( param.cur() != nullptr
-							&& substring(
-								param.pos() + 1, param.pos() + 5 ).compare(
-									substring( "name" ) ) == 0 )
+							&& substring( param.pos() + 1, param.pos() + 5 ).compare( substring( "name" ) ) == 0 )
 						{
 							param.pos( param.pos() + 6 );
 							param.cur()->Name = true;
@@ -253,8 +255,7 @@ namespace eon
 			return nullptr;
 		}
 
-		Node* Graph::parseNot( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseNot( ParseParam& param, const string_iterator& start )
 		{
 			if( param.advance() )			// the '!'
 			{
@@ -266,8 +267,7 @@ namespace eon
 						size_t min{ 0 }, max{ SIZE_MAX };
 						try
 						{
-							if( parseQuantifier(
-								param, min, max, param.pos() ) )
+							if( parseQuantifier( param, min, max, param.pos() ) )
 								value->Quant._set( min, max, true );
 						}
 						catch( ... )
@@ -321,8 +321,8 @@ namespace eon
 				if( node->type() == NodeType::op_or )
 				{
 					// Two '|' in a row, assume second is a fixed value
-					node = new FixedValue( "|", substring(
-						start, param.pos() ) );
+					// TODO: Is it better to ignore it? (Or report error?)
+					node = new FixedValue( "|", substring( start, param.pos() ) );
 				}
 				else if( node->type() == NodeType::op_not )
 				{
@@ -365,8 +365,7 @@ namespace eon
 			return node_or;
 		}
 
-		Node* Graph::parseCharGroup( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseCharGroup( ParseParam& param, const string_iterator& start )
 		{
 			param.advance();			// The '['
 
@@ -383,8 +382,7 @@ namespace eon
 						case '\\':
 							if( prev != -1 )
 							{
-								value.Chars.insert(
-									static_cast<char_t>( prev ) );
+								value.Chars.insert( static_cast<char_t>( prev ) );
 								prev = -1;
 							}
 							esc = true;
@@ -393,24 +391,20 @@ namespace eon
 						case ']':
 							if( prev != -1 )
 							{
-								value.Chars.insert(
-									static_cast<char_t>( prev ) );
+								value.Chars.insert( static_cast<char_t>( prev ) );
 								prev = -1;
 							}
 							param.advance();
-							return new CharGroup( std::move( value ),
-								substring( start, param.pos() ) );
+							return new CharGroup( std::move( value ), substring( start, param.pos() ) );
 						case '-':
 							if( prev == -1 )
 								value.Chars.insert( c );
 							else
-								parseCharGroupRange( param, value,
-									static_cast<char_t>( prev ) );
+								parseCharGroupRange( param, value, static_cast<char_t>( prev ) );
 							break;
 						default:
 							if( prev != -1 )
-								value.Chars.insert(
-									static_cast<char_t>( prev ) );
+								value.Chars.insert( static_cast<char_t>( prev ) );
 							prev = c;
 							param.advance();
 					}
@@ -446,15 +440,12 @@ namespace eon
 				}
 			}
 			if( prev != -1 )
-				value.Chars.insert(
-					static_cast<char_t>( prev ) );
-			throw InvalidExpression( "At position "
-				+ string( start - Source.begin() )
+				value.Chars.insert( static_cast<char_t>( prev ) );
+			throw InvalidExpression( "At position " + string( start - Source.begin() )
 				+ ": Character group starting here is missing ending ']'" );
 			return nullptr;
 		}
-		void Graph::parseCharGroupRange( ParseParam& param,
-			CharGroup::CharGrp& value, char_t start )
+		void Graph::parseCharGroupRange( ParseParam& param, CharGroup::CharGrp& value, char_t start )
 		{
 			if( !param.advance() )			// The '-'
 			{
@@ -481,8 +472,7 @@ namespace eon
 			else
 				return new FixedValue( "@", substring( start, param.pos() ) );
 		}
-		Node* Graph::parseCapture( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseCapture( ParseParam& param, const string_iterator& start )
 		{
 			param.advance();			// The '<'
 			eon::string name;
@@ -493,8 +483,7 @@ namespace eon
 				{
 					if( name.empty() )
 					{
-						throw InvalidExpression( "At position "
-							+ string( start - Source.begin() )
+						throw InvalidExpression( "At position " + string( start - Source.begin() )
 							+ ": Capture group must have a name" );
 						return nullptr;
 					}
@@ -502,30 +491,24 @@ namespace eon
 					{
 						if( !param.advance() || param() != '(' )
 						{
-							throw InvalidExpression( "At position "
-								+ string( start - Source.begin() )
-								+ ": Capture group must have a parenthesized "
-								"group following immediately after the '>'" );
+							throw InvalidExpression( "At position " + string( start - Source.begin() )
+								+ ": Capture group must have a parenthesized group following immediately after the '>'" );
 							return nullptr;
 						}
 						auto start = param.pos();
 						auto nodegrp = parseNodeGroup( param, start );
 						if( nodegrp == nullptr )
 						{
-							throw InvalidExpression( "At position "
-								+ string( start - Source.begin() )
-								+ ": Capture group starting here is missing "
-								"terminating ')'" );
+							throw InvalidExpression( "At position " + string( start - Source.begin() )
+								+ ": Capture group starting here is missing terminating ')'" );
 							return nullptr;
 						}
 						auto _name = name::get( name );
 						if( _name == no_name )
 						{
-							throw InvalidExpression( "At position "
-								+ string( param.pos() - Source.begin() )
-								+ ": Name of capture group can only contain "
-								"letters, numbers and underscore, and not all "
-								"numbers" );
+							throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
+								+ ": Name of capture group can only contain letters, "
+									"numbers and underscore, and not all numbers" );
 							return nullptr;
 						}
 						return new CaptureGroup( _name, (NodeGroup*)nodegrp,
@@ -540,18 +523,15 @@ namespace eon
 				else
 				{
 					throw InvalidExpression( "At position "
-						+ string( param.pos() - Source.begin() )
-						+ ": Invalid character in group name" );
+						+ string( param.pos() - Source.begin() ) + ": Invalid character in group name" );
 					return nullptr;
 				}
 			}
-			throw InvalidExpression( "At position "
-				+ string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( start - Source.begin() )
 				+ ": Incomplete capture group started here" );
 			return nullptr;
 		}
-		Node* Graph::parseBackref( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseBackref( ParseParam& param, const string_iterator& start )
 		{
 			eon::string name;
 			if( !param.advance() )			// The ':'
@@ -573,40 +553,32 @@ namespace eon
 						param.advance();
 						if( name.empty() )
 						{
-							throw InvalidExpression( "At position "
-								+ string( start - Source.begin() )
-								+ ": Back-reference must name a previously "
-								"defined capture group" );
+							throw InvalidExpression( "At position " + string( start - Source.begin() )
+								+ ": Back-reference must name a previously defined capture group" );
 							return nullptr;
 						}
 						auto _name = name::get( name );
 						if( _name == no_name )
 						{
-							throw InvalidExpression( "At position "
-								+ string( param.pos() - Source.begin() )
-								+ ": Back-reference name can only contain "
-								"letters, numbers and underscore, and not all "
-								"numbers" );
+							throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
+								+ ": Back-reference name can only contain letters, "
+									"numbers and underscore, and not all numbers" );
 							return nullptr;
 						}
-						return new Backreference( _name,
-							substring( start, param.pos() ) );
+						return new Backreference( _name, substring( start, param.pos() ) );
 					}
-					throw InvalidExpression("At position "
-						+ string( param.pos() - Source.begin() )
+					throw InvalidExpression("At position " + string( param.pos() - Source.begin() )
 						+ ": Invalid character in group name" );
 					return nullptr;
 				}
 			}
 		error:
-			throw InvalidExpression( "At position "
-				+ string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( start - Source.begin() )
 				+ ": Incomplete back-reference started here" );
 			return nullptr;
 		}
 
-		Node* Graph::parseEscaped( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseEscaped( ParseParam& param, const string_iterator& start )
 		{
 			if( !param.advance() )				// The '\'
 				return new FixedValue( "\\", substring( start, param.pos() ) );
@@ -637,30 +609,22 @@ namespace eon
 				case 'p':
 					return new Punctuation( substring( start, param.pos() ) );
 				case 'P':
-					return new NotPunctuation(
-						substring( start, param.pos() ) );
+					return new NotPunctuation( substring( start, param.pos() ) );
 				case '\\':
-					return new FixedValue( "\\",
-						substring( start, param.pos() ) );
+					return new FixedValue( "\\", substring( start, param.pos() ) );
 				case '\"':
-					return new FixedValue( "\"",
-						substring( start, param.pos() ) );
+					return new FixedValue( "\"", substring( start, param.pos() ) );
 				case 'n':
-					return new FixedValue( "\n",
-						substring( start, param.pos() ) );
+					return new FixedValue( "\n", substring( start, param.pos() ) );
 				case 't':
-					return new FixedValue( "\t",
-						substring( start, param.pos() ) );
+					return new FixedValue( "\t", substring( start, param.pos() ) );
 
 				default:
-					return new FixedValue( string( c ),
-						substring( start, param.pos() ) );
+					return new FixedValue( string( c ), substring( start, param.pos() ) );
 			}
 		}
 
-		bool Graph::parseQuantifier( ParseParam& param,
-			size_t& min, size_t& max,
-			const string_iterator& start )
+		bool Graph::parseQuantifier( ParseParam& param, size_t& min, size_t& max, const string_iterator& start )
 		{
 			if( !param.advance() )			// The '{'
 				return new FixedValue( "{", substring( start, param.pos() ) );
@@ -686,8 +650,7 @@ namespace eon
 					digit += param();
 				else
 				{
-					throw InvalidExpression( "At position "
-						+ string( param.pos() - Source.begin() )
+					throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
 						+ ": Expected digit, comma, or '}' here" );
 				}
 				param.advance();
@@ -710,21 +673,18 @@ namespace eon
 					digit += param();
 				else
 				{
-					throw InvalidExpression( "At position "
-						+ string( param.pos() - Source.begin() )
+					throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
 						+ ": Expected digit, comma, or '}' here" );
 					return false;
 				}
 				param.advance();
 			}
-			throw InvalidExpression( "At position "
-				+ string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( start - Source.begin() )
 				+ ": Expected '}' and the end the sequence starting here" );
 			return false;
 		}
 
-		Node* Graph::parseNodeGroup( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseNodeGroup( ParseParam& param, const string_iterator& start )
 		{
 			if( !param.advance() )			// The '('
 				return new FixedValue( "(", substring( start, param.pos() ) );
@@ -733,26 +693,22 @@ namespace eon
 			if( !parse( param2, ')' ) )
 			{
 				param.endGroup();
-				throw InvalidExpression( "At position "
-					+ string( start - Source.begin() )
+				throw InvalidExpression( "At position " + string( start - Source.begin() )
 					+ ": Group started here i missing terminating ')'" );
 				param.pos( param2.pos() );
 				return nullptr;
 			}
 			param.endGroup();
 			param.pos( param2.pos() );
-			return new NodeGroup( param2.head(),
-				substring( start, param.pos() ) );
+			return new NodeGroup( param2.head(), substring( start, param.pos() ) );
 		}
 
-		Node* Graph::parseFixed( ParseParam& param,
-			const string_iterator& start )
+		Node* Graph::parseFixed( ParseParam& param, const string_iterator& start )
 		{
 			string value{ param() };
 			while( param.advance() && string::isWordChar( param() ) )
 				value += param();
-			return new FixedValue( std::move( value ),
-				substring( start, param.pos() ) );
+			return new FixedValue( std::move( value ), substring( start, param.pos() ) );
 		}
 
 		Node* Graph::setQuantifier( ParseParam& param, size_t min, size_t max )
@@ -767,6 +723,21 @@ namespace eon
 			{
 				param.cur()->Quant._set( min, max, true );
 				return nullptr;
+			}
+		}
+
+
+		void Graph::optimize()
+		{
+//			removeDuplicates();
+			// "(a+)+" to "a+" ?
+		}
+		void Graph::removeDuplicates()
+		{
+			if( Head )
+			{
+				std::set<Node*> removed;
+				Head->removeDuplicates( removed );
 			}
 		}
 	}
