@@ -34,14 +34,14 @@ namespace eon
 
 	void eonof::loadReplace( const file& input_file )
 	{
-		auto name = eon::name::get( input_file.path().str() );
-		source src( input_file.path(), input_file.loadText() );
+		auto name = eon::name::get( input_file.fpath().str() );
+		source src( input_file.fpath(), input_file.loadText() );
 		_parse( name, src, false );
 	}
 	void eonof::loadMerge( const file& input_file )
 	{
-		auto name = eon::name::get( input_file.path().str() );
-		source src( input_file.path(), input_file.loadText() );
+		auto name = eon::name::get( input_file.fpath().str() );
+		source src( input_file.fpath(), input_file.loadText() );
 		_parse( name, src, true );
 	}
 
@@ -86,7 +86,7 @@ namespace eon
 		}
 		return Docs.find( ref );
 	}
-	void eonof::_set( const nameref& ref, vars::valueptr context, const vars::valueptr& value )
+	void eonof::_set( const nameref& ref, vars::valueptr context, vars::valueptr value )
 	{
 		if( ref.empty() )
 			throw vars::InvalidReference( "Cannot set empty reference!" );

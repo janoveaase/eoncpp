@@ -32,7 +32,7 @@ namespace eon
 		{
 		public:
 			virtual valueptr _get( const nameref& ref, valueptr context ) const noexcept = 0;
-			virtual void _set( const nameref& ref, valueptr context, const valueptr& value ) = 0;
+			virtual void _set( const nameref& ref, valueptr context, valueptr value ) = 0;
 		};
 
 

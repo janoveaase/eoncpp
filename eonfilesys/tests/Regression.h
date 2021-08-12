@@ -28,7 +28,7 @@ namespace eon
 #else
 			testdir = "/tmp";
 #endif
-			testdir = testdir.path() + "eonfilesystest";
+			testdir = testdir.dpath() + "eonfilesystest";
 			if( testdir.exists() )
 				testdir.remove();
 		}

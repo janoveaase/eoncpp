@@ -16,6 +16,7 @@
 #include <eonvariables/MetaValue.h>
 #include <eonvariables/FunctionValue.h>
 #include <eonvariables/ControlValue.h>
+#include <cmath>
 
 
 namespace eon
@@ -136,7 +137,7 @@ namespace eon
 					}
 					break;
 				}
-				case vars::operators::code::typeof:
+				case vars::operators::code::type_of:
 					return vars::nameval::create(
 						vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) );
 				case vars::operators::code::isname:

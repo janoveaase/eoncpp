@@ -897,7 +897,7 @@ namespace eon
 	}
 	TEST( ReferenceTest, reference_get_existing )
 	{
-		_set( nameref( "one/two" ), vars::stringval::create( "Hello" ) );
+		_set( nameref( "one/two" ), vars::valueptr(), vars::stringval::create( "Hello" ) );
 		expression expr;
 		vars::variables vars( *this );
 		REQUIRE_NO_EXCEPT( expr = expression( "a = @one/two", vars ) );
@@ -915,19 +915,19 @@ namespace eon
 		REQUIRE_NO_EXCEPT( expr = expression( "@one/two = 123", vars ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) );
-		auto result = _get( nameref( "one/two" ) );
+		auto result = _get( nameref( "one/two" ), vars::valueptr() );
 		REQUIRE_TRUE( result && result->isInt() ) << "Didn't set variable";
 		WANT_EQ( 123, result->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ReferenceTest, reference_set_existing )
 	{
-		_set( nameref( "one/two" ), vars::stringval::create( "Hello" ) );
+		_set( nameref( "one/two" ), vars::valueptr(), vars::stringval::create( "Hello" ) );
 		expression expr;
 		vars::variables vars( *this );
 		REQUIRE_NO_EXCEPT( expr = expression( "@one/two = 123", vars ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) );
-		auto result = _get( nameref( "one/two" ) );
+		auto result = _get( nameref( "one/two" ), vars::valueptr() );
 		REQUIRE_TRUE( result && result->isInt() ) << "Didn't set variable";
 		WANT_EQ( 123, result->actualInt() ) << "Wrong variable value";
 	}

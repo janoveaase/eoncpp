@@ -501,6 +501,9 @@ namespace eon
 		eon::regex erx;
 		std::regex srx;
 		size_t count = 50000;
+#ifdef EON_UNIX
+		count /= 10;
+#endif
 #ifdef _DEBUG
 		count /= 50;
 #endif

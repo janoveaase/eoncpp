@@ -199,7 +199,7 @@ namespace eon
 	public:
 
 		vars::valueptr _get( const nameref& ref, vars::valueptr context ) const noexcept override;
-		void _set( const nameref& ref, vars::valueptr context, const vars::valueptr& value ) override;
+		void _set( const nameref& ref, vars::valueptr context, vars::valueptr value ) override;
 
 
 

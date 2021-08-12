@@ -65,7 +65,7 @@ namespace eon
 
 			// Do cheap optimizations without being asked
 			// TODO: Find out why matching runs slower with this done!
-//			removeDuplicates();
+			removeDuplicates();
 
 			if( MyFlags & Flag::optimize )
 				optimize();

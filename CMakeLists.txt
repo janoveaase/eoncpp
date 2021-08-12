@@ -18,7 +18,7 @@ set(EON_BUILD_VARIABLES ON CACHE BOOL "Build the Variables package")
 set(EON_BUILD_TUPLE ON CACHE BOOL "Build the Tuple package")
 set(EON_BUILD_EOF ON CACHE BOOL "Build the Eon Object Format package - EOF")
 set(EON_BUILD_EXPRESSION ON CACHE BOOL "Build the Eon Expression package")
-set(EON_BUILD_PARSER ON CACHE BOOL "Build the Eon Parser package")
+set(EON_BUILD_PARSER OFF CACHE BOOL "Build the Eon Parser package")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-D_DEBUG)

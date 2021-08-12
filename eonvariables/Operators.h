@@ -66,7 +66,7 @@ namespace eon
 				ltrim,				// ltrim a
 				len,				// len a
 				resize,				// a resize b
-				typeof,				// typeof a
+				type_of,			// typeof a
 				isname,				// isname a
 				is_set,				// is_set a
 				topath,				// topath a

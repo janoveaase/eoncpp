@@ -26,10 +26,8 @@ namespace eon
 		inline file( path&& file_path ) { *this = std::move( file_path ); }
 		inline file( const string& raw_path ) { *this = raw_path; }
 		inline file( const substring& raw_path ) { *this = raw_path; }
-		inline file( const std::filesystem::path& std_path ) {
-			*this = std_path; }
-		explicit inline file( const std::string& raw_path ) {
-			*this = raw_path; }
+		inline file( const std::filesystem::path& std_path ) { *this = std_path; }
+		explicit inline file( const std::string& raw_path ) { *this = raw_path; }
 		explicit inline file( const char* raw_path ) { *this = raw_path; }
 
 		inline virtual ~file() = default;
@@ -42,24 +40,17 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		inline file& operator=( const file& other ) {
-			Path = other.Path; return *this; }
-		inline file& operator=( file&& other ) noexcept {
-			Path = std::move( other.Path ); return *this; }
+		inline file& operator=( const file& other ) { Path = other.Path; return *this; }
+		inline file& operator=( file&& other ) noexcept { Path = std::move( other.Path ); return *this; }
 
-		inline file& operator=( const path& file_path ) {
-			return *this = eon::path( file_path ); }
+		inline file& operator=( const path& file_path ) { return *this = eon::path( file_path ); }
 		file& operator=( path&& file_path );
-		inline file& operator=( const string& raw_path ) {
-			return *this = eon::path( raw_path ).makeFilePath(); }
-		inline file& operator=( const substring& raw_path ) {
-			return *this = eon::path( raw_path ).makeFilePath(); }
+		inline file& operator=( const string& raw_path ) { return *this = eon::path( raw_path ).makeFilePath(); }
+		inline file& operator=( const substring& raw_path ) { return *this = eon::path( raw_path ).makeFilePath(); }
 		inline file& operator=( const std::filesystem::path& std_path ) {
 			return *this = eon::path( std_path ).makeFilePath(); }
-		inline file& operator=( const std::string& raw_path ) {
-			return *this = eon::path( raw_path ).makeFilePath(); }
-		inline file& operator=( const char* raw_path ) {
-			return *this = eon::path( raw_path ).makeFilePath(); }
+		inline file& operator=( const std::string& raw_path ) { return *this = eon::path( raw_path ).makeFilePath(); }
+		inline file& operator=( const char* raw_path ) { return *this = eon::path( raw_path ).makeFilePath(); }
 
 
 
@@ -70,15 +61,14 @@ namespace eon
 	public:
 
 		// Get the path
-		inline const eon::path& path() const noexcept { return Path; }
+		inline const eon::path& fpath() const noexcept { return Path; }
 
 		// Check if the file exists
 		inline bool exists() const { return Path.exists(); }
 		inline operator bool() const noexcept { return Path.exists(); }
 
 		// Get file size in bytes
-		std::uintmax_t size() const {
-			return std::filesystem::file_size( Path.stdpath() ); }
+		std::uintmax_t size() const { return std::filesystem::file_size( Path.stdpath() ); }
 
 
 
@@ -138,8 +128,8 @@ namespace eon
 
 		//* Save string to file
 		//* If the file already exists, its contents will be replaced!
-		void save( string& text ) const;
-		void save( std::string& bytes ) const;
+		void save( const string& text ) const;
+		void save( const std::string& bytes ) const;
 
 
 		//* Remove file from the file system - if it exists
@@ -165,14 +155,11 @@ namespace eon
 			inline const string& operator*() const noexcept { return Line; }
 			inline const string* operator->() const noexcept { return &Line; }
 
-			inline iterator& operator++() noexcept {
-				_readLine(); return *this; }
+			inline iterator& operator++() noexcept { _readLine(); return *this; }
 
-			inline bool operator==( const iterator& other )
-				const noexcept {
+			inline bool operator==( const iterator& other ) const noexcept {
 				return Buffer.filePath() == other.Buffer.filePath(); }
-			inline bool operator!=( const iterator& other )
-				const noexcept {
+			inline bool operator!=( const iterator& other ) const noexcept {
 				return Buffer.filePath() != other.Buffer.filePath(); }
 		private:
 			void _readLine();

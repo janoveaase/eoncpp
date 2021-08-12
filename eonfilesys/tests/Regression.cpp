@@ -142,11 +142,11 @@ namespace eon
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
 			<< "Failed to create test dir";
 
-		directory dir = testdir.path() + "alpha/";
+		directory dir = testdir.dpath() + "alpha/";
 		REQUIRE_NO_EXCEPT( dir.ensureExists() ) << "Failed to create dir";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after create";
 		REQUIRE_NO_EXCEPT( dir.rename( "beta" ) ) << "Failed to rename dir";
-		WANT_EQ( "beta/", dir.path().name().stdstr() )
+		WANT_EQ( "beta/", dir.dpath().name().stdstr() )
 			<< "Wrong name after rename";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after rename";
 		REQUIRE_FALSE( directory( testdir + "alpha" ).exists() )
@@ -157,11 +157,11 @@ namespace eon
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
 			<< "Failed to create test dir";
 
-		directory alpha = testdir.path() + "alpha";
-		directory beta = testdir.path() + "beta";
-		directory gamma = testdir.path() + "gamma";
-		file f1 = testdir.path() + "f1";
-		file f2 = testdir.path() + "f2";
+		directory alpha = testdir.dpath() + "alpha";
+		directory beta = testdir.dpath() + "beta";
+		directory gamma = testdir.dpath() + "gamma";
+		file f1 = testdir.dpath() + "f1";
+		file f2 = testdir.dpath() + "f2";
 
 		REQUIRE_NO_EXCEPT( alpha.ensureExists() );
 		REQUIRE_NO_EXCEPT( beta.ensureExists() );
@@ -188,7 +188,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
 			<< "Failed to create test dir";
 
-		file testfile{ testdir.path() + "test1" };
+		file testfile{ testdir.dpath() + "test1" };
 		REQUIRE_FALSE( testfile.exists() ) << "File exists before create";
 		REQUIRE_NO_EXCEPT( testfile.touch() ) << "Failed to create file";
 		REQUIRE_TRUE( testfile.exists() ) << "File doesn't exist after create";
@@ -200,11 +200,11 @@ namespace eon
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
 			<< "Failed to create test dir";
 
-		file f = testdir.path() + "alpha";
+		file f = testdir.dpath() + "alpha";
 		REQUIRE_NO_EXCEPT( f.touch() ) << "Failed to create file";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after create";
 		REQUIRE_NO_EXCEPT( f.rename( "beta" ) ) << "Failed to rename file";
-		WANT_EQ( "beta", f.path().name().stdstr() )
+		WANT_EQ( "beta", f.fpath().name().stdstr() )
 			<< "Wrong name after rename";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after rename";
 		REQUIRE_FALSE( file( testdir + "alpha" ).exists() )
@@ -215,7 +215,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
 			<< "Failed to create test dir";
 
-		file f = testdir.path() + "alpha";
+		file f = testdir.dpath() + "alpha";
 		REQUIRE_NO_EXCEPT( f.save( string( "Line 1\nSecond line\nThird" ) ) );
 		std::list<string> lines;
 		try
