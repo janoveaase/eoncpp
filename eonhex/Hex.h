@@ -108,6 +108,10 @@ namespace eon
 		//* Access the hex data
 		inline const std::string& value() const noexcept { return Value; }
 
+		//* Access byte data for given position
+		inline byte_t byte( size_t pos ) const {
+			return toByte( digits( Value[ pos * 2 ], Value[ pos * 2 + 1 ] ) ); }
+
 
 		//* Comparison
 		inline int compare( const hex& other ) const noexcept {

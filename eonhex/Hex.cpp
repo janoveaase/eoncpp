@@ -21,7 +21,8 @@ namespace eon
 		for( auto c = binary_data; *c != '\0'; ++c )
 		{
 			auto digits = toHex( *c );
-			Value += digits.first + digits.second;
+			Value += static_cast<char>( digits.first );
+			Value += static_cast<char>( digits.second );
 		}
 		return *this;
 	}
