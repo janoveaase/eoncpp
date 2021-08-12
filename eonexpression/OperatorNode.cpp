@@ -1,13 +1,22 @@
 #include "OperatorNode.h"
 #include "OperandNode.h"
 #include "Evaluate.h"
-#include <eontuple/Value.h>
+#include <eonvariables/Value.h>
 
 
 namespace eon
 {
 	namespace expr
 	{
+		void operatornode::setContext( vars::valueptr context )
+		{
+			for( auto& child : Children )
+				child->setContext( context );
+		}
+
+
+
+
 		string operatornode::postorderStr() const
 		{
 			switch( operands() )
@@ -27,16 +36,14 @@ namespace eon
 		string operatornode::inorderStr() const
 		{
 			std::vector<bool> require_brace;
-			auto right2left = tup::operators::inputPrecedence( Type )
-				> tup::operators::stackPrecedence( Type );
+			auto right2left = vars::operators::inputPrecedence( Type ) > vars::operators::stackPrecedence( Type );
 
 			// We require braces on a child if the child is an operator of
 			// lower precedence that 'this'
 			for( auto child : Children )
 			{
 				require_brace.push_back( child->isOperator()
-					&& ( tup::operators::inputPrecedence( child->type() )
-						< tup::operators::inputPrecedence( Type ) ) );
+					&& ( vars::operators::inputPrecedence( child->type() ) < vars::operators::inputPrecedence( Type ) ) );
 			}		
 			
 			for( auto child : Children )
@@ -112,20 +119,18 @@ namespace eon
 			return string();
 		}
 
-		tup::valueptr operatornode::evaluate( tup::variables& vars ) const
+		vars::valueptr operatornode::evaluateAccurate( vars::variables& vars ) const
 		{
-			switch( tup::operators::numOperands( Type ) )
+			switch( vars::operators::numOperands( Type ) )
 			{
 				case 1:
 					return evaluate::unary( Type, vars, Children[ 0 ] );
 				case 2:
-					return evaluate::binary( Type, vars,
-						Children[ 1 ], Children[ 0 ] );
+					return evaluate::binary( Type, vars, Children[ 1 ], Children[ 0 ] );
 				case 3:
-					return evaluate::ternary( Type, vars,
-						Children[ 2 ], Children[ 1 ], Children[ 0 ] );
+					return evaluate::ternary( Type, vars, Children[ 2 ], Children[ 1 ], Children[ 0 ] );
 			}
-			return tup::valueptr();
+			return vars::valueptr();
 		}
 
 		nodeptr operatornode::copy() const
@@ -136,8 +141,7 @@ namespace eon
 			return nodeptr( cpy );
 		}
 
-		bool operatornode::equal( const nodeptr& other,
-			const tup::variables& vars ) const noexcept
+		bool operatornode::equal( const nodeptr& other ) const noexcept
 		{
 			if( !other )
 				return false;
@@ -147,7 +151,7 @@ namespace eon
 				return false;
 			for( size_t i = 0; i < Children.size(); ++i )
 			{
-				if( !Children[ i ]->equal( other->children()[ i ], vars ) )
+				if( !Children[ i ]->equal( other->children()[ i ] ) )
 					return false;
 			}
 			return true;

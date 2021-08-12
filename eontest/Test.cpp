@@ -57,10 +57,10 @@ namespace eontest
 			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			if( diff_line < exp_lines.size() )
 				_Messages << "Expected value: \"" << _extractLine(
-					exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"n";
+					exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
 			else
 				_Messages << "  Actual value: \"" << _extractLine(
-					act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"n";
+					act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
 		}
 		else
 		{

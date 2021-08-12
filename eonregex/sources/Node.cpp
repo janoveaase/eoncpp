@@ -60,11 +60,11 @@ namespace eon
 		bool Node::matchSingle( RxData& data, size_t steps )
 		{
 			RxData data_tmp{ data };
+
 			if( !_match( data_tmp, steps ) )
 				return false;
 
-			if( Name && !name::valid( substring(
-				data.pos(), data_tmp.pos() ) ) )
+			if( Name && !name::valid( substring( data.pos(), data_tmp.pos() ) ) )
 				return false;
 
 			if( Next != nullptr )
@@ -105,6 +105,7 @@ namespace eon
 			// Match as many as possible from the start
 			auto matches = _stack();
 			matches.push( data );
+			size_t msize = 1;
 			matchMax( matches, steps );
 
 			// No next means we have nothing more to do
@@ -127,10 +128,11 @@ namespace eon
 				// Goble as much as we can
 				while( matches.size() - 1 < Quant.max() && matches.top() )
 				{
-					matches.top().advance();
 					matches.push( matches.top() );
+					matches.top().advance();
 				}
-				matches.pop();
+				if( Next == nullptr )
+					matches.pop();
 			}
 			else
 			{
@@ -138,7 +140,8 @@ namespace eon
 				{
 					if( !_match( matches.top(), steps ) )
 					{
-						matches.pop();
+						if( Next == nullptr )
+							matches.pop();
 						break;
 					}
 					matches.push( matches.top() );
@@ -157,10 +160,9 @@ namespace eon
 		}
 		bool Node::nextMatches( RxData& data, stack& matches )
 		{
-			while( matches.size() >= Quant.min() )
+			while( matches.size() > Quant.min() )
 			{
-				size_t next_steps = data.speedOnly() ? 1
-					: data.accuracyOnly() ? SIZE_MAX : 6;
+				size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
 				if( Next->match( matches.top(), next_steps ) )
 				{
 					// Got a match
@@ -172,9 +174,14 @@ namespace eon
 					// Didn't get match, pop the stack
 					matches.pop();
 
-					// Check if we can get a way with zero matches
-					if( matches.empty() && Quant.min() == 0 )
-						return true;
+					if( matches.empty() )
+					{
+						// Check if we can get a way with zero matches
+						if( Quant.min() == 0 && Next == nullptr )
+							return true;
+						else
+							break;
+					}
 				}
 			}
 			return false;
@@ -194,7 +201,7 @@ namespace eon
 			// No next means we have nothing more to do
 			if( Next == nullptr )
 			{
-				if( matches <= Quant.max() )
+				if( matches >= Quant.min() && matches <= Quant.max() )
 				{
 					data = std::move( data_tmp );
 					return true;
@@ -205,8 +212,7 @@ namespace eon
 			// Now make sure the rest matches, or try matching this once more
 			while( matches <= Quant.max() )
 			{
-				size_t next_steps = data.speedOnly() ? 1
-					: data.accuracyOnly() ? SIZE_MAX : 6;
+				size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
 				if( Next->match( data_tmp, next_steps ) )
 				{
 					// Got a match
@@ -228,6 +234,85 @@ namespace eon
 			if( Next == nullptr )
 				return true;
 			return Next->match( data, steps );
+		}
+
+
+		string Node::strStruct() const
+		{
+			auto s = _strStruct() + Quant.str();
+			if( Next )
+				return s + Next->strStruct();
+			else
+				return s;
+		}
+
+
+		bool Node::equal( const Node& other, cmpflag flags ) const noexcept
+		{
+			// Different types are definitely not equal
+			if( Type != other.Type )
+				return false;
+
+			// Cmpare quantifiers if so instructed
+			if( flags & cmpflag::quant && Quant != other.Quant )
+				return false;
+
+			// Compare contents
+			cmpflag cflags = cmpflag::quant;
+			if( flags & cmpflag::deep )
+				cflags |= cmpflag::deep;
+			if( !_equal( other, cflags ) )
+				return false;
+
+			// Go deep?
+			if( flags & cmpflag::deep )
+			{
+				if( Next != other.Next && ( !Next || !other.Next ) )
+					return false;
+				if( Next )
+				{
+					if( !Next->equal( *other.Next, cmpflag::deep | cmpflag::quant ) )
+						return false;
+				}
+			}
+
+			// Equal!
+			return true;
+		}
+
+
+		void Node::removeDuplicates( std::set<Node*>& removed )
+		{
+			if( removed.find( this ) != removed.end() )
+				return;
+			_removeDuplicates( removed );
+			while( Next != nullptr )
+			{
+				Next->removeDuplicates( removed );
+
+				// Find out if the two are identical, quantification excluded
+				if( equal( *Next, cmpflag::none ) )
+				{
+					// They are
+					// Make a new qantification that includes both
+					if( Quant.Min > 0 && Next->Quant.Min > 0 )
+						Quant.Min += Next->Quant.Min;
+					else
+						Quant.Min = Quant.Min > Next->Quant.Min ? Quant.Min : Next->Quant.Min;
+					if( Quant.Max < SIZE_MAX && Next->Quant.Max < SIZE_MAX )
+						Quant.Max = SIZE_MAX - Quant.Max < Next->Quant.Max ? SIZE_MAX : Quant.Max + Next->Quant.Max;
+					else
+						Quant.Max = SIZE_MAX;
+					if( !Quant.Greedy && Next->Quant.Greedy )
+						Quant.Greedy = true;
+					auto next = Next;
+					Next = Next->Next;
+					next->Next = nullptr;
+					delete next;
+				}
+				else
+					break;
+			}
 		}
 	}
 }

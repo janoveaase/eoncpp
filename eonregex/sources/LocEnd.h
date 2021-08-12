@@ -21,27 +21,21 @@ namespace eon
 		class LocEnd : public Node
 		{
 		public:
-			LocEnd( const substring& source ) : Node( source ) {
-				Type = NodeType::loc_end; }
-			LocEnd( const LocEnd& other ) : Node( other ) {
-				Type = NodeType::loc_end; }
-			LocEnd( LocEnd&& other ) noexcept : Node( std::move( other ) ) {
-				Type = NodeType::loc_end; }
+			inline LocEnd( const substring& source ) : Node( source ) { Type = NodeType::loc_end; }
+			inline LocEnd( const LocEnd& other ) : Node( other ) { Type = NodeType::loc_end; }
+			inline LocEnd( LocEnd&& other ) noexcept : Node( std::move( other ) ) { Type = NodeType::loc_end; }
 			virtual ~LocEnd() = default;
 
 			inline Node* copy() const override { return new LocEnd( *this ); }
 
-			inline LocEnd& operator=( const LocEnd& other ) {
-				*static_cast<Node*>( this ) = other; return *this; }
+			inline LocEnd& operator=( const LocEnd& other ) { *static_cast<Node*>( this ) = other; return *this; }
 			inline LocEnd& operator=( LocEnd&& other ) noexcept {
-				*static_cast<Node*>( this ) = std::move( other );
-				return *this; }
+				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
 			inline bool _match( RxData& param, size_t steps ) override {
-				return !param ? true : ( param.lines() && param() == '\n' )
-					? param.advance() : false;
-			}
+				return !param ? true : ( param.lines() && param() == '\n' ) ? param.advance() : false; }
+			inline string _strStruct() const override { return "$"; }
 		};
 	}
 }

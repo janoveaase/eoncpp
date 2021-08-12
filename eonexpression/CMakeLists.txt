@@ -10,6 +10,7 @@ set(EXPRESSION_HEADERS
 	Evaluate.h
 )
 set(EXPRESSION_SOURCES
+	Node.cpp
 	OperatorNode.cpp
 	OperandNode.cpp
 	Expression.cpp

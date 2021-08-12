@@ -90,6 +90,8 @@ namespace eon
 	const name_t name_value = name::get( "value" );
 	const name_t name_raw = name::get( "raw" );
 	const name_t name_meta = name::get( "meta" );
+	const name_t name_function = name::get( "function" );
+	const name_t name_functions = name::get( "functions" );
 	const name_t name_reference = name::get( "reference" );
 	const name_t name_variable = name::get( "variable" );
 	const name_t name_var = name::get( "var" );
@@ -100,10 +102,16 @@ namespace eon
 	const name_t name_title = name::get( "title" );
 	const name_t name_pattern = name::get( "pattern" );
 	const name_t name_optional = name::get( "optional" );
+	const name_t name_yes = name::get( "yes" );
 	const name_t name_no = name::get( "no" );
+	const name_t name_on = name::get( "on" );
 	const name_t name_off = name::get( "off" );
+	const name_t name_positive = name::get( "positive" );
 	const name_t name_negative = name::get( "negative" );
+	const name_t name_ok = name::get( "ok" );
 	const name_t name_cancel = name::get( "cancel" );
+	const name_t name_active = name::get( "active" );
+	const name_t name_inactive = name::get( "inactive" );
 	const name_t name_abort = name::get( "abort" );
 	const name_t name_output = name::get( "output" );
 	const name_t name_token = name::get( "token" );
@@ -120,4 +128,7 @@ namespace eon
 	const name_t name_if = name::get( "if" );
 	const name_t name_skip = name::get( "skip" );
 	const name_t name_space = name::get( "space" );
+	const name_t name_source = name::get( "source" );
+	const name_t name_target = name::get( "target" );
+	const name_t name_args = name::get( "args" );
 }

@@ -35,22 +35,19 @@ namespace eon
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
-		regex( const substring& expression ) {
-			Raw = expression; Graph.parse( Raw.substr() ); }
+		inline regex( const substring& expression ) { Raw = expression; Graph.parse( Raw.substr() ); }
 
 		//* Construct for an std::string 'expression'
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
-		regex( const std::string& expression ) {
-			Raw = substring( expression ); Graph.parse( Raw.substr() ); }
+		inline regex( const std::string& expression ) { Raw = substring( expression ); Graph.parse( Raw.substr() ); }
 
 		//* Construct for a 'const char*' (C-string)
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
-		regex( const char* expression ) {
-			Raw = substring( expression ); Graph.parse( Raw.substr() ); }
+		inline regex( const char* expression ) { Raw = substring( expression ); Graph.parse( Raw.substr() ); }
 
 
 		//* Default destruction
@@ -64,12 +61,11 @@ namespace eon
 		**********************************************************************/
 
 		//* Copy the 'other' expression
-		inline regex& operator=( const regex& other ) {
-			Graph = other.Graph; Raw = other.Raw; return *this; }
+		inline regex& operator=( const regex& other ) { Graph = other.Graph; Raw = other.Raw; return *this; }
 
 		//* Take ownership of the details of the 'other' expression
-		inline regex& operator=( regex&& other ) noexcept { Graph = std::move(
-			other.Graph ); Raw = std::move( other.Raw ); return *this; }
+		inline regex& operator=( regex&& other ) noexcept {
+			Graph = std::move( other.Graph ); Raw = std::move( other.Raw ); return *this; }
 
 
 		//* Clear this expression
@@ -88,6 +84,10 @@ namespace eon
 		//* Get the complete pattern (boundary markers and flags included)
 		inline const string& str() const noexcept { return Raw; }
 
+		//* Get the complete (optimized) pattern, boundary markers and flags
+		//* not included!
+		inline string strStruct() const { return Graph.strStruct(); }
+
 
 
 
@@ -104,12 +104,9 @@ namespace eon
 		//* NOTE: The entire match is a group named "complete", so never
 		//*       specify a group with that name!
 		rx::match match( const substring& str ) const;
-		inline rx::match match( const string& str ) const {
-			return match( str.substr() ); }
-		inline rx::match match( const std::string& str ) const {
-			return match( substring( str ) ); }
-		inline rx::match match( const char* str ) const {
-			return match( substring( str ) ); }
+		inline rx::match match( const string& str ) const { return match( str.substr() ); }
+		inline rx::match match( const std::string& str ) const { return match( substring( str ) ); }
+		inline rx::match match( const char* str ) const { return match( substring( str ) ); }
 
 		//* Find the first section of the [eon::substring] that matches
 		//* Returns an [eon::rx::match] object that is either 'true' if there
@@ -118,12 +115,9 @@ namespace eon
 		//* [eon::substring]) or [eon::rx::match::group(name)] to get a
 		//* specific capture.
 		rx::match findFirst( const substring& str ) const;
-		inline rx::match findFirst( const string& str ) const {
-			return match( str.substr() ); }
-		inline rx::match findFirst( const std::string& str ) const {
-			return match( substring( str ) ); }
-		inline rx::match findFirst( const char* str ) const {
-			return match( substring( str ) ); }
+		inline rx::match findFirst( const string& str ) const { return match( str.substr() ); }
+		inline rx::match findFirst( const std::string& str ) const { return match( substring( str ) ); }
+		inline rx::match findFirst( const char* str ) const { return match( substring( str ) ); }
 
 		//* Find the last section of the [eon::substring that matches]
 		//* Returns an [eon::rx::match] object that is either 'true' if there
@@ -132,12 +126,9 @@ namespace eon
 		//* [eon::substring]) or [eon::rx::match::group(name)] to get a
 		//* specific capture.
 		rx::match findLast( const substring& str ) const;
-		inline rx::match findLast( const string& str ) const {
-			return match( str.substr() ); }
-		inline rx::match findLast( const std::string& str ) const {
-			return match( substring( str ) ); }
-		inline rx::match findLast( const char* str ) const {
-			return match( substring( str ) ); }
+		inline rx::match findLast( const string& str ) const { return match( str.substr() ); }
+		inline rx::match findLast( const std::string& str ) const { return match( substring( str ) ); }
+		inline rx::match findLast( const char* str ) const { return match( substring( str ) ); }
 
 
 

@@ -21,20 +21,15 @@ namespace eon
 	public:
 		directory() = default;
 		inline directory( const directory& other ) { *this = other; }
-		inline directory( directory&& other ) noexcept {
-			*this = std::move( other ); }
+		inline directory( directory&& other ) noexcept { *this = std::move( other ); }
 
 		inline directory( const path& file_path ) { *this = file_path; }
-		inline directory( path&& file_path ) {
-			*this = std::move( file_path ); }
+		inline directory( path&& file_path ) { *this = std::move( file_path ); }
 		inline directory( const string& raw_path ) { *this = raw_path; }
 		inline directory( const substring& raw_path ) { *this = raw_path; }
-		inline directory( const std::filesystem::path& std_path ) {
-			*this = std_path; }
-		explicit inline directory( const std::string& raw_path ) {
-			*this = raw_path; }
-		explicit inline directory( const char* raw_path ) {
-			*this = raw_path; }
+		inline directory( const std::filesystem::path& std_path ) { *this = std_path; }
+		explicit inline directory( const std::string& raw_path ) { *this = raw_path; }
+		explicit inline directory( const char* raw_path ) { *this = raw_path; }
 
 		inline virtual ~directory() = default;
 
@@ -46,22 +41,16 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		inline directory& operator=( const directory& other ) {
-			Path = other.Path; return *this; }
-		inline directory& operator=( directory&& other ) noexcept {
-			Path = std::move( other.Path ); return *this; }
+		inline directory& operator=( const directory& other ) { Path = other.Path; return *this; }
+		inline directory& operator=( directory&& other ) noexcept { Path = std::move( other.Path ); return *this; }
 		
-		inline directory& operator=( const path& dir_path ) {
-			return *this = eon::path( dir_path ); }
+		inline directory& operator=( const path& dir_path ) { return *this = eon::path( dir_path ); }
 		directory& operator=( path&& dir_path );
-		inline directory& operator=( const string& raw_path ) {
-			return *this = eon::path( raw_path ).makeDirPath(); }
-		inline directory& operator=( const substring& raw_path ) {
-			return *this = eon::path( raw_path ).makeDirPath(); }
+		inline directory& operator=( const string& raw_path ) { return *this = eon::path( raw_path ).makeDirPath(); }
+		inline directory& operator=( const substring& raw_path ) { return *this = eon::path( raw_path ).makeDirPath(); }
 		inline directory& operator=( const std::filesystem::path& std_path ) {
 			return *this = eon::path( std_path ).makeDirPath(); }
-		inline directory& operator=( const std::string& raw_path ) {
-			return *this = eon::path( raw_path ).makeDirPath(); }
+		inline directory& operator=( const std::string& raw_path ) { return *this = eon::path( raw_path ).makeDirPath(); }
 		inline directory& operator=( const char* raw_path ) {
 			return *this = std::move( eon::path( raw_path ).makeDirPath() ); }
 
@@ -74,7 +63,7 @@ namespace eon
 	public:
 
 		// Get the path
-		inline const eon::path& path() const noexcept { return Path; }
+		inline const eon::path& dpath() const noexcept { return Path; }
 
 		// Check if the directory exists
 		inline bool exists() const { return Path.exists(); }
@@ -157,19 +146,15 @@ namespace eon
 			iterator() = default;
 			iterator( const directory& d );
 
-			inline operator bool() const noexcept {
-				return Base != std::filesystem::directory_iterator(); }
+			inline operator bool() const noexcept { return Base != std::filesystem::directory_iterator(); }
 
 			inline const eon::path& operator*() const noexcept { return Path; }
-			inline const eon::path* operator->() const noexcept {
-				return &Path; }
+			inline const eon::path* operator->() const noexcept { return &Path; }
 
 			iterator& operator++() noexcept;
 
-			inline bool operator==( const iterator& other )
-				const noexcept { return Base == other.Base; }
-			inline bool operator!=( const iterator& other )
-				const noexcept { return Base != other.Base; }
+			inline bool operator==( const iterator& other ) const noexcept { return Base == other.Base; }
+			inline bool operator!=( const iterator& other ) const noexcept { return Base != other.Base; }
 		private:
 			std::filesystem::directory_iterator Base;
 			eon::path Path;

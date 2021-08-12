@@ -3,38 +3,12 @@ project(EonTuple LANGUAGES CXX)
 message(STATUS " - EonTuple")
 
 set(TUPLE_HEADERS
-	Value.h
-	BoolValue.h
-	CharValue.h
-	IntValue.h
-	FloatValue.h
-	NameValue.h
-	StringValue.h
-	RawValue.h
-	BinaryValue.h
-	RegexValue.h
-	ReferenceValue.h
-	VariableValue.h
-	ExpressionValue.h
-	MetaValue.h
-	TupleValue.h
-	Path.h
 	Tuple.h
-	Operators.h
-	Variables.h
+	Attribute.h
 )
 set(TUPLE_SOURCES
-	Value.cpp
-	CharValue.cpp
-	RawValue.cpp
-	BinaryValue.cpp
-	VariableValue.cpp
-	ExpressionValue.cpp
-	TupleValue.cpp
-	Path.cpp
 	Tuple.cpp
-	Operators.cpp
-	Variables.cpp
+	Attribute.cpp
 )
 
 add_library(EonTuple STATIC ${TUPLE_HEADERS} ${TUPLE_SOURCES})
@@ -46,7 +20,7 @@ set_target_properties(
 )
 set_property(TARGET EonTuple PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTuple PUBLIC EonString
+target_link_libraries(EonTuple PUBLIC EonString EonVariables
 	EonName EonExcept EonHex EonRegex EonExpression EonFileSys
 )
 target_include_directories(EonTuple PUBLIC "${EON_SOURCES_DIR}"

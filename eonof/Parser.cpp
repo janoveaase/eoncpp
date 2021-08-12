@@ -14,14 +14,13 @@ namespace eon
 
 
 
-		tuple Parser::parseDocumentStart( tup::variables& vars, bool merge )
+		tuple Parser::parseDocumentStart( vars::variables& vars, bool merge )
 		{
 			tuple result;
 			if( !TP || ( skipEmtpyLines() && !TP ) )
 				return result;
-			result.append( tup::valueptr( new tup::nameval( no_name ) ),
-				vars );
-			result.append( tup::valueptr( new tup::metaval() ), vars );
+			result.append( vars::nameval::create( no_name ), vars );
+			result.append( vars::metaval::create(), vars );
 
 			if( !TP.match( { "-", "-", "-" } ) )
 				return result;
@@ -37,7 +36,7 @@ namespace eon
 			if( name == no_name )
 				throw EofBadSyntax( TP.current().source().textRefRange()
 					+ "\nExpected a document name here!" );
-			result.set( 0, tup::valueptr( new tup::nameval( name ) ), vars );
+			result.set( 0, vars::nameval::create( name ), vars );
 
 			skipNoise();
 
@@ -54,11 +53,9 @@ namespace eon
 			return result;
 		}
 
-		bool Parser::parseDocumentAttribute( tuple& document,
-			tup::variables& vars, bool merge )
+		bool Parser::parseDocumentAttribute( tuple& document, vars::variables& vars, bool merge )
 		{
-			if( !TP || ( skipEmtpyLines() && !TP )
-				|| TP.match( { "-", "-", "-" } ) )
+			if( !TP || ( skipEmtpyLines() && !TP ) || TP.match( { "-", "-", "-" } ) )
 				return false;
 
 			indentationStrict();
@@ -71,8 +68,7 @@ namespace eon
 		}
 
 
-		tup::valueptr Parser::parseValue( tokenparser& parser,
-			tup::variables& vars, ContextType context, bool merge )
+		vars::valueptr Parser::parseValue( tokenparser& parser, vars::variables& vars, ContextType context, bool merge )
 		{
 			auto tmp = std::move( TP );
 			TP = std::move( parser );
@@ -85,18 +81,15 @@ namespace eon
 
 
 
-		void Parser::parseAttribute( tuple& result, tup::variables& vars,
-			bool merge )
+		void Parser::parseAttribute( tuple& result, vars::variables& vars, bool merge )
 		{
-			auto value = parseValue( vars, ContextType::plain, merge );
+			auto value = parseValue( vars, result.function() ? ContextType::function : ContextType::plain, merge );
 			if( !value )
 			{
 				if( TP )
 				{
 					if( !TP.current().newline() )
-						throw EofBadSyntax(
-							TP.current().source().textRefRange()
-							+ "\nUnexpected!" );
+						throw EofBadSyntax( TP.current().source().textRefRange() + "\nUnexpected!" );
 				}
  				return;
 			}
@@ -108,56 +101,75 @@ namespace eon
 				skipNoise();
 
 				// Check for meta data
-				tup::valueptr meta;
+				vars::valueptr meta;
 				if( TP && TP.current().match( "<" ) )
 				{
 					meta = parseMeta( vars, merge );
 					skipNoise();
 				}
 
-				if( TP && TP.current().match( "=" ) )
+				// If next we have a colon, then we have a sub-tuple that must
+				// be indented on the next line.
+				if( TP && TP.current().match( ":" ) )
 				{
 					TP.forward();
 					auto pos = TP.current().source().pos();
 					skipNoise();
 					if( !TP )
-						throw EofBadSyntax(
-							sourceref( Source.source(), pos ).textRefPos()
+						throw EofBadSyntax( sourceref( Source.source(), pos ).textRefPos()
 							+ "\nExpected an attribute value following this!" );
 
-					auto name = value->hardName();
+					auto name = value->actualName();
 
-					// If we got a newline, then the value is a sub-tuple
-					if( TP.current().newline() )
+					// Expect a newline
+					if( !TP.current().newline() )
+						throw EofBadSyntax( sourceref( Source.source(), pos ).textRefPos()
+							+ "\nExpected an indented sub-tuple to follow the colon!" );
+
+					auto& cur = TP.current();
+					while( TP && TP.current().newline() )
 					{
-						auto& cur = TP.current();
-						while( TP && TP.current().newline() )
-						{
+						TP.forward();
+						if( TP.current().space() && TP.ahead().newline() )
 							TP.forward();
-							if( TP.current().space() && TP.ahead().newline() )
-								TP.forward();
-						}
-						auto indent = indentationStrict();
-						if( indent < main_indent + 2 )
-							throw EofBadSyntax( TP.current().source().textRefRange()
-								+ "\nInvalid indentation of sub-tuple value here!" );
-						value = parseTuple( vars, tupletype::plain, merge );
-						if( !value )
-							throw EofBadSyntax( cur.source().textRefPos()
-								+ "\nExpected an indented sub-tuple value here!" );
-
-						if( merge )
-							result.addMerge( value, vars, name, meta
-								? tupleptr( new tuple(
-									((tup::metaval*)&*meta)->claim() ) )
-								: tupleptr() );
-						else
-							result.addReplace( value, vars, name, meta
-								? tupleptr( new tuple(
-									( (tup::metaval*)&*meta )->claim() ) )
-								: tupleptr() );
-						return;
 					}
+					auto indent = indentationStrict();
+					if( indent < main_indent + 2 )
+						throw EofBadSyntax( TP.current().source().textRefRange()
+							+ "\nInvalid indentation of sub-tuple value here!" );
+					auto type = meta && meta->actualMeta().containsUnnamedValue( name_function )
+						? tupletype::function : tupletype::plain;
+					value = parseTuple( vars, type, merge );
+					if( !value )
+						throw EofBadSyntax( cur.source().textRefPos()
+							+ "\nExpected an indented sub-tuple value here!" );
+
+					if( merge )
+						result.addMerge( value, vars, name,
+							meta ? tupleptr( new tuple( ( (vars::metaval*)&*meta )->claim() ) ) : tupleptr() );
+					else
+						result.addReplace( value, vars, name,
+							meta ? tupleptr( new tuple( ( (vars::metaval*)&*meta )->claim() ) ) : tupleptr() );
+					return;
+				}
+
+				// If next is an equal sign and not colon, we have a basic
+				// value (which may still be a braced tuple!)
+				else if( TP && TP.current().match( "=" ) )
+				{
+					TP.forward();
+					auto pos = TP.current().source().pos();
+					skipNoise();
+					if( !TP )
+						throw EofBadSyntax( sourceref( Source.source(), pos ).textRefPos()
+							+ "\nExpected an attribute value following this!" );
+
+					auto name = value->actualName();
+
+					// Indented sub-tuples not allowed following '='!
+					if( TP.current().newline() )
+						throw EofBadSyntax( sourceref( Source.source(), pos ).textRefPos()
+							+ "\nExpected an attribute value following \"=\" - on the same line!" );
 
 					// Get value
 					else
@@ -169,13 +181,11 @@ namespace eon
 								+ "\nExpected an attribute value here!" );
 						if( merge )
 							result.addMerge( value, vars, name, meta
-								? tupleptr( new tuple(
-									((tup::metaval*)&*meta)->claim() ) )
+								? tupleptr( new tuple( ( (vars::metaval*)&*meta )->claim() ) )
 								: nullptr );
 						else
 							result.addReplace( value, vars, name, meta
-								? tupleptr( new tuple(
-									( (tup::metaval*)&*meta )->claim() ) )
+								? tupleptr( new tuple( ( (vars::metaval*)&*meta )->claim() ) )
 								: nullptr );
 						return;
 					}
@@ -186,8 +196,12 @@ namespace eon
 			result.append( value, vars );
 		}
 
-		tup::valueptr Parser::parseValue( tup::variables& vars, ContextType context, bool merge )
+		vars::valueptr Parser::parseValue( vars::variables& vars, ContextType context, bool merge )
 		{
+			// Expression?
+			if( context == ContextType::function )
+				return parseExpr( vars );
+
 			// Parenthesized tuple?
 			if( TP.current().match( "{" ) )
 				return parseTuple( vars, tupletype::curly, merge );
@@ -220,17 +234,16 @@ namespace eon
 			else if( TP.current().match( "?" ) )
 				return parseRegex();
 
-			// Path?
+			// Reference?
 			else if( TP.current().match( "@" ) )
 				return parseRef();
 
 			// Name?
-			else if( context == ContextType::expression
-				&& TP.current().match( "#" ) )
+			else if( context == ContextType::expression && TP.current().match( "#" ) )
 				return parseName();
 
 			// Expression?
-			else if( TP.current().match( "(" ) )
+			else if( TP.match( { "&", "(" } ) || context == ContextType::function )
 				return parseExpr( vars );
 
 			// Positive number?
@@ -238,13 +251,10 @@ namespace eon
 			{
 				TP.forward();
 				if( !TP )
-					throw EofBadSyntax( TP.last().source().textRefRange()
-						+ "\nExpected a number to follow this!" );
+					throw EofBadSyntax( TP.last().source().textRefRange() + "\nExpected a number to follow this!" );
 				if( !TP.current().number() )
-					throw EofBadSyntax( TP.current().source().textRefRange()
-						+ "\nExpected a number here!" );
-				if( TP.exists() && TP.ahead().match(
-					DecimalSep.substr() ) )
+					throw EofBadSyntax( TP.current().source().textRefRange() + "\nExpected a number here!" );
+				if( TP.exists() && TP.ahead().match( DecimalSep.substr() ) )
 					return parseFloat();
 				else
 					return parseInt();
@@ -255,13 +265,10 @@ namespace eon
 			{
 				TP.forward();
 				if( !TP )
-					throw EofBadSyntax( TP.last().source().textRefRange()
-						+ "\nExpected a number to follow this!" );
+					throw EofBadSyntax( TP.last().source().textRefRange() + "\nExpected a number to follow this!" );
 				if( !TP.current().number() )
-					throw EofBadSyntax( TP.current().source().textRefRange()
-						+ "\nExpected a number here!" );
-				if( TP.exists() && TP.ahead().match(
-					DecimalSep.substr() ) )
+					throw EofBadSyntax( TP.current().source().textRefRange() + "\nExpected a number here!" );
+				if( TP.exists() && TP.ahead().match( DecimalSep.substr() ) )
 					return parseFloat( -1.0 );
 				else
 					return parseInt( -1 );
@@ -276,22 +283,20 @@ namespace eon
 				{
 					// Is it a boolean literal?
 					if( name == name_true || name == name_false )
-						return tup::valueptr( new tup::boolval(
-							name == name_true ) );
+						return vars::boolval::create( name == name_true );
 
 					// Must be a name if plain context, variable if expression
 					if( context == ContextType::plain )
-						return tup::valueptr( new tup::nameval( name ) );
+						return vars::nameval::create( name );
 					else
-						return tup::valueptr( new tup::variableval( name ) );
+						return vars::variableval::create( name );
 				}
 			}
 
 			// Unsigned number?
 			if( TP.current().number() )
 			{
-				if( TP.exists()
-					&& TP.ahead().match( DecimalSep.substr() ) )
+				if( TP.exists() && TP.ahead().match( DecimalSep.substr() ) )
 					return parseFloat();
 				else
 					return parseInt();
@@ -365,21 +370,18 @@ namespace eon
 		}
 
 
-		tup::valueptr Parser::parseChar()
+		vars::valueptr Parser::parseChar()
 		{
 			TP.forward();	// Skip opening "'"
 			if( !TP )
-				throw EofBadSyntax( TP.last().source().textRefRange()
-					+ "\nExpected a character value to follow this!" );
+				throw EofBadSyntax( TP.last().source().textRefRange() + "\nExpected a character value to follow this!" );
 			if( TP.current().substr().numChars() != 1 )
-				throw EofBadSyntax( TP.current().source().textRefRange()
-					+ "\nExpected a character value here!" );
+				throw EofBadSyntax( TP.current().source().textRefRange() + "\nExpected a character value here!" );
 			auto value = *TP.current().substr().begin();
 			auto& pos = TP.current().source().pos();
 			TP.forward();
 			if( !TP )
-				throw EofBadSyntax( TP.last().source().textRefRange()
-					+ "\nMissing end of char value!" );
+				throw EofBadSyntax( TP.last().source().textRefRange() + "\nMissing end of char value!" );
 			if( value == '\\' )
 			{
 				string tmp = "\\";
@@ -390,9 +392,7 @@ namespace eon
 				}
 				tmp = tmp.unescape();
 				if( tmp.numChars() != 1 )
-					throw EofBadSyntax(
-						sourceref( Source.source(), pos ).textRefPos()
-						+ "\nInvalid escape sequence!" );
+					throw EofBadSyntax( sourceref( Source.source(), pos ).textRefPos() + "\nInvalid escape sequence!" );
 				value = *tmp.begin();
 			}
 			else
@@ -405,15 +405,15 @@ namespace eon
 						+ "\nExpected a single quote character here!" );
 			}
 			TP.forward();
-			return tup::valueptr( new tup::charval( value ) );
+			return vars::charval::create( value );
 		}
-		tup::valueptr Parser::parseInt( int64_t sign )
+		vars::valueptr Parser::parseInt( int64_t sign )
 		{
 			int64_t val = string( TP.current().substr() ).toInt64();
 			TP.forward();
-			return tup::valueptr( new tup::intval( val * sign ) );
+			return vars::intval::create( val * sign );
 		}
-		tup::valueptr Parser::parseFloat( double sign )
+		vars::valueptr Parser::parseFloat( double sign )
 		{
 			string val = TP.current().substr();
 			TP.forward( 2 );	// Skip past the decimal separator as well
@@ -422,24 +422,22 @@ namespace eon
 				val += "." + TP.current().substr();
 				TP.forward();
 			}
-			return tup::valueptr( new tup::floatval( val.toDouble() * sign ) );
+			return vars::floatval::create( val.toDouble() * sign );
 		}
-		tup::valueptr Parser::parseName()
+		vars::valueptr Parser::parseName()
 		{
 			auto pos = TP.current().source().pos();
 			TP.forward();		// Skip the "#"
 			if( !TP )
-				throw EofBadSyntax( TP.last().source().textRefRange()
-					+ "\nExpected a name to follow this!" );
+				throw EofBadSyntax( TP.last().source().textRefRange() + "\nExpected a name to follow this!" );
 			pos = TP.current().source().pos();
 
 			// Expect a name
 			auto name = parseRawName();
 			if( name == no_name )
 				throw EofBadSyntax(
-					sourceref( Source.source(), pos ).textRefPos()
-					+ "\nExpected a name here!" );
-			return tup::valueptr( new tup::nameval( name ) );
+					sourceref( Source.source(), pos ).textRefPos() + "\nExpected a name here!" );
+			return vars::nameval::create( name );
 		}
 		name_t Parser::parseRawName()
 		{
@@ -463,7 +461,7 @@ namespace eon
 			TP.forward( i );
 			return eon::name::get( name );
 		}
-		tup::valueptr Parser::parseString()
+		vars::valueptr Parser::parseString()
 		{
 			TP.forward();	// Skip opening "\""
 			auto start_line = TP.current().source().pos().line();
@@ -494,20 +492,19 @@ namespace eon
 				}
 			}
 			if( !TP || !TP.current().match( "\"" ) )
-				throw EofBadSyntax( Source.name() + ":" + string(
-					start_line + 1 ) + ":" + string( start_pos + 1 )
+				throw EofBadSyntax( Source.name() + ":" + string( start_line + 1 ) + ":" + string( start_pos + 1 )
 					+ "\nExpected a double quote character here!" );
 			TP.forward();
-			return tup::valueptr( new tup::stringval( value.unescape() ) );
+			return vars::stringval::create( value.unescape() );
 		}
-		tup::valueptr Parser::parseBinary()
+		vars::valueptr Parser::parseBinary()
 		{
 			auto base_indent = indentationStrict();
 			auto main_indent = base_indent + 2;
 
-			TP.forward();	// Skip opening "#"
+			TP.forward();	// Skip opening "%"
 			if( !TP )		// Empty binary value is legal!
-				return tup::valueptr( new tup::binaryval() );
+				return vars::binaryval::create();
 			std::string line;
 			hex hx, value;
 			sourcepos pos;
@@ -526,8 +523,7 @@ namespace eon
 						}
 						catch( ... )
 						{
-							throw EofBadSyntax( sourceref(
-								Source.source(), pos ).textRefRange()
+							throw EofBadSyntax( sourceref( Source.source(), pos ).textRefRange()
 								+ "\nNot a valid hex digits section!" );
 						}
 						value += hx;
@@ -549,22 +545,21 @@ namespace eon
 				}
 				catch( ... )
 				{
-					throw EofBadSyntax( sourceref(
-						Source.source(), pos ).textRefRange()
+					throw EofBadSyntax( sourceref( Source.source(), pos ).textRefRange()
 						+ "\nNot a valid hex digits section!" );
 				}
 				value += hx;
 			}
-			return tup::valueptr( new tup::binaryval( value ) );
+			return vars::binaryval::create( value );
 		}
-		tup::valueptr Parser::parseRaw()
+		vars::valueptr Parser::parseRaw()
 		{
 			auto base_indent = indentationStrict();
 			auto main_indent = base_indent + 2;
 
 			TP.forward();	// Skip opening "|"
 			if( !TP )		// Empty raw value is legal!
-				return tup::valueptr( new tup::rawval() );
+				return vars::rawval::create();
 
 			// If the next token is space or a line comment or spaces + line
 			// comment, we can skip those.
@@ -574,9 +569,7 @@ namespace eon
 				{
 					if( TP.ahead().newline() )
 						TP.forward();
-					else if( TP.exists( 2 )
-						&& TP.ahead().match( "/" )
-						&& TP.ahead( 2 ).match( "/" ) )
+					else if( TP.exists( 2 ) && TP.ahead().match( "/" ) && TP.ahead( 2 ).match( "/" ) )
 						TP.skipToEol();
 				}
 			}
@@ -588,7 +581,7 @@ namespace eon
 				TP.forward();
 				auto indent = indentation();
 				if( indent < main_indent )		// Empty raw value is legal!
-					return tup::valueptr( new tup::rawval() );
+					return vars::rawval::create();
 			}
 
 			// Keep reading until indentation drops below main indentation
@@ -604,8 +597,7 @@ namespace eon
 				}
 
 				// Backslash + newline means we don't add newline to the string
-				if( TP.current().match( "\\" )
-					&& TP.exists() && TP.ahead().newline() )
+				if( TP.current().match( "\\" ) && TP.exists() && TP.ahead().newline() )
 				{
 					TP.forward(); TP.forward();
 					auto indent = indentation();
@@ -636,9 +628,9 @@ namespace eon
 			}
 			if( !line.empty() )
 				lines.push_back( std::move( line ) );
-			return tup::valueptr( new tup::rawval( std::move( lines ) ) );
+			return vars::rawval::create( std::move( lines ) );
 		}
-		tup::valueptr Parser::parseRegex()
+		vars::valueptr Parser::parseRegex()
 		{
 			TP.forward();	// Skip opening "?"
 			if( !TP )
@@ -685,8 +677,7 @@ namespace eon
 			}
 			if( !boundary.empty() )
 			{
-				auto pos = TP ? TP.current().source().pos()
-					: TP.last().source().pos();
+				auto pos = TP ? TP.current().source().pos() : TP.last().source().pos();
 				throw EofBadSyntax(
 					sourceref( Source.source(), pos ).textRefRange()
 					+ "\nExpected the boundary character to end the regular expression!" );
@@ -696,8 +687,7 @@ namespace eon
 			if( TP && TP.current().letter() )
 			{
 				string flags = TP.current().substr();
-				if( TP.current().substr().containsOtherThan(
-					substring( "ilsSo" ) ) )
+				if( TP.current().substr().containsOtherThan( substring( "ilsSo" ) ) )
 					throw EofBadSyntax( TP.current().source().textRefRange()
 						+ "\nOnly legal regex flags are: ilsSo!" );
 				pattern += TP.current().substr();
@@ -715,15 +705,15 @@ namespace eon
 					+ ":" + string( start_pos + 1 ) + "\n" + e.what() );
 			}
 
-			return tup::valueptr( new tup::regexval( std::move( value ) ) );
+			return vars::regexval::create( std::move( value ) );
 		}
-		tup::valueptr Parser::parseRef()
+		vars::valueptr Parser::parseRef()
 		{
 			auto pos = TP.current().source().pos();
 			TP.forward();		// Skip the first opening "@"
 
 			// Keep reading until no more names followed by forward slash
-			tup::path path;
+			nameref path;
 			while( TP )
 			{
 				// Expect a name
@@ -739,41 +729,72 @@ namespace eon
 				TP.forward();
 			}
 			if( path.empty() )
-				throw EofBadSyntax(
-					sourceref( Source.source(), pos ).textRefRange()
+				throw EofBadSyntax( sourceref( Source.source(), pos ).textRefRange()
 					+ "\nExpected a name part of a path here!" );
-			return tup::valueptr( new tup::refval( std::move( path ) ) );
+			return vars::refval::create( std::move( path ), nullptr );
 		}
-		tup::valueptr Parser::parseExpr( tup::variables& vars )
+		vars::valueptr Parser::parseExpr( vars::variables& vars )
 		{
-			auto pos = TP.current().source().pos();
-			TP.forward();		// Skip opening '('
+			auto base_indent = indentationStrict();
+			auto main_indent = base_indent + 2;
 
-			// Get everything up to the closing ')'
+			auto pos = TP.current().source().pos();
+			
+			// Check if braced
+			auto braced = TP.match( { "&", "(" } );
+			if( braced )
+				TP.forward( 2 );	// Skip opening "&("
+
+			// Get everything up to the closing ')' (if braced) or indentation
+			// reduction
 			size_t nested = 1;
 			string expr;
 			while( TP )
 			{
 				if( TP.current().match( "(" ) )
 					++nested;
-				if( TP.current().match( ")" ) )
+				else if( TP.current().match( ")" ) )
 				{
+					if( ( braced && nested == 0 ) || ( !braced && nested == 1 ) )
+						throw EofBadSyntax( TP.current().source().textRefRange() + "\nMissing matching '('!" );
 					if( --nested == 0 )
 					{
 						TP.forward();
 						break;
 					}
 				}
+				else if( TP.current().newline() )
+				{
+					TP.forward();
+					if( !TP )
+					{
+						if( nested == 0 )
+							break;
+						throw EofBadSyntax( TP.last().source().textRefRange()
+							+ "\nExpression started at line " + string( pos.line() )
+							+ " pos " + string( pos.pos( Source.source() ) ) + " is not complete!" );
+					}
+					auto indent = indentation();
+					if( indent < main_indent )
+					{
+						if( nested == 1 )
+						{
+							TP.backward();
+							break;
+						}
+						throw EofBadSyntax( TP.current().source().textRefRange()
+							+ "\nIndentation reduced but expression started at line " + string( pos.line() )
+							+ " pos " + string( pos.pos( Source.source() ) ) + " is not complete!" );
+					}
+				}
 				expr += TP.current().substr();
 				TP.forward();
 			}
-			if( nested == 1 )
-				throw EofBadSyntax(
-					sourceref( Source.source(), pos ).textRefRange()
+			if( braced && nested == 1 )
+				throw EofBadSyntax( sourceref( Source.source(), pos ).textRefRange()
 					+ "\nExpression must end in ')'" );
-			else if( nested > 1 )
-				throw EofBadSyntax(
-					sourceref( Source.source(), pos ).textRefRange()
+			else if( ( braced && nested > 1 ) || ( !braced && nested > 1 ) )
+				throw EofBadSyntax( sourceref( Source.source(), pos ).textRefRange()
 					+ "\nInvalid expression (Check parenthesis!)" );
 
 			expression ex;
@@ -783,19 +804,19 @@ namespace eon
 			}
 			catch( exception& e )
 			{
-				throw EofBadSyntax(
-					sourceref( Source.source(), pos ).textRefPos()
-					+ "\n" + e.what() );
+				throw EofBadSyntax( sourceref( Source.source(), pos ).textRefPos() + "\n" + e.what() );
 			}
-			return tup::valueptr( new tup::expressionval( std::move( ex ) ) );
+			return vars::expressionval::create( std::move( ex ), braced );
 		}
-		tup::valueptr Parser::parseTuple( tup::variables& vars, tupletype type, bool merge )
+		vars::valueptr Parser::parseTuple( vars::variables& vars, tupletype type, bool merge )
 		{
-			// We have four types of tuples:
+			// We have five types of tuples:
 			// 1. By indentation (at or greater than 'base_indentation')
 			// 2. Started by dash + space
 			// 3. Curly braced
 			// 4. Meta (angle braced)
+			// 5. Function (marked by "function" keyword in named attribute)
+			//    (Only detection is handled here!)
 			size_t main_indent = indentation();
 			string group_end;
 			switch( type )
@@ -831,13 +852,13 @@ namespace eon
 			tuple result(
 				type == tupletype::curly ? tuple::form::braced
 				: type == tupletype::meta ? tuple::form::metadata
+				: type == tupletype::function ? tuple::form::function
 				: tuple::form::plain );
 			bool end_marker = group_end.empty();
 			while( TP )
 			{
 				// Check for end of tuple marker
-				if( !group_end.empty()
-					&& TP.current().match( group_end.substr() ) )
+				if( !group_end.empty() && TP.current().match( group_end.substr() ) )
 				{
 					TP.forward();
 					end_marker = true;
@@ -880,11 +901,38 @@ namespace eon
 			}
 			if( end_marker )
 			{
-				if( !result.empty() )
-					return tup::valueptr(
-						new tup::tupleval( std::move( result ) ) );
-				else
-					return tup::valueptr( new tup::tupleval() );
+				vars::valueptr val;
+				switch( type )
+				{
+					case tupletype::meta:
+						if( !result.empty() )
+						{
+							val = vars::metaval::create( std::move( result ) );
+							dynamic_cast<vars::metaval*>( &*val )->meta_value().setAttributeContext( val );
+						}
+						else
+							val = vars::metaval::create();
+						break;
+					case tupletype::function:
+						if( !result.empty() )
+						{
+							val = vars::functionval::create( std::move( result ) );
+							dynamic_cast<vars::functionval*>( &*val )->function_value().setAttributeContext( val );
+						}
+						else
+							val = vars::functionval::create();
+						break;
+					default:
+						if( !result.empty() )
+						{
+							val = vars::tupleval::create( std::move( result ) );
+							dynamic_cast<vars::tupleval*>( &*val )->tuple_value().setAttributeContext( val );
+						}
+						else
+							val = vars::tupleval::create();
+						break;
+				}
+				return val;
 			}
 			else
 				throw EofBadSyntax( TP.last().source().textRefRange()
@@ -892,12 +940,6 @@ namespace eon
 					+ string( pos.line() + 1 ) + " position "
 					+ string( pos.pos( TP.last().source().source() ) + 1 )
 					+ " to end in '" + group_end + "' here!" );
-		}
-		tup::valueptr Parser::parseMeta( tup::variables& vars, bool merge )
-		{
-			auto tuple = parseTuple( vars, tupletype::meta, merge );
-			return tup::valueptr( new tup::metaval(
-				((tup::metaval*)&*tuple)->claim() ) );
 		}
 
 
@@ -923,8 +965,7 @@ namespace eon
 					}
 
 					// Unicode
-					else if( ( c1 == 'u' || c1 == 'U' ) && i < str.size() - 2
-						&& isHexDigit( str[ i + 2 ] ) )
+					else if( ( c1 == 'u' || c1 == 'U' ) && i < str.size() - 2 && isHexDigit( str[ i + 2 ] ) )
 					{
 						++i;
 						char_t val{ 0 };
@@ -941,8 +982,7 @@ namespace eon
 					}
 
 					// Hex
-					else if( c1 == '0' && ( c2 == 'x' || c2 == 'X' )
-						&& i < str.size() - 3 && isHexDigit( str[ i + 3 ] ) )
+					else if( c1 == '0' && ( c2 == 'x' || c2 == 'X' ) && i < str.size() - 3 && isHexDigit( str[ i + 3 ] ) )
 					{
 						i += 2;
 						byte_t val{ 0 };
@@ -979,8 +1019,7 @@ namespace eon
 								out += static_cast<byte_t>( chr );
 								val -= chr << 1;
 							}
-							if( i == str.size() - 1
-								|| !isOctalDigit( str[ i + 1 ] ) )
+							if( i == str.size() - 1 || !isOctalDigit( str[ i + 1 ] ) )
 							{
 								if( have_val )
 								{
@@ -1000,8 +1039,7 @@ namespace eon
 
 		size_t Parser::indentationStrict() const
 		{
-			auto indent = TP.at( TP.lineStart() ).space() ? TP.at(
-				TP.lineStart() ).substr().numChars() : 0;
+			auto indent = TP.at( TP.lineStart() ).space() ? TP.at( TP.lineStart() ).substr().numChars() : 0;
 			if( indent % 2 != 0 )
 				throw EofBadSyntax( TP.current().source().textRefRange()
 					+ "\nIndentation must be a factor of 2!" );

@@ -21,54 +21,42 @@ namespace eon
 		class Digit : public Node
 		{
 		public:
-			Digit( const substring& source ) : Node( source ) {
-				Type = NodeType::val_digit; }
-			Digit( const Digit& other ) : Node( other ) {
-				Type = NodeType::val_digit; }
-			Digit( Digit&& other ) noexcept
-				: Node( std::move( other ) ) { Type = NodeType::val_digit; }
+			inline Digit( const substring& source ) : Node( source ) { Type = NodeType::val_digit; }
+			inline Digit( const Digit& other ) : Node( other ) { Type = NodeType::val_digit; }
+			inline Digit( Digit&& other ) noexcept : Node( std::move( other ) ) { Type = NodeType::val_digit; }
 			virtual ~Digit() = default;
 
 			inline Node* copy() const override { return new Digit( *this ); }
 
-			inline Digit& operator=( const Digit& other ) {
-				*static_cast<Node*>( this ) = other; return *this; }
+			inline Digit& operator=( const Digit& other ) { *static_cast<Node*>( this ) = other; return *this; }
 			inline Digit& operator=( Digit&& other ) noexcept {
-				*static_cast<Node*>( this ) = std::move( other );
-				return *this; }
+				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
 			inline bool _match( RxData& data, size_t steps ) override {
-				return string::isNumberAsciiDigit( data() )
-					? data.advance() : false; }
+				return string::isNumberAsciiDigit( data() ) ? data.advance() : false; }
+			inline string _strStruct() const override { return "\\d"; }
 		};
 
 
 		class NotDigit : public Node
 		{
 		public:
-			NotDigit( const substring& source ) : Node( source ) {
-				Type = NodeType::val_digit; }
-			NotDigit( const NotDigit& other ) : Node( other ) {
-				Type = NodeType::val_digit;}
-			NotDigit( NotDigit&& other ) noexcept
-				: Node( std::move( other ) ) {
-				Type = NodeType::val_digit; }
+			inline NotDigit( const substring& source ) : Node( source ) { Type = NodeType::val_digit; }
+			inline NotDigit( const NotDigit& other ) : Node( other ) { Type = NodeType::val_digit;}
+			inline NotDigit( NotDigit&& other ) noexcept : Node( std::move( other ) ) { Type = NodeType::val_digit; }
 			virtual ~NotDigit() = default;
 
-			inline Node* copy() const override {
-				return new NotDigit( *this ); }
+			inline Node* copy() const override { return new NotDigit( *this ); }
 
-			inline NotDigit& operator=( const NotDigit& other ) {
-				*static_cast<Node*>( this ) = other; return *this; }
+			inline NotDigit& operator=( const NotDigit& other ) { *static_cast<Node*>( this ) = other; return *this; }
 			inline NotDigit& operator=( NotDigit&& other ) noexcept {
-				*static_cast<Node*>( this ) = std::move( other );
-				return *this; }
+				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
 			inline bool _match( RxData& data, size_t steps ) override {
-				return !string::isNumberDecimalDigit( data() )
-					? data.advance() : false; }
+				return !string::isNumberDecimalDigit( data() ) ? data.advance() : false; }
+			inline string _strStruct() const override { return "\\D"; }
 		};
 	}
 }

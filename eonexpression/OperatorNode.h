@@ -24,10 +24,8 @@ namespace eon
 
 			operatornode() = default;
 			operatornode( const operatornode& ) = delete;
-			inline operatornode( operatornode&& other ) noexcept {
-				*this = std::move( other ); }
-			inline operatornode( tup::operators::code op_type )
-				: node( op_type ) {}
+			inline operatornode( operatornode&& other ) noexcept { *this = std::move( other ); }
+			inline operatornode( vars::operators::code op_type ) : node( op_type ) {}
 
 			virtual ~operatornode() = default;
 
@@ -41,8 +39,11 @@ namespace eon
 
 			operatornode& operator=( const operatornode& ) = delete;
 			inline operatornode& operator=( operatornode&& other ) noexcept {
-				Type = other.Type; *static_cast<node*>( this ) = std::move(
-					other ); return *this; }
+				Type = other.Type; *static_cast<node*>( this ) = std::move( other ); return *this; }
+
+			// Register a tuple as context to references that might exist in this
+			// expression
+			void setContext( vars::valueptr context ) override;
 
 
 
@@ -52,22 +53,19 @@ namespace eon
 			******************************************************************/
 		public:
 
-			inline int operands() const noexcept { return static_cast<int>(
-				Children.size() ); }
+			inline int operands() const noexcept { return static_cast<int>( Children.size() ); }
 
-			inline string str() const override {
-				return tup::operators::mapCode( Type ); }
+			inline string str() const override { return vars::operators::mapCode( Type ); }
 
 			string postorderStr() const override;
 			string inorderStr() const override;
 
-			//* Evaluate expression
-			tup::valueptr evaluate( tup::variables& vars ) const override;
+			//* Evaluate expression, return void valueptr if no value
+			vars::valueptr evaluateAccurate( vars::variables& vars ) const override;
 
 			nodeptr copy() const override;
 
-			bool equal( const nodeptr& other, const tup::variables& vars )
-				const noexcept override;
+			bool equal( const nodeptr& other ) const noexcept override;
 		};
 	}
 }

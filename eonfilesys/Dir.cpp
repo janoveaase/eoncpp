@@ -23,8 +23,7 @@ namespace eon
 		try
 		{
 			if( !std::filesystem::create_directory( Path.stdpath() ) )
-				throw filesys::Failure( "Failed to create directory \""
-					+ Path + "\"" );
+				throw filesys::Failure( "Failed to create directory \"" + Path + "\"" );
 		}
 		catch( std::exception& e )
 		{
@@ -38,17 +37,14 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to rename unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to rename nonexisting directory \""
-				+ Path.str() + "\"" );
-		directory target{ Path.hasParent()
-			? Path.parent() + eon::path( new_name )
-			: eon::path( new_name ) };
+			throw filesys::Failure( "Trying to rename nonexisting directory \"" + Path.str() + "\"" );
+		directory target{ Path.hasParent() ? Path.parent() + eon::path( new_name ) : eon::path( new_name ) };
 		if( target.exists() )
 			throw filesys::Failure( "Cannot rename directory \"" + Path.str()
 				+ "\" to target \"" + new_name + "\": Target exists" );
 		try
 		{
-			std::filesystem::rename( Path.stdpath(), target.path().stdpath() );
+			std::filesystem::rename( Path.stdpath(), target.dpath().stdpath() );
 		}
 		catch( std::exception& e )
 		{
@@ -61,16 +57,13 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to rename unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to rename nonexisting directory \""
-				+ Path.str() + "\"" );
-		directory target{ Path.hasParent()
-			? Path.parent() + eon::path( new_name )
-			: eon::path( new_name ) };
+			throw filesys::Failure( "Trying to rename nonexisting directory \"" + Path.str() + "\"" );
+		directory target{ Path.hasParent() ? Path.parent() + eon::path( new_name ) : eon::path( new_name ) };
 		try
 		{
 			if( target.exists() )
 				target.remove();
-			std::filesystem::rename( Path.stdstr(), target.path().stdstr() );
+			std::filesystem::rename( Path.stdstr(), target.dpath().stdstr() );
 		}
 		catch( std::exception& e )
 		{
@@ -84,17 +77,14 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to move unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to move nonexisting directory \""
-				+ Path.str() + "\"" );
+			throw filesys::Failure( "Trying to move nonexisting directory \"" + Path.str() + "\"" );
 		directory target{ new_parent_dir + Path.base() };
 		if( target.exists() )
 			throw filesys::Failure( "Cannot move \"" + Path.str()
-				+ "\" to target \"" + target.path().str()
-				+ "\": Target exists" );
+				+ "\" to target \"" + target.dpath().str() + "\": Target exists" );
 		try
 		{
-			std::filesystem::rename(
-				Path.stdpath(), target.path().stdpath() );
+			std::filesystem::rename( Path.stdpath(), target.dpath().stdpath() );
 		}
 		catch( std::exception& e )
 		{
@@ -107,15 +97,13 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to move unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to move nonexisting directory \""
-				+ Path.str() + "\"" );
+			throw filesys::Failure( "Trying to move nonexisting directory \"" + Path.str() + "\"" );
 		directory target{ new_parent_dir + Path.base() };
 		try
 		{
 			if( target.exists() )
 				target.remove();
-			std::filesystem::rename(
-				Path.stdpath(), target.path().stdpath() );
+			std::filesystem::rename( Path.stdpath(), target.dpath().stdpath() );
 		}
 		catch( std::exception& e )
 		{
@@ -129,15 +117,13 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to copy unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to copy nonexisting directory \""
-				+ Path.str() + "\"" );
+			throw filesys::Failure( "Trying to copy nonexisting directory \"" + Path.str() + "\"" );
 		if( target.exists() )
 			throw filesys::Failure( "Cannot copy \"" + Path.str()
-				+ "\" to target \"" + target.path().str()
-				+ "\": Target exists" );
+				+ "\" to target \"" + target.dpath().str() + "\": Target exists" );
 		try
 		{
-			std::filesystem::copy( Path.stdpath(), target.path().stdpath(),
+			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(),
 				std::filesystem::copy_options::skip_existing );
 		}
 		catch( std::exception& e )
@@ -150,13 +136,12 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to copy unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to copy nonexisting directory \""
-				+ Path.str() + "\"" );
+			throw filesys::Failure( "Trying to copy nonexisting directory \"" + Path.str() + "\"" );
 		try
 		{
 			if( target.exists() )
 				target.remove();
-			std::filesystem::copy( Path.stdpath(), target.path().stdpath(),
+			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(),
 				std::filesystem::copy_options::recursive );
 		}
 		catch( std::exception& e )
@@ -169,11 +154,10 @@ namespace eon
 		if( !Path )
 			throw filesys::Failure( "Trying to copy unnamed directory" );
 		if( !exists() )
-			throw filesys::Failure( "Trying to copy nonexisting directory \""
-				+ Path.str() + "\"" );
+			throw filesys::Failure( "Trying to copy nonexisting directory \"" + Path.str() + "\"" );
 		try
 		{
-			std::filesystem::copy( Path.stdpath(), target.path().stdpath(),
+			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(),
 				std::filesystem::copy_options::recursive );
 		}
 		catch( std::exception& e )
@@ -182,8 +166,7 @@ namespace eon
 		}
 	}
 
-	directory::iterator directory::begin() const noexcept {
-		return iterator( *this ); }
+	directory::iterator directory::begin() const noexcept { return iterator( *this ); }
 	directory::iterator directory::end() const noexcept { return iterator(); }
 
 	void directory::remove() const
@@ -198,8 +181,7 @@ namespace eon
 			throw filesys::Failure( e.what() );
 		}
 		if( !success )
-			throw filesys::Failure(
-				"Unable to delete \"" + Path.str() + "\"" );
+			throw filesys::Failure( "Unable to delete \"" + Path.str() + "\"" );
 	}
 
 
@@ -207,7 +189,7 @@ namespace eon
 
 	directory::iterator::iterator( const eon::directory& d )
 	{
-		Base = std::filesystem::directory_iterator( d.path() );
+		Base = std::filesystem::directory_iterator( d.dpath() );
 		if( *this )
 		{
 			Path = Base->path();

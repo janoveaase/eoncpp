@@ -23,6 +23,30 @@ namespace eon
 
 	class TupleTest : public eontest::EonTest {};
 	class MetaTest : public eontest::EonTest {};
+	class FunctionTest : public eontest::EonTest {};
 
 	class ValidateTest : public eontest::EonTest {};
+
+
+
+	class addInt : public vars::function
+	{
+	public:
+		tuple Args{
+			{ name::get( "a" ), vars::nameval::create( name_int ) },
+			{ name::get( "b" ), vars::nameval::create( name_int ) } };
+
+		addInt() = default;
+
+		inline const tuple* args() const noexcept override { return &Args; }
+
+		vars::valueptr execute( vars::variables& varcache, const tuple& args ) const override
+		{
+			auto a = args.at( name::get( "a" ) );
+			auto b = args.at( name::get( "b" ) );
+			if( a && b && a->isInt() && b->isInt() )
+				return vars::intval::create( a->actualInt() + b->actualInt() );
+			throw vars::WrongType();
+		}
+	};
 }

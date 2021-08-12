@@ -4,20 +4,21 @@
 #include <eontokenizer/Tokenizer.h>
 #include <eontokenizer/TokenParser.h>
 #include <eontuple/Tuple.h>
-#include <eontuple/BoolValue.h>
-#include <eontuple/CharValue.h>
-#include <eontuple/IntValue.h>
-#include <eontuple/FloatValue.h>
-#include <eontuple/NameValue.h>
-#include <eontuple/StringValue.h>
-#include <eontuple/BinaryValue.h>
-#include <eontuple/RawValue.h>
-#include <eontuple/RegexValue.h>
-#include <eontuple/VariableValue.h>
-#include <eontuple/ExpressionValue.h>
-#include <eontuple/TupleValue.h>
-#include <eontuple/ReferenceValue.h>
-#include <eontuple/MetaValue.h>
+#include <eonvariables/BoolValue.h>
+#include <eonvariables/CharValue.h>
+#include <eonvariables/IntValue.h>
+#include <eonvariables/FloatValue.h>
+#include <eonvariables/NameValue.h>
+#include <eonvariables/StringValue.h>
+#include <eonvariables/BinaryValue.h>
+#include <eonvariables/RawValue.h>
+#include <eonvariables/RegexValue.h>
+#include <eonvariables/VariableValue.h>
+#include <eonvariables/ExpressionValue.h>
+#include <eonvariables/TupleValue.h>
+#include <eonvariables/ReferenceValue.h>
+#include <eonvariables/MetaValue.h>
+#include <eonvariables/FunctionValue.h>
 
 
 /******************************************************************************
@@ -54,13 +55,13 @@ namespace eon
 			// by calling parse():
 			//   1. name    : Name of document, no_name if not specified.
 			//   2. metaval : Meta information for the document (if any).
-			tuple parseDocumentStart( tup::variables& vars, bool merge );
+			tuple parseDocumentStart( vars::variables& vars, bool merge );
 
 			// Parse the next attribute of the current document
 			// Returns false when no more attributes.
 			// If false is returned, you should call parseDocumentStart to
 			// see if there are more documents.
-			bool parseDocumentAttribute( tuple& document, tup::variables& vars,
+			bool parseDocumentAttribute( tuple& document, vars::variables& vars,
 				bool merge );
 
 
@@ -68,20 +69,19 @@ namespace eon
 			enum class ContextType
 			{
 				plain,
-				expression
+				expression,
+				function
 			};
-			tup::valueptr parseValue( tokenparser& parser,
-				tup::variables& vars, ContextType context, bool merge );
+			vars::valueptr parseValue( tokenparser& parser, vars::variables& vars, ContextType context, bool merge );
 
 
 		private:
 
 			// Parse an attribute, with optional name and meta data
-			void parseAttribute( tuple& result, tup::variables& vars
-				, bool merge );
+			void parseAttribute( tuple& result, vars::variables& vars, bool merge );
 
 			// Parse a value
-			tup::valueptr parseValue( tup::variables& vars, ContextType context, bool merge );
+			vars::valueptr parseValue( vars::variables& vars, ContextType context, bool merge );
 
 			// Skip tokens, return false if nothing was skipped
 			bool skipComments();
@@ -89,26 +89,28 @@ namespace eon
 			bool skipNoise();	// Comments and spaces
 			bool skipEmtpyLines();
 
-			tup::valueptr parseChar();
-			tup::valueptr parseInt( int64_t sign = 1 );
-			tup::valueptr parseFloat( double sign = 1.0 );
-			tup::valueptr parseName();
+			vars::valueptr parseChar();
+			vars::valueptr parseInt( int64_t sign = 1 );
+			vars::valueptr parseFloat( double sign = 1.0 );
+			vars::valueptr parseName();
 			name_t parseRawName();	// This can return no_name!
-			tup::valueptr parseString();
-			tup::valueptr parseBinary();
-			tup::valueptr parseRaw();
-			tup::valueptr parseRegex();
+			vars::valueptr parseString();
+			vars::valueptr parseBinary();
+			vars::valueptr parseRaw();
+			vars::valueptr parseRegex();
 			enum class tupletype
 			{
 				plain,
 				dash,
 				curly,
-				meta
+				meta,
+				function
 			};
-			tup::valueptr parseTuple( tup::variables& vars, tupletype type, bool merge );
-			tup::valueptr parseRef();
-			tup::valueptr parseExpr( tup::variables& vars );
-			tup::valueptr parseMeta( tup::variables& vars, bool merge );
+			vars::valueptr parseTuple( vars::variables& vars, tupletype type, bool merge );
+			vars::valueptr parseRef();
+			vars::valueptr parseExpr( vars::variables& vars );
+			inline vars::valueptr parseMeta( vars::variables& vars, bool merge ) {
+				return parseTuple( vars, tupletype::meta, merge ); }
 
 			std::string unescape( const std::string& str ) const noexcept;
 			inline bool inrange( byte_t c, byte_t lower, byte_t upper )

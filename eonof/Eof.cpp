@@ -6,7 +6,7 @@ namespace eon
 {
 	bool eonof::validate( name_t document, name_t pattern_document )
 	{
-		auto doc = Docs.attribute( document );
+		auto doc = Docs.at( document );
 		if( !doc || !doc->isTuple() )
 			return false;
 
@@ -17,15 +17,13 @@ namespace eon
 		if( pattern_document != no_name )
 		{
 			if( Patterns.find( pattern_document ) == Patterns.end() )
-				throw tup::Invalid( "The specified pattern document \""
-					+ *pattern_document
+				throw EofInvalid( "The specified pattern document \"" + *pattern_document
 					+ "\" is not a \"pattern document\"!" );
-			auto ptrn = Docs.attribute( pattern_document );
+			auto ptrn = Docs.at( pattern_document );
 			if( !ptrn )
-				throw tup::Invalid( "Pattern document not available: "
-					+ *pattern_document );
-			if( ptrn->isTuple() && ptrn->hardTuple() )
-				ptrn->tuple_value().validate( doc->hardTuple(), Vars );
+				throw EofInvalid( "Pattern document not available: " + *pattern_document );
+			if( ptrn->isTuple() && ptrn->actualTuple() )
+				ptrn->tuple_value().validate( doc->actualTuple(), Vars );
 		}
 
 		return true;
@@ -34,20 +32,20 @@ namespace eon
 
 
 
-	void eonof::loadExclusive( const file& input_file )
+	void eonof::loadReplace( const file& input_file )
 	{
-		auto name = eon::name::get( input_file.path().str() );
-		source src( input_file.path(), input_file.loadText() );
+		auto name = eon::name::get( input_file.fpath().str() );
+		source src( input_file.fpath(), input_file.loadText() );
 		_parse( name, src, false );
 	}
 	void eonof::loadMerge( const file& input_file )
 	{
-		auto name = eon::name::get( input_file.path().str() );
-		source src( input_file.path(), input_file.loadText() );
+		auto name = eon::name::get( input_file.fpath().str() );
+		source src( input_file.fpath(), input_file.loadText() );
 		_parse( name, src, true );
 	}
 
-	void eonof::parseExclusive( const string& str, name_t document_name )
+	void eonof::parseReplace( const string& str, name_t document_name )
 	{
 		source src( *document_name, string( str ) );
 		_parse( document_name, src, false );
@@ -56,6 +54,51 @@ namespace eon
 	{
 		source src( *document_name, string( str ) );
 		_parse( document_name, src, true );
+	}
+
+
+
+	vars::valueptr eonof::_get( const nameref& ref, vars::valueptr context ) const noexcept
+	{
+		if( ref.empty() )
+			return vars::valueptr();
+		if( ref.at( 0 ) != name_docs )
+		{
+			if( context )
+			{
+				const tuple* tup{ nullptr };
+				if( context->isTuple() )
+					tup = &context->actualTuple();
+				else if( context->isMeta() )
+					tup = &context->actualMeta();
+				else if( context->isFunction() )
+					tup = &context->actualFunction();
+				if( tup )
+				{
+					auto found = tup->find( ref );
+					if( found )
+						return found;
+					found = tup->document()->find( ref );
+					if( found )
+						return found;
+				}
+			}
+		}
+		return Docs.find( ref );
+	}
+	void eonof::_set( const nameref& ref, vars::valueptr context, vars::valueptr value )
+	{
+		if( ref.empty() )
+			throw vars::InvalidReference( "Cannot set empty reference!" );
+		if( !value )
+			throw vars::NoValue( "Cannot set void value for reference " + ref.str() + "!" );
+		auto found = _get( ref, context );
+		if( !found )
+			throw vars::NotFound( "Reference " + ref.str() + " has no target!" );
+		if( found->type() != value->type() )
+			throw vars::WrongType( "Reference " + ref.str() + " (" + *vars::mapTypeCode( found->type() )
+				+ ") cannot have a value of type " + *vars::mapTypeCode( value->type() ) + " set!" );
+		found->setActual( value );
 	}
 
 
@@ -70,8 +113,8 @@ namespace eon
 			auto result = parser.parseDocumentStart( Vars, merge );
 			if( !result )
 				break;
-			auto doc_name = result.attribute( 0 )->hardName();
-			auto doc_meta = result.attribute( 1 )->hardMeta();
+			auto doc_name = result.at( 0 )->actualName();
+			auto doc_meta = result.at( 1 )->actualMeta();
 
 			// Use given name if no name in header
 			if( doc_name == no_name )
@@ -83,30 +126,31 @@ namespace eon
 				meta = tupleptr( new tuple( std::move( doc_meta ) ) );
 
 			// If this is a pattern document, we need to record it as such
-			if( meta && meta->containsUnnamedValue( name_pattern, Vars ) )
+			if( meta && meta->containsUnnamedValue( name_pattern ) )
 				Patterns.insert( doc_name );
 
-			tuple* doc{ nullptr };
+			vars::valueptr doc;
 
 			if( Docs.exists( name ) )
 			{
 				// Choose strategy for existing document
-				doc = &Docs.attribute( name )->tuple_value();
+				doc = Docs.at( name );
 				if( !merge )
 					doc->clear();
 			}
 			else
 			{
 				// Create (empty) tuple with these details
-				Docs.append( tup::valueptr( new tup::tupleval() ), Vars,
-					doc_name, meta );
-				doc = (tuple*)&Docs.attribute(
-					Docs.numAttributes() - 1 )->hardTuple();
+				Docs.append( vars::tupleval::create(), Vars, doc_name, meta );
+				doc = Docs.at( Docs.numAttributes() - 1 );
 			}
 
 			// Keep on parsing until end of document
-			while( parser.parseDocumentAttribute( *doc, Vars, merge ) )
+			auto& docp = dynamic_cast<vars::tupleval*>( &*doc )->tuple_value();
+			while( parser.parseDocumentAttribute( docp, Vars, merge ) )
 				;
+
+			docp.setAttributeContext( doc );
 		}
 	}
 }

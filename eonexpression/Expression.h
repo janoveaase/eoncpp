@@ -1,9 +1,7 @@
 #pragma once
-#include <eontuple/Value.h>
 #include <eontokenizer/TokenParser.h>
-#include <eontuple/Operators.h>
-#include <eontuple/Variables.h>
 #include "Node.h"
+#include <stack>
 
 
 /******************************************************************************
@@ -43,10 +41,8 @@ namespace eon
 
 		expression() = default;
 		inline expression( const expression& other ) { *this = other; }
-		inline expression( expression&& other ) noexcept {
-			*this = std::move( other ); }
-		inline expression( string&& expr, tup::variables& vars ) {
-			_parse( std::move( expr ), vars ); }
+		inline expression( expression&& other ) noexcept { *this = std::move( other ); }
+		inline expression( string&& expr, vars::variables& vars ) { _parse( std::move( expr ), vars ); }
 
 		virtual ~expression() = default;
 
@@ -60,9 +56,13 @@ namespace eon
 
 		expression& operator=( const expression& other );
 		inline expression& operator=( expression&& other ) noexcept {
-			Root = std::move( other.Root ); return *this; }
+			Roots = std::move( other.Roots ); return *this; }
 
-		void clear() noexcept { Root = expr::nodeptr(); }
+		void clear() noexcept { Roots.clear(); }
+
+		// Register a tuple as context to references that might exist in this
+		// expression
+		void setContext( vars::valueptr context );
 
 
 
@@ -72,7 +72,7 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		inline bool empty() const noexcept { return !Root; }
+		inline bool empty() const noexcept { return Roots.empty(); }
 
 		// Get expression as postfix string
 		string postfixStr() const;
@@ -81,12 +81,12 @@ namespace eon
 		string infixStr() const;
 
 		// Evaluate expression
-		tup::valueptr evaluate() const;
-		tup::valueptr evaluate( tup::variables& vars ) const;
+		vars::valueptr evaluate() const;
+		vars::valueptr evaluate( vars::variables& vars ) const;
 
 
-		bool equal( const expression& other, const tup::variables& vars )
-			const noexcept;
+		//* Check for equality in expressions
+		bool equal( const expression& other ) const noexcept;
 
 
 
@@ -97,14 +97,12 @@ namespace eon
 	private:
 
 		// Parse expression
-		void _parse( string&& expr, tup::variables& vars );
+		void _parse( string&& expr, vars::variables& vars );
 
-		void _processToken( tokenparser& parser, tup::variables& vars,
-			tup::operators::code& last_type,
-			std::stack<tup::operators::code>& op_stack,
-			std::stack<expr::nodeptr>& tree_stack );
+		void _processToken( tokenparser& parser, vars::variables& vars, vars::operators::code& last_type,
+			std::stack<vars::operators::code>& op_stack, std::stack<expr::nodeptr>& tree_stack );
 
-		expr::nodeptr _parseValue( tokenparser& parser, tup::variables& vars );
+		expr::nodeptr _parseValue( tokenparser& parser, vars::variables& vars );
 
 
 
@@ -114,6 +112,6 @@ namespace eon
 		// Attributes
 		//
 	private:
-		expr::nodeptr Root;
+		std::vector<expr::nodeptr> Roots;
 	};
 }

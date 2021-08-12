@@ -11,6 +11,7 @@ namespace eon
 			if( group )
 			{
 				RxData param_b{ data };
+
 				for( auto c = group.begin(); c != group.end() && param_b; ++c )
 				{
 					if( param_b() == *c )
@@ -18,7 +19,7 @@ namespace eon
 					else
 						return false;
 				}
-				param_b = std::move( data );
+				data = std::move( param_b );
 				return true;
 			}
 			return false;

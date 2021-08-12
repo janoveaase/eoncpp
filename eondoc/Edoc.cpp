@@ -6,8 +6,8 @@ namespace eon
 {
 	void edoc::load( const file& input_file, const string& override_name )
 	{
-		auto name = input_file.path().name();
-		source src{ input_file.path(), input_file.loadText() };
+		auto name = input_file.fpath().name();
+		source src{ input_file.fpath(), input_file.loadText() };
 		auto document = _parse( name, src );
 		add( std::move( document ), override_name.empty() ? name
 			: override_name );

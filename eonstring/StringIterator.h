@@ -29,14 +29,11 @@ namespace eon
 	private:
 		std::string Message;
 	public:
-		WrongSource() : std::exception() {}
-		WrongSource( const char* message ) : std::exception() {
-			Message = message; }
-		WrongSource( const std::string& message ) : std::exception() {
-			Message = message; }
-		WrongSource( std::string&& message ) noexcept : std::exception() {
-			Message = std::move( message ); }
-		const char* what() const noexcept override { return Message.c_str(); }
+		inline WrongSource() : std::exception() {}
+		inline WrongSource( const char* message ) : std::exception() { Message = message; }
+		inline WrongSource( const std::string& message ) : std::exception() { Message = message; }
+		inline WrongSource( std::string&& message ) noexcept : std::exception() { Message = std::move( message ); }
+		inline const char* what() const noexcept override { return Message.c_str(); }
 	};
 
 	/**************************************************************************
@@ -48,14 +45,11 @@ namespace eon
 	private:
 		std::string Message;
 	public:
-		InvalidUTF8() : std::exception() {}
-		InvalidUTF8( const char* message ) : std::exception() {
-			Message = message; }
-		InvalidUTF8( const std::string& message ) : std::exception() {
-			Message = message; }
-		InvalidUTF8( std::string&& message ) noexcept : std::exception() {
-			Message = std::move( message ); }
-		const char* what() const noexcept override { return Message.c_str(); }
+		inline InvalidUTF8() : std::exception() {}
+		inline InvalidUTF8( const char* message ) : std::exception() { Message = message; }
+		inline InvalidUTF8( const std::string& message ) : std::exception() { Message = message; }
+		inline InvalidUTF8( std::string&& message ) noexcept : std::exception() { Message = std::move( message ); }
+		inline const char* what() const noexcept override { return Message.c_str(); }
 	};
 
 
@@ -94,44 +88,38 @@ namespace eon
 		string_iterator() = default;
 
 		//* Construct as a copy of another iterator
-		inline string_iterator( const string_iterator& other ) {
-			*this = other; }
+		inline string_iterator( const string_iterator& other ) { *this = other; }
 
 
 		//* Construct for an 'std::string'
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
 		inline explicit string_iterator( const std::string& stdstr ) noexcept {
-			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(),
-				stdstr.c_str() ); }
+			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() ); }
 
 		//* Construct for an 'std::string', but set to a specific character
 		//* position
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
-		inline string_iterator( const std::string& stdstr, size_t pos )
-			noexcept { _prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(),
-				stdstr.c_str() + pos ); }
+		inline string_iterator( const std::string& stdstr, size_t pos ) noexcept {
+			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() + pos ); }
 
 
 		//* Construct for a 'C-string'
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
-		inline explicit string_iterator( const char* cstr ) noexcept {
-			_prep( cstr, cstr + strlen( cstr ), cstr ); }
+		inline explicit string_iterator( const char* cstr ) noexcept { _prep( cstr, cstr + strlen( cstr ), cstr ); }
 
 		//* Construct for a 'C-string'
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
 		inline explicit string_iterator( const unsigned char* cstr ) noexcept {
-			_prep( (const char*)cstr, (const char*)cstr + strlen(
-				(const char*)cstr ), (const char*)cstr ); }
+			_prep( (const char*)cstr, (const char*)cstr + strlen( (const char*)cstr ), (const char*)cstr ); }
 
 		//* Construct for a 'C-string', but set to a specific byte position
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
-		inline string_iterator( const char* cstr, size_t size ) noexcept {
-			_prep( cstr, cstr + size, cstr ); }
+		inline string_iterator( const char* cstr, size_t size ) noexcept { _prep( cstr, cstr + size, cstr ); }
 
 
 		//* Construct from already known details, position at start of source
@@ -142,9 +130,8 @@ namespace eon
 		//*   - begin     : Start of source string
 		//*   - num_bytes : Total number of bytes in source string
 		//*   - num_chars : Total number of UTF-8 characters in source string
-		inline string_iterator( const char* begin, size_t num_bytes,
-			size_t num_chars ) noexcept { NumChars = num_chars; _prep(
-				begin, begin + num_bytes, begin ); }
+		inline string_iterator( const char* begin, size_t num_bytes, size_t num_chars ) noexcept {
+			NumChars = num_chars; _prep( begin, begin + num_bytes, begin ); }
 		
 		//* Construct from already known details, position specified
 		//* Slow, has to count UTF-8 characters!
@@ -154,8 +141,7 @@ namespace eon
 		//*   - begin     : Start of source string
 		//*   - num_bytes : Total number of bytes in source string
 		//*   - pos       : Iterator position in source string
-		inline string_iterator( const char* begin, size_t num_bytes,
-			const char* pos ) noexcept {
+		inline string_iterator( const char* begin, size_t num_bytes, const char* pos ) noexcept {
 			_prep( begin, begin + num_bytes, pos ); }
 
 		//* Construct from already known details, position specified
@@ -168,8 +154,7 @@ namespace eon
 		//*   - num_bytes : Total number of bytes in source string
 		//*   - num_chars : Total number of UTF-8 characters in source string
 		//*   - pos       : Iterator position in source string
-		inline string_iterator( const char* begin, size_t num_bytes,
-			size_t num_chars, const char* pos ) noexcept {
+		inline string_iterator( const char* begin, size_t num_bytes, size_t num_chars, const char* pos ) noexcept {
 			NumChars = num_chars; _prep( begin, begin + num_bytes, pos ); }
 
 		//* Construct from already known details, position specified
@@ -182,10 +167,9 @@ namespace eon
 		//*   - num_chars : Total number of UTF-8 characters in source string
 		//*   - pos       : Iterator position in source string
 		//*   - num_char  : UTF-8 character number of iterator position
-		inline string_iterator( const char* begin, size_t num_bytes,
-			size_t num_chars, const char* pos, size_t num_char ) noexcept {
-			NumChars = num_chars; NumChar = num_char; _prep(
-				begin, begin + num_bytes, pos ); }
+		inline string_iterator( const char* begin, size_t num_bytes, size_t num_chars,
+			const char* pos, size_t num_char ) noexcept {
+			NumChars = num_chars; NumChar = num_char; _prep( begin, begin + num_bytes, pos ); }
 
 		//* Construct using another 'string_iterator' as 'source', but set a
 		//* specific position
@@ -196,8 +180,7 @@ namespace eon
 		//*   - source   : 'string_iterator' to copy source details from
 		//*   - pos      : New iterator position
 		//*   - num_char : UTF-8 character number of new iterator position
-		string_iterator( const string_iterator& source, const char* pos,
-			size_t num_char ) noexcept;
+		string_iterator( const string_iterator& source, const char* pos, size_t num_char ) noexcept;
 
 
 		//* Default destructor
@@ -210,15 +193,11 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		//* Copy another 'string_iterator'
-		string_iterator& operator=( const string_iterator& other ) noexcept;
-
 		//* Set from 'std::string'
 		//* Will use UTF-8 iteration if no invalid UTF-8 characters, if not,
 		//* byte sized characters are assumed.
-		inline string_iterator& operator=( const std::string& stdstr )
-			noexcept { _prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(),
-				stdstr.c_str() ); return *this; }
+		inline string_iterator& operator=( const std::string& stdstr ) noexcept {
+			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() ); return *this; }
 
 		//* Reset string_iterator to default constructor state
 		string_iterator& reset() noexcept;
@@ -242,33 +221,28 @@ namespace eon
 		inline operator bool() const noexcept { return CodepointSize > 0; }
 
 		//* Check if the iterator is at reverse end of string (before first)
-		inline bool atREnd() const noexcept {
-			return CodepointSize == 0 && Pos == Begin; }
+		inline bool atREnd() const noexcept { return CodepointSize == 0 && Pos == Begin; }
 
 		//* Check if the iterator is at the end of the string (after last)
-		inline bool atEnd() const noexcept {
-			return CodepointSize == 0 && Pos > Begin; }
+		inline bool atEnd() const noexcept { return CodepointSize == 0 && Pos > Begin; }
 
 
 		//* Check if this iterator is for a string starting at the specified
 		//* raw buffer address
-		inline bool sameBuffer( const char* buffer_start ) const noexcept {
-			return Begin == buffer_start; }
+		inline bool sameBuffer( const char* buffer_start ) const noexcept { return Begin == buffer_start; }
 
 		//* Check if compatible with other iterator (same source string)
-		inline bool compatibleWith( const string_iterator& other )
-			const noexcept { return sameBuffer( other.Begin ); }
+		inline bool compatibleWith( const string_iterator& other ) const noexcept { return sameBuffer( other.Begin ); }
 
 		//* Assert compatible iterators
 		//* Throws [eon::WrongSource] if not.
-		inline void assertCompatibleWith( const string_iterator& other )
-			const { if( Begin != other.Begin ) throw WrongSource(); }
+		inline void assertCompatibleWith( const string_iterator& other ) const {
+			if( Begin != other.Begin ) throw WrongSource(); }
 
 		//* Assert that iterator is for a source string starting at the
 		//* specified raw buffer address
 		// Throws [eon::WrongSource] if not.
-		inline void assertSameBuffer( const char* begin ) const {
-			if( Begin != begin ) throw WrongSource(); }
+		inline void assertSameBuffer( const char* begin ) const { if( Begin != begin ) throw WrongSource(); }
 
 
 		//* Get the codepoint at 'this'  position
@@ -285,8 +259,7 @@ namespace eon
 
 		//* Check if the entire string is byte characters only
 		//* (Allows for optimizations.)
-		inline bool bytesOnly() const noexcept {
-			return NumChars == End - Begin; }
+		inline bool bytesOnly() const noexcept { return NumChars == End - Begin; }
 
 		//* Check if the string contains only valid UTF-8 characters
 		//* Will return 'true' if ASCII only, but not if there are any invalid
@@ -301,12 +274,12 @@ namespace eon
 		inline size_t numChars() const noexcept { return NumChars; }
 
 		//* Get a copy of the iterator, but reset to end
-		inline string_iterator getEnd() const noexcept { if( !*this )
-			return *this; auto end = *this; return end.resetToEnd(); }
+		inline string_iterator getEnd() const noexcept {
+			if( !*this ) return *this; auto end = *this; return end.resetToEnd(); }
 
 		//* Get a copy of the iterator, but reset to the beginning
-		inline string_iterator getBegin() const noexcept { if( !*this )
-			return *this; auto beg = *this; return beg.resetToBegin(); }
+		inline string_iterator getBegin() const noexcept {
+			if( !*this ) return *this; auto beg = *this; return beg.resetToBegin(); }
 
 
 
@@ -322,19 +295,16 @@ namespace eon
 		inline string_iterator& operator--() noexcept { return *this -= 1; }
 
 		//* Postfix iteration by increment
-		inline string_iterator operator++( int ) noexcept {
-			auto _this = *this; ++*this; return _this; }
+		inline string_iterator operator++( int ) noexcept { auto _this = *this; ++*this; return _this; }
 
 		//* Postfix iteration by decrement
-		inline string_iterator operator--( int ) noexcept {
-			auto _this = *this; *this -= 1; return _this; }
+		inline string_iterator operator--( int ) noexcept { auto _this = *this; *this -= 1; return _this; }
 
 
 		//* Move forward a number of characters
 		inline string_iterator& operator+=( size_t chars ) noexcept {
-			if( bytesOnly() ) _advanceBytes( chars ); else {
-				for( size_t i = 0; i < chars && *this; ++i, ++ * this ); }
-			return *this; }
+			if( bytesOnly() ) _advanceBytes( chars );
+				else { for( size_t i = 0; i < chars && *this; ++i, ++ * this ); } return *this; }
 
 		//* Move backward a number of characaters
 		string_iterator& operator-=( size_t chars ) noexcept;
@@ -343,37 +313,32 @@ namespace eon
 		//* Multiple characters in one go, possibly negative (counting from end
 		//* of the source string)
 		inline string_iterator& operator+=( int64_t chars ) noexcept {
-			return chars >= 0 ? *this += static_cast<size_t>( chars )
-				: *this -= static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this += static_cast<size_t>( chars ) : *this -= static_cast<size_t>( -chars ); }
 		inline string_iterator& operator+=( int chars ) noexcept {
-			return chars >= 0 ? *this += static_cast<size_t>( chars )
-				: *this -= static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this += static_cast<size_t>( chars ) : *this -= static_cast<size_t>( -chars ); }
 		inline string_iterator& operator-=( int64_t chars ) noexcept {
-			return chars >= 0 ? *this -= static_cast<size_t>( chars )
-				: *this += static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this -= static_cast<size_t>( chars ) : *this += static_cast<size_t>( -chars ); }
 		inline string_iterator& operator-=( int chars ) noexcept {
-			return chars >= 0 ? *this -= static_cast<size_t>( chars )
-				: *this += static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this -= static_cast<size_t>( chars ) : *this += static_cast<size_t>( -chars ); }
 
 		//* Get number of characters in difference between two iterators
 		//* Throws [eon::WrongSource] if incompatible iterators.
-		friend int64_t operator-( const string_iterator& lhs,
-			const string_iterator& rhs );
+		friend int64_t operator-( const string_iterator& lhs, const string_iterator& rhs );
 
 		//* Get a copy of 'itr', moved forwards or backwards by 'num'
 		//* characters
-		inline friend string_iterator operator+( const string_iterator& itr,
-			size_t num ) noexcept { return string_iterator( itr ) += num; }
-		inline friend string_iterator operator+( const string_iterator& itr,
-			int64_t num ) noexcept { return string_iterator( itr ) += num; }
-		inline friend string_iterator operator+( const string_iterator& itr,
-			int num ) noexcept { return string_iterator( itr ) += num; }
-		inline friend string_iterator operator-( const string_iterator& itr,
-			size_t num ) noexcept { return string_iterator( itr ) -= num; }
-		inline friend string_iterator operator-( const string_iterator& itr,
-			int64_t num ) noexcept { return string_iterator( itr ) -= num; }
-		inline friend string_iterator operator-( const string_iterator& itr,
-			int num ) noexcept { return string_iterator( itr ) -= num; }
+		inline friend string_iterator operator+( const string_iterator& itr, size_t num ) noexcept {
+			return string_iterator( itr ) += num; }
+		inline friend string_iterator operator+( const string_iterator& itr, int64_t num ) noexcept {
+			return string_iterator( itr ) += num; }
+		inline friend string_iterator operator+( const string_iterator& itr, int num ) noexcept {
+			return string_iterator( itr ) += num; }
+		inline friend string_iterator operator-( const string_iterator& itr, size_t num ) noexcept {
+			return string_iterator( itr ) -= num; }
+		inline friend string_iterator operator-( const string_iterator& itr, int64_t num ) noexcept {
+			return string_iterator( itr ) -= num; }
+		inline friend string_iterator operator-( const string_iterator& itr, int num ) noexcept {
+			return string_iterator( itr ) -= num; }
 
 
 
@@ -389,18 +354,12 @@ namespace eon
 		int compare( const string_iterator& other ) const noexcept;
 
 		//* Comparison operators are using the [compare] method
-		inline bool operator<( const string_iterator& other ) const noexcept {
-			return compare( other ) < 0; }
-		inline bool operator<=( const string_iterator& other ) const noexcept {
-			return compare( other ) <= 0; }
-		inline bool operator>( const string_iterator& other ) const noexcept {
-			return compare( other ) > 0; }
-		inline bool operator>=( const string_iterator& other ) const noexcept {
-			return compare( other ) >= 0; }
-		inline bool operator==( const string_iterator& other ) const noexcept {
-			return compare( other ) == 0; }
-		inline bool operator!=( const string_iterator& other ) const noexcept {
-			return compare( other ) != 0; }
+		inline bool operator<( const string_iterator& other ) const noexcept { return compare( other ) < 0; }
+		inline bool operator<=( const string_iterator& other ) const noexcept { return compare( other ) <= 0; }
+		inline bool operator>( const string_iterator& other ) const noexcept { return compare( other ) > 0; }
+		inline bool operator>=( const string_iterator& other ) const noexcept { return compare( other ) >= 0; }
+		inline bool operator==( const string_iterator& other ) const noexcept { return compare( other ) == 0; }
+		inline bool operator!=( const string_iterator& other ) const noexcept { return compare( other ) != 0; }
 
 
 
@@ -412,8 +371,7 @@ namespace eon
 		//* Given a raw byte string with a 'start' and an 'end' position, set
 		//* 'cp' to the next codepoint and return the number of bytes it
 		//* occupies (zero if not a valid unicode code point)
-		static size_t bytesToUnicode( const char* start, const char* end,
-			char_t& cp );
+		static size_t bytesToUnicode( const char* start, const char* end, char_t& cp );
 
 		//* Given a codepoint, convert it into bytes
 		//* The bytes are stored in the 'bytes' uint32_t, up to 4 of them
@@ -425,8 +383,7 @@ namespace eon
 		//* WARNING: Only use this if you really know what you are doing!
 		//* See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details about
 		//* the UTF-8 decoder algorithm used here.
-		static char32_t utf8Decode( char32_t& state, char32_t& codep,
-			char32_t byte ) noexcept;
+		static char32_t utf8Decode( char32_t& state, char32_t& codep, char32_t byte ) noexcept;
 
 		//* Count the number of UTF-8 characters in the given string
 		//* Throws [eon::InvalidUTF8] if not valid!
@@ -440,8 +397,7 @@ namespace eon
 		//
 	private:
 
-		void _prep( const char* begin, const char* end, const char* pos )
-			noexcept;
+		void _prep( const char* begin, const char* end, const char* pos ) noexcept;
 
 		void _utf8CharacterCount() noexcept;
 

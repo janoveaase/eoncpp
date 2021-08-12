@@ -1,7 +1,7 @@
 #pragma once
 #include <eonstring/String.h>
-#include <eontuple/Operators.h>
-#include <eontuple/Variables.h>
+#include <eonvariables/Operators.h>
+#include <eonvariables/Variables.h>
 
 
 /******************************************************************************
@@ -44,9 +44,8 @@ namespace eon
 
 			node() = default;
 			node( const node& ) = delete;
-			inline node( node&& other ) noexcept {
-				*this = std::move( other ); }
-			node( tup::operators::code node_type ) { Type = node_type; }
+			inline node( node&& other ) noexcept { *this = std::move( other ); }
+			node( vars::operators::code node_type ) { Type = node_type; }
 
 			virtual ~node() = default;
 
@@ -60,12 +59,14 @@ namespace eon
 
 			node& operator=( const node& ) = delete;
 			inline node& operator=( node&& other ) noexcept {
-				Type = other.Type;
-				other.Type = tup::operators::code::undef;
+				Type = other.Type; other.Type = vars::operators::code::undef;
 				Children = std::move( other.Children ); return *this; }
 
-			inline void addChild( const nodeptr& child ) {
-				Children.push_back( child ); }
+			inline void addChild( const nodeptr& child ) {Children.push_back( child ); }
+
+			// Register a tuple as context to references that might exist in this
+			// expression
+			virtual void setContext( vars::valueptr context ) = 0;
 
 
 
@@ -75,13 +76,11 @@ namespace eon
 			******************************************************************/
 		public:
 
-			inline tup::operators::code type() const noexcept { return Type; }
+			inline vars::operators::code type() const noexcept { return Type; }
 			inline bool isOperator() const noexcept {
-				return Type != tup::operators::code::undef
-					&& Type != tup::operators::code::value; }
+				return Type != vars::operators::code::undef && Type != vars::operators::code::value; }
 
-			inline const std::vector<nodeptr>& children() const noexcept {
-				return Children; }
+			inline const std::vector<nodeptr>& children() const noexcept { return Children; }
 
 			//* Get this node only as a string
 			virtual string str() const = 0;
@@ -94,16 +93,18 @@ namespace eon
 			//* string
 			virtual string inorderStr() const = 0;
 
-			//* Evaluate expression
-			virtual tup::valueptr evaluate( tup::variables& vars ) const = 0;
+			//* Evaluate expression, accept lack of value as bool false
+			vars::valueptr evaluate( vars::variables& vars ) const;
+
+			//* Evaluate expression, return void valueptr if no value
+			virtual vars::valueptr evaluateAccurate( vars::variables& vars ) const = 0;
 
 
 			//* Get a copy
 			virtual nodeptr copy() const = 0;
 
 			//* Check if equal
-			virtual bool equal( const nodeptr& other,
-				const tup::variables& vars ) const noexcept = 0;
+			virtual bool equal( const nodeptr& other ) const noexcept = 0;
 
 
 
@@ -113,7 +114,7 @@ namespace eon
 			// Attributes
 			//
 		protected:
-			tup::operators::code Type{ tup::operators::code::undef };
+			vars::operators::code Type{ vars::operators::code::undef };
 			std::vector<nodeptr> Children;
 		};
 	}

@@ -1,6 +1,6 @@
 #pragma once
 #include "Node.h"
-#include <eontuple/Value.h>
+//#include <eontuple/Value.h>
 
 
 /******************************************************************************
@@ -36,14 +36,11 @@ namespace eon
 			******************************************************************/
 		public:
 
-			static tup::valueptr unary( tup::operators::code op_code,
-				tup::variables& vars, const nodeptr& arg1 );
-			static tup::valueptr binary( tup::operators::code op_code,
-				tup::variables& vars,
+			static vars::valueptr unary( vars::operators::code op_code, vars::variables& vars, const nodeptr& arg1 );
+			static vars::valueptr binary( vars::operators::code op_code, vars::variables& vars,
 				const nodeptr& arg1, const nodeptr& arg2 );
-			static tup::valueptr ternary( tup::operators::code op_code,
-				tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2,
-				const nodeptr& arg3 );
+			static vars::valueptr ternary( vars::operators::code op_code,
+				vars::variables& vars, const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 );
 
 
 
@@ -52,14 +49,11 @@ namespace eon
 			  Helpers
 			******************************************************************/
 		private:
-			static tup::valueptr _unary( tup::operators::code op_code,
-				tup::variables& vars, const nodeptr& arg1 );
-			static tup::valueptr _binary( tup::operators::code op_code,
-				tup::variables& vars,
+			static vars::valueptr _unary( vars::operators::code op_code, vars::variables& vars, const nodeptr& arg1 );
+			static vars::valueptr _binary( vars::operators::code op_code, vars::variables& vars,
 				const nodeptr& arg1, const nodeptr& arg2 );
-			static tup::valueptr _ternary( tup::operators::code op_code,
-				tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2,
-				const nodeptr& arg3 );
+			static vars::valueptr _ternary( vars::operators::code op_code,
+				vars::variables& vars, const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 );
 		};
 	}
 }

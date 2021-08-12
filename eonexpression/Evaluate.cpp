@@ -1,455 +1,512 @@
 #include "Evaluate.h"
 #include "OperandNode.h"
 #include <eonfilesys/FileSys.h>
-#include <eontuple/BoolValue.h>
-#include <eontuple/FloatValue.h>
-#include <eontuple/IntValue.h>
-#include <eontuple/StringValue.h>
-#include <eontuple/NameValue.h>
-#include <eontuple/BinaryValue.h>
-#include <eontuple/RawValue.h>
-#include <eontuple/TupleValue.h>
+#include <eonvariables/BoolValue.h>
+#include <eonvariables/CharValue.h>
+#include <eonvariables/IntValue.h>
+#include <eonvariables/FloatValue.h>
+#include <eonvariables/NameValue.h>
+#include <eonvariables/StringValue.h>
+#include <eonvariables/BinaryValue.h>
+#include <eonvariables/RawValue.h>
+#include <eonvariables/ReferenceValue.h>
+#include <eonvariables/VariableValue.h>
+#include <eonvariables/TupleValue.h>
 #include <eontuple/Tuple.h>
-#include <eontuple/MetaValue.h>
-#include <eontuple/VariableValue.h>
+#include <eonvariables/MetaValue.h>
+#include <eonvariables/FunctionValue.h>
+#include <eonvariables/ControlValue.h>
+#include <cmath>
 
 
 namespace eon
 {
 	namespace expr
 	{
-		tup::valueptr evaluate::unary( tup::operators::code op_code,
-			tup::variables& vars, const nodeptr& arg1 )
+		vars::valueptr evaluate::unary( vars::operators::code op_code, vars::variables& varcache, const nodeptr& arg1 )
 		{
 			try
 			{
-				return _unary( op_code, vars, arg1 );
+				return _unary( op_code, varcache, arg1 );
 			}
-			catch( tup::WrongType )
+			catch( vars::WrongType )
 			{
-				throw tup::UnsupportedOperand( "Unary operator '"
-					+ tup::operators::mapCode( op_code )
-					+ "' not supported for "
-					+ *tup::mapBasicType( arg1->evaluate( vars )->softType(
-						vars ) ) + " operand" );
+				throw vars::UnsupportedOperand( "Unary operator '"
+					+ vars::operators::mapCode( op_code ) + "' not supported for "
+					+ *vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) + " operand" );
 			}
 		}
-		tup::valueptr evaluate::binary( tup::operators::code op_code,
-			tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2 )
+		vars::valueptr evaluate::binary( vars::operators::code op_code,
+			vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 )
 		{
 			try
 			{
-				return _binary( op_code, vars, arg1, arg2 );
+				return _binary( op_code, varcache, arg1, arg2 );
 			}
-			catch( tup::WrongType )
+			catch( vars::WrongType )
 			{
-				throw tup::UnsupportedOperand( "Binary operator '"
-					+ tup::operators::mapCode( op_code )
+				throw vars::UnsupportedOperand( "Binary operator '"
+					+ vars::operators::mapCode( op_code )
 					+ "' not supported for "
-					+ *tup::mapBasicType( arg1->evaluate( vars )->softType(
-						vars ) ) + " vs. "
-					+ *tup::mapBasicType( arg2->evaluate( vars )->softType(
-						vars ) ) + " operand" );
+					+ *vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) + " vs. "
+					+ *vars::mapTypeCode( arg2->evaluate( varcache )->targetType( varcache ) ) + " operand" );
 			}
 		}
-		tup::valueptr evaluate::ternary( tup::operators::code op_code,
-			tup::variables& vars,
+		vars::valueptr evaluate::ternary( vars::operators::code op_code, vars::variables& varcache,
 			const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 )
 		{
 			try
 			{
-				return _ternary( op_code, vars, arg1, arg2, arg3 );
+				return _ternary( op_code, varcache, arg1, arg2, arg3 );
 			}
-			catch( tup::WrongType )
+			catch( vars::WrongType )
 			{
-				throw tup::UnsupportedOperand( "Ternary operator '"
-					+ tup::operators::mapCode( op_code ) + "' not supported for "
-					+ *tup::mapBasicType( arg2->evaluate( vars )->softType(
-						vars ) ) + " vs. "
-					+ *tup::mapBasicType( arg1->evaluate( vars )->softType(
-						vars ) ) + " vs. "
-					+ *tup::mapBasicType( arg3->evaluate( vars )->softType(
-						vars ) ) + " operand" );
+				throw vars::UnsupportedOperand( "Ternary operator '"
+					+ vars::operators::mapCode( op_code ) + "' not supported for "
+					+ *vars::mapTypeCode( arg2->evaluate( varcache )->targetType( varcache ) ) + " vs. "
+					+ *vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) + " vs. "
+					+ *vars::mapTypeCode( arg3->evaluate( varcache )->targetType( varcache ) ) + " operand" );
 			}
 		}
 
 
 
 
-		tup::valueptr evaluate::_unary( tup::operators::code op_code,
-			tup::variables& vars, const nodeptr& arg1 )
+		vars::valueptr evaluate::_unary( vars::operators::code op_code, vars::variables& varcache, const nodeptr& arg1 )
 		{
 			switch( op_code )
 			{
-				case tup::operators::code::_not:
-					return tup::valueptr( new tup::boolval(
-						!arg1->evaluate( vars )->softBool( vars ) ) );
-				case tup::operators::code::sqrt:
-					return tup::valueptr( new tup::floatval( std::sqrt(
-						arg1->evaluate( vars )->softFloat( vars ) ) ) );
-				case tup::operators::code::unary_minus:
+				case vars::operators::code::_not:
+					return vars::boolval::create( !arg1->evaluate( varcache )->targetBool( varcache ) );
+				case vars::operators::code::sqrt:
 				{
-					auto val = arg1->evaluate( vars );
-					switch( val->softType( vars ) )
+					auto val = arg1->evaluate( varcache );
+					switch( val->targetType( varcache ) )
 					{
-						case tup::basic_type::int_t:
-							return tup::valueptr( new tup::intval(
-								-val->softInt( vars ) ) );
-						case tup::basic_type::float_t:
-							return tup::valueptr( new tup::floatval(
-								-val->softFloat( vars ) ) );
+						case vars::type_code::int_t:
+							return vars::floatval::create(
+								std::sqrt( static_cast<int>( arg1->evaluate( varcache )->targetInt( varcache ) ) ) );
+						case vars::type_code::float_t:
+							return vars::floatval::create(
+								std::sqrt( arg1->evaluate( varcache )->targetFloat( varcache ) ) );
 					}
 					break;
 				}
-				case tup::operators::code::exists:
-					return tup::valueptr( new tup::boolval( path(
-						arg1->evaluate( vars )->softString(
-							vars ) ).exists() ) );
-				case tup::operators::code::trim:
-					return tup::valueptr( new tup::stringval(
-						arg1->evaluate( vars )->softString( vars ).trim() ) );
-				case tup::operators::code::rtrim:
-					return tup::valueptr( new tup::stringval( arg1->evaluate(
-						vars )->softString( vars ).trimTrailing() ) );
-				case tup::operators::code::ltrim:
-					return tup::valueptr( new tup::stringval( arg1->evaluate(
-						vars )->softString( vars ).trimLeading() ) );
-				case tup::operators::code::len:
+				case vars::operators::code::unary_minus:
 				{
-					auto val = arg1->evaluate( vars );
-					switch( val->softType( vars ) )
+					auto val = arg1->evaluate( varcache );
+					switch( val->targetType( varcache ) )
 					{
-						case tup::basic_type::string_t:
-							return tup::valueptr( new tup::intval(
-								static_cast<int64_t>( val->softString(
-									vars ).numChars() ) ) );
-						case tup::basic_type::raw_t:
-							return tup::valueptr( new tup::intval(
-								static_cast<int64_t>( val->softRaw(
-									vars ).size() ) ) );
-						case tup::basic_type::binary_t:
-							return tup::valueptr( new tup::intval(
-								static_cast<int64_t>( val->softBinary(
-									vars ).size() / 2 ) ) );
-						case tup::basic_type::tuple_t:
-							return tup::valueptr( new tup::intval(
-								static_cast<int64_t>( val->softTuple(
-									vars ).numAttributes() ) ) );
-						case tup::basic_type::meta_t:
-							return tup::valueptr( new tup::intval(
-								static_cast<int64_t>( val->softMeta(
-									vars ).numAttributes() ) ) );
+						case vars::type_code::int_t:
+							return vars::intval::create( -val->targetInt( varcache ) );
+						case vars::type_code::float_t:
+							return vars::floatval::create( -val->targetFloat( varcache ) );
 					}
 					break;
 				}
-				case tup::operators::code::typeof:
-					return tup::valueptr( new tup::nameval( tup::mapBasicType(
-						arg1->evaluate( vars )->softType( vars ) ) ) );
-				case tup::operators::code::isname:
-					return tup::valueptr( new tup::boolval( name::valid(
-						arg1->evaluate( vars )->softString( vars ) ) ) );
-				case tup::operators::code::toname:
-					return tup::valueptr( new tup::nameval( name::get(
-						arg1->evaluate( vars )->softString( vars ) ) ) );
-				case tup::operators::code::topath:
-					return tup::valueptr( new tup::stringval( eon::path(
-						arg1->evaluate( vars )->softString( vars ) ).str() ) );
-				case tup::operators::code::basename:
-					return tup::valueptr( new tup::stringval(
-						eon::path( arg1->evaluate( vars )->softString(
-							vars ) ).base() ) );
+				case vars::operators::code::exists:
+					return vars::boolval::create(
+						path( arg1->evaluate( varcache )->targetString( varcache ) ).exists() );
+				case vars::operators::code::trim:
+					return vars::stringval::create( arg1->evaluate( varcache )->targetString( varcache ).trim() );
+				case vars::operators::code::rtrim:
+					return vars::stringval::create(
+						arg1->evaluate( varcache )->targetString( varcache ).trimTrailing() );
+				case vars::operators::code::ltrim:
+					return vars::stringval::create( arg1->evaluate( varcache )->targetString( varcache ).trimLeading() );
+				case vars::operators::code::len:
+				{
+					auto val = arg1->evaluate( varcache );
+					switch( val->targetType( varcache ) )
+					{
+						case vars::type_code::string_t:
+							return vars::intval::create(
+								static_cast<int64_t>( val->targetString( varcache ).numChars() ) );
+						case vars::type_code::raw_t:
+							return vars::intval::create(
+								static_cast<int64_t>( val->targetRaw( varcache ).size() ) );
+						case vars::type_code::binary_t:
+							return vars::intval::create(
+								static_cast<int64_t>( val->targetBinary( varcache ).size() / 2 ) );
+						case vars::type_code::tuple_t:
+							return vars::intval::create(
+								static_cast<int64_t>( val->targetTuple( varcache ).numAttributes() ) );
+						case vars::type_code::meta_t:
+							return vars::intval::create(
+								static_cast<int64_t>( val->targetMeta( varcache ).numAttributes() ) );
+					}
+					break;
+				}
+				case vars::operators::code::type_of:
+					return vars::nameval::create(
+						vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) );
+				case vars::operators::code::isname:
+					return vars::boolval::create( name::valid( arg1->evaluate( varcache )->targetString( varcache ) ) );
+				case vars::operators::code::is_set:
+					if( !arg1->isOperator() )
+					{
+						auto val = dynamic_cast<operandnode*>( &*arg1 )->value();
+						if( val->isVariable() )
+							return vars::boolval::create( static_cast<bool>( varcache.get( val->actualVariable() ) ) );
+					}
+					break;
+				case vars::operators::code::topath:
+					return vars::stringval::create(
+						eon::path( arg1->evaluate( varcache )->targetString( varcache ) ).str() );
+				case vars::operators::code::basename:
+					return vars::stringval::create(
+						eon::path( arg1->evaluate( varcache )->targetString( varcache ) ).base() );
+				case vars::operators::code::tobool:
+					return vars::boolval::create( arg1->evaluate( varcache )->convertTargetBool( varcache ) );
+				case vars::operators::code::tochar:
+					return vars::charval::create( arg1->evaluate( varcache )->convertTargetChar( varcache ) );
+				case vars::operators::code::toint:
+					return vars::intval::create( arg1->evaluate( varcache )->convertTargetInt( varcache ) );
+				case vars::operators::code::tofloat:
+					return vars::floatval::create(arg1->evaluate( varcache )->convertTargetFloat( varcache ) );
+				case vars::operators::code::toname:
+					return vars::nameval::create( arg1->evaluate( varcache )->convertTargetName( varcache ) );
+				case vars::operators::code::tostring:
+					return vars::stringval::create( arg1->evaluate( varcache )->convertTargetString( varcache ) );
+				case vars::operators::code::toref:
+					return vars::refval::create( arg1->evaluate( varcache )->convertTargetReference( varcache ), nullptr );
+				case vars::operators::code::tovar:
+					return vars::variableval::create( arg1->evaluate( varcache )->convertTargetVariable( varcache ) );
+				case vars::operators::code::_return:
+				{
+					auto val = arg1->evaluate( varcache );
+					return vars::controlval::create( vars::ctrl_t::_return, val->target( varcache, val ) );
+				}
 			}
-			throw tup::UnsupportedOperand( "Unary operator '"
-				+ tup::operators::mapCode( op_code ) + "' not supported for "
-				+ *tup::mapBasicType( arg1->evaluate( vars )->softType(
-					vars ) ) + " operand" );
+			throw vars::UnsupportedOperand( "Unary operator '"
+				+ vars::operators::mapCode( op_code ) + "' not supported for "
+				+ *vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) + " operand" );
 		}
-		tup::valueptr evaluate::_binary( tup::operators::code op_code,
-			tup::variables& vars, const nodeptr& arg1, const nodeptr& arg2 )
+		vars::valueptr evaluate::_binary( vars::operators::code op_code,
+			vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 )
 		{
 			switch( op_code )
 			{
-				case tup::operators::code::_and:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softBool( vars )
-						&& arg2->evaluate( vars )->softBool( vars ) ) );
-				case tup::operators::code::_or:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softBool( vars )
-						|| arg2->evaluate( vars )->softBool( vars ) ) );
-				case tup::operators::code::eq:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softCompare(
-							arg2->evaluate( vars ), vars ) == 0 ) );
-				case tup::operators::code::ne:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softCompare(
-							arg2->evaluate( vars ), vars ) != 0 ) );
-				case tup::operators::code::lt:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softCompare(
-							arg2->evaluate( vars ), vars ) < 0 ) );
-				case tup::operators::code::le:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softCompare(
-							arg2->evaluate( vars ), vars ) <= 0 ) );
-				case tup::operators::code::gt:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softCompare(
-							arg2->evaluate( vars ), vars ) > 0 ) );
-				case tup::operators::code::ge:
-					return tup::valueptr( new tup::boolval(
-						arg1->evaluate( vars )->softCompare(
-							arg2->evaluate( vars ), vars ) >= 0 ) );
-				case tup::operators::code::plus:
+				case vars::operators::code::_and:
+					return vars::boolval::create( arg1->evaluate( varcache )->targetBool( varcache )
+						&& arg2->evaluate( varcache )->targetBool( varcache ) );
+				case vars::operators::code::_or:
+					return vars::boolval::create( arg1->evaluate( varcache )->targetBool( varcache )
+						|| arg2->evaluate( varcache )->targetBool( varcache ) );
+				case vars::operators::code::call:
 				{
-					auto val1 = arg1->evaluate( vars );
-					auto val2 = arg2->evaluate( vars );
-					auto type1 = val1->softType( vars );
-					auto type2 = val2->softType( vars );
-					tup::basic_type type{ tup::basic_type::undef };
-					// If both operands are numbers and one of them is float,
-					// the result will also be float.
-					if( type1 == tup::basic_type::float_t
-						|| ( type1 == tup::basic_type::int_t
-							&& type2 == tup::basic_type::float_t ) )
-						type = tup::basic_type::float_t;
-					// Otherwise, the result will match the type of the first
-					// operand.
+					auto val1= arg1->evaluateAccurate( varcache );
+					if( !val1 )
+						throw vars::NotFound( "Could not find " + arg1->str() );
+					vars::function* func{ nullptr };
+					auto found = val1->target( varcache, val1 );
+					if( found->isMeta() && found->actualMeta().containsUnnamedValue( name_function ) )
+					{
+						auto& meta = found->actualMeta();
+						if( !meta.exists( name_target ) )
+							throw vars::BadFunction( "Declared function is missing target!" );
+						auto trg = meta.at( name_target );
+						if( !trg->isReference() )
+						{
+							size_t pos{ 0 };
+							throw vars::BadFunction( "Target \"" + trg->str( pos, 0 )
+								+ "\" of declared function must be a reference!" );
+						}
+						auto target = trg->actualReference();
+						func = varcache.getFunction( target );
+						if( !func )
+						{
+							size_t pos{ 0 };
+							throw vars::BadFunction( "Target \"" + trg->str( pos, 0 )
+								+ "\" of declared function does not exist!" );
+						}
+					}
+					else if( found->isFunction() )
+						func = dynamic_cast<vars::function*>( &*found );
+					auto args = arg2->evaluate( varcache )->targetTuple( varcache );
+					if( func )
+						return func->execute( varcache, args );
 					else
-						type = type1;
+						break;
+				}
+				case vars::operators::code::eq:
+					return vars::boolval::create(
+						arg1->evaluate( varcache )->targetCompare( arg2->evaluate( varcache ), varcache ) == 0 );
+				case vars::operators::code::ne:
+					return vars::boolval::create(
+						arg1->evaluate( varcache )->targetCompare( arg2->evaluate( varcache ), varcache ) != 0 );
+				case vars::operators::code::lt:
+					return vars::boolval::create(
+						arg1->evaluate( varcache )->targetCompare( arg2->evaluate( varcache ), varcache ) < 0 );
+				case vars::operators::code::le:
+					return vars::boolval::create(
+						arg1->evaluate( varcache )->targetCompare( arg2->evaluate( varcache ), varcache ) <= 0 );
+				case vars::operators::code::gt:
+					return vars::boolval::create(
+						arg1->evaluate( varcache )->targetCompare( arg2->evaluate( varcache ), varcache ) > 0 );
+				case vars::operators::code::ge:
+					return vars::boolval::create(
+						arg1->evaluate( varcache )->targetCompare( arg2->evaluate( varcache ), varcache ) >= 0 );
+				case vars::operators::code::plus:
+				{
+					auto val1 = arg1->evaluate( varcache );
+					auto val2 = arg2->evaluate( varcache );
+					auto type = val1->targetType( varcache );
+					if( val2->targetType( varcache ) != type )
+						throw vars::WrongType();
 					switch( type )
 					{
-						case tup::basic_type::int_t:
-							return tup::valueptr( new tup::intval(
-								val1->softInt( vars )
-								+ val2->softInt( vars ) ) );
-						case tup::basic_type::float_t:
-							return tup::valueptr( new tup::floatval(
-								val1->softFloat( vars )
-								+ val2->softFloat( vars ) ) );
-						case tup::basic_type::string_t:
-							return tup::valueptr( new tup::stringval(
-								val1->softString( vars )
-								+ val2->softString( vars ) ) );
-						case tup::basic_type::binary_t:
-							return tup::valueptr( new tup::binaryval(
-								val1->softBinary( vars )
-								+ val2->softBinary( vars ) ) );
-						case tup::basic_type::raw_t:
+						case vars::type_code::int_t:
+							return vars::intval::create( val1->targetInt( varcache ) + val2->targetInt( varcache ) );
+						case vars::type_code::float_t:
+							return vars::floatval::create( val1->targetFloat( varcache ) + val2->targetFloat( varcache ) );
+						case vars::type_code::string_t:
+							return vars::stringval::create(
+								val1->targetString( varcache ) + val2->targetString( varcache ) );
+						case vars::type_code::binary_t:
+							return vars::binaryval::create(
+								val1->targetBinary( varcache ) + val2->targetBinary( varcache ) );
+						case vars::type_code::raw_t:
 						{
-							auto a = val1->softRaw( vars );
-							auto& b = val2->softRaw( vars );
+							auto a = val1->targetRaw( varcache );
+							auto& b = val2->targetRaw( varcache );
 							a.insert( a.end(), b.begin(), b.end() );
-							return tup::valueptr( new tup::rawval( a ) );
+							return vars::rawval::create( a );
 						}
-						case tup::basic_type::tuple_t:
+						case vars::type_code::tuple_t:
 						{
-							auto a = val1->softTuple( vars );
-							a.append( val2->softTuple( vars ), vars );
-							return tup::valueptr( new tup::tupleval(
-								std::move( a ) ) );
+							auto a = val1->targetTuple( varcache );
+							a.append( val2->targetTuple( varcache ), varcache );
+							return vars::tupleval::create( std::move( a ) );
 						}
-						case tup::basic_type::meta_t:
+						case vars::type_code::meta_t:
 						{
-							auto a = val1->softMeta( vars );
-							a.append( val2->softMeta( vars ), vars );
-							return tup::valueptr( new tup::metaval(
-								std::move( a ) ) );
+							auto a = val1->targetMeta( varcache );
+							a.append( val2->targetMeta( varcache ), varcache );
+							return vars::metaval::create( std::move( a ) );
 						}
+						default:
+							throw vars::WrongType();
 					}
 					break;
 				}
-				case tup::operators::code::minus:
+				case vars::operators::code::minus:
 				{
-					auto val1 = arg1->evaluate( vars );
-					auto val2 = arg2->evaluate( vars );
-					auto type1 = val1->softType( vars );
-					auto type2 = val2->softType( vars );
-					tup::basic_type type{ tup::basic_type::undef };
-					// If both operands are numbers and one of them is float,
-					// the result will also be float.
-					if( type1 == tup::basic_type::float_t
-						|| ( type1 == tup::basic_type::int_t
-							&& type2 == tup::basic_type::float_t ) )
-						type = tup::basic_type::float_t;
-					// Otherwise, the result will match the type of the first
-					// operand.
-					else
-						type = type1;
+					auto val1 = arg1->evaluate( varcache );
+					auto val2 = arg2->evaluate( varcache );
+					auto type = val1->targetType( varcache );
+					if( val2->targetType( varcache ) != type )
+						throw vars::WrongType();
 					switch( type )
 					{
-						case tup::basic_type::int_t:
-							return tup::valueptr( new tup::intval(
-								val1->softInt( vars )
-								- val2->softInt( vars ) ) );
-						case tup::basic_type::float_t:
-							return tup::valueptr( new tup::floatval(
-								val1->softFloat( vars )
-								- val2->softFloat( vars ) ) );
-						case tup::basic_type::string_t:
-							return tup::valueptr( new tup::stringval(
-								val1->softString( vars ).remove(
-									val2->softString( vars ) ) ) );
+						case vars::type_code::int_t:
+							return vars::intval::create( val1->targetInt( varcache ) - val2->targetInt( varcache ) );
+						case vars::type_code::float_t:
+							return vars::floatval::create(val1->targetFloat( varcache ) - val2->targetFloat( varcache ) );
+						case vars::type_code::string_t:
+							return vars::stringval::create(
+								val1->targetString( varcache ).remove( val2->targetString( varcache ) ) );
+						default:
+							throw vars::WrongType();
 					}
 					break;
 				}
-				case tup::operators::code::multiply:
+				case vars::operators::code::multiply:
 				{
-					auto val1 = arg1->evaluate( vars );
-					auto val2 = arg2->evaluate( vars );
-					auto type1 = val1->softType( vars );
-					auto type2 = val2->softType( vars );
-					tup::basic_type type{ tup::basic_type::undef };
-					// If both operands are numbers and one of them is float,
-					// the result will also be float.
-					if( type1 == tup::basic_type::float_t
-						|| ( type1 == tup::basic_type::int_t
-							&& type2 == tup::basic_type::float_t ) )
-						type = tup::basic_type::float_t;
-					// Otherwise, the result will match the type of the first
-					// operand.
-					else
-						type = type1;
+					auto val1 = arg1->evaluate( varcache );
+					auto val2 = arg2->evaluate( varcache );
+					auto type = val1->targetType( varcache );
+					if( val2->targetType( varcache ) != type )
+						throw vars::WrongType();
 					switch( type )
 					{
-						case tup::basic_type::int_t:
-							return tup::valueptr( new tup::intval(
-								val1->softInt( vars )
-								* val2->softInt( vars ) ) );
-						case tup::basic_type::float_t:
-							return tup::valueptr( new tup::floatval(
-								val1->softFloat( vars )
-								* val2->softFloat( vars ) ) );
+						case vars::type_code::int_t:
+							return vars::intval::create( val1->targetInt( varcache ) * val2->targetInt( varcache ) );
+						case vars::type_code::float_t:
+							return vars::floatval::create( val1->targetFloat( varcache ) * val2->targetFloat( varcache ) );
+						default:
+							throw vars::WrongType();
 					}
 					break;
 				}
-				case tup::operators::code::divide:
+				case vars::operators::code::divide:
 				{
-					auto val1 = arg1->evaluate( vars );
-					auto val2 = arg2->evaluate( vars );
-					auto type1 = val1->softType( vars );
-					auto type2 = val2->softType( vars );
-					tup::basic_type type{ tup::basic_type::undef };
-					// If both operands are numbers and one of them is float,
-					// the result will also be float.
-					if( type1 == tup::basic_type::float_t
-						|| ( type1 == tup::basic_type::int_t
-							&& type2 == tup::basic_type::float_t ) )
-						type = tup::basic_type::float_t;
-					// Otherwise, the result will match the type of the first
-					// operand.
-					else
-						type = type1;
+					auto val1 = arg1->evaluate( varcache );
+					auto val2 = arg2->evaluate( varcache );
+					auto type = val1->targetType( varcache );
+					if( val2->targetType( varcache ) != type )
+						throw vars::WrongType();
 					switch( type )
 					{
-						case tup::basic_type::int_t:
+						case vars::type_code::int_t:
 						{
-							auto divisor = val2->softInt( vars );
+							auto divisor = val2->targetInt( varcache );
 							if( divisor == 0 )
 								throw DivisionByZero();
-							return tup::valueptr( new tup::intval(
-								val1->softInt( vars ) / divisor ) );
+							return vars::intval::create(val1->targetInt( varcache ) / divisor );
 						}
-						case tup::basic_type::float_t:
+						case vars::type_code::float_t:
 						{
-							auto divisor = val2->softFloat( vars );
+							auto divisor = val2->targetFloat( varcache );
 							if( divisor == 0.0 )
 								throw DivisionByZero();
-							return tup::valueptr( new tup::floatval(
-								val1->softFloat( vars ) / divisor ) );
+							return vars::floatval::create( val1->targetFloat( varcache ) / divisor );
 						}
+						default:
+							throw vars::WrongType();
 					}
 					break;
 				}
-				case tup::operators::code::pow:
-					return tup::valueptr( new tup::floatval(
-						std::pow( arg1->evaluate( vars )->softFloat( vars ),
-							arg2->evaluate( vars )->softFloat( vars ) ) ) );
-				case tup::operators::code::mod:
-					return tup::valueptr( new tup::intval(
-						arg1->evaluate( vars )->softInt( vars )
-						% arg2->evaluate( vars )->softInt( vars ) ) );
-				case tup::operators::code::match:
+				case vars::operators::code::pow:
 				{
-					auto match = arg2->evaluate( vars )->softRegex(
-						vars ).match( arg1->evaluate( vars )->softString(
-							vars ) );
+					auto val1 = arg1->evaluate( varcache );
+					auto val2 = arg2->evaluate( varcache );
+					auto type1 = val1->targetType( varcache );
+					auto type2 = val2->targetType( varcache );
+					double v1{ 0.0 }, v2{ 0.0 };
+					switch( type1 )
+					{
+						case vars::type_code::int_t:
+						{
+							v1 = static_cast<double>( val1->targetInt( varcache ) );
+							switch( type2 )
+							{
+								case vars::type_code::int_t:
+									v2 = static_cast<double>( val2->targetInt( varcache ) );
+									break;
+								case vars::type_code::float_t:
+									v2 = val2->targetFloat( varcache );
+									break;
+								default:
+									throw vars::WrongType();
+							}
+							break;
+						}
+						case vars::type_code::float_t:
+						{
+							v1 = val1->targetFloat( varcache );
+							switch( type2 )
+							{
+								case vars::type_code::int_t:
+									v2 = static_cast<double>( val2->targetInt( varcache ) );
+									break;
+								case vars::type_code::float_t:
+									v2 = val2->targetFloat( varcache );
+									break;
+								default:
+									throw vars::WrongType();
+							}
+							break;
+						}
+						default:
+							throw vars::WrongType();
+					}
+					return vars::floatval::create( std::pow( v1, v2 ) );
+				}
+				case vars::operators::code::mod:
+					return vars::intval::create( arg1->evaluate( varcache )->targetInt( varcache )
+						% arg2->evaluate( varcache )->targetInt( varcache ) );
+				case vars::operators::code::match:
+				{
+					auto match = arg2->evaluate( varcache )->targetRegex( varcache ).match(
+						arg1->evaluate( varcache )->targetString( varcache ) );
 					if( match )
 					{
 						for( auto& capt : match )
-							vars.set( capt.first, tup::valueptr(
-								new tup::stringval( capt.second ) ) );
-						return tup::valueptr( new tup::boolval( true ) );
+							varcache.set( capt.first, vars::stringval::create( capt.second ) );
+						return vars::boolval::create( true );
 					}
-					return tup::valueptr( new tup::boolval( false ) );
+					return vars::boolval::create( false );
 				}
-				case tup::operators::code::assign:
+				case vars::operators::code::assign:
 				{
-					auto val1 = arg1->isOperator()
-						? arg1->evaluate( vars )
+					auto val1 = arg1->isOperator() ? arg1->evaluate( varcache )
 						: dynamic_cast<operandnode*>( &*arg1 )->value();
-					auto val2 = arg2->evaluate( vars );
-					if( !val2 )
-						throw tup::NotFound();
-					auto name = no_name;
-					if( val1->isVar() )
-						name = val1->hardVar();
-					else
-						name = val1->softName( vars );
-					if( val2->isVar() )
+					auto val2 = arg2->isOperator() ? arg2->evaluate( varcache )
+						: dynamic_cast<operandnode*>( &*arg2 )->value();
+
+					if( val1->isVariable() )
 					{
-						auto val = vars.get( name );
-						if( !val )
-							throw tup::NotFound( "No such variable: "
-								+ *name );
-						vars.set( name, val );
+						if( val2->isVariable() )
+						{
+							auto val = varcache.getActual( val2->actualVariable() );
+							if( !val )
+								throw vars::NotFound( "No such variable: " + *val2->actualVariable() );
+							varcache.set( val1->actualVariable(), val );
+						}
+						else if( val2->isReference() )
+						{
+							auto val = varcache.getActual( val2->actualReference(),
+								dynamic_cast<vars::refval*>( &*val2 )->context() );
+							if( !val )
+								throw vars::NotFound( "No such reference: " + val2->actualReference().str() );
+							varcache.set( val1->actualVariable(), val );
+						}
+						else
+							varcache.set( val1->actualVariable(), val2 );
+						return vars::variableval::create( val1->actualVariable() );
+					}
+					else if( val1->isReference() )
+					{
+						if( val2->isVariable() )
+						{
+							auto val = varcache.getActual( val2->actualVariable() );
+							if( !val )
+								throw vars::NotFound( "No such variable: " + *val2->actualVariable() );
+							varcache.set( val1->actualReference(), dynamic_cast<vars::refval*>( &*val1 )->context(), val );
+						}
+						else if( val2->isReference() )
+						{
+							auto val = varcache.getActual( val2->actualReference(),
+								dynamic_cast<vars::refval*>( &*val2 )->context() );
+							if( !val )
+								throw vars::NotFound( "No such reference: " + val2->actualReference().str() );
+							varcache.set( val1->actualReference(), dynamic_cast<vars::refval*>( &*val1 )->context(), val );
+						}
+						else
+							varcache.set( val1->actualReference(),
+								dynamic_cast<vars::refval*>( &*val1 )->context(), val2->target( varcache, val2 ) );
+						return vars::refval::create( val1->actualReference(),
+							dynamic_cast<vars::refval*>( &*val1 )->context() );
 					}
 					else
-						vars.set( name, val2 );
-					return tup::valueptr( new tup::variableval( name ) );
+						break;
 				}
-				case tup::operators::code::resize:
+				case vars::operators::code::resize:
 				{
-					auto str = arg1->evaluate( vars )->softString( vars );
-					auto sz = arg2->evaluate( vars )->softInt( vars );
+					auto str = arg1->evaluate( varcache )->targetString( varcache );
+					auto sz = arg2->evaluate( varcache )->targetInt( varcache );
 					if( sz > 0 && str.numChars() > static_cast<size_t>( sz ) )
 						str = str.substr( 0, sz );
 					else
 						str = str.padRight( sz, ' ' );
-					return tup::valueptr( new tup::stringval( str ) );
+					return vars::stringval::create( str );
 				}
 			}
-			throw tup::UnsupportedOperand( "Binary operator '"
-				+ tup::operators::mapCode( op_code ) + "' not supported for "
-				+ *tup::mapBasicType( arg1->evaluate( vars )->softType(
-					vars ) ) + " vs. "
-				+ *tup::mapBasicType( arg2->evaluate( vars )->softType(
-					vars ) ) + " operand" );
+			throw vars::UnsupportedOperand( "Binary operator '"
+				+ vars::operators::mapCode( op_code ) + "' not supported for "
+				+ *vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) + " vs. "
+				+ *vars::mapTypeCode( arg2->evaluate( varcache )->targetType( varcache ) ) + " operand" );
 		}
-		tup::valueptr evaluate::_ternary( tup::operators::code op_code,
-			tup::variables& vars,
+		vars::valueptr evaluate::_ternary( vars::operators::code op_code, vars::variables& varcache,
 			const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 )
 		{
 			switch( op_code )
 			{
-				case tup::operators::code::if_else:
+				case vars::operators::code::if_else:
 				{
-					auto condition = arg2->evaluate( vars );
-					if( condition && condition->softBool( vars ) )
-						return arg1->evaluate( vars );
+					auto condition = arg2->evaluate( varcache );
+					if( condition && condition->targetBool( varcache ) )
+						return arg1->evaluate( varcache );
 					else
-						return arg3->evaluate( vars );
+						return arg3->evaluate( varcache );
 				}
 			}
-			throw tup::UnsupportedOperand( "Ternary operator '"
-				+ tup::operators::mapCode( op_code ) + "' not supported for "
-				+ *tup::mapBasicType( arg2->evaluate( vars )->softType(
-					vars ) ) + " vs. "
-				+ *tup::mapBasicType( arg1->evaluate( vars )->softType(
-					vars ) ) + " vs. "
-				+ *tup::mapBasicType( arg3->evaluate( vars )->softType(
-					vars ) ) + " operand" );
+			throw vars::UnsupportedOperand( "Ternary operator '"
+				+ vars::operators::mapCode( op_code ) + "' not supported for "
+				+ *vars::mapTypeCode( arg2->evaluate( varcache )->targetType( varcache ) ) + " vs. "
+				+ *vars::mapTypeCode( arg1->evaluate( varcache )->targetType( varcache ) ) + " vs. "
+				+ *vars::mapTypeCode( arg3->evaluate( varcache )->targetType( varcache ) ) + " operand" );
 		}
 	}
 }
