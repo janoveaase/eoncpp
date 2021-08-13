@@ -59,6 +59,7 @@ namespace eon
 			OperatorDetails( code::_delete, 1, 11, 12 ),
 			OperatorDetails( code::element, 2, 81, 82 ),
 			OperatorDetails( code::slice, 3, 81, 82 ),
+			OperatorDetails( code::in, 2, 81, 82 ),
 
 			OperatorDetails( code::open_brace, 2, 100, 0 ),
 			OperatorDetails( code::close_brace, 2, 0, 99 ),
@@ -119,6 +120,7 @@ namespace eon
 				{ "loadbin", code::loadbin },
 				{ "saveto", code::saveto },
 				{ "delete", code::_delete },
+				{ "in", code::in },
 
 				{ "[", code::open_square },
 				{ "]", code::close_square },
@@ -188,6 +190,7 @@ namespace eon
 				{ code::close_square, "]" },
 				{ code::element, "[]" },
 				{ code::slice, "[:]" },
+				{ code::in, "in" },
 
 				{ code::colon, ":" },
 				{ code::separator, ";" }

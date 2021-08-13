@@ -87,6 +87,7 @@ namespace eon
 				_delete,			// delete a
 				element,			// []
 				slice,				// [:]
+				in,					// in
 
 				open_brace,			// (
 				close_brace,		// )

@@ -17,6 +17,7 @@
 #include <eonvariables/FunctionValue.h>
 #include <eonvariables/ControlValue.h>
 #include <cmath>
+#include <algorithm>
 
 
 namespace eon
@@ -187,6 +188,8 @@ namespace eon
 					return _saveto( varcache, arg1, arg2 );
 				case vars::operators::code::element:
 					return _element( varcache, arg1, arg2 );
+				case vars::operators::code::in:
+					return _in( varcache, arg1, arg2 );
 				default:
 					throw unsupported( op_code, varcache, arg1, arg2 );
 			}
@@ -731,6 +734,47 @@ namespace eon
 				default:
 					throw unsupported( vars::operators::code::open_square, val1, val2 );
 			}
+		}
+		vars::valueptr evaluate::_in( vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 )
+		{
+			auto raw1 = arg1->evaluate( varcache ), raw2 = arg2->evaluate( varcache );
+			if( !raw1 )
+				throw vars::NotFound( "Could not find " + arg1->str() );
+			if( !raw2 )
+				throw vars::NotFound( "Could not find " + arg2->str() );
+			auto val1 = raw1->target( varcache, raw1 );
+			auto val2 = raw2->target( varcache, raw2 );
+
+			auto type1 = val1->type();
+			auto type2 = val2->type();
+			switch( type2 )
+			{
+				case vars::type_code::string_t:
+					switch( type1 )
+					{
+						case vars::type_code::string_t:
+							return vars::boolval::create( val2->actualString().contains( val1->actualString() ) );
+						case vars::type_code::char_t:
+							return vars::boolval::create( val2->actualString().contains( val1->actualChar() ) );
+					}
+					break;
+				case vars::type_code::raw_t:
+					switch( type1 )
+					{
+						case vars::type_code::string_t:
+							return vars::boolval::create( std::find( val2->actualRaw().begin(), val2->actualRaw().end(),
+								val1->actualString() ) != val2->actualRaw().end() );
+					}
+					break;
+				case vars::type_code::tuple_t:
+					switch( type1 )
+					{
+						case vars::type_code::name_t:
+							return vars::boolval::create( val2->actualTuple().exists( val1->actualName() ) );
+					}
+					break;
+			}
+			throw unsupported( vars::operators::code::in, val1, val2 );
 		}
 
 		vars::valueptr evaluate::_if_else( vars::variables& varcache,

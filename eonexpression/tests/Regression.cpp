@@ -4,6 +4,7 @@
 #include <eonvariables/StringValue.h>
 #include <eonvariables/RawValue.h>
 #include <eonvariables/BinaryValue.h>
+#include <eonvariables/TupleValue.h>
 
 
 
@@ -1276,7 +1277,7 @@ namespace eon
 		WANT_FALSE( val->actualBool() );
 	}
 
-	TEST( ExpressionTest, name )
+	TEST( ExpressionTest, tovar )
 	{
 		expression expr;
 		vars::variables varcache;
@@ -1288,6 +1289,78 @@ namespace eon
 		auto var = varcache.get( name::get( "a2" ) );
 		REQUIRE_TRUE( var && var->isFloat() ) << "Didn't get variable";
 		WANT_EQ( 99.9, var->actualFloat() ) << "Wrong variable value";
+	}
+
+	TEST( ExpressionTest, char_in_str )
+	{
+		expression expr;
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = 'b' in \"abc\"; b = 'b' in \"cde\"", varcache ) );
+		vars::valueptr val;
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) ) << "Failed to evaluate";
+		REQUIRE_TRUE( varcache.exists( name::get( "a" ) ) );
+		REQUIRE_TRUE( varcache.exists( name::get( "b" ) ) );
+		auto a = varcache.get( name::get( "a" ) );
+		auto b = varcache.get( name::get( "b" ) );
+		REQUIRE_TRUE( a->isBool() );
+		REQUIRE_TRUE( b->isBool() );
+		WANT_TRUE( a->actualBool() );
+		WANT_FALSE( b->actualBool() );
+	}
+	TEST( ExpressionTest, str_in_str )
+	{
+		expression expr;
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = \"bc\" in \"abcde\"; b = \"bc\" in \"cdeb\"", varcache ) );
+		vars::valueptr val;
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) ) << "Failed to evaluate";
+		REQUIRE_TRUE( varcache.exists( name::get( "a" ) ) );
+		REQUIRE_TRUE( varcache.exists( name::get( "b" ) ) );
+		auto a = varcache.get( name::get( "a" ) );
+		auto b = varcache.get( name::get( "b" ) );
+		REQUIRE_TRUE( a->isBool() );
+		REQUIRE_TRUE( b->isBool() );
+		WANT_TRUE( a->actualBool() );
+		WANT_FALSE( b->actualBool() );
+	}
+	TEST( ExpressionTest, str_in_raw )
+	{
+		expression expr;
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::rawval::create( { "one", "two", "three" } ) );
+		REQUIRE_NO_EXCEPT( expr = expression( "a = \"two\" in r; b = \"Two\" in r", varcache ) );
+		vars::valueptr val;
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) ) << "Failed to evaluate";
+		REQUIRE_TRUE( varcache.exists( name::get( "a" ) ) );
+		REQUIRE_TRUE( varcache.exists( name::get( "b" ) ) );
+		auto a = varcache.get( name::get( "a" ) );
+		auto b = varcache.get( name::get( "b" ) );
+		REQUIRE_TRUE( a->isBool() );
+		REQUIRE_TRUE( b->isBool() );
+		WANT_TRUE( a->actualBool() );
+		WANT_FALSE( b->actualBool() );
+	}
+	TEST( ExpressionTest, name_in_tuple )
+	{
+		expression expr;
+		vars::variables varcache;
+		tuple t;
+		t.append( vars::intval::create( 33 ), varcache );
+		t.append( vars::stringval::create( "Hello" ), varcache, name::get( "str" ) );
+		t.append( vars::floatval::create( 3.14 ), varcache, name::get( "pi" ) );
+		varcache.set( name::get( "t" ), vars::tupleval::create( t ) );
+
+		REQUIRE_NO_EXCEPT( expr = expression( "a = #str in t; b = #PI in t", varcache ) );
+		vars::valueptr val;
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) ) << "Failed to evaluate";
+		REQUIRE_TRUE( varcache.exists( name::get( "a" ) ) );
+		REQUIRE_TRUE( varcache.exists( name::get( "b" ) ) );
+		auto a = varcache.get( name::get( "a" ) );
+		auto b = varcache.get( name::get( "b" ) );
+		REQUIRE_TRUE( a->isBool() );
+		REQUIRE_TRUE( b->isBool() );
+		WANT_TRUE( a->actualBool() );
+		WANT_FALSE( b->actualBool() );
 	}
 
 	TEST( ExpressionTest, double_parenthesis )

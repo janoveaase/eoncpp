@@ -73,6 +73,7 @@ namespace eon
 			static vars::valueptr _resize( vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 );
 			static vars::valueptr _saveto( vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 );
 			static vars::valueptr _element( vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 );
+			static vars::valueptr _in( vars::variables& varcache, const nodeptr& arg1, const nodeptr& arg2 );
 
 			static vars::valueptr _if_else( vars::variables& varcache,
 				const nodeptr& arg1, const nodeptr& arg2, const nodeptr& arg3 );
