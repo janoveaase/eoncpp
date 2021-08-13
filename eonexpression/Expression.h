@@ -1,6 +1,7 @@
 #pragma once
 #include <eontokenizer/TokenParser.h>
 #include "Node.h"
+#include "OperatorStack.h"
 #include <stack>
 
 
@@ -100,7 +101,7 @@ namespace eon
 		void _parse( string&& expr, vars::variables& vars );
 
 		void _processToken( tokenparser& parser, vars::variables& vars, vars::operators::code& last_type,
-			std::stack<vars::operators::code>& op_stack, std::stack<expr::nodeptr>& tree_stack );
+			expr::opstack& op_stack, std::stack<expr::nodeptr>& tree_stack );
 
 		expr::nodeptr _parseValue( tokenparser& parser, vars::variables& vars );
 

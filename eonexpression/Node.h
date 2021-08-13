@@ -9,7 +9,7 @@
 ******************************************************************************/
 namespace eon
 {
-	namespace tup
+	namespace vars
 	{
 		class value;
 		using valueptr = std::shared_ptr<value>;

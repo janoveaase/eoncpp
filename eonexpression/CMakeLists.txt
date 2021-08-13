@@ -8,6 +8,7 @@ set(EXPRESSION_HEADERS
 	OperandNode.h
 	Expression.h
 	Evaluate.h
+	OperatorStack.h
 )
 set(EXPRESSION_SOURCES
 	Node.cpp

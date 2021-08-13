@@ -112,6 +112,9 @@ namespace eon
 	const name_t name_cancel = name::get( "cancel" );
 	const name_t name_active = name::get( "active" );
 	const name_t name_inactive = name::get( "inactive" );
+	const name_t name_success = name::get( "success" );
+	const name_t name_failure = name::get( "failure" );
+	const name_t name_error = name::get( "error" );
 	const name_t name_abort = name::get( "abort" );
 	const name_t name_output = name::get( "output" );
 	const name_t name_token = name::get( "token" );

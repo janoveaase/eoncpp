@@ -79,7 +79,7 @@ namespace eon
 	public:
 
 		//* Open file
-		//* Throws [eon::FileOpenError] if unable to open.
+		//* Throws [eon::filesys::OpenError] if unable to open.
 		void open();
 
 		//* Close file

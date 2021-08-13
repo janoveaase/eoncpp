@@ -8,9 +8,9 @@ namespace eon
 	{
 		std::vector<operators::OperatorDetails> operators::Ops{
 			OperatorDetails( code::undef, 0, 0, -1 ),
+			
 			OperatorDetails( code::value, 2, 0, 0 ),
-			OperatorDetails( code::open_brace, 2, 100, 0 ),
-			OperatorDetails( code::close_brace, 2, 0, 99 ),
+
 			OperatorDetails( code::_and, 2, 23, 24 ),
 			OperatorDetails( code::_or, 2, 21, 22 ),
 			OperatorDetails( code::_not, 1, 73, 74 ),
@@ -57,9 +57,14 @@ namespace eon
 			OperatorDetails( code::loadbin, 1, 11, 12 ),
 			OperatorDetails( code::saveto, 2, 11, 12 ),
 			OperatorDetails( code::_delete, 1, 11, 12 ),
-			OperatorDetails( code::open_square, 2, 98, 0 ),
-			OperatorDetails( code::close_square, 2, 0, 97 ),
+			OperatorDetails( code::element, 2, 81, 82 ),
+			OperatorDetails( code::slice, 3, 81, 82 ),
 
+			OperatorDetails( code::open_brace, 2, 100, 0 ),
+			OperatorDetails( code::close_brace, 2, 0, 99 ),
+			OperatorDetails( code::open_square, 2, 98, 0 ),
+			OperatorDetails( code::close_square, 2, 0, 97 ),			
+			OperatorDetails( code::colon, 2, 14, 13 ),
 			OperatorDetails( code::separator, 0, 0, -1 )
 		};
 
@@ -114,9 +119,10 @@ namespace eon
 				{ "loadbin", code::loadbin },
 				{ "saveto", code::saveto },
 				{ "delete", code::_delete },
+
 				{ "[", code::open_square },
 				{ "]", code::close_square },
-
+				{ ":", code::colon },
 				{ ";", code::separator },
 				{ "\n", code::separator }
 			};
@@ -178,9 +184,12 @@ namespace eon
 				{ code::loadbin, "loadbin" },
 				{ code::saveto, "saveto" },
 				{ code::_delete, "delete" },
-				{ code::open_square, "[]" },
+				{ code::open_square, "[" },
 				{ code::close_square, "]" },
+				{ code::element, "[]" },
+				{ code::slice, "[:]" },
 
+				{ code::colon, ":" },
 				{ code::separator, ";" }
 			};
 			auto found = types.find( op_code );

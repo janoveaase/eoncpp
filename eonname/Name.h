@@ -100,6 +100,9 @@ namespace eon
 	extern const name_t name_cancel;
 	extern const name_t name_active;
 	extern const name_t name_inactive;
+	extern const name_t name_success;
+	extern const name_t name_failure;
+	extern const name_t name_error;
 	extern const name_t name_abort;
 	extern const name_t name_output;
 	extern const name_t name_token;
@@ -168,4 +171,16 @@ namespace eon
 		std::set<name_t, string_lt> NameLookup;
 		std::mutex NamesLock;
 	};
+}
+
+namespace std
+{
+	//* Allow implicit use of [eon::name_t] as key/value when used in
+	//* containers such as 'std::unordered_map' and 'std::unordered_set'.
+	template<>
+	struct hash<::eon::name_t> {
+		inline size_t operator()( const ::eon::name_t rhs ) const { return (size_t)rhs; } };
+	template<>
+	struct equal_to<::eon::name_t> {
+		inline bool operator()( const ::eon::name_t lhs, const ::eon::name_t rhs ) const { return lhs == rhs; } };
 }

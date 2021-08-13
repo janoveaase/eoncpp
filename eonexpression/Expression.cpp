@@ -85,7 +85,7 @@ namespace eon
 		auto count = expr.count( ';' ) + 1;
 		source src( "expression", std::move( expr ) );
 		auto tokens = tokenizer()( src );
-		std::stack<vars::operators::code> op_stack;
+		expr::opstack op_stack;
 		op_stack.push( vars::operators::code::undef );
 		std::stack<expr::nodeptr> tree_stack;
 		tokenparser parser( std::move( tokens ) );
@@ -116,11 +116,13 @@ namespace eon
 			Roots.push_back( node );
 	}
 
-	inline void runStack( tokenparser& parser,
-		std::stack<vars::operators::code>& op_stack, std::stack<expr::nodeptr>& tree_stack )
+	inline void runStack( tokenparser& parser, expr::opstack& op_stack, std::stack<expr::nodeptr>& tree_stack )
 	{
-		auto root = expr::nodeptr( new expr::operatornode( op_stack.top() ) );
-		for( size_t i = 0, num_ops = vars::operators::numOperands( op_stack.top() ); i < num_ops; ++i )
+		auto op_type = op_stack.top();
+		if( op_type == vars::operators::code::open_square )
+			op_type = vars::operators::code::element;
+		auto root = expr::nodeptr( new expr::operatornode( op_type ) );
+		for( size_t i = 0, num_ops = vars::operators::numOperands( op_type ); i < num_ops; ++i )
 		{
 			if( tree_stack.empty() )
 				throw BadExpression(
@@ -133,7 +135,7 @@ namespace eon
 		tree_stack.push( std::move( root ) );
 	}
 	void expression::_processToken( tokenparser& parser, vars::variables& vars, vars::operators::code& last_type,
-		std::stack<vars::operators::code>& op_stack, std::stack<expr::nodeptr>& tree_stack )
+		expr::opstack& op_stack, std::stack<expr::nodeptr>& tree_stack )
 	{
 		vars::operators::code type{ vars::operators::code::undef };
 		if( parser )
@@ -195,12 +197,48 @@ namespace eon
 				while( op_stack.top() != vars::operators::code::if_else )
 					runStack( parser, op_stack, tree_stack );
 				break;
+			case vars::operators::code::colon:
+			{
+				// We need to replace the first odd '[' on the operator stack with '[:]'
+				size_t squares = 0;
+				bool found = false;
+				for( auto pos = op_stack.size(); pos > 0 && !found; --pos )
+				{
+					switch( op_stack.at( pos - 1 ) )
+					{
+						case vars::operators::code::close_square:
+							if( squares == 0 )
+								throw BadExpression(
+									( parser ? parser.current().source().textRefRange()
+										: parser.last().source().textRefRange() ) + ": Unbalanced square brackets!" );
+							--squares;
+							break;
+						case vars::operators::code::open_square:
+							if( squares == 0 )
+							{
+								op_stack.replace( pos - 1, vars::operators::code::slice );
+								found = true;
+							}
+							else
+								++squares;
+							break;
+						default:
+							break;
+					}
+				}
+				if( !found )
+					throw BadExpression(
+						( parser ? parser.current().source().textRefRange()
+							: parser.last().source().textRefRange() ) + ": Improper use of ':'!" );
+				break;
+			}
 			case vars::operators::code::close_square:
 				while( !op_stack.empty() )
 				{
-					auto opensq = op_stack.top() == vars::operators::code::open_square;
+					auto ontop = op_stack.top();
 					runStack( parser, op_stack, tree_stack );
-					if( opensq )
+					if( ontop == vars::operators::code::open_square
+						|| ontop == vars::operators::code::slice )
 						break;
 				}
 				if( op_stack.empty() )

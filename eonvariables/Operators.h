@@ -36,9 +36,9 @@ namespace eon
 			enum class code
 			{
 				undef,				// Undefined
+
 				value,				// Not an operator
-				open_brace,			// (
-				close_brace,		// )
+
 				_and,				// a and b
 				_or ,				// a or b
 				_not,				// not a
@@ -85,9 +85,14 @@ namespace eon
 				loadbin,			// loadbin a
 				saveto,				// a saveto b
 				_delete,			// delete a
+				element,			// []
+				slice,				// [:]
+
+				open_brace,			// (
+				close_brace,		// )
 				open_square,		// [
 				close_square,		// ]
-
+				colon,				// :
 				separator,			// ';' and newline
 
 				dummies,

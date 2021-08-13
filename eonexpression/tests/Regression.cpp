@@ -12,8 +12,8 @@ namespace eon
 	TEST( ExpressionTest, binary1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "2 pow ( 3 + 1 )", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "2 pow ( 3 + 1 )", varcache ) );
 		WANT_EQ( "2 3 1 + pow",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ(
@@ -23,9 +23,9 @@ namespace eon
 	TEST( ExpressionTest, binary2 )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		REQUIRE_NO_EXCEPT( expr = expression(
-			"1 - 2 pow 3 pow 3 - ( 4 + 5 * 6 ) * 7", vars ) );
+			"1 - 2 pow 3 pow 3 - ( 4 + 5 * 6 ) * 7", varcache ) );
 		WANT_EQ( "1 2 3 3 pow pow - 4 5 6 * + 7 * -",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ(
@@ -35,8 +35,8 @@ namespace eon
 	TEST( ExpressionTest, binary3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "(4+3)*(2-1)", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "(4+3)*(2-1)", varcache ) );
 		WANT_EQ( "4 3 + 2 1 - *",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "( 4 + 3 ) * ( 2 - 1 )",
@@ -46,8 +46,8 @@ namespace eon
 	TEST( ExpressionTest, unary1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "not 1", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "not 1", varcache ) );
 		WANT_EQ( "1 not",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "not 1",
@@ -56,8 +56,8 @@ namespace eon
 	TEST( ExpressionTest, unary2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "1 and not 1 or not 0", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "1 and not 1 or not 0", varcache ) );
 		WANT_EQ( "1 1 not and 0 not or",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "1 and not 1 or not 0",
@@ -67,8 +67,8 @@ namespace eon
 	TEST( ExpressionTest, ternary1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "0 if 1 else 2", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "0 if 1 else 2", varcache ) );
 		WANT_EQ( "0 1 2 if_else",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "0 if 1 else 2",
@@ -77,8 +77,8 @@ namespace eon
 	TEST( ExpressionTest, ternary2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "0 if 1 else 2 == 3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "0 if 1 else 2 == 3", varcache ) );
 		WANT_EQ( "0 1 2 3 == if_else",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "0 if 1 else 2 == 3",
@@ -87,8 +87,8 @@ namespace eon
 	TEST( ExpressionTest, ternary3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "(0 if 1 else 2) == 3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "(0 if 1 else 2) == 3", varcache ) );
 		WANT_EQ( "0 1 2 if_else 3 ==",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "( 0 if 1 else 2 ) == 3",
@@ -98,8 +98,8 @@ namespace eon
 	TEST( ExpressionTest, and1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true and true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true and true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -107,8 +107,8 @@ namespace eon
 	TEST( ExpressionTest, and2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true and false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true and false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -116,8 +116,8 @@ namespace eon
 	TEST( ExpressionTest, and3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false and true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false and true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -125,8 +125,8 @@ namespace eon
 	TEST( ExpressionTest, and4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false and false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false and false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -135,8 +135,8 @@ namespace eon
 	TEST( ExpressionTest, or1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true or false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true or false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -144,8 +144,8 @@ namespace eon
 	TEST( ExpressionTest, or2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "1 > 0 or 0 > 0", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "1 > 0 or 0 > 0", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -153,8 +153,8 @@ namespace eon
 	TEST( ExpressionTest, or3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "tobool \"0\" or tobool \"\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "tobool \"0\" or tobool \"\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -163,8 +163,8 @@ namespace eon
 	TEST( ExpressionTest, not1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "not true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "not true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -172,8 +172,8 @@ namespace eon
 	TEST( ExpressionTest, not2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "not false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "not false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -181,8 +181,8 @@ namespace eon
 	TEST( ExpressionTest, not3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "not tobool 4.3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "not tobool 4.3", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -191,8 +191,8 @@ namespace eon
 	TEST( ExpressionTest, if_else1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "'T' if true else 6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "'T' if true else 6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isChar() ) << "Wrong value type";
@@ -201,8 +201,8 @@ namespace eon
 	TEST( ExpressionTest, if_else2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "'T' if false else 6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "'T' if false else 6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -211,8 +211,8 @@ namespace eon
 	TEST( ExpressionTest, if_else3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "(6-4) if true else (6+4)", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "(6-4) if true else (6+4)", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -221,8 +221,8 @@ namespace eon
 	TEST( ExpressionTest, if_else4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "(6-4) if false else (6+4)", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "(6-4) if false else (6+4)", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -232,8 +232,8 @@ namespace eon
 	TEST( ExpressionTest, eq1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true == true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true == true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -241,8 +241,8 @@ namespace eon
 	TEST( ExpressionTest, eq2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true == false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true == false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -250,8 +250,8 @@ namespace eon
 	TEST( ExpressionTest, eq3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true == tobool 8", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true == tobool 8", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -259,8 +259,8 @@ namespace eon
 	TEST( ExpressionTest, eq4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "0.000 == tofloat false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "0.000 == tofloat false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -268,8 +268,8 @@ namespace eon
 	TEST( ExpressionTest, eq5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "0.000 == tofloat 0", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "0.000 == tofloat 0", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -277,8 +277,8 @@ namespace eon
 	TEST( ExpressionTest, eq6 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "0.000 == tofloat \"0.0\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "0.000 == tofloat \"0.0\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -286,8 +286,8 @@ namespace eon
 	TEST( ExpressionTest, eq7 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"\" == tostring 1", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"\" == tostring 1", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -296,8 +296,8 @@ namespace eon
 	TEST( ExpressionTest, ne1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false != true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false != true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -305,8 +305,8 @@ namespace eon
 	TEST( ExpressionTest, ne2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "4 != toint 4.001", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "4 != toint 4.001", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -314,8 +314,8 @@ namespace eon
 	TEST( ExpressionTest, ne3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "4.001 != tofloat 4", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "4.001 != tofloat 4", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -323,8 +323,8 @@ namespace eon
 	TEST( ExpressionTest, ne4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "4 != toint 4.0", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "4 != toint 4.0", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -333,8 +333,8 @@ namespace eon
 	TEST( ExpressionTest, lt1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false < true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false < true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -342,8 +342,8 @@ namespace eon
 	TEST( ExpressionTest, lt2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true < false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true < false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -351,8 +351,8 @@ namespace eon
 	TEST( ExpressionTest, lt3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "1 < 2", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "1 < 2", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -360,8 +360,8 @@ namespace eon
 	TEST( ExpressionTest, lt4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "1 < toint 1.1", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "1 < toint 1.1", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -369,8 +369,8 @@ namespace eon
 	TEST( ExpressionTest, lt5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"alpha\" < \"alphA\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"alpha\" < \"alphA\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -378,8 +378,8 @@ namespace eon
 	TEST( ExpressionTest, lt6 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"alphA\" < \"alpha\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"alphA\" < \"alpha\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -388,8 +388,8 @@ namespace eon
 	TEST( ExpressionTest, le1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false <= true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false <= true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -397,8 +397,8 @@ namespace eon
 	TEST( ExpressionTest, le2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false <= false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false <= false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -406,8 +406,8 @@ namespace eon
 	TEST( ExpressionTest, le4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true <= false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true <= false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -415,8 +415,8 @@ namespace eon
 	TEST( ExpressionTest, le5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "1.1 <= tofloat 1", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "1.1 <= tofloat 1", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -424,8 +424,8 @@ namespace eon
 	TEST( ExpressionTest, le6 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "1.1 <= tofloat \"1.10000\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "1.1 <= tofloat \"1.10000\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -434,8 +434,8 @@ namespace eon
 	TEST( ExpressionTest, gt1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true > false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true > false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -443,8 +443,8 @@ namespace eon
 	TEST( ExpressionTest, gt2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true > true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true > true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -452,8 +452,8 @@ namespace eon
 	TEST( ExpressionTest, gt3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false > true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false > true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -461,8 +461,8 @@ namespace eon
 	TEST( ExpressionTest, gt4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "5 > 4", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "5 > 4", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -470,8 +470,8 @@ namespace eon
 	TEST( ExpressionTest, gt5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "5 > toint 5.9999", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "5 > toint 5.9999", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -479,8 +479,8 @@ namespace eon
 	TEST( ExpressionTest, gt6 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "'T' > 't'", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "'T' > 't'", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -489,8 +489,8 @@ namespace eon
 	TEST( ExpressionTest, ge1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true >= false", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true >= false", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -498,8 +498,8 @@ namespace eon
 	TEST( ExpressionTest, ge2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "true >= true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "true >= true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -507,8 +507,8 @@ namespace eon
 	TEST( ExpressionTest, ge3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "false >= true", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "false >= true", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -516,8 +516,8 @@ namespace eon
 	TEST( ExpressionTest, ge4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "99.9 >= tofloat 100", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "99.9 >= tofloat 100", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -525,8 +525,8 @@ namespace eon
 	TEST( ExpressionTest, ge5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"alphb\" >= \"alpha\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"alphb\" >= \"alpha\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -534,8 +534,8 @@ namespace eon
 	TEST( ExpressionTest, ge6 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" >= tostring 'A'", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" >= tostring 'A'", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
@@ -543,8 +543,8 @@ namespace eon
 	TEST( ExpressionTest, ge7 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" >= tostring 'a'", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" >= tostring 'a'", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -553,8 +553,8 @@ namespace eon
 	TEST( ExpressionTest, plus1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" + tostring 'A'", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" + tostring 'A'", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isString() ) << "Wrong value type";
@@ -563,8 +563,8 @@ namespace eon
 	TEST( ExpressionTest, plus2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" + tostring 6.6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"A\" + tostring 6.6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isString() ) << "Wrong value type";
@@ -573,8 +573,8 @@ namespace eon
 	TEST( ExpressionTest, plus3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6.6 + tofloat \"1.1\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6.6 + tofloat \"1.1\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -583,8 +583,8 @@ namespace eon
 	TEST( ExpressionTest, plus4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "tofloat 1 + 2.9", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "tofloat 1 + 2.9", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -593,8 +593,8 @@ namespace eon
 	TEST( ExpressionTest, plus5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "2.9 + tofloat 1", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "2.9 + tofloat 1", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -604,8 +604,8 @@ namespace eon
 	TEST( ExpressionTest, minus1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "10-6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "10-6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -614,8 +614,8 @@ namespace eon
 	TEST( ExpressionTest, minus2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6-10", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6-10", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -624,8 +624,8 @@ namespace eon
 	TEST( ExpressionTest, minus3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "\"alpha beta\" - tostring 'a'", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "\"alpha beta\" - tostring 'a'", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isString() ) << "Wrong value type";
@@ -634,8 +634,8 @@ namespace eon
 	TEST( ExpressionTest, minus4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "99.99 - tofloat \"000.9900\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "99.99 - tofloat \"000.9900\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -645,8 +645,8 @@ namespace eon
 	TEST( ExpressionTest, multiply1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "3 * 6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "3 * 6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -655,8 +655,8 @@ namespace eon
 	TEST( ExpressionTest, multiply2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "tofloat 3 * 6.0", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "tofloat 3 * 6.0", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -665,8 +665,8 @@ namespace eon
 	TEST( ExpressionTest, multiply3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "3.0 * tofloat 6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "3.0 * tofloat 6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -675,8 +675,8 @@ namespace eon
 	TEST( ExpressionTest, multiply4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "2.2 * tofloat \"3.3\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "2.2 * tofloat \"3.3\"", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -686,8 +686,8 @@ namespace eon
 	TEST( ExpressionTest, divide1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6 / 3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6 / 3", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -696,8 +696,8 @@ namespace eon
 	TEST( ExpressionTest, divide2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6.6 / 3.3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6.6 / 3.3", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -706,8 +706,8 @@ namespace eon
 	TEST( ExpressionTest, divide3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6 / 0", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6 / 0", varcache ) );
 		vars::valueptr val;
 		REQUIRE_EXCEPT( val = expr.evaluate(), eon::expr::DivisionByZero );
 	}
@@ -715,18 +715,18 @@ namespace eon
 	TEST( ExpressionTest, pow1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6 pow 3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6 pow 3", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
-		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
-		WANT_EQ( 216.0, val->actualFloat() ) << "Wrong value";
+		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
+		WANT_EQ( 216, val->actualInt() ) << "Wrong value";
 	}
 	TEST( ExpressionTest, pow2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "3.3 pow 3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "3.3 pow tofloat 3", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -735,8 +735,8 @@ namespace eon
 	TEST( ExpressionTest, pow3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "10 pow -2", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "10.0 pow -2.0", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -746,8 +746,8 @@ namespace eon
 	TEST( ExpressionTest, mod1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6 mod 5", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6 mod 5", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -756,8 +756,8 @@ namespace eon
 	TEST( ExpressionTest, mod2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6 mod 6", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6 mod 6", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -766,8 +766,8 @@ namespace eon
 	TEST( ExpressionTest, mod3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "2 mod 5", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "2 mod 5", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -776,8 +776,8 @@ namespace eon
 	TEST( ExpressionTest, mod4 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "6 mod toint 5.5", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "6 mod toint 5.5", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
@@ -786,8 +786,8 @@ namespace eon
 	TEST( ExpressionTest, mod5 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "{9, 5} mod 5", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "{9, 5} mod 5", varcache ) );
 		vars::valueptr val;
 		REQUIRE_EXCEPT( val = expr.evaluate(), vars::UnsupportedOperand );
 	}
@@ -795,18 +795,18 @@ namespace eon
 	TEST( ExpressionTest, sqrt1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "sqrt 9", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "sqrt 9", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
-		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
-		WANT_EQ( 3.0, val->actualFloat() ) << "Wrong value";
+		REQUIRE_TRUE( val->isInt() ) << "Wrong value type";
+		WANT_EQ( 3, val->actualInt() ) << "Wrong value";
 	}
 	TEST( ExpressionTest, sqrt2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "sqrt 39.9424", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "sqrt 39.9424", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isFloat() ) << "Wrong value type";
@@ -816,14 +816,14 @@ namespace eon
 	TEST( ExpressionTest, match1 )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		REQUIRE_NO_EXCEPT(
-			expr = expression( "\"alpha beta\" match ?/.+ha/", vars ) );
+			expr = expression( "\"alpha beta\" match ?/.+ha/", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		WANT_TRUE( val->actualBool() ) << "Wrong value";
-		auto match = vars.get( name::get( "complete" ) );
+		auto match = varcache.get( name::get( "complete" ) );
 		REQUIRE_TRUE( match && match->isString() )
 			<< "Didn't get capture group";
 		WANT_EQ( "alpha", match->string_value().stdstr() ) << "Wrong capture";
@@ -831,9 +831,9 @@ namespace eon
 	TEST( ExpressionTest, match2 )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		REQUIRE_NO_EXCEPT(
-			expr = expression( "\"alpha beta\" match ?/.+haa/", vars ) );
+			expr = expression( "\"alpha beta\" match ?/.+haa/", varcache ) );
 		vars::valueptr val;
 		REQUIRE_NO_EXCEPT( val = expr.evaluate() ) << "Failed to evaluate";
 		WANT_FALSE( val->actualBool() ) << "Wrong value";
@@ -841,14 +841,14 @@ namespace eon
 	TEST( ExpressionTest, match3 )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		REQUIRE_NO_EXCEPT(
-			expr = expression( "\"alpha beta\" match ?/.+@<grp1>(ha)/", vars ) );
+			expr = expression( "\"alpha beta\" match ?/.+@<grp1>(ha)/", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->actualBool() ) << "Wrong value";
-		auto grp = vars.get( name::get( "grp1" ) );
+		auto grp = varcache.get( name::get( "grp1" ) );
 		REQUIRE_TRUE( grp && grp->isString() ) << "Didn't get capture group";
 		WANT_EQ( "ha", grp->string_value().stdstr() ) << "Wrong capture";
 	}
@@ -856,67 +856,67 @@ namespace eon
 	TEST( ExpressionTest, assign1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = 99.9", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = 99.9", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isFloat() ) << "Didn't get variable";
 		WANT_EQ( 99.9, var->actualFloat() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, assign2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = b + 321", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = b + 321", varcache ) );
 		vars::valueptr val;
-		vars.set( name::get( "b" ), vars::intval::create( 123 ) );
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		varcache.set( name::get( "b" ), vars::intval::create( 123 ) );
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 444, var->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, assign3 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = b", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = b", varcache ) );
 		vars::valueptr val;
-		REQUIRE_EXCEPT( val = expr.evaluate( vars ), vars::NotFound );
+		REQUIRE_EXCEPT( val = expr.evaluate( varcache ), vars::NotFound );
 	}
 
 	TEST( ReferenceTest, reference_get_nonexisting )
 	{
 		expression expr;
-		vars::variables vars( *this );
-		REQUIRE_NO_EXCEPT( expr = expression( "a = @one/two", vars ) );
+		vars::variables varcache( *this );
+		REQUIRE_NO_EXCEPT( expr = expression( "a = @one/two", varcache ) );
 		vars::valueptr val;
-		REQUIRE_EXCEPT( val = expr.evaluate( vars ), vars::NotFound );
+		REQUIRE_EXCEPT( val = expr.evaluate( varcache ), vars::NotFound );
 	}
 	TEST( ReferenceTest, reference_get_existing )
 	{
 		_set( nameref( "one/two" ), vars::valueptr(), vars::stringval::create( "Hello" ) );
 		expression expr;
-		vars::variables vars( *this );
-		REQUIRE_NO_EXCEPT( expr = expression( "a = @one/two", vars ) );
+		vars::variables varcache( *this );
+		REQUIRE_NO_EXCEPT( expr = expression( "a = @one/two", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) );
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) );
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
 		WANT_EQ( "Hello", var->actualString().stdstr() ) << "Wrong variable value";
 	}
 	TEST( ReferenceTest, reference_set_new )
 	{
 		expression expr;
-		vars::variables vars( *this );
-		REQUIRE_NO_EXCEPT( expr = expression( "@one/two = 123", vars ) );
+		vars::variables varcache( *this );
+		REQUIRE_NO_EXCEPT( expr = expression( "@one/two = 123", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) );
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) );
 		auto result = _get( nameref( "one/two" ), vars::valueptr() );
 		REQUIRE_TRUE( result && result->isInt() ) << "Didn't set variable";
 		WANT_EQ( 123, result->actualInt() ) << "Wrong variable value";
@@ -925,10 +925,10 @@ namespace eon
 	{
 		_set( nameref( "one/two" ), vars::valueptr(), vars::stringval::create( "Hello" ) );
 		expression expr;
-		vars::variables vars( *this );
-		REQUIRE_NO_EXCEPT( expr = expression( "@one/two = 123", vars ) );
+		vars::variables varcache( *this );
+		REQUIRE_NO_EXCEPT( expr = expression( "@one/two = 123", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) );
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) );
 		auto result = _get( nameref( "one/two" ), vars::valueptr() );
 		REQUIRE_TRUE( result && result->isInt() ) << "Didn't set variable";
 		WANT_EQ( 123, result->actualInt() ) << "Wrong variable value";
@@ -937,138 +937,191 @@ namespace eon
 	TEST( ExpressionTest, exists_yes )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		REQUIRE_NO_EXCEPT( expr = expression( "a = 1 if exists \""
-			+ string( _TestExe ).replace( '\\', '/' ) + "\" else 0", vars ) );
+			+ string( _TestExe ).replace( '\\', '/' ) + "\" else 0", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 1, var->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, exists_no )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		REQUIRE_NO_EXCEPT( expr = expression( "a = 1 if exists \""
-			"somethingimpossiblewhateverblahblah\" else 0", vars ) );
+			"somethingimpossiblewhateverblahblah\" else 0", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 0, var->actualInt() ) << "Wrong variable value";
 	}
 	
 	TEST( FileTest, save_load_delete )
 	{
-		vars::variables vars;
+		vars::variables varcache;
 		vars::valueptr result;
 		auto name_str = name::get( "str" );
 		file myfile{ testdir.dpath() + "myfile.txt" };
 
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() );
 		
-		expression save{ "\"Hello World!\" saveto \"" + myfile.fpath().str() + "\"", vars };
-		REQUIRE_NO_EXCEPT( result = save.evaluate( vars ) ) << "Failed to save!";
-		REQUIRE_TRUE( result->actualBool() ) << "Failed to save!";
+		expression save{ "\"Hello World!\" saveto \"" + myfile.fpath().str() + "\"", varcache };
+		REQUIRE_NO_EXCEPT( result = save.evaluate( varcache ) ) << "Failed to save!";
+		REQUIRE_TRUE( result->actualTuple().at( name_success )->actualBool() ) << "Failed to save!";
 		WANT_TRUE( myfile.exists() ) << "File not created!";
 
-		expression load{ "str = loadstr \"" + myfile.fpath().str() + "\"", vars };
-		REQUIRE_NO_EXCEPT( load.evaluate( vars ) ) << "Failed to load!";
-		WANT_EQ( "Hello World!", vars.get( name_str )->actualString().stdstr() ) << "Wrong value loaded!";
+		expression load{ "str = loadstr \"" + myfile.fpath().str() + "\"", varcache };
+		REQUIRE_NO_EXCEPT( load.evaluate( varcache ) ) << "Failed to load!";
+		WANT_EQ( "Hello World!", varcache.get( name_str )->actualString().stdstr() ) << "Wrong value loaded!";
 
-		expression del{ "delete \"" + myfile.fpath().str() + "\"", vars };
-		WANT_NO_EXCEPT( result = del.evaluate( vars ) ) << "Failed to delete!";
+		expression del{ "delete \"" + myfile.fpath().str() + "\"", varcache };
+		WANT_NO_EXCEPT( result = del.evaluate( varcache ) ) << "Failed to delete!";
 		WANT_FALSE( myfile.exists() ) << "File not deleted!";
 	}
 
 	TEST( ExpressionTest, str_elm )
 	{
-		vars::variables vars;
-		expression expr{ "x = \"Hello World!\"[4]", vars };
-		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
-		WANT_EQ( 'o', static_cast<char>( vars.get( name::get( "x" ) )->actualChar() ) );
+		vars::variables varcache;
+		expression expr{ "x = \"Hello World!\"[4]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( 'o', static_cast<char>( varcache.get( name::get( "x" ) )->actualChar() ) );
+	}
+	TEST( ExpressionTest, str_negpos_elm )
+	{
+		vars::variables varcache;
+		expression expr{ "x = \"Hello World!\"[-4]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( 'r', static_cast<char>( varcache.get( name::get( "x" ) )->actualChar() ) );
 	}
 	TEST( ExpressionTest, raw_elm )
 	{
-		vars::variables vars;
-		vars.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
-		expression expr{ "x = r[1]", vars };
-		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
-		WANT_EQ( "two", vars.get( name::get( "x" ) )->actualString().stdstr() );
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
+		expression expr{ "x = r[1]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "two", varcache.get( name::get( "x" ) )->actualString().stdstr() );
+	}
+	TEST( ExpressionTest, raw_negpos_elm )
+	{
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
+		expression expr{ "x = r[-1]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "three", varcache.get( name::get( "x" ) )->actualString().stdstr() );
 	}
 	TEST( ExpressionTest, bin_elm )
 	{
-		vars::variables vars;
-		vars.set( name::get( "b" ), vars::valueptr( new vars::binaryval( hex( "abc" ) ) ) );
-		expression expr{ "x = b[1]", vars };
-		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
-		WANT_EQ( 98, vars.get( name::get( "x" ) )->actualInt() );
+		vars::variables varcache;
+		varcache.set( name::get( "b" ), vars::valueptr( new vars::binaryval( hex( "abc" ) ) ) );
+		expression expr{ "x = b[1]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( 98, varcache.get( name::get( "x" ) )->actualInt() );
+	}
+	TEST( ExpressionTest, bin_negpos_elm )
+	{
+		vars::variables varcache;
+		varcache.set( name::get( "b" ), vars::valueptr( new vars::binaryval( hex( "abc" ) ) ) );
+		expression expr{ "x = b[-3]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( 97, varcache.get( name::get( "x" ) )->actualInt() );
 	}
 	TEST( ExpressionTest, tuple_pos_elm )
 	{
-		vars::variables vars;
-		expression expr{ "x = {1, a=test, three=3.0}[1]", vars };
-		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
-		WANT_EQ( name_test, vars.get( name::get( "x" ) )->actualName() );
+		vars::variables varcache;
+		expression expr{ "x = {1, a=test, three=3.0}[1]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( name_test, varcache.get( name::get( "x" ) )->actualName() );
+	}
+	TEST( ExpressionTest, tuple_negpos_elm )
+	{
+		vars::variables varcache;
+		expression expr{ "x = {1, a=test, three=3.0}[-1]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( 3.0, varcache.get( name::get( "x" ) )->actualFloat() );
 	}
 	TEST( ExpressionTest, tuple_name_elm )
 	{
-		vars::variables vars;
-		expression expr{ "x = {1, a=test, three=3.0}[#a]", vars };
-		REQUIRE_NO_EXCEPT( expr.evaluate( vars ) );
-		WANT_EQ( name_test, vars.get( name::get( "x" ) )->actualName() );
+		vars::variables varcache;
+		expression expr{ "x = {1, a=test, three=3.0}[#a]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( name_test, varcache.get( name::get( "x" ) )->actualName() );
+	}
+
+	TEST( ExpressionTest, str_slice )
+	{
+		vars::variables varcache;
+		expression expr{ "x = \"Hello World!\"[3:6]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "lo W", varcache.get( name::get( "x" ) )->actualString().stdstr() );
+	}
+	TEST( ExpressionTest, str_negpos_slice )
+	{
+		vars::variables varcache;
+		expression expr{ "x = \"Hello World!\"[-8:-5]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "o Wo", varcache.get( name::get( "x" ) )->actualString().stdstr() );
+	}
+	TEST( ExpressionTest, raw_slice )
+	{
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
+		expression expr{ "x = r[1:2]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "two,three", string( "," ).join( varcache.get( name::get( "x" ) )->actualRaw() ).stdstr() );
 	}
 
 	TEST( ExpressionTest, trim )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "b = trim (a = trim \"  str  \")", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "b = trim (a = trim \"  str  \")", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto vara = vars.get( name::get( "a" ) );
+		auto vara = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( vara && vara->isString() ) << "Didn't get variable a";
 		WANT_EQ( "str", vara->actualString().stdstr() ) << "Wrong variable value a";
-		auto varb = vars.get( name::get( "a" ) );
+		auto varb = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( varb && varb->isString() ) << "Didn't get variable b";
 		WANT_EQ( "str", varb->actualString().stdstr() ) << "Wrong variable value b";
 	}
 	TEST( ExpressionTest, rtrim )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "b = rtrim (a = rtrim \"  str  \")", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "b = rtrim (a = rtrim \"  str  \")", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto vara = vars.get( name::get( "a" ) );
+		auto vara = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( vara && vara->isString() ) << "Didn't get variable a";
 		WANT_EQ( "  str", vara->actualString().stdstr() ) << "Wrong variable value a";
-		auto varb = vars.get( name::get( "a" ) );
+		auto varb = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( varb && varb->isString() ) << "Didn't get variable b";
 		WANT_EQ( "  str", varb->actualString().stdstr() ) << "Wrong variable value b";
 	}
 	TEST( ExpressionTest, ltrim )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "b = ltrim (a = ltrim \"  str  \")", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "b = ltrim (a = ltrim \"  str  \")", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto vara = vars.get( name::get( "a" ) );
+		auto vara = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( vara && vara->isString() ) << "Didn't get variable a";
 		WANT_EQ( "str  ", vara->actualString().stdstr() ) << "Wrong variable value a";
-		auto varb = vars.get( name::get( "a" ) );
+		auto varb = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( varb && varb->isString() ) << "Didn't get variable b";
 		WANT_EQ( "str  ", varb->actualString().stdstr() ) << "Wrong variable value b";
 	}
@@ -1076,90 +1129,114 @@ namespace eon
 	TEST( ExpressionTest, len_str )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = len \"0123456789\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len \"0123456789\"", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 10, var->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, len_raw )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = len |\n  one\n  two\n  three", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len |\n  one\n  two\n  three", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 3, var->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, len_bin)
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = len %0A417D", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len %0A417D", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 3, var->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, len_tuple )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = len {one two three}", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = len {one two three}", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 3, var->actualInt() ) << "Wrong variable value";
 	}
 
-	TEST( ExpressionTest, resize_grow )
+	TEST( ExpressionTest, resize_str_grow )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = \"one\" resize 5", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = \"one\" resize 5", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
-			<< "Failed to evaluate";
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
 		WANT_EQ( "one  ", var->actualString().stdstr() ) << "Wrong variable value";
 	}
-	TEST( ExpressionTest, resize_shrink )
+	TEST( ExpressionTest, resize_str_shrink )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "a = \"one\" resize 1", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "a = \"one\" resize 1", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
-			<< "Failed to evaluate";
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) ) << "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a" ) );
+		auto var = varcache.get( name::get( "a" ) );
 		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
 		WANT_EQ( "o", var->actualString().stdstr() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, resize_raw_grow )
+	{
+		expression expr;
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::rawval::create( { "one", "two" } ) );
+		REQUIRE_NO_EXCEPT( expr = expression( "a = r resize 5", varcache ) );
+		vars::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) ) << "Failed to evaluate";
+		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
+		auto var = varcache.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isRaw() ) << "Didn't get variable";
+		WANT_EQ( "one,two,,,", string( "," ).join( var->actualRaw() ).stdstr() ) << "Wrong variable value";
+	}
+	TEST( ExpressionTest, resize_raw_shrink )
+	{
+		expression expr;
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::rawval::create( { "one", "two" } ) );
+		REQUIRE_NO_EXCEPT( expr = expression( "a = r resize 1", varcache ) );
+		vars::valueptr val;
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) ) << "Failed to evaluate";
+		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
+		auto var = varcache.get( name::get( "a" ) );
+		REQUIRE_TRUE( var && var->isRaw() ) << "Didn't get variable";
+		WANT_EQ( "one", string( "," ).join( var->actualRaw() ).stdstr() ) << "Wrong variable value";
 	}
 
 	TEST( ExpressionTest, type1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "typeof \"str\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "typeof \"str\"", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isName() );
 		WANT_TRUE( val->actualName() == name_string );
@@ -1167,10 +1244,10 @@ namespace eon
 	TEST( ExpressionTest, type2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "typeof 3.14", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "typeof 3.14", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isName() );
 		WANT_TRUE( val->actualName() == name_float );
@@ -1179,10 +1256,10 @@ namespace eon
 	TEST( ExpressionTest, isname1 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "isname \"012alpha_21\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "isname \"012alpha_21\"", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isBool() );
 		WANT_TRUE( val->actualBool() );
@@ -1190,10 +1267,10 @@ namespace eon
 	TEST( ExpressionTest, isname2 )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "isname \"012al pha_21\"", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "isname \"012al pha_21\"", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isBool() );
 		WANT_FALSE( val->actualBool() );
@@ -1202,13 +1279,13 @@ namespace eon
 	TEST( ExpressionTest, name )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "tovar(\"a\" + tostring 2) = 99.9", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "tovar(\"a\" + tostring 2) = 99.9", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "a2" ) );
+		auto var = varcache.get( name::get( "a2" ) );
 		REQUIRE_TRUE( var && var->isFloat() ) << "Didn't get variable";
 		WANT_EQ( 99.9, var->actualFloat() ) << "Wrong variable value";
 	}
@@ -1216,8 +1293,8 @@ namespace eon
 	TEST( ExpressionTest, double_parenthesis )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "((5-1)/(4-2))*3", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "((5-1)/(4-2))*3", varcache ) );
 		WANT_EQ( "5 1 - 4 2 - / 3 *",
 			expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ(
@@ -1227,30 +1304,30 @@ namespace eon
 	TEST( ExpressionTest, complex_len )
 	{
 		expression expr;
-		vars::variables vars;
-		vars.set( name_token, vars::stringval::create( "    " ) );
+		vars::variables varcache;
+		varcache.set( name_token, vars::stringval::create( "    " ) );
 		REQUIRE_NO_EXCEPT( expr = expression(
-			"(indentation = len token if not tobool (ltrim token) else 0)", vars ) );
+			"(indentation = len token if not tobool (ltrim token) else 0)", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "indentation" ) );
+		auto var = varcache.get( name::get( "indentation" ) );
 		REQUIRE_TRUE( var && var->isInt() ) << "Didn't get variable";
 		WANT_EQ( 4, var->actualInt() ) << "Wrong variable value";
 	}
 	TEST( ExpressionTest, complex_if_else )
 	{
 		expression expr;
-		vars::variables vars;
-		vars.set( name_name, vars::stringval::create( "one" ) );
+		vars::variables varcache;
+		varcache.set( name_name, vars::stringval::create( "one" ) );
 		REQUIRE_NO_EXCEPT( expr = expression(
-			"id=\"namespace__\" + ((parent_id + \"__\") if tobool parent_id else \"\") + name", vars ) );
+			"id=\"namespace__\" + ((parent_id + \"__\") if tobool parent_id else \"\") + name", varcache ) );
 		vars::valueptr val;
-		REQUIRE_NO_EXCEPT( val = expr.evaluate( vars ) )
+		REQUIRE_NO_EXCEPT( val = expr.evaluate( varcache ) )
 			<< "Failed to evaluate";
 		REQUIRE_TRUE( val->isVariable() ) << "Wrong value type";
-		auto var = vars.get( name::get( "id" ) );
+		auto var = varcache.get( name::get( "id" ) );
 		REQUIRE_TRUE( var && var->isString() ) << "Didn't get variable";
 		WANT_EQ( "namespace__one", var->actualString().stdstr() ) << "Wrong variable value";
 	}
@@ -1258,8 +1335,8 @@ namespace eon
 	TEST( ExpressionTest, multiple )
 	{
 		expression expr;
-		vars::variables vars;
-		REQUIRE_NO_EXCEPT( expr = expression( "x = 1 + 2; x > 2", vars ) );
+		vars::variables varcache;
+		REQUIRE_NO_EXCEPT( expr = expression( "x = 1 + 2; x > 2", varcache ) );
 		WANT_EQ( "x 1 2 + =; x 2 >", expr.postfixStr().stdstr() ) << "Bad postfix expression";
 		WANT_EQ( "x = 1 + 2; x > 2", expr.infixStr().stdstr() ) << "Bad infix expression";
 	}
@@ -1267,14 +1344,14 @@ namespace eon
 	TEST( ExpressionTest, stress )
 	{
 		expression expr;
-		vars::variables vars;
+		vars::variables varcache;
 		eon::string str{ "tag = \"Even stephen\" if toint number mod 2 == 0 else \"N/A\"; "
 			"ln = letter + \":\" + tostring number; "
 			"sz = len letter; "
 			"_match = m if letter match ?/^.*?@<m>(p.*i).*$/ else \"N/A\"" };
 		try
 		{
-			expr = expression( std::move( str ), vars );
+			expr = expression( std::move( str ), varcache );
 		}
 		catch( eon::exception& e )
 		{
@@ -1327,13 +1404,13 @@ namespace eon
 		auto start = clock.now();
 		for( int i = 0; i < rounds; ++i )
 		{
-			vars.set( letter, letters[ l ] );
-			vars.set( number, numbers[ n ] );
-			REQUIRE_NO_EXCEPT( expr.evaluate( vars ) ) << "Failed to evaluate at round " << eon::string( i ).stdstr();
-			result.push_back( vars.get( tag )->targetString( vars ) + ","
-				+ vars.get( ln )->convertTargetString( vars ) + ","
-				+ vars.get( sz )->convertTargetString( vars ) + ","
-				+ vars.get( match )->targetString( vars ) );
+			varcache.set( letter, letters[ l ] );
+			varcache.set( number, numbers[ n ] );
+			REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) ) << "Failed to evaluate at round " << eon::string( i ).stdstr();
+			result.push_back( varcache.get( tag )->targetString( varcache ) + ","
+				+ varcache.get( ln )->convertTargetString( varcache ) + ","
+				+ varcache.get( sz )->convertTargetString( varcache ) + ","
+				+ varcache.get( match )->targetString( varcache ) );
 			if( ++l == letters.size() )
 				l = 0;
 			if( ++n == numbers.size() )

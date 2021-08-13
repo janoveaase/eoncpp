@@ -49,7 +49,7 @@ namespace eon
 			inline bool convertBool() const override {
 				return Val == name_true || Val == name_yes || Val == name_active || Val == name_on; }
 			inline name_t convertName() const override { return Val; }
-			inline string convertString() const override { return *Val; }
+			inline string convertString() const override { return Val ? *Val : ""; }
 			inline name_t convertVariable() const override { return Val; }
 
 			//* Get an identical copy

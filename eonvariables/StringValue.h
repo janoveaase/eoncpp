@@ -53,10 +53,11 @@ namespace eon
 			inline char_t convertChar() const override { return Val.empty() ? '\0' : *Val.begin(); }
 			inline int64_t convertInt() const override { return Val.toInt64(); }
 			inline double convertFloat() const override { return Val.toDouble(); }
-			inline name_t convertName() const override { return name::get( Val ); }
+			inline name_t convertName() const override { auto n = name::get( Val ); if( n ) return n; else
+				throw NoConversion( "Cannot convert string to name - illegal characters in string!" ); }
 			inline string convertString() const override { return Val; }
 			inline nameref convertReference() const override { return nameref( Val ); }
-			inline name_t convertVariable() const override  { return name::get( Val ); }
+			inline name_t convertVariable() const override  { return convertName(); }
 
 			//* Get an identical copy
 			inline valueptr copy() const override { return valueptr( new stringval( Val ) ); }
