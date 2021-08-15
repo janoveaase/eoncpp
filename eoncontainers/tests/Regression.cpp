@@ -37,6 +37,18 @@ namespace eon
 		REQUIRE_EQ( 2, revs.size() );
 		WANT_EQ( "gamma", revs[ 0 ] );
 		WANT_EQ( "beta", revs[ 1 ] );
+		revs = strings.slice( -1, -2 );
+		REQUIRE_EQ( 2, revs.size() );
+		WANT_EQ( "delta", revs[ 0 ] );
+		WANT_EQ( "gamma", revs[ 1 ] );
+
+		vector<std::string> one;
+		REQUIRE_NO_EXCEPT( one = strings.slice( 1, 1 ) );
+		REQUIRE_EQ( 1, one.size() );
+		WANT_EQ( "beta", one[ 0 ] );
+		REQUIRE_NO_EXCEPT( one = strings.slice( -1, -1 ) );
+		REQUIRE_EQ( 1, one.size() );
+		WANT_EQ( "delta", one[ 0 ] );
 	}
 
 	TEST( VectorTest, contains )

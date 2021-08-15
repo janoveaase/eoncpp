@@ -585,7 +585,7 @@ namespace eon
 			}
 
 			// Keep reading until indentation drops below main indentation
-			std::vector<string> lines;
+			vector<string> lines;
 			string line;
 			while( TP )
 			{

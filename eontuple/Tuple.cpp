@@ -893,7 +893,7 @@ namespace eon
 			throw Invalid( "Attribute \"" + location->path( varcache ).str()
 				+ "\": 'format' validation failed!" );
 	}
-	void tuple::_validateFormat( vars::valueptr meta, const tuple* location, const std::vector<string>& value,
+	void tuple::_validateFormat( vars::valueptr meta, const tuple* location, const vector<string>& value,
 		vars::variables& varcache ) const
 	{
 		if( !meta->isRegex() )

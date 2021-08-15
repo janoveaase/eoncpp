@@ -26,8 +26,8 @@ namespace eon
 		public:
 
 			inline rawval() : value( type_code::raw_t ) {}
-			inline rawval( const std::vector<string>& val ) : value( type_code::raw_t ) { Val = val; }
-			inline rawval( std::vector<string>&& val ) noexcept : value( type_code::raw_t ) { Val = std::move( val ); }
+			inline rawval( const vector<string>& val ) : value( type_code::raw_t ) { Val = val; }
+			inline rawval( vector<string>&& val ) noexcept : value( type_code::raw_t ) { Val = std::move( val ); }
 
 
 
@@ -37,8 +37,8 @@ namespace eon
 		public:
 
 			static inline valueptr create() { return valueptr( new rawval() ); }
-			static inline valueptr create( const std::vector<string>& value ) { return valueptr( new rawval( value ) ); }
-			static inline valueptr create( std::vector<string>&& value ) noexcept {
+			static inline valueptr create( const vector<string>& value ) { return valueptr( new rawval( value ) ); }
+			static inline valueptr create( vector<string>&& value ) noexcept {
 				return valueptr( new rawval( std::move( value ) ) ); }
 
 
@@ -48,8 +48,8 @@ namespace eon
 			******************************************************************/
 		public:
 
-			inline const std::vector<string>& actualRaw() const override { return Val; }
-			inline const std::vector<string>& targetRaw( variables& vars ) const override { return Val; }
+			inline const vector<string>& actualRaw() const override { return Val; }
+			inline const vector<string>& targetRaw( variables& vars ) const override { return Val; }
 			inline string convertString() const override { return string( "\n" ).join( Val.begin(), Val.end() ); }
 
 			//* Get an identical copy
@@ -78,7 +78,7 @@ namespace eon
 			inline void setActual( valueptr new_value ) override {
 				if( new_value && new_value->isRaw() ) Val = new_value->actualRaw(); else throw WrongType(); }
 
-			inline std::vector<string>& raw_value() override { return Val; }
+			inline vector<string>& raw_value() override { return Val; }
 
 			//* Clear value
 			inline void clear() noexcept override { Val.clear(); }
@@ -91,7 +91,7 @@ namespace eon
 			// Attributes
 			//
 		private:
-			std::vector<string> Val;
+			vector<string> Val;
 		};
 	}
 }

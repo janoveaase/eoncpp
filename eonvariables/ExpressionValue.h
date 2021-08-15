@@ -65,7 +65,7 @@ namespace eon
 				return Val.evaluate( vars )->targetName( vars ); }
 			inline const string& targetString( variables& vars ) const override {
 				return Val.evaluate( vars )->targetString( vars ); }
-			inline const std::vector<string>& targetRaw( variables& vars ) const override {
+			inline const vector<string>& targetRaw( variables& vars ) const override {
 				return Val.evaluate( vars )->targetRaw( vars ); }
 			inline const hex& targetBinary( variables& vars ) const override {
 				return Val.evaluate( vars )->targetBinary( vars ); }

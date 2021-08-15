@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(EonVariables LANGUAGES CXX)
 message(STATUS " - EonVariables")
 
-set(VARIABLS_HEADERS
+set(VARIABLES_HEADERS
 	Value.h
 	BoolValue.h
 	CharValue.h
@@ -24,7 +24,7 @@ set(VARIABLS_HEADERS
 	Operators.h
 	Variables.h
 )
-set(VARIABLS_SOURCES
+set(VARIABLES_SOURCES
 	Value.cpp
 	RawValue.cpp
 	BinaryValue.cpp
@@ -36,7 +36,7 @@ set(VARIABLS_SOURCES
 	Variables.cpp
 )
 
-add_library(EonVariables STATIC ${VARIABLS_HEADERS} ${VARIABLS_SOURCES})
+add_library(EonVariables STATIC ${VARIABLES_HEADERS} ${VARIABLES_SOURCES})
 set_target_properties(
 	EonVariables
 	PROPERTIES
@@ -46,7 +46,7 @@ set_target_properties(
 set_property(TARGET EonVariables PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonVariables PUBLIC EonString
-	EonName EonExcept EonHex EonRegex EonExpression EonFileSys
+	EonName EonExcept EonContainers EonHex EonRegex EonExpression EonFileSys
 )
 target_include_directories(EonVariables PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"

@@ -71,7 +71,7 @@ namespace eon
 			inline const string& targetString( variables& vars ) const override {
 				auto found = vars.get( actualVariable() );
 				if( found ) return found->targetString( vars ); throw NotFound(); }
-			inline const std::vector<string>& targetRaw( variables& vars ) const override {
+			inline const vector<string>& targetRaw( variables& vars ) const override {
 				auto found = vars.get( actualVariable() );
 				if( found ) return found->targetRaw( vars ); throw NotFound(); }
 			inline const hex& targetBinary( variables& vars ) const override {

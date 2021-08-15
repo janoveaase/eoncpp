@@ -16,6 +16,20 @@ namespace eon
 	template<typename T>
 	class vector
 	{
+	public:
+		using key_type = T;
+		using mapped_type = T;
+		using value_type = T;
+		using reference = T&;
+		using const_reference = const T&;
+		using iterator = typename std::vector<T>::iterator;
+		using const_iterator = typename std::vector<T>::const_iterator;
+		using reverse_iterator = typename std::vector<T>::reverse_iterator;
+		using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
+
+
+
+
 		/**********************************************************************
 		  Construction
 		**********************************************************************/
@@ -25,7 +39,7 @@ namespace eon
 		inline vector( const vector& other ) { Elements = other.Elements; }
 		inline vector( vector&& other ) noexcept { Elements = std::move( other.Elements ); }
 		inline vector( std::initializer_list<T> elements ) { Elements.assign( elements ); }
-		inline vector( size_t count, const T& init_elm ) { Elements.assign( size, init_elm ); }
+		inline vector( size_t count, const_reference init_elm ) { Elements.assign( size, init_elm ); }
 		template<class InputIt>
 		inline vector( InputIt beg, InputIt end ) { Elements.assign( beg, end ); }
 
@@ -51,30 +65,32 @@ namespace eon
 
 		// Access elements where negative positions count from the end of the
 		// vector. I.e., -1 = last element.
-		inline const T& at( int64_t pos ) const { return Elements.at( _pos( pos ) ); }
-		inline T& at( int64_t pos ) { return Elements.at( _pos( pos ) ); }
-		inline const T& operator[]( int64_t pos ) const { return Elements[ _pos( pos ) ]; }
-		inline T& operator[]( int64_t pos ) { return Elements[ _pos( pos ) ]; }
+		inline const_reference at( int64_t pos ) const { return Elements.at( _pos( pos ) ); }
+		inline reference at( int64_t pos ) { return Elements.at( _pos( pos ) ); }
+		inline const_reference operator[]( int64_t pos ) const { return Elements[ _pos( pos ) ]; }
+		inline reference operator[]( int64_t pos ) { return Elements[ _pos( pos ) ]; }
 
-		inline void assign( size_t count, const T& value ) { Elements.assign( count, value ); }
+		inline void assign( size_t count, const_reference value ) { Elements.assign( count, value ); }
 		template<class InputIt>
 		inline void assign( InputIt beg, InputIt end ) { Elements.assign( beg, end ); }
 		inline void assign( std::initializer_list<T> elements ) { Elements.assign( elements ); }
 
-		inline const T& front() const { return Elements.front(); }
-		inline T& front() { return Elements.front(); }
-		inline const T& back() const { return Elements.back(); }
-		inline T& back() { return Elements.back(); }
+		inline const_reference front() const { return Elements.front(); }
+		inline reference front() { return Elements.front(); }
+		inline const_reference back() const { return Elements.back(); }
+		inline reference back() { return Elements.back(); }
 
 		// Get a slice of the vector
 		// Negative positions count from the end of the vector.
 		// If first < last, then the slice will be reversed.
-		inline vector<T> slice( int64_t first, int64_t last ) const { auto f = _pos( first ), l = _pos( last );
-			return f <= l ? vector<T>( begin() + f, begin() + l + 1 ) : vector<T>( rbegin() + l, rbegin() + ( f + 1 ) ); }
+		inline vector<T> slice( int64_t first, int64_t last ) const { auto f = _pos( first ), l = _pos( last ); return
+			f <= l ? vector<T>( begin() + f, begin() + ( l + 1 ) )
+				: vector<T>( rbegin() + ( static_cast<size_t>( -first ) - 1 ), rbegin() + static_cast<size_t>( -last ) ); }
 
 		// Check if elements is contained within this vector
 		// Uses linear searching!
-		inline bool contains( const T& element ) const noexcept { return std::find( begin(), end(), element ) != end(); }
+		inline bool contains( const_reference element ) const noexcept {
+			return std::find( begin(), end(), element ) != end(); }
 
 
 
@@ -83,11 +99,6 @@ namespace eon
 		  Iteration
 		**********************************************************************/
 	public:
-
-		using iterator = typename std::vector<T>::iterator;
-		using const_iterator = typename std::vector<T>::const_iterator;
-		using reverse_iterator = typename std::vector<T>::reverse_iterator;
-		using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
 
 		inline iterator begin() noexcept { return Elements.begin(); }
 		inline iterator end() noexcept { return Elements.end(); }
@@ -133,9 +144,9 @@ namespace eon
 
 		inline void clear() noexcept { Elements.clear(); }
 
-		inline iterator insert( const_iterator pos, const T& element ) { return Elements.insert( pos, element ); }
-		inline iterator insert( const_iterator pos, T&& element ) { return Elements.insert( pos, std::move( element ) ); }
-		inline iterator insert( const_iterator pos, size_t count, const T& element ) {
+		inline iterator insert( const_iterator pos, const_reference element ) { return Elements.insert( pos, element ); }
+		inline iterator insert( const_iterator pos, T& element ) { return Elements.insert( pos, std::move( element ) ); }
+		inline iterator insert( const_iterator pos, size_t count, const_reference element ) {
 			return Elements.insert( pos, count, element ); }
 		template<class InputIt>
 		inline iterator insert( const_iterator pos, InputIt beg, InputIt end ) { return Elements.insert( pos, beg, end ); }
@@ -145,13 +156,13 @@ namespace eon
 		inline iterator erase( const_iterator pos ) { return Elements.erase( pos ); }
 		inline iterator erase( const_iterator beg, const_iterator end ) { return Elements.erase( beg, end ); }
 
-		inline void push_back( const T& value ) { Elements.push_back( value ); }
+		inline void push_back( const_reference value ) { Elements.push_back( value ); }
 		inline void push_back( T&& value ) { Elements.push_back( std::move( value ) ); }
 
 		inline void pop_back() { Elements.pop_back(); }
 
 		inline void resize( size_t new_size ) { Elements.resize( new_size ); }
-		inline void resize( size_t new_size, const T& value ) { Elements.resize( new_size, value ); }
+		inline void resize( size_t new_size, const_reference value ) { Elements.resize( new_size, value ); }
 
 		inline void swap( vector<T>& other ) noexcept { Elements.swap( other.Elements ); }
 

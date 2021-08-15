@@ -6,7 +6,7 @@
 #include <eonname/NameRef.h>
 #include <eonexpression/Expression.h>
 #include <eontuple/Tuple.h>
-//#include "Operators.h"
+#include <eoncontainers/Vector.h>
 #include "Variables.h"
 
 
@@ -151,7 +151,7 @@ namespace eon
 			
 			virtual name_t actualName() const { throw WrongType(); }
 			virtual const string& actualString() const { throw WrongType(); }
-			virtual const std::vector<string>& actualRaw() const { throw WrongType(); }
+			virtual const vector<string>& actualRaw() const { throw WrongType(); }
 			virtual const hex& actualBinary() const { throw WrongType(); }
 			virtual const regex& actualRegex() const { throw WrongType(); }
 			virtual const nameref& actualReference() const { throw WrongType(); }
@@ -207,7 +207,7 @@ namespace eon
 
 			virtual name_t targetName( variables& vars ) const { throw WrongType(); }
 			virtual const string& targetString( variables& vars ) const { throw WrongType(); }
-			virtual const std::vector<string>& targetRaw( variables& vars ) const { throw WrongType(); }
+			virtual const vector<string>& targetRaw( variables& vars ) const { throw WrongType(); }
 			virtual const hex& targetBinary( variables& vars ) const { throw WrongType(); }
 			virtual const regex& targetRegex( variables& vars ) const { throw WrongType(); }
 			virtual const nameref& targetReference( variables& vars ) const { throw WrongType(); }
@@ -281,7 +281,7 @@ namespace eon
 			//* Throws [eon::vars::WrongType] if you try to access the wrong
 			//* type
 			virtual string& string_value() { throw WrongType(); }
-			virtual std::vector<eon::string>& raw_value() { throw WrongType(); }
+			virtual vector<eon::string>& raw_value() { throw WrongType(); }
 			virtual hex& binary_value() { throw WrongType(); }
 			virtual expression& expression_value() { throw WrongType(); }
 			virtual tuple& meta_value() { throw WrongType(); }

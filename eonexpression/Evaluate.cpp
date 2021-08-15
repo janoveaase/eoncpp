@@ -123,7 +123,7 @@ namespace eon
 				case vars::operators::code::loadraw:
 				{
 					auto str = file( arg1->evaluate( varcache )->targetString( varcache ) ).loadText();
-					return vars::rawval::create( str.splitSequential<std::vector<string>>( '\n' ) );
+					return vars::rawval::create( str.splitSequential<vector<string>>( '\n' ) );
 				}
 				case vars::operators::code::loadbin:
 					return vars::binaryval::create(
@@ -690,16 +690,7 @@ namespace eon
 					return vars::charval::create( *val1->actualString().slice(
 						val2->actualInt(), val2->actualInt() ).begin() );
 				case vars::type_code::raw_t:
-				{
-					auto pos = val2->actualInt();
-					auto p = static_cast<size_t>( pos < 0 ? -pos : pos );
-					if( pos < 0 )
-						return vars::stringval::create( val1->actualRaw().at(
-							p >= val1->actualRaw().size() ? 0 : val1->actualRaw().size() - p ) );
-					else
-						return vars::stringval::create( val1->actualRaw().at(
-							p < val1->actualRaw().size() ? p : val1->actualRaw().size() - 1 ) );
-				}
+					return vars::stringval::create( val1->actualRaw().at( val2->actualInt() ) );
 				case vars::type_code::binary_t:
 				{
 					auto pos = val2->actualInt();
@@ -810,9 +801,7 @@ namespace eon
 				case vars::type_code::string_t:
 					return vars::stringval::create( val1->actualString().slice( val2->actualInt(), val3->actualInt() ) );
 				case vars::type_code::raw_t:
-					return vars::rawval::create( std::vector<string>(
-						val1->actualRaw().begin() + static_cast<size_t>( val2->actualInt() ),
-						val1->actualRaw().begin() + static_cast<size_t>( val3->actualInt() ) + 1 ) );
+					return vars::rawval::create( val1->actualRaw().slice( val2->actualInt(), val3->actualInt() ) );
 				default:
 					throw unsupported( vars::operators::code::slice, val1, val2, val3 );
 			}

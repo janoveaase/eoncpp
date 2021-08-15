@@ -21,7 +21,7 @@ set_target_properties(
 set_property(TARGET EonTuple PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonTuple PUBLIC EonString EonVariables
-	EonName EonExcept EonHex EonRegex EonExpression EonFileSys
+	EonName EonExcept EonContainers EonHex EonRegex EonExpression EonFileSys
 )
 target_include_directories(EonTuple PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"

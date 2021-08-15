@@ -17,6 +17,15 @@ namespace eon
 	template<typename T>
 	class stack
 	{
+		using key_type = T;
+		using mapped_type = T;
+		using value_type = T;
+		using reference = T&;
+		using const_reference = const T&;
+
+
+
+
 		/**********************************************************************
 		  Construction
 		**********************************************************************/
@@ -49,13 +58,13 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		inline T& top() { return Elements.back(); }
-		inline const T& top() const { return Elements.back(); }
+		inline reference top() { return Elements.back(); }
+		inline const_reference top() const { return Elements.back(); }
 
 		// Positive positions count from the top of the stack (meaning 0=top),
 		// while negative count from the bottom (meaning -1=bottom).
-		inline T& at( int64_t pos ) { return Elements.at( -( ++pos ) ); }
-		inline const T& at( int64_t pos ) const { return Elements.at( -( ++pos ) ); }
+		inline reference at( int64_t pos ) { return Elements.at( -( ++pos ) ); }
+		inline const_reference at( int64_t pos ) const { return Elements.at( -( ++pos ) ); }
 
 
 
@@ -85,11 +94,11 @@ namespace eon
 
 		inline void clear() noexcept { Elements.clear(); }
 
-		inline void push( const T& element ) { Elements.push_back( element ); }
+		inline void push( const_reference element ) { Elements.push_back( element ); }
 		inline void pop() { Elements.pop_back(); }
 
 		inline void resize( size_t new_size ) { Elements.resize( new_size ); }
-		inline void resize( size_t new_size, const T& value ) { Elements.resize( new_size, value ); }
+		inline void resize( size_t new_size, const_reference value ) { Elements.resize( new_size, value ); }
 
 		inline void swap( stack<T>& other ) noexcept { Elements.swap( other.Elements ); }
 

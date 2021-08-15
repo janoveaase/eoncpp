@@ -1077,6 +1077,22 @@ namespace eon
 		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
 		WANT_EQ( "two,three", string( "," ).join( varcache.get( name::get( "x" ) )->actualRaw() ).stdstr() );
 	}
+	TEST( ExpressionTest, raw_negpos_slice )
+	{
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
+		expression expr{ "x = r[-2:-1]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "two,three", string( "," ).join( varcache.get( name::get( "x" ) )->actualRaw() ).stdstr() );
+	}
+	TEST( ExpressionTest, raw_negpos_reverse_slice )
+	{
+		vars::variables varcache;
+		varcache.set( name::get( "r" ), vars::valueptr( new vars::rawval( { "one", "two", "three" } ) ) );
+		expression expr{ "x = r[-1:-2]", varcache };
+		REQUIRE_NO_EXCEPT( expr.evaluate( varcache ) );
+		WANT_EQ( "three,two", string( "," ).join( varcache.get( name::get( "x" ) )->actualRaw() ).stdstr() );
+	}
 
 	TEST( ExpressionTest, trim )
 	{

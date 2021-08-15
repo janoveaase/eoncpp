@@ -5,6 +5,7 @@
 #include <eonexcept/Exception.h>
 #include <eonname/NameRef.h>
 #include <eonhex/Hex.h>
+#include <eoncontainers/Vector.h>
 #include "Attribute.h"
 
 
@@ -33,25 +34,6 @@ namespace eon
 	**************************************************************************/
 	class tuple
 	{
-/*	public:
-		using key_type = name_t;
-		using mapped_type = vars::valueptr;
-		using value_type = std::pair<const name_t, name_t>;
-		using allocator_type = typename _Mybase::allocator_type;
-		using size_type = typename _Mybase::size_type;
-		using difference_type = typename _Mybase::difference_type;
-		using pointer = typename _Mybase::pointer;
-		using const_pointer = typename _Mybase::const_pointer;
-		using reference = value_type&;
-		using const_reference = const value_type&;
-		using iterator = typename _Mybase::iterator;
-		using const_iterator = typename _Mybase::const_iterator;
-		using reverse_iterator = typename _Mybase::reverse_iterator;
-		using const_reverse_iterator = typename _Mybase::const_reverse_iterator;*/
-
-
-
-
 		/**********************************************************************
 		  Defintions
 		**********************************************************************/
@@ -274,8 +256,8 @@ namespace eon
 		**********************************************************************/
 	public:
 
-		using iterator = std::vector<attributeptr>::iterator;
-		using const_iterator = std::vector<attributeptr>::const_iterator;
+		using iterator = vector<attributeptr>::iterator;
+		using const_iterator = vector<attributeptr>::const_iterator;
 
 		inline iterator begin() noexcept { return Attributes.begin(); }
 		inline iterator end() noexcept { return Attributes.end(); }
@@ -359,7 +341,7 @@ namespace eon
 		void _validateFormat( vars::valueptr meta, const tuple* location,
 			const string& value, vars::variables& vars ) const;
 		void _validateFormat( vars::valueptr meta, const tuple* location,
-			const std::vector<string>& value, vars::variables& vars ) const;
+			const vector<string>& value, vars::variables& vars ) const;
 
 		void _validateFlags( vars::valueptr meta, const tuple* location, const tuple& value,
 			const vars::variables& vars ) const;
@@ -381,7 +363,7 @@ namespace eon
 		//
 	private:
 
-		std::vector<attributeptr> Attributes;
+		vector<attributeptr> Attributes;
 		std::unordered_map<name_t, attributeptr> Named;
 		form Form{ form::plain };
 		tuple* Parent{ nullptr };
