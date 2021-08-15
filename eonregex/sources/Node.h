@@ -78,6 +78,9 @@ namespace eon
 			using stack = std::stack<RxData, std::vector<RxData>>;
 			inline stack _stack() { std::vector<RxData> data; data.reserve( 53 ); return stack( std::move( data ) ); }
 
+		public:
+			virtual size_t _countMinCharsRemaining() noexcept = 0;
+
 
 		private:
 			bool matchSingle( RxData& data, size_t steps );
@@ -90,12 +93,12 @@ namespace eon
 
 			bool matchNext( RxData& data, size_t steps );
 
-		private:
+		protected:
 			Node* Next{ nullptr };
+			size_t MinCharsRemaining{ 0 };
 			Quantifier Quant;
 			bool Name{ false };
 			bool Open{ true };
-		protected:
 			substring Source;
 			NodeType Type{ NodeType::undef };
 

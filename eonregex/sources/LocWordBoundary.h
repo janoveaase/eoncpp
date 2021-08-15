@@ -37,6 +37,8 @@ namespace eon
 		private:
 			bool _match( RxData& data, size_t steps ) override;
 			inline string _strStruct() const override { return "\\b"; }
+			inline size_t _countMinCharsRemaining() noexcept override {
+				return MinCharsRemaining = Next ? Next->_countMinCharsRemaining() : 0; }
 		};
 
 		/*
@@ -60,6 +62,9 @@ namespace eon
 		private:
 			bool _match( RxData& data, size_t steps ) override;
 			inline string _strStruct() const override { return "\\B"; }
+			
+			inline size_t _countMinCharsRemaining() noexcept override {
+				return MinCharsRemaining = Next ? Next->_countMinCharsRemaining() : 0; }
 		};
 	}
 }

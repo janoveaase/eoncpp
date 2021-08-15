@@ -41,6 +41,12 @@ namespace eon
 
 		bool Node::match( RxData& data, size_t steps )
 		{
+			// If there are fewer characters remaining than the minimum
+			// required characters remaining of the pattern, we can report
+			// failure right now!
+			if( data.remaining() < MinCharsRemaining )
+				return false;
+
 			// Cases:
 			// 1 single match
 			// 2 zero or one
@@ -130,6 +136,8 @@ namespace eon
 				{
 					matches.push( matches.top() );
 					matches.top().advance();
+					if( MinCharsRemaining > 0 && matches.top().remaining() < MinCharsRemaining - 1 )
+						return;
 				}
 				if( Next == nullptr )
 					matches.pop();

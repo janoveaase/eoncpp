@@ -30,5 +30,22 @@ namespace eon
 			}
 			return false;
 		}
+
+		size_t OpOr::_countMinCharsRemaining() noexcept
+		{
+			MinCharsRemaining = 0;
+			for( auto node : Optionals )
+			{
+				auto min = node->_countMinCharsRemaining() * Quant.min();
+				if( min < MinCharsRemaining )
+				{
+					MinCharsRemaining = min;
+					if( min == 0 )
+						break;
+				}
+			}
+			MinCharsRemaining += Next ? Next->_countMinCharsRemaining() : 0;
+			return MinCharsRemaining;
+		}
 	}
 }

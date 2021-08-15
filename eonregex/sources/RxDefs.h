@@ -39,11 +39,10 @@ namespace eon
 		enum class Flag : char
 		{
 			none = 0x00,
-			icase = 0x01,			// Ignore case
-			lines = 0x02,			// Make ^ and $ apply to lines
-			speed = 0x04,			// Maximize speed
-			accuracy = 0x08,		// Maximize accuracy
-			optimize = 0x10			// Optimize during parsing
+			icase = 0x01,		// Ignore case
+			lines = 0x02,		// Make ^ and $ apply to lines
+			speed = 0x04,		// Maximize speed (for long and complex expressions)
+			accuracy = 0x08,	// Maximize accuracy (for long and complex expressions)
 		};
 
 		inline bool operator&( Flag a, Flag b ) noexcept { return static_cast<int>( a ) & static_cast<int>( b ); }

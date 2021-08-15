@@ -424,7 +424,7 @@ namespace eon
 	}
 	TEST( RegexTest, flags_legal )
 	{
-		string in{ R"(?/./ilsSo)" };
+		string in{ R"(?/./ilsS)" };
 		eonof docs;
 		REQUIRE_NO_EXCEPT( docs.parseReplace( in, name_test ) )
 			<< "Failed to parse";
@@ -436,7 +436,7 @@ namespace eon
 	}
 	TEST( RegexTest, flags_illegal )
 	{
-		string in{ R"(?/./ilsxo)" };
+		string in{ R"(?/./ilsx)" };
 		eonof docs;
 		REQUIRE_EXCEPT( docs.parseReplace( in, name_test ), EofBadSyntax )
 			<< "Failed to detect bad syntax";

@@ -118,8 +118,8 @@ namespace eon
 
 			Node* setQuantifier( ParseParam& param, size_t min, size_t max );
 
-			void optimize();
 			void removeDuplicates();
+			void countMinCharsRemaining();
 
 
 

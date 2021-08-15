@@ -635,4 +635,65 @@ namespace eon
 		std::cout << "Std regex (" << string::toString( s_successes )
 			<< "): " << string::toString( s_ms.count() ) << "ms\n";
 	}
+	TEST( SpeedCmp, eon_match_only )
+	{
+		eon::regex rx;
+		REQUIRE_NO_EXCEPT( rx =
+			R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" )
+			<< "Failed to parse Eon regex";
+		size_t count = 5000;
+#ifdef _DEBUG
+		count /= 10;
+#endif
+		std::map<string, bool> text{
+			{ "alpha: 1:99:7 beta .", true },
+			{ "beta: 01:3:18 alphabeta       .", true },
+			{ "gamma: 123:1:1 alpha  .", false },
+			{ "delta: 1:1:1 gamma  .", false },
+			{ "epsilon: 1:1:1 alpha .", false },
+			{ "zeta: 00:00:00 betaalpha      .", true },
+			{ "eta: 0::1 alpha .", false },
+			{ "theta: :: beta .", false },
+			{ "iota: 1:2:3 alpha.", false },
+			{ "kappa: 11:22:33 beta          .", true },
+			{ "lambda: 9:8:7 alphaalpha      .", true },
+			{ "mu: 1:2 alpha .", false },
+			{ "nu: 1.2:3 alpha .", false },
+			{ "xi: 1:2.3 alpha .", false },
+			{ "omikron: 2:2:2 alpha .", false },
+			{ "pi:: 1:2:3 alpha .", false },
+			{ "rho 1:2:3 alpha .", false },
+			{ "sigma: 1:1:1 alpha                                                                                          .", true },
+			{ "tau: 1,2,3 alpha .", false },
+			{ "upsilon: 1:2:3 beta .", false },
+			{ "phi:  1:2:3 alpha .", false },
+			{ "chi: 1 :2 :3 alpa .", false },
+			{ "psi: 1.:2.:3. alpha .", false },
+			{ "omega: 44:55:66 beta                                                                                                .", true }
+		};
+		std::chrono::steady_clock clock;
+		size_t successes = 0;
+
+		auto start = clock.now();
+		for( size_t i = 0; i < count; ++i )
+		{
+			for( auto& details : text )
+			{
+				bool match = false;
+				REQUIRE_NO_EXCEPT( match = static_cast<bool>( rx.match( details.first ) ) )
+					<< "Eon failed match on round #" << string::toString( i + 1 ) << ", text \"" << details.first << "\"";
+				WANT_TRUE( match == details.second )
+					<< "Eon bad match on round #" << string::toString( i + 1 ) << ", text \"" << details.first + "\"";
+				if( match == details.second )
+					++successes;
+			}
+		}
+		auto end = clock.now();
+
+		auto e_time = end - start;
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+
+		std::cout << "\nEon regex (" << string::toString( successes )
+			<< "): " << string::toString( ms.count() ) << "ms\n";
+	}
 }

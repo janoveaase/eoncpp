@@ -48,6 +48,9 @@ namespace eon
 
 			inline void _removeDuplicates( std::set<Node*>& removed ) override {
 				if( Head ) Head->removeDuplicates( removed ); }
+			inline size_t _countMinCharsRemaining() noexcept override {
+				return MinCharsRemaining = ( Head ? Head->_countMinCharsRemaining() * Quant.min() : 0 )
+					+ ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 
 			void _append( Node* node ) noexcept;
 			inline bool _locked() const noexcept { return _Cur == nullptr; }

@@ -63,12 +63,9 @@ namespace eon
 			if( *( chr + 1 ) != Separator )
 				parse();
 
-			// Do cheap optimizations without being asked
 			// TODO: Find out why matching runs slower with this done!
 			removeDuplicates();
-
-			if( MyFlags & Flag::optimize )
-				optimize();
+			countMinCharsRemaining();
 		}
 
 
@@ -98,9 +95,6 @@ namespace eon
 						break;
 					case 'S':
 						MyFlags |= Flag::accuracy;
-						break;
-					case 'o':
-						MyFlags |= Flag::optimize;
 						break;
 					default:
 						invalid += *last;
@@ -727,11 +721,6 @@ namespace eon
 		}
 
 
-		void Graph::optimize()
-		{
-//			removeDuplicates();
-			// "(a+)+" to "a+" ?
-		}
 		void Graph::removeDuplicates()
 		{
 			if( Head )
@@ -739,6 +728,11 @@ namespace eon
 				std::set<Node*> removed;
 				Head->removeDuplicates( removed );
 			}
+		}
+		void Graph::countMinCharsRemaining()
+		{
+			if( Head )
+				Head->_countMinCharsRemaining();
 		}
 	}
 }

@@ -36,6 +36,9 @@ namespace eon
 			inline bool _match( RxData& data, size_t step ) override { return data ? data.advance() : false; }
 
 			inline string _strStruct() const override { return "."; }
+
+			inline size_t _countMinCharsRemaining() noexcept override {
+				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}
 }

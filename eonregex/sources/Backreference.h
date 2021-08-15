@@ -40,6 +40,7 @@ namespace eon
 			inline string _strStruct() const override { return "@:<" + *Name + ">"; }
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return Name == dynamic_cast<const Backreference*>( &other )->Name; }
+			inline size_t _countMinCharsRemaining() noexcept override { return MinCharsRemaining = 0; }
 
 		private:
 			name_t Name{ no_name };
