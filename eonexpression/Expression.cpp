@@ -85,9 +85,9 @@ namespace eon
 		auto count = expr.count( ';' ) + 1;
 		source src( "expression", std::move( expr ) );
 		auto tokens = tokenizer()( src );
-		expr::opstack op_stack;
+		stack<vars::operators::code> op_stack;
 		op_stack.push( vars::operators::code::undef );
-		std::stack<expr::nodeptr> tree_stack;
+		stack<expr::nodeptr> tree_stack;
 		tokenparser parser( std::move( tokens ) );
 		vars::operators::code last_type{ vars::operators::code::undef };
 		while( parser )
@@ -116,7 +116,7 @@ namespace eon
 			Roots.push_back( node );
 	}
 
-	inline void runStack( tokenparser& parser, expr::opstack& op_stack, std::stack<expr::nodeptr>& tree_stack )
+	inline void runStack( tokenparser& parser, stack<vars::operators::code>& op_stack, stack<expr::nodeptr>& tree_stack )
 	{
 		auto op_type = op_stack.top();
 		if( op_type == vars::operators::code::open_square )
@@ -135,7 +135,7 @@ namespace eon
 		tree_stack.push( std::move( root ) );
 	}
 	void expression::_processToken( tokenparser& parser, vars::variables& vars, vars::operators::code& last_type,
-		expr::opstack& op_stack, std::stack<expr::nodeptr>& tree_stack )
+		stack<vars::operators::code>& op_stack, stack<expr::nodeptr>& tree_stack )
 	{
 		vars::operators::code type{ vars::operators::code::undef };
 		if( parser )
@@ -216,7 +216,7 @@ namespace eon
 						case vars::operators::code::open_square:
 							if( squares == 0 )
 							{
-								op_stack.replace( pos - 1, vars::operators::code::slice );
+								op_stack.at( pos - 1 ) = vars::operators::code::slice;
 								found = true;
 							}
 							else

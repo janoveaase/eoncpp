@@ -8,7 +8,6 @@ set(EXPRESSION_HEADERS
 	OperandNode.h
 	Expression.h
 	Evaluate.h
-	OperatorStack.h
 )
 set(EXPRESSION_SOURCES
 	Node.cpp
@@ -28,7 +27,7 @@ set_target_properties(
 set_property(TARGET EonExpression PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonExpression PUBLIC EonString
-	EonExcept EonTokenizer EonOF EonTuple EonFileSys
+	EonExcept EonTokenizer EonOF EonTuple EonFileSys EonContainers
 )
 target_include_directories(EonExpression PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
