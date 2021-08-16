@@ -38,8 +38,8 @@ namespace eon
 		vector() = default;
 		inline vector( const vector& other ) { Elements = other.Elements; }
 		inline vector( vector&& other ) noexcept { Elements = std::move( other.Elements ); }
-		inline vector( std::initializer_list<T> elements ) { Elements.assign( elements ); }
-		inline vector( size_t count, const_reference init_elm ) { Elements.assign( size, init_elm ); }
+		inline vector( std::initializer_list<T> elements ) { Elements = std::vector<T>( elements ); }
+		inline vector( size_t count, const T& init_elm ) { Elements = std::vector<T>( size, init_elm ); }
 		template<class InputIt>
 		inline vector( InputIt beg, InputIt end ) { Elements.assign( beg, end ); }
 
@@ -70,7 +70,7 @@ namespace eon
 		inline const_reference operator[]( int64_t pos ) const { return Elements[ _pos( pos ) ]; }
 		inline reference operator[]( int64_t pos ) { return Elements[ _pos( pos ) ]; }
 
-		inline void assign( size_t count, const_reference value ) { Elements.assign( count, value ); }
+		inline void assign( size_t count, const T& value ) { Elements.assign( count, value ); }
 		template<class InputIt>
 		inline void assign( InputIt beg, InputIt end ) { Elements.assign( beg, end ); }
 		inline void assign( std::initializer_list<T> elements ) { Elements.assign( elements ); }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(EonContainersTests LANGUAGES CXX)
 message(STATUS " - EonContainersTests")
 
-set(CONTANIERSTEST_HEADERS
+set(CONTAINERSTEST_HEADERS
 	Regression.h
 )
 set(CONTAINERSTEST_SOURCES
