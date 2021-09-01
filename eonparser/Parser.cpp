@@ -1,6 +1,4 @@
 #include "Parser.h"
-#include <eontuple/StringValue.h>
-#include <eonfilesys/FileSys.h>
 
 
 namespace eon
@@ -48,7 +46,7 @@ namespace eon
 	void parser::_showUsage()
 	{
 		std::cout << "Eon Parser Usage\n";
-		std::cout << App.path().base() + " <input> <output> <how>\n";
+		std::cout << App.fpath().base() + " <input> <output> <how>\n";
 		std::cout << "  input=<source>  : The source can be a file path, a directory path,\n";
 		std::cout << "                    (ending in a slash), a directory path (optionally\n";
 		std::cout << "                    ending in slash) followed by '::' and a regular\n";
@@ -124,7 +122,7 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		{
 			auto file = InputFiles.front();
 			InputFiles.pop();
-			std::cout << " - " << file.path().stdstr() << "\n";
+			std::cout << " - " << file.fpath().stdstr() << "\n";
 			_parse( file );
 		}
 		return 0;
@@ -150,8 +148,7 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 			auto meta = Docs.metadata( name );
 			if( !meta )
 				continue;
-			if( !meta->containsUnnamedValue( eon::name::get( "eonparser" ),
-				Docs.variables() ) )
+			if( !meta->containsUnnamedValue( eon::name::get( "eonparser" ) ) )
 				continue;
 			Doc = &Docs.doc( i );
 		}
@@ -160,16 +157,16 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 	void parser::_showInfo()
 	{
 		std::cout << "Parsing ";
-		std::cout << Doc->find( { name::get( "source_type" ) } )->hardString();
+		std::cout << Doc->find( { name::get( "source_type" ) } )->actualString();
 		std::cout << " files, generating ";
-		std::cout << Doc->find( { name_output } )->hardString();
+		std::cout << Doc->find( { name_output } )->actualString();
 		std::cout << " output inside \"";
-		std::cout << OutputDir.path().stdstr() << "\".\n";
+		std::cout << OutputDir.dpath().stdstr() << "\".\n";
 	}
 
 	void parser::_parse( const file& input_file )
 	{
-		source src( input_file.path(), input_file.loadText() );
+		source src( input_file.fpath(), input_file.loadText() );
 		_parse( src );
 	}
 	void parser::_parse( source& src )
@@ -181,28 +178,26 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 	}
 	bool parser::_parseStructure( tokenparser& tp, const tuple& structure )
 	{
-		Docs.variables().set( name_token, tup::valueptr(
-			new tup::stringval( tp.current().substr() ) ) );
+		Docs.variables().set( name_token, vars::valueptr( new vars::stringval( tp.current().substr() ) ) );
 		auto start = tp.pos();
 		for( size_t i = 0; i < structure.numAttributes(); ++i )
 		{
 			auto name = structure.name( i );
 			if( name == no_name )
 			{
-				if( structure.attribute( i )->isRef() )
+				if( structure.at( i )->isReference() )
 				{
-					auto target = dynamic_cast<tup::refval*>( &*structure.attribute( i ) )->target();
-					return _parseStructure( tp, target->hardTuple() );
+					auto target = dynamic_cast<vars::refval*>( &*structure.at( i ) )->target();
+					return _parseStructure( tp, target->actualTuple() );
 				}
-				if( _parseExplicit( tp, structure.attribute( i ) ) )
+				if( _parseExplicit( tp, structure.at( i ) ) )
 					return true;
 			}
 			else
 			{
 				if( name == name_loop )
 				{
-					if( _loop( tp, structure.metadata( name ),
-						structure.attribute( i )->tuple_value() ) )
+					if( _loop( tp, structure.metadata( name ), structure.at( i )->tuple_value() ) )
 						return true;
 				}
 			}
@@ -211,24 +206,24 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		return false;
 	}
 
-	bool parser::_parseExplicit( tokenparser& tp, tup::valueptr element )
+	bool parser::_parseExplicit( tokenparser& tp, vars::valueptr element )
 	{
 		switch( element->type() )
 		{
-			case tup::basic_type::char_t:
-				return _match( tp, element->softChar( Docs.variables() ) );
-			case tup::basic_type::int_t:
-				return _match( tp, element->softInt( Docs.variables() ) );
-			case tup::basic_type::float_t:
-				return _match( tp, element->softFloat( Docs.variables() ) );
-			case tup::basic_type::name_t:
-				return _match( tp, element->softName( Docs.variables() ) );
-			case tup::basic_type::string_t:
-			case tup::basic_type::var_t:
-			case tup::basic_type::expr_t:
-				return _match( tp, element->softString( Docs.variables() ) );
-			case tup::basic_type::meta_t:
-				return _executeMeta( tp, element->softMeta( Docs.variables() ) );
+			case vars::type_code::char_t:
+				return _match( tp, element->targetChar( Docs.variables() ) );
+			case vars::type_code::int_t:
+				return _match( tp, element->targetInt( Docs.variables() ) );
+			case vars::type_code::float_t:
+				return _match( tp, element->targetFloat( Docs.variables() ) );
+			case vars::type_code::name_t:
+				return _match( tp, element->targetName( Docs.variables() ) );
+			case vars::type_code::string_t:
+			case vars::type_code::var_t:
+			case vars::type_code::expr_t:
+				return _match( tp, element->targetString( Docs.variables() ) );
+			case vars::type_code::meta_t:
+				return _executeMeta( tp, element->targetMeta( Docs.variables() ) );
 		}
 		return false;
 	}
@@ -288,15 +283,14 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		const expression* condition{ nullptr };
 		string id;
 		name_t func{ no_name };
-		tup::valueptr argument;
+		vars::valueptr argument;
 		for( size_t i = 0; i < val.numAttributes(); ++i )
 		{
-			auto attribute = val.attribute( i );
+			auto attribute = val.at( i );
 			auto name = val.name( i );
 			if( name == no_name )
 			{
-				if( attribute->isName()
-					&& attribute->hardName() == name_optional )
+				if( attribute->isName() && attribute->actualName() == name_optional )
 					optional = true;
 			}
 			else if( name == name_match || name == name_skip )
@@ -305,10 +299,9 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 				argument = attribute;
 			}
 			else if( name == name_condition )
-				condition = &attribute->softExpression( Docs.variables() );
+				condition = &attribute->targetExpression( Docs.variables() );
 		}
-		auto cond = condition == nullptr ? true : condition->evaluate(
-			Docs.variables() )->softBool( Docs.variables() );
+		auto cond = condition == nullptr ? true : condition->evaluate( Docs.variables() )->targetBool( Docs.variables() );
 		if( !cond )
 			return false;
 		if( func == name_match )
@@ -318,17 +311,17 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		else
 			return false;
 	}
-	bool parser::_executeMatch( tokenparser& tp, const tuple& val, const tup::valueptr& argument, bool optional )
+	bool parser::_executeMatch( tokenparser& tp, const tuple& val, const vars::valueptr& argument, bool optional )
 	{
 		auto pos = tp.pos();
 		bool matched = false;
 		switch( argument->type() )
 		{
-			case tup::basic_type::ref_t:
-				matched = _matchReferenced( tp, argument->hardRef() );
+			case vars::type_code::ref_t:
+				matched = _matchReferenced( tp, argument->actualReference() );
 				break;
-			case tup::basic_type::tuple_t:
-				matched = _matchAlternates( tp, argument->hardTuple() );
+			case vars::type_code::tuple_t:
+				matched = _matchAlternates( tp, argument->actualTuple() );
 				break;
 		}
 		if( !matched && optional )
@@ -338,14 +331,14 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		}
 		return matched;
 	}
-	bool parser::_executeSkip( tokenparser& tp, const tuple& val, const tup::valueptr& argument, bool optional )
+	bool parser::_executeSkip( tokenparser& tp, const tuple& val, const vars::valueptr& argument, bool optional )
 	{
 		auto pos = tp.pos();
 		bool matched = false;
 		switch( argument->type() )
 		{
-			case tup::basic_type::tuple_t:
-				matched = _skipAll( tp, argument->hardTuple() );
+			case vars::type_code::tuple_t:
+				matched = _skipAll( tp, argument->actualTuple() );
 				break;
 		}
 		if( !matched && optional )
@@ -359,29 +352,28 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 	{
 		for( size_t i = 0; i < alternates.numAttributes(); ++i )
 		{
-			auto attribute = alternates.attribute( i );
+			auto attribute = alternates.at( i );
 			switch( attribute->type() )
 			{
-				case tup::basic_type::ref_t:
-					if( _matchReferenced( tp, attribute->hardRef() ) )
+				case vars::type_code::ref_t:
+					if( _matchReferenced( tp, attribute->actualReference() ) )
 						return true;
 			}
 		}
 		return false;
 	}
-	bool parser::_matchReferenced( tokenparser& tp, const tup::path& ref )
+	bool parser::_matchReferenced( tokenparser& tp, const nameref& ref )
 	{
 		auto target = Doc->find( ref );
 		if( !target || !target->isTuple() )
 			return false;
-		auto structure = target->hardTuple().attribute( name_structure );
+		auto structure = target->actualTuple().at( name_structure );
 		if( !structure || !structure->isTuple() )
 			return false;
-		if( !_parseStructure( tp, structure->hardTuple() ) )
+		if( !_parseStructure( tp, structure->actualTuple() ) )
 			return false;
 		if( ref.last() == name_include )
-			_handleIncludeInput( target->hardTuple().attribute(
-				name_locate )->hardTuple() );
+			_handleIncludeInput( target->actualTuple().at( name_locate )->actualTuple() );
 		return true;
 	}
 	bool parser::_skipAll( tokenparser& tp, const tuple& elements )
@@ -391,21 +383,20 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 			bool skip = false;
 			for( size_t i = 0; i < elements.numAttributes(); ++i )
 			{
-				auto attribute = elements.attribute( i );
+				auto attribute = elements.at( i );
 				switch( attribute->type() )
 				{
-					case tup::basic_type::name_t:
+					case vars::type_code::name_t:
 					{
-						auto name = attribute->hardName();
+						auto name = attribute->actualName();
 						if( name == name_space )
 							skip = tp.skipSpaces();
 						break;
 					}
-					case tup::basic_type::char_t:
+					case vars::type_code::char_t:
 					{
 						if( tp.current().substr().numChars() == 1
-							&& *tp.current().substr().begin()
-								== attribute->hardChar() )
+							&& *tp.current().substr().begin() == attribute->actualChar() )
 							skip = true;
 						break;
 					}
@@ -427,24 +418,21 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 		const expression* condition{ nullptr };
 		for( size_t i = 0; i < metadata->numAttributes(); ++i )
 		{
-			auto what = metadata->attribute( i )->softName( Docs.variables() );
+			auto what = metadata->at( i )->targetName( Docs.variables() );
 			if( what == name_while )
-				condition = &metadata->attribute( ++i )->softExpression(
-					Docs.variables() );
+				condition = &metadata->at( ++i )->targetExpression( Docs.variables() );
 		}
 
 		if( condition )
 		{
-			while( tp && condition->evaluate( Docs.variables() )->softBool(
-				Docs.variables() ) )
+			while( tp && condition->evaluate( Docs.variables() )->targetBool( Docs.variables() ) )
 			{
 				_parseStructure( tp, structure );
 
 				tp.forward();
 				if( !tp )
 					return true;
-				Docs.variables().set( name_token, tup::valueptr(
-					new tup::stringval( tp.current().substr() ) ) );
+				Docs.variables().set( name_token, vars::valueptr( new vars::stringval( tp.current().substr() ) ) );
 			}
 		}
 		return true;
@@ -458,10 +446,10 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 			if( name != no_name )
 			{
 				auto& meta = locate.metadata( name );
-				if( meta->containsUnnamedValue( name_section, Docs.variables() ) )
-					_handleIncludeInput( locate.attribute( i )->hardTuple() );
+				if( meta->containsUnnamedValue( name_section ) )
+					_handleIncludeInput( locate.at( i )->actualTuple() );
 				else
-					_execute( name, *meta, locate.attribute( i )->hardTuple() );
+					_execute( name, *meta, locate.at( i )->actualTuple() );
 			}
 		}
 	}
@@ -474,15 +462,12 @@ auto str = Docs.doc( name::get( "docgen_cpp" ) ).str();
 	{
 		static name_t fexists = name::get( "file_exists" );
 
-		auto func = args.attribute( 0 )->softName( Docs.variables() );
+		auto func = args.at( 0 )->targetName( Docs.variables() );
 		bool condition = false;
 
 		if( func == fexists )
-			condition = path(
-				args.attribute( 1 )->softExpression(
-					Docs.variables() ).evaluate(
-						Docs.variables() )->softString(
-							Docs.variables() ) ).exists();
+			condition = path( args.at( 1 )->targetExpression( Docs.variables() ).evaluate( Docs.variables() )
+				->targetString( Docs.variables() ) ).exists();
 
 		if( !condition )
 			return;

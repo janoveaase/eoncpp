@@ -4,11 +4,9 @@ message(STATUS " - EonParser")
 
 set(PARSER_HEADERS
 	Parser.h
-	DocNode.h
 )
 set(PARSER_SOURCES
 	Parser.cpp
-	DocNode.cpp
 )
 
 add_library(EonParser STATIC ${PARSER_HEADERS} ${PARSER_SOURCES})
