@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <memory>
 #include <map>
+#include <locale>
 
 
 /******************************************************************************
@@ -162,6 +163,8 @@ namespace eon
 		//* this static method
 		static const Characters& get();
 
+		inline const std::locale& locale() const noexcept { return Locale; }
+
 		//* Check if a character belongs to the "other" categotry
 		inline bool isOther( char_t c ) const noexcept { return
 			isOtherControl( c ) || isOtherFormat( c )
@@ -298,6 +301,7 @@ namespace eon
 		// Attributes
 		//
 	private:
+		std::locale Locale{ "" };
 		const std::vector<char_t>* other_format{ nullptr };
 
 		const std::vector<char_t>* letter_upper_case{ nullptr };

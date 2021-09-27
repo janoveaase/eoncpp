@@ -28,8 +28,9 @@ namespace eon
 					return Value.Negate ? false : data.advance();
 				if( data.flags() & Flag::icase )
 				{
-					auto l = std::tolower( static_cast<int>( data() ) );
-					auto u = std::toupper( static_cast<int>( data() ) );
+					auto& chars = Characters::get();
+					auto l = std::tolower( static_cast<int>( data() ), chars.locale() );
+					auto u = std::toupper( static_cast<int>( data() ), chars.locale() );
 					if( l != u )
 					{
 						if( data() == l )
