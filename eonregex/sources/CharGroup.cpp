@@ -29,8 +29,8 @@ namespace eon
 				if( data.flags() & Flag::icase )
 				{
 					auto& chars = Characters::get();
-					auto l = std::tolower( data(), chars.locale() );
-					auto u = std::toupper( data(), chars.locale() );
+					auto l = std::tolower<char_t>( data(), chars.locale() );
+					auto u = std::toupper<char_t>( data(), chars.locale() );
 					if( l != u )
 					{
 						if( data() == l )
