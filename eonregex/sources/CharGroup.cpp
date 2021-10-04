@@ -29,13 +29,8 @@ namespace eon
 				if( data.flags() & Flag::icase )
 				{
 					auto& chars = Characters::get();
-#ifdef EON_APPLE
-					auto l = std::tolower<wchar_t>( static_cast<wchar_t>( data() ), chars.locale() );
-					auto u = std::toupper<wchar_t>( static_cast<wchar_t>( data() ), chars.locale() );
-#else
 					auto l = std::tolower<char_t>( data(), chars.locale() );
 					auto u = std::toupper<char_t>( data(), chars.locale() );
-#endif
 					if( l != u )
 					{
 						if( data() == l )
