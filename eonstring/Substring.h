@@ -100,8 +100,7 @@ namespace eon
 
 		//* Check if 'this' substring is for the same area (and has the same
 		//* ordering) as the 'other'
-		inline bool sameArea( const substring& other ) const
-			noexcept { return Beg == other.Beg && End == other.End; }
+		inline bool sameArea( const substring& other ) const noexcept { return Beg == other.Beg && End == other.End; }
 
 
 		//* Check ordering

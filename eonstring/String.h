@@ -178,6 +178,7 @@ namespace eon
 #endif
 		inline explicit string( float value ) { *this = toString( static_cast<double>( value ) ); }
 		inline explicit string( double value ) { *this = toString( value ); }
+		inline explicit string( long double value ) { *this = toString( value ); }
 
 
 		//* Default destructor
@@ -1117,8 +1118,8 @@ namespace eon
 			return NumChars < target_size ? *this + string( target_size - NumChars, fill ) : *this; }
 
 		//* Get a copy of the string, if it is shorter than 'target_size', add
-		//* enough copies of the the 'fill' codepoint on the left and side to
-		//* make it that long
+		//* enough copies of the the 'fill' codepoint on the left and right
+		//* side to make it that long
 		//* (Centers the string)
 		string padLeftAndRight( size_t target_size, char_t fill = SpaceChr ) const;
 
@@ -1147,7 +1148,7 @@ namespace eon
 
 
 		/**********************************************************************
-		  Numbers as Strings
+		  Strings as Numbers
 
 		  These methods provide various number operations to strings.
 		**********************************************************************/
@@ -1438,7 +1439,7 @@ namespace eon
 
 		//* Set locale (used by various compare methods).
 		//* The default is set automatically at startup!
-		static void setLocale( const std::string& name = ".utf8" );
+		static void setLocale( const std::string& name = "en_US.utf8" );
 
 		//* Convert other types into string (using 'std::to_string')
 		//* This method is limited to whatever is supported by

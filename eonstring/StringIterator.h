@@ -116,7 +116,7 @@ namespace eon
 		inline explicit string_iterator( const unsigned char* cstr ) noexcept {
 			_prep( (const char*)cstr, (const char*)cstr + strlen( (const char*)cstr ), (const char*)cstr ); }
 
-		//* Construct for a 'C-string', but set to a specific byte position
+		//* Construct for a 'C-string', but set to a specific byte length
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
 		inline string_iterator( const char* cstr, size_t size ) noexcept { _prep( cstr, cstr + size, cstr ); }
@@ -310,8 +310,7 @@ namespace eon
 		string_iterator& operator-=( size_t chars ) noexcept;
 
 		
-		//* Multiple characters in one go, possibly negative (counting from end
-		//* of the source string)
+		//* Move forward (positive) or backward (negative)
 		inline string_iterator& operator+=( int64_t chars ) noexcept {
 			return chars >= 0 ? *this += static_cast<size_t>( chars ) : *this -= static_cast<size_t>( -chars ); }
 		inline string_iterator& operator+=( int chars ) noexcept {
