@@ -301,7 +301,7 @@ namespace eon
 		// Attributes
 		//
 	private:
-		std::locale Locale{ "en_US.utf8" };
+		std::locale Locale;
 		const std::vector<char_t>* other_format{ nullptr };
 
 		const std::vector<char_t>* letter_upper_case{ nullptr };
