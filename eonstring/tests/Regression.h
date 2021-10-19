@@ -8,5 +8,6 @@
 namespace eon
 {
 	class Substring : public eontest::EonTest {};
+	class StaticString : public eontest::EonTest {};
 	class String : public eontest::EonTest {};
 }

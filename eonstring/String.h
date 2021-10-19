@@ -227,12 +227,11 @@ namespace eon
 		/** Assignment Operator **/
 
 		//* Assign a copy of another string
-		inline string& operator=( const string& other ) {
-			Bytes = other.Bytes; NumChars = other.NumChars; return *this; }
+		inline string& operator=( const string& other ) { Bytes = other.Bytes; NumChars = other.NumChars; return *this; }
 
 		//* Take ownership of the underlying string data from another string
-		inline string& operator=( string&& other ) noexcept { Bytes = std::move( other.Bytes );
-			NumChars = other.NumChars; other.NumChars = 0; return *this; }
+		inline string& operator=( string&& other ) noexcept {
+			Bytes = std::move( other.Bytes ); NumChars = other.NumChars; other.NumChars = 0; return *this; }
 
 
 		//* Assign from a substring
@@ -462,8 +461,7 @@ namespace eon
 		/** Find First Occurrence **/
 
 		//* Find first occurrence of another (equal or shorter) string
-		inline substring findFirst( const string& to_find ) const noexcept {
-			return substr().findFirst( to_find.substr() ); }
+		inline substring findFirst( const string& to_find ) const noexcept { return substr().findFirst( to_find.substr() ); }
 
 		//* Find first occurrence of another string, but limit search to the
 		//* specified 'sub' [eon::substring].
@@ -547,8 +545,8 @@ namespace eon
 		//* See [eon::substring::findFirstIgnoreSections] for how to customize
 		//* searches.
 		inline substring findFirstNotBraced( char_t cp, char_t brace = '(' ) const noexcept {
-			return substr().findFirstIgnoreSections( cp, brace,
-				brace == '(' ? ')' : brace == '[' ? ']' : brace == '{' ? '}' : brace ); }
+			return substr().findFirstIgnoreSections(
+				cp, brace, brace == '(' ? ')' : brace == '[' ? ']' : brace == '{' ? '}' : brace ); }
 
 
 		//* Find the first character in 'this' that differs from the 'other'
@@ -651,8 +649,7 @@ namespace eon
 
 		//* Count number of occurrences of the specified string
 		//* NOTE: All occurrences are counted, even overlaps!
-		inline size_t count( const string& to_count ) const noexcept {
-			return substr().count( to_count.substr() ); }
+		inline size_t count( const string& to_count ) const noexcept { return substr().count( to_count.substr() ); }
 
 		//* Count number of occurrences of the specified string, limit the
 		//* counting to the specified 'sub' [eon::substring].
@@ -682,13 +679,12 @@ namespace eon
 		/** Concatenation Assignments **/
 
 		//* Concatenate another string to 'this'
-		inline string& operator+=( const string& other ) {
-			Bytes += other.Bytes; NumChars += other.NumChars; return *this; }
+		inline string& operator+=( const string& other ) { Bytes += other.Bytes; NumChars += other.NumChars; return *this; }
 
 		//* Concatenate 'sub' [eon::substring] to 'this'
 		inline string& operator+=( const substring& sub ) {
-			if( sub.validUTF8() ) { Bytes.append( sub.begin().byteData(),
-				sub.numBytes() ); NumChars += sub.numChars(); return *this; }
+			if( sub.validUTF8() ) {
+				Bytes.append( sub.begin().byteData(), sub.numBytes() ); NumChars += sub.numChars(); return *this; }
 			else return *this += string( sub ); }
 
 		//* Concatename a std::string to 'this'
@@ -869,8 +865,7 @@ namespace eon
 
 		//* Get a copy of the entire string with all occurrences of 'find'
 		//* replaced with 'replacement'
-		inline string replace( char_t find, char_t replacement ) const {
-			return replace( find, replacement, substr() ); }
+		inline string replace( char_t find, char_t replacement ) const { return replace( find, replacement, substr() ); }
 		
 		//* Get a copy of the entire string with all occurrences of 'find'
 		//* within 'sub' [eon::substring] replaced with 'replacement'
@@ -1169,8 +1164,7 @@ namespace eon
 
 		//* Check if all characters in 'sub' [eon::substring] are ASCII digits
 		//* (only!)
-		inline bool isUInt( const substring& sub ) const {
-			sub.assertSameBuffer( Bytes.c_str() ); return sub.isUInt(); }
+		inline bool isUInt( const substring& sub ) const { sub.assertSameBuffer( Bytes.c_str() ); return sub.isUInt(); }
 
 
 		//* Check if all characters are ASCII digits (only!), prefixed by a
@@ -1179,8 +1173,7 @@ namespace eon
 
 		//* Check if all characters in 'sub' [eon::substring] are ASCII digits
 		//* (only!), prefixed by a single '+' or '-'
-		inline bool isInt( const substring& sub ) const {
-			sub.assertSameBuffer( Bytes.c_str() ); return sub.isInt(); }
+		inline bool isInt( const substring& sub ) const { sub.assertSameBuffer( Bytes.c_str() ); return sub.isInt(); }
 
 
 		//* Check if the string makes up an ASCII floating point number,
@@ -1474,8 +1467,7 @@ namespace eon
 		//* streaming/saving etc.):
 		//   "<byte pos>:<char pos>-<byte pos>:<char pos>"
 		//* (See matching [decodeIterator] method.)
-		static inline string encode( const substring& sub ) {
-			return encode( sub.begin() ) + "-" + encode( sub.end() ); }
+		static inline string encode( const substring& sub ) { return encode( sub.begin() ) + "-" + encode( sub.end() ); }
 
 
 		//* Get Byte Order Marker for UTF-8

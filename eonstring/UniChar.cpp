@@ -57,32 +57,22 @@ namespace eon
 	bool Characters::isLetterUpperCase( char_t c ) const noexcept
 	{
 		if( c <= 0xDE )
-			return ( c >= 0x41 && c <= 0x5A )
-			|| ( c >= 0xC0 && c <= 0xD6 )
-			|| ( c >= 0xD8 && c <= 0xDE );
+			return ( c >= 0x41 && c <= 0x5A ) || ( c >= 0xC0 && c <= 0xD6 ) || ( c >= 0xD8 && c <= 0xDE );
 		else
-			return std::binary_search(
-				letter_upper_case->begin(),
-				letter_upper_case->end(),
-				c );
+			return std::binary_search( letter_upper_case->begin(), letter_upper_case->end(), c );
 	}
 	bool Characters::isLetterLowerCase( char_t c ) const noexcept
 	{
 		if( c <= 0xFF )
-			return ( c >= 0x61 && c <= 0x7A )
-			|| ( c >= 0xDF && c <= 0xF6 )
-			|| ( c >= 0xF8 && c <= 0xFF );
+			return ( c >= 0x61 && c <= 0x7A ) || ( c >= 0xDF && c <= 0xF6 ) || ( c >= 0xF8 && c <= 0xFF );
 		else
-			return std::binary_search(
-				letter_lower_case->begin(),
-				letter_lower_case->end(),
-				c );
+			return std::binary_search( letter_lower_case->begin(), letter_lower_case->end(), c );
 	}
 	bool Characters::isLetterModifier( char_t c ) const noexcept
 	{
-		return ( c >= 0x2B0 && c <= 0x2C1 ) || ( c >= 0x2C6 && c <= 0x2D1 )
-			|| std::binary_search( letter_modifier->begin(),
-				letter_modifier->end(), c );
+		return ( c >= 0x2B0 && c <= 0x2C1 )
+			|| ( c >= 0x2C6 && c <= 0x2D1 )
+			|| std::binary_search( letter_modifier->begin(), letter_modifier->end(), c );
 	}
 
 

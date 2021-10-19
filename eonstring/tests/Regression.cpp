@@ -1,6 +1,7 @@
 #include "Regression.h"
 #include <set>
 #include <cfloat>
+#include <fstream>
 
 
 
@@ -27,6 +28,16 @@ namespace eon
 
 
 
+
+	TEST( StaticString, toString )
+	{
+		WANT_EQ( "1234", eon::string::toString( 1234 ).stdstr() );
+		WANT_EQ( "-1.23", eon::string::toString( -1.230 ).stdstr() );
+	}
+	TEST( StaticString, isLetter )
+	{
+		WANT_FALSE( eon::string::isLetter( '_' ) );
+	}
 
 	TEST( String, find )
 	{
