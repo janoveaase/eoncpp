@@ -1,5 +1,5 @@
 #pragma once
-#include "Source.h"
+#include <eonexcept/Exception.h>
 
 
 /******************************************************************************
@@ -8,79 +8,79 @@
 namespace eon
 {
 	/**************************************************************************
-	  Eon Source Position Class - eon::sourcepos
-
-	  A source position is a reference to a specific location within a source.
-	  It includes a line number and an [eon::substring] marking the portion of
-	  the source that is referenced.
+	  The 'source' namespace encloses all source functionality
 	**************************************************************************/
-	class sourcepos
+	namespace source
 	{
-	public:
-		//* Default construction, a non-reference
-		sourcepos() = default;
+		/**********************************************************************
+		  Eon Source Position Class - eon::source::Pos
 
-		//* Construct as a copy of the 'other' source position
-		inline sourcepos( const sourcepos& other ) noexcept { *this = other; }
+		  A source position is a reference to a specific location within a
+		  source (that is not known by the source position object).
+		  It contains a byte position from the start of the source, a character
+		  position from the start, a line number, and a position on that line.
+		**********************************************************************/
+		class Pos
+		{
+		public:
 
-		//* Construct for first characater of the specified 'source'
-		inline sourcepos( const source& source ) noexcept {
-			Line = 0; Area.begin() = source.data().begin();
-			Area.end() = Area.begin() + 1; }
+			//* Default construction, a non-reference
+			Pos() = default;
 
-		//* Construct for the specified 'line' and 'start' position (with end =
-		//* start + 1) 
-		inline sourcepos( size_t line, const string_iterator& start )
-			noexcept { Line = line; Area = substring( start, start + 1 ); }
+			//* Construct as a copy of the 'other' source position
+			inline Pos( const Pos& other ) noexcept { *this = other; }
 
-		//* Construct for the specified 'line' and [eon::substring] 'area'
-		inline sourcepos( size_t line, const substring& area ) noexcept {
-			Line = line; Area = area; }
+			//* Construct with specific details
+			inline Pos( size_t byte_pos, size_t char_pos, size_t line, size_t pos_on_line ) noexcept {
+				BytePos = byte_pos; CharPos = char_pos; Line = line; PosOnLine = pos_on_line; }
 
-		//* Default destruction
-		~sourcepos() = default;
-
-
-		//* Assign as a copy of the 'other' source position
-		inline sourcepos& operator=( const sourcepos& other ) noexcept {
-			Line = other.Line; Area = other.Area; return *this; }
-
-		//* Set the end of the source position reference
-		inline void setEnd( const string_iterator& end ) noexcept {
-			Area.end() = end; }
+			//* Default destruction
+			~Pos() = default;
 
 
-		//* Get the line number referenced
-		inline size_t line() const noexcept { return Line; }
-
-		//* Get the referenced area
-		const substring& area() const noexcept { return Area; }
-
-		//* Get the character number on the line
-		inline size_t pos( const source& source ) const noexcept {
-			return Line < source.numLines() ? Area.begin() - source.line(
-				Line ).begin() : 0; }
-
-		//* Get the number of characters referenced
-		inline size_t numChars() const noexcept { return Area.numChars(); }
+			//* Assign as a copy of the 'other' source position
+			inline Pos& operator=( const Pos& other ) noexcept {
+				BytePos = other.BytePos; CharPos = other.CharPos; Line = other.Line; PosOnLine = other.PosOnLine;
+				return *this; }
 
 
-		//* Check if 'this' source position is at the end of the 'source'
-		bool atEnd( const source& source ) const noexcept;
+			//* Check if the position is zero
+			inline operator bool() const noexcept { return BytePos > 0; }
 
-		//* Get character at 'this' source position
-		//* Returns 'eon::nochar' if invalid position for the 'source'.
-		char_t chr() const noexcept { return *Area.begin(); }
+			//* Get the raw byte position (counted from start of source)
+			inline size_t bytePos() const noexcept { return BytePos; }
 
-		//* Move 'this' source position to the next character in the source
-		//* Newline will cause line number to increment and position on line to
-		//* be zero.
-		//* NOTE: The number of characters will be ignored (and set to 1).
-		//* NOTE: This method will check [atEnd] and return 'false' if at end.
-		bool advance( const source& source ) noexcept;
+			//* Get the character position (counted from the start of source)
+			inline size_t charPos() const noexcept { return CharPos; }
 
-	private:
-		size_t Line{ 0 };
-		substring Area;
-	};
+			//* Get the line number
+			inline size_t line() const noexcept { return Line; }
+
+			//* Get the position on the lien
+			inline size_t posOnLine() const noexcept { return PosOnLine; }
+
+
+			//* Get line and position on line as string format
+			//* Format: <line>:<pos>
+			inline string str() const { return string( Line + 1 ) + ":" + string( PosOnLine + 1 ); }
+
+
+			//* Compare with another position - presumably from the same source
+			inline bool operator<( const Pos& other ) const noexcept { return BytePos < other.BytePos; }
+			inline bool operator<=( const Pos& other ) const noexcept { return BytePos <= other.BytePos; }
+			inline bool operator>( const Pos& other ) const noexcept { return BytePos > other.BytePos; }
+			inline bool operator>=( const Pos& other ) const noexcept { return BytePos >= other.BytePos; }
+			inline bool operator==( const Pos& other ) const noexcept { return BytePos == other.BytePos; }
+			inline bool operator!=( const Pos& other ) const noexcept { return BytePos != other.BytePos; }
+
+
+
+
+		public:
+			size_t BytePos{ 0 };
+			size_t CharPos{ 0 };
+			size_t Line{ 0 };
+			size_t PosOnLine{ 0 };
+		};
+	}
 }

@@ -6,8 +6,6 @@ namespace eon
 {
 	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
-#define UTF8_ACCEPT 0
-#define UTF8_REJECT 1
 	static const uint8_t utf8d[] = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00..1f
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20..3f
@@ -36,21 +34,21 @@ namespace eon
 
 	string_iterator::string_iterator( const string_iterator& source, const char* pos, size_t num_char ) noexcept
 	{
-		Begin = source.Begin;
-		End = source.End;
+		Source = source.Source;
+		SourceEnd = source.SourceEnd;
 		NumChars = source.NumChars;
 		ValidUTF8 = source.ValidUTF8;
 		Pos = pos;
 		NumChar = num_char;
-		if( NumChar == 0 && Pos != Begin )
+		if( NumChar == 0 && Pos != Source )
 			_utf8CharacterCount();
 		_translateCodepoint();
 	}
 
 	string_iterator& string_iterator::reset() noexcept
 	{
-		Begin = nullptr;
-		End = nullptr;
+		Source = nullptr;
+		SourceEnd = nullptr;
 		Pos = nullptr;
 		Codepoint = nochar;
 		CodepointSize = 0;
@@ -60,9 +58,9 @@ namespace eon
 	}
 	string_iterator& string_iterator::resetToBegin() noexcept
 	{
-		if( Pos != Begin )
+		if( Pos != Source )
 		{
-			Pos = Begin;
+			Pos = Source;
 			CodepointSize = 0;
 			NumChar = 0;
 			_translateCodepoint();
@@ -71,9 +69,9 @@ namespace eon
 	}
 	string_iterator& string_iterator::resetToEnd() noexcept
 	{
-		if( Pos != End )
+		if( Pos != SourceEnd )
 		{
-			Pos = End;
+			Pos = SourceEnd;
 			Codepoint = nochar;
 			CodepointSize = 0;
 			NumChar = NumChars;
@@ -86,7 +84,7 @@ namespace eon
 	string_iterator& string_iterator::operator++() noexcept
 	{
 		// Cannot increment if at the end
-		if( CodepointSize == 0 && Pos > Begin )
+		if( CodepointSize == 0 && Pos > Source )
 			return *this;
 
 		// Next byte position
@@ -94,7 +92,7 @@ namespace eon
 		Codepoint = nochar;		// Unknown at this time
 
 		// End of string?
-		if( Pos == End )
+		if( Pos == SourceEnd )
 		{
 			CodepointSize = 0;
 			NumChar = NumChars;
@@ -104,7 +102,7 @@ namespace eon
 		// Get the code point
 		char32_t state = 0;
 		CodepointSize = 1;			// Always at least 1 byte long
-		size_t max_char_len = ( End - Pos ) < 4 ? ( End - Pos ) : 4;
+		size_t max_char_len = ( SourceEnd - Pos ) < 4 ? ( SourceEnd - Pos ) : 4;
 		for( size_t i = 0; i < max_char_len; ++i, ++CodepointSize )
 		{
 			if( !_utf8Decode( state, Codepoint, static_cast<unsigned char>( *( Pos + i ) ) ) )
@@ -117,14 +115,14 @@ namespace eon
 	string_iterator& string_iterator::operator-=( size_t chars ) noexcept
 	{
 		// Cannot subtract if at the beginning
-		if( CodepointSize == 0 && Pos == Begin )
+		if( CodepointSize == 0 && Pos == Source )
 			return *this;
 
 		if( chars == 0 )
 			return *this;
 
 		// If at start, we stay at this position, but invalidate the iterator
-		if( Pos == Begin )
+		if( Pos == Source )
 		{
 			CodepointSize = 0;
 			Codepoint = nochar;
@@ -168,8 +166,8 @@ namespace eon
 
 	int string_iterator::compare( const string_iterator& other ) const noexcept
 	{
-		if( Begin != other.Begin )
-			return Begin < other.Begin ? -1 : Begin > other.Begin ? 1 : 0;
+		if( Source != other.Source )
+			return Source < other.Source ? -1 : Source > other.Source ? 1 : 0;
 		else if( atREnd() )
 			return other.atREnd() ? 0 : -1;
 		else if( other.atREnd() )
@@ -259,10 +257,10 @@ namespace eon
 
 	void string_iterator::_prep( const char* begin, const char* end, const char* pos ) noexcept
 	{
-		Begin = begin; End = end; Pos = pos;
+		Source = begin; SourceEnd = end; Pos = pos;
 		if( NumChars == 0 || ( pos > begin && NumChar == 0 ) )
 			_utf8CharacterCount();
-		if( Pos < End )
+		if( Pos < SourceEnd )
 			_translateCodepoint();
 	}
 
@@ -270,7 +268,7 @@ namespace eon
 	{
 		char32_t state = 0, cp = 0;
 		NumChars = 0;
-		for( auto c = Begin; c != End; ++c )
+		for( auto c = Source; c != SourceEnd; ++c )
 		{
 			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
 			{
@@ -281,13 +279,13 @@ namespace eon
 		}
 		ValidUTF8 = state == UTF8_ACCEPT;
 		if( !ValidUTF8 )
-			NumChars = End - Begin;
+			NumChars = SourceEnd - Source;
 	}
 
 	void string_iterator::_translateCodepoint() noexcept
 	{
 		Codepoint = nochar;
-		if( Pos == End )
+		if( Pos == SourceEnd )
 		{
 			CodepointSize = 0;
 			return;
@@ -302,7 +300,7 @@ namespace eon
 		}
 
 		char32_t state = 0;
-		size_t max_char_len = ( End - Pos ) < 4 ? ( End - Pos ) : 4;
+		size_t max_char_len = ( SourceEnd - Pos ) < 4 ? ( SourceEnd - Pos ) : 4;
 		CodepointSize = 1;
 		for( size_t i = 0; i < max_char_len; ++i, ++CodepointSize )
 		{
@@ -314,7 +312,7 @@ namespace eon
 
 	void string_iterator::_advanceBytes( size_t bytes ) noexcept
 	{
-		if( bytes < static_cast<size_t>( End - Pos ) )
+		if( bytes < static_cast<size_t>( SourceEnd - Pos ) )
 		{
 			if( !atREnd() )
 				Pos += bytes;
@@ -324,7 +322,7 @@ namespace eon
 		}
 		else
 		{
-			Pos = End;
+			Pos = SourceEnd;
 			CodepointSize = 0;
 			Codepoint = nochar;
 			NumChar = NumChars;
@@ -332,7 +330,7 @@ namespace eon
 	}
 	void string_iterator::_retreatBytes( size_t bytes ) noexcept
 	{
-		if( bytes < static_cast<size_t>( Pos - Begin ) )
+		if( bytes < static_cast<size_t>( Pos - Source ) )
 		{
 			Pos -= bytes;
 			CodepointSize = 1;
@@ -341,7 +339,7 @@ namespace eon
 		}
 		else
 		{
-			Pos = End;
+			Pos = SourceEnd;
 			CodepointSize = 0;
 			Codepoint = nochar;
 			NumChar = NumChars;

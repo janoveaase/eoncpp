@@ -2,6 +2,7 @@
 
 #include <eontest/Test.h>
 #include <eonname/Name.h>
+#include <eonname/DefaultNames.h>
 #include <eonname/NameRef.h>
 #include <chrono>
 

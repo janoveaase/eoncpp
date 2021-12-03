@@ -3,14 +3,18 @@ project(EonSource LANGUAGES CXX)
 message(STATUS " - EonSource")
 
 set(SOURCE_HEADERS
-	Source.h
+	Raw.h
+	File.h
+	String.h
 	SourceRef.h
 	SourcePos.h
+	SourceReporter.h
 )
 set(SOURCE_SOURCES
-	Source.cpp
+	File.cpp
+	String.cpp
 	SourceRef.cpp
-	SourcePos.cpp
+	SourceReporter.cpp
 )
 
 add_library(EonSource STATIC ${SOURCE_HEADERS} ${SOURCE_SOURCES})

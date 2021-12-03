@@ -224,6 +224,7 @@ namespace eon
 		int64_t toUInt64() const;
 		inline size_t toSize() const { return (size_t)toUInt64(); }
 		double toDouble( char_t decimal_separator = PointChr ) const;
+		long double toLongDouble( char_t decimal_separator = PointChr ) const;
 
 
 		//* Assuming the entire substring is a number, get a reduced substring

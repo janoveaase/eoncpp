@@ -4,6 +4,7 @@ message(STATUS " - EonName")
 
 set(NAME_HEADERS
 	Name.h
+	DefaultNames.h
 	NameRef.h
 )
 set(NAME_SOURCES

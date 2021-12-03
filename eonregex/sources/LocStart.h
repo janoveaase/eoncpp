@@ -34,7 +34,7 @@ namespace eon
 
 		private:
 			inline bool _match( RxData& param, size_t steps ) override {
-				return param && ( param.pos().numChar() == 0 || ( param.lines() && param.prev( '\n' ) ) ); }
+				return param && ( param.pos() == param.source().begin() || ( param.lines() && param.prev( '\n' ) ) ); }
 			inline string _strStruct() const override { return "^"; }
 		};
 	}

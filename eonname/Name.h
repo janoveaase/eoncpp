@@ -44,81 +44,7 @@ namespace eon
 	  data structure.
 	**************************************************************************/
 
-	//* The defintion of 'eon::name_t'
-	using name_t = const string*;
-
-	//* Name 'null' value (invalid name)
-	static const name_t no_name{ nullptr };
-
-
-	//* Common names that can be accessed at no cost at any time
-	//* The string value of each name is the latter part, after the underscore.
-	extern const name_t name_undef;
-	extern const name_t name_bool;
-	extern const name_t name_byte;
-	extern const name_t name_char;
-	extern const name_t name_int;
-	extern const name_t name_int8;
-	extern const name_t name_int16;
-	extern const name_t name_int32;
-	extern const name_t name_int64;
-	extern const name_t name_float;
-	extern const name_t name_pos;
-	extern const name_t name_name;
-	extern const name_t name_type;
-	extern const name_t name_tuple;
-	extern const name_t name_bytes;
-	extern const name_t name_string;
-	extern const name_t name_binary;
-	extern const name_t name_regex;
-	extern const name_t name_true;
-	extern const name_t name_false;
-	extern const name_t name_complete;
-	extern const name_t name_key;
-	extern const name_t name_value;
-	extern const name_t name_raw;
-	extern const name_t name_meta;
-	extern const name_t name_function;
-	extern const name_t name_functions;
-	extern const name_t name_reference;
-	extern const name_t name_variable;
-	extern const name_t name_var;
-	extern const name_t name_expression;
-	extern const name_t name_docs;
-	extern const name_t name_b;
-	extern const name_t name_test;
-	extern const name_t name_title;
-	extern const name_t name_pattern;
-	extern const name_t name_optional;
-	extern const name_t name_yes;
-	extern const name_t name_no;
-	extern const name_t name_on;
-	extern const name_t name_off;
-	extern const name_t name_positive;
-	extern const name_t name_negative;
-	extern const name_t name_ok;
-	extern const name_t name_cancel;
-	extern const name_t name_active;
-	extern const name_t name_inactive;
-	extern const name_t name_abort;
-	extern const name_t name_output;
-	extern const name_t name_token;
-	extern const name_t name_scan;
-	extern const name_t name_loop;
-	extern const name_t name_while;
-	extern const name_t name_match;
-	extern const name_t name_condition;
-	extern const name_t name_id;
-	extern const name_t name_include;
-	extern const name_t name_structure;
-	extern const name_t name_locate;
-	extern const name_t name_section;
-	extern const name_t name_if;
-	extern const name_t name_skip;
-	extern const name_t name_space;
-	extern const name_t name_source;
-	extern const name_t name_target;
-	extern const name_t name_args;
+#include "DefaultNames.h"
 
 
 
@@ -138,21 +64,24 @@ namespace eon
 		//* Convert an [eon::string] into a name
 		//* Returns the name, [eon::no_name] if the 'source' string is not a
 		//* valid name.
-		static inline name_t get( const string& source ) {
-			return get( string( source ) ); }
-		static inline name_t get( const std::string& name ) {
-			return get( substring( name ) ); }
-		static inline name_t get( const char* name ) {
-			return get( substring( name ) ); }
+		static inline name_t get( const string& source ) { return get( string( source ) ); }
+		static inline name_t get( const std::string& name ) { return get( substring( name ) ); }
+		static inline name_t get( const char* name ) { return get( substring( name ) ); }
 		static name_t get( string&& source ) noexcept;
-
-		//* Check that the [eon::name_t] value is a registered name
-		//* Will return false on [eon::no_name]
-		static bool registered( name_t value );
 
 		//* Check if an [eon::string] is a valid name
 		//* NOTE: [eon::name::get] will call this!
 		static bool valid( const string& source ) noexcept;
+
+		//* Compiler version of 'get' - allows all characters
+		static inline name_t compilerGet( const string& source ) { return compilerGet( string( source ) ); }
+		static inline name_t compilerGet( const std::string& name ) { return compilerGet( substring( name ) ); }
+		static inline name_t compilerGet( const char* name ) { return compilerGet( substring( name ) ); }
+		static name_t compilerGet( string&& source ) noexcept;
+
+		//* Run compare on two names
+		//* Returns -1 if 'a' < 'b', 0 if 'a' == 'b' and 1 if 'a' > 'b'
+		static inline int compare( name_t a, name_t b ) noexcept { return a < b ? -1 : b < a ? 1 : 0; }
 
 
 

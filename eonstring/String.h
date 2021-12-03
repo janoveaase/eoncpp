@@ -178,6 +178,7 @@ namespace eon
 #endif
 		inline explicit string( float value ) { *this = toString( static_cast<double>( value ) ); }
 		inline explicit string( double value ) { *this = toString( value ); }
+		inline explicit string( long double value ) { *this = toString( value ); }
 
 
 		//* Default destructor
@@ -1198,22 +1199,25 @@ namespace eon
 		/* Convert String to Number */
 		inline int32_t toInt32() const { return substr().toInt32(); }
 		inline int32_t toInt32( const substring& area ) const {
-			area.assertSameBuffer( Bytes.c_str() ); return substr().toInt32(); }
+			area.assertSameBuffer( Bytes.c_str() ); return area.toInt32(); }
 		inline int64_t toInt64() const { return substr().toInt64(); }
 		inline int64_t toInt64( const substring& area ) const {
-			area.assertSameBuffer( Bytes.c_str() ); return substr().toInt64(); }
+			area.assertSameBuffer( Bytes.c_str() ); return area.toInt64(); }
 		inline uint32_t toUInt32() const { return substr().toUInt32(); }
 		inline uint32_t toUInt32( const substring& area ) const {
-			area.assertSameBuffer( Bytes.c_str() ); return substr().toUInt32(); }
+			area.assertSameBuffer( Bytes.c_str() ); return area.toUInt32(); }
 		inline uint64_t toUInt64() const { return substr().toUInt64(); }
 		inline uint64_t toUInt64( const substring& area ) const {
-			area.assertSameBuffer( Bytes.c_str() ); return substr().toUInt64(); }
+			area.assertSameBuffer( Bytes.c_str() ); return area.toUInt64(); }
 		inline size_t toSize() const { return substr().toSize(); }
 		inline size_t toSize( const substring& area ) const {
-			area.assertSameBuffer( Bytes.c_str() ); return substr().toSize(); }
+			area.assertSameBuffer( Bytes.c_str() ); return area.toSize(); }
 		inline double toDouble() const { return substr().toDouble(); }
 		inline double toDouble( const substring& area ) const {
-			area.assertSameBuffer( Bytes.c_str() ); return substr().toDouble(); }
+			area.assertSameBuffer( Bytes.c_str() ); return area.toDouble(); }
+		inline long double toLongDouble() const { return substr().toLongDouble(); }
+		inline long double toLongDouble( const substring& area ) const {
+			area.assertSameBuffer( Bytes.c_str() ); return area.toLongDouble(); }
 		/* (Non-numbers and non-ASCII numbers are defined as zero.) */
 
 

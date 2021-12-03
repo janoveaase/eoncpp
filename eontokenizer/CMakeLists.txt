@@ -5,10 +5,12 @@ message(STATUS " - EonTokenizer")
 set(TOKENIZER_HEADERS
 	Tokenizer.h
 	Token.h
+	ReTokenizer.h
 	TokenParser.h
 )
 set(TOKENIZER_SOURCES
 	Tokenizer.cpp
+	ReTokenizer.cpp
 	TokenParser.cpp
 )
 
@@ -21,7 +23,7 @@ set_target_properties(
 )
 set_property(TARGET EonTokenizer PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTokenizer PUBLIC EonString EonSource)
+target_link_libraries(EonTokenizer PUBLIC EonString EonSource EonRegex)
 target_include_directories(EonTokenizer PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonTokenizer

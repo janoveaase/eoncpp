@@ -310,9 +310,11 @@ namespace eon
 		if( area.numBytes() == 1 )
 			return upper( area );
 		else
+		{
 			return string( substr( begin(), area.begin() ) )
-			+ string( substr( area.begin(), area.begin() + 1 ) ).upper()
-			+ string( substr( area.begin() + 1 ) );
+				+ string( substr( area.begin(), area.begin() + 1 ) ).upper()
+				+ string( substr( area.begin() + 1 ) );
+		}
 	}
 	string string::ucWords( const substring& sub ) const
 	{
@@ -476,7 +478,7 @@ namespace eon
 				result += "U";
 				auto end = c + 1;
 				for( size_t i = 0; i < end.numByte(); ++i )
-					result += numToHex( *( c.byteData() + i ) );
+					result += byteToHex( *( c.byteData() + i ) );
 			}
 
 			else

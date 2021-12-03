@@ -1,9 +1,14 @@
 #pragma once
-#include <eonvariables/StringValue.h>
-#include <eonfilesys/FileSys.h>
+#include <eonsource/String.h>
+#include <eonsource/File.h>
+#include <eonsource/SourceReporter.h>
+#include <eontokenizer/Tokenizer.h>
+#include <eontokenizer/ReTokenizer.h>
+#include <eonfilesys/Path.h>
 #include <eonregex/RegEx.h>
-#include <eonof/Eof.h>
-#include <queue>
+#include <eonexpression/Expression.h>
+#include "ParseExpression.h"
+#include "ToolBox.h"
 
 
 /******************************************************************************
@@ -12,134 +17,74 @@
 namespace eon
 {
 	/**************************************************************************
-	  Eon Parser Class - eon::parser
+	  Eon Parser Class - eon::Parser
 
-	  The parser will read one or more EOF files, and given a file or directory
-	  + pattern, will parse the file(s) and generate output, all according to
-	  the EOF files.
+	  Parse Æon code, Æon Dynamic Tuple Format (DTF), and/or Æon expression.
 	**************************************************************************/
-	class parser : public vars::refsource
+	class Parser
 	{
 		/**********************************************************************
 		  Construction
 		**********************************************************************/
 	public:
 
-		parser() = default;
-		parser( const std::vector<string>& args ) noexcept;
+		//* Construct a place-holder object
+		Parser() = default;
 
-		//* Default destruction
-		virtual ~parser() = default;
+		//* Construct for parsing a string source
+		inline Parser( const string& source_name, string&& string_source, source::Reporter& reporter,
+			scope::Scope& parent_scope, scope::Frame& frame ) {
+			source::String src( source_name, std::move( string_source ) );
+			Tools.init( source::Ref( src ), reporter, parent_scope, frame ); }
+
+		//* Construct for parsing a file source
+		inline Parser( const path& file_path, source::Reporter& reporter, scope::Scope& parent_scope, scope::Frame& frame ) {
+			source::File src( file_path.str() ); Tools.init( source::Ref( src ), reporter, parent_scope, frame ); }
+
+		virtual ~Parser() = default;
 
 
 
 
 		/**********************************************************************
-		  Execution
+		  Preparations
 		**********************************************************************/
 	public:
 
-		int run() noexcept;
+		//* Parse the source from current position as Æon code, don't stop
+		//* until end of source (or fatal error)
+
+		//* Parse the source from current position as Æon Dynamic Tuple Format,
+		//* stop at end of EDT (or fatal error)
+
+		//* Parse the source from current position as Æon expression, stop at
+		//* end of expression
+		//* Can only occur in the following contexts: args, test, body, lambda,
+		//* switcher, trait
+		//* Returns true if parsed, false if not an expression or the
+		//*         expression has errors. (Errors are reported!)
+//		inline bool parseExpression( expression& result ) { return ParseExpression()( Tools, result ); }
 
 
 
 
-		/**********************************************************************
-		  Functions that can be called from expressions
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Helpers
+		//
 	private:
 
-		vars::valueptr _get( const nameref& ref, vars::valueptr context ) const noexcept override;
-		void _set( const nameref& ref, vars::valueptr context, vars::valueptr value ) override;
-
-		//* Skip the next token conditionally
-		//* The 'arg' argument can be one of the following types:
-		//*   char, name, string, regex
-		//*   The next token must match the value of this
-		//* Or a tuple containing one or more of those, in which case the
-		//* next token must match one of these to be skipped.
-		//* Or an int for number of tokens to skip.
-		//* Returns 'bool' true if skipped and false if not.
-		vars::valueptr _skip( vars::valueptr arg );
-
-		//* Match the next token, if it matches then advance tokens
-		//* The 'arg' argument can be one of the following types:
-		//*   char, int, float, name, string, regex
-		//* Or a tuple containing one or more of those, in which case the next
-		//* token must match one of these to be matched.
-		//* Returns 'bool' true if matched and false if not.
-		vars::valueptr _match( vars::valueptr args );
-
-		//* Create an error
-		//* The 'arg' argument must be a string!
-		//* Returns 'bool' false always!
-		vars::valueptr _error( vars::valueptr args );
-
-		//* Load a file
-		//* The 'arg' argument must be a string!
-		//* Returns 'int' - handle to the file.
-		vars::valueptr _loadfile( vars::valueptr args );
+		// Do the actual parsing
 
 
 
 
-		/**********************************************************************
-		  Helpers
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Attributes
+		//
 	private:
 
-		void _showUsage();
-		void _parseArgs( const std::vector<string>& args );
-		void _parseInput( const substring& input );
-
-		int _run();
-
-		void _validateDocs();
-		void _findDocument();
-		void _showInfo();
-
-		void _parse( const file& input_file );
-		void _parse( source& src );
-		bool _parseStructure( tokenparser& tp, const tuple& structure );
-
-		bool _parseExplicit( tokenparser& tp, vars::valueptr element );
-		bool _match( tokenparser& tp, char_t val );
-		bool _match( tokenparser& tp, int64_t val );
-		bool _match( tokenparser& tp, double val );
-		bool _match( tokenparser& tp, name_t val );
-		bool _match( tokenparser& tp, const string& val );
-		bool _executeMeta( tokenparser& tp, const tuple& val );
-		bool _executeMatch( tokenparser& tp, const tuple& val, const vars::valueptr& argument, bool optional );
-		bool _executeSkip( tokenparser& tp, const tuple& val, const vars::valueptr& argument, bool optional );
-		bool _matchAlternates( tokenparser& tp, const tuple& alternates );
-		bool _matchReferenced( tokenparser& tp, const nameref& ref );
-		bool _skipAll( tokenparser& tp, const tuple& elements );
-
-		bool _loop( tokenparser& tp, const tupleptr metadata,
-			const tuple& structure );
-
-		void _handleIncludeInput( const tuple& locate );
-		void _execute( name_t action, const tuple& args, const tuple& block );
-		void _executeIf( const tuple& args, const tuple& block );
-
-
-
-
-	private:
-		file App;
-		std::set<directory> InputDirs;
-//		std::queue<std::pair<path, regex>> ScanDirs;
-		std::queue<file> InputFiles;
-		directory OutputDir;
-		eonof Docs;
-		tuple* Doc{ nullptr };
-
-		enum class statecode
-		{
-			normal,
-			error,
-			usage
-		};
-		statecode State{ statecode::normal };
+		parser::ToolBox Tools;
 	};
 };

@@ -7,7 +7,7 @@ namespace eon
 	TEST( TokenizerTest, basic )
 	{
 		string raw{ "This is a 02   \tline test\nLine #2!" };
-		source src( "test", std::move( raw ) );
+		Source src( "test", std::move( raw ) );
 		auto tokens = tokenizer()( src );
 		REQUIRE_EQ( 18, tokens.size() ) << "Wrong number of tokens";
 

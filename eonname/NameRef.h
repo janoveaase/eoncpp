@@ -75,8 +75,7 @@ namespace eon
 
 			//* Get reference as a string
 			inline string str() const noexcept {
-				string s; for( auto name : Value ) { if( !s.empty() )
-					s += "/"; s += *name; } return s; }
+				string s{ "@" }; for( auto name : Value ) { if( s.numChars() > 2 ) s += "/"; s += *name; } return s; }
 
 
 			//* Get hash value

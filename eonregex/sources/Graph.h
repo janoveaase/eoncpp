@@ -31,7 +31,7 @@ namespace eon
 
 			inline void clear() noexcept { if( Head != nullptr ) { delete Head; Head = nullptr; } }
 
-			void parse( const substring& source );
+			void parse( substring source, substring flags );
 
 			inline Flag flags() const noexcept { return MyFlags; }
 
@@ -40,16 +40,13 @@ namespace eon
 			inline bool match( RxData& param ) const { return Head != nullptr ? Head->match( param ) : false; }
 
 			inline const substring& source() const noexcept { return Source; }
-			inline const substring& expressionSub() const noexcept { return ExprSub; }
-			inline const substring& flagsSub() const noexcept { return FlagsSub; }
-			inline char_t separator() const noexcept { return Separator; }
-
+			
 			inline string strStruct() const { return Head ? Head->strStruct() : string(); }
 
 		private:
 			void parse();
 
-			void parseFlags( string::iterator& last );
+			void parseFlags( substring flags );
 
 			class ParseParam
 			{
@@ -126,10 +123,8 @@ namespace eon
 
 		private:
 			substring Source;
-			substring ExprSub, FlagsSub;
 			Node* Head{ nullptr };
 			Flag MyFlags{ Flag::none };
-			char_t Separator{ '/' };
 		};
 	}
 }

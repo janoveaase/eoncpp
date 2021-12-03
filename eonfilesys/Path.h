@@ -234,6 +234,23 @@ namespace eon
 		inline path& makeDirPath() { return isFilePath() ? *this = Full + ForwSlashChr : *this; }
 
 
+
+
+		/**********************************************************************
+		  Comparison
+		**********************************************************************/
+	public:
+
+		inline int compare( const path& other ) const noexcept { return Full.compare( other.Full ); }
+
+		inline bool operator<( const path& other ) const noexcept { return Full < other.Full; }
+		inline bool operator<=( const path& other ) const noexcept { return Full <= other.Full; }
+		inline bool operator>( const path& other ) const noexcept { return Full > other.Full; }
+		inline bool operator>=( const path& other ) const noexcept { return Full >= other.Full; }
+		inline bool operator==( const path& other ) const noexcept { return Full == other.Full; }
+		inline bool operator!=( const path& other ) const noexcept { return Full != other.Full; }
+
+
 		
 
 		///////////////////////////////////////////////////////////////////

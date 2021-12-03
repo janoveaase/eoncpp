@@ -7,59 +7,58 @@ namespace eon
 	TEST( RegExTest, parse_ok_01 )
 	{
 		regex expr;
-		WANT_NO_EXCEPT( expr = R"(/^\w+|\d+alpha{2}$/)" );
+		WANT_NO_EXCEPT( expr = R"(^\w+|\d+alpha{2}$)" );
 	}
 	TEST( RegExTest, parse_error_01 )
 	{
 		regex expr;
-		WANT_EXCEPT( expr = R"(/^\w+|\d+alpha{2$/)", rx::InvalidExpression );
+		WANT_EXCEPT( expr = R"(^\w+|\d+alpha{2$)", rx::InvalidExpression );
 	}
 
 	TEST( RegExTest, parse_ok_02 )
 	{
 		regex expr;
-		WANT_NO_EXCEPT( expr = R"(/@<spaces>(\s*?)..@:<spaces>/)" );
+		WANT_NO_EXCEPT( expr = R"(@<spaces>(\s*?)..@:<spaces>)" );
 	}
 	TEST( RegExTest, parse_error_02 )
 	{
 		regex expr;
-		WANT_EXCEPT( expr = R"(/@<spaces>(\s*?)..@:<spa!ces>/)",
-			rx::InvalidExpression );
+		WANT_EXCEPT( expr = R"(@<spaces>(\s*?)..@:<spa!ces>)", rx::InvalidExpression );
 	}
 
 	TEST( RegExTest, removeDuplicates )
 	{
-		regex ex{ R"(/a+a+/)" };
+		regex ex{ R"(a+a+)" };
 		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a+a*/)" };
+		ex = regex{ R"(a+a*)" };
 		WANT_EQ( "a+", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a*a+/)" };
+		ex = regex{ R"(a*a+)" };
 		WANT_EQ( "a+", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a+a+?/)" };
+		ex = regex{ R"(a+a+?)" };
 		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a+?a+/)" };
+		ex = regex{ R"(a+?a+)" };
 		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a+?a+?/)" };
+		ex = regex{ R"(a+?a+?)" };
 		WANT_EQ( "a{2,}?", ex.strStruct().stdstr() );
-		ex = regex{ R"(/(a+a+)/)" };
+		ex = regex{ R"((a+a+))" };
 		WANT_EQ( "(a{2,})", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a+a+a+a+/)" };
+		ex = regex{ R"(a+a+a+a+)" };
 		WANT_EQ( "a{4,}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a+?a+?a+?a+?/)" };
+		ex = regex{ R"(a+?a+?a+?a+?)" };
 		WANT_EQ( "a{4,}?", ex.strStruct().stdstr() );
-		ex = regex{ R"(/(a+a+)(a+a+)/)" };
+		ex = regex{ R"((a+a+)(a+a+))" };
 		WANT_EQ( "(a{2,}){2}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a{1,5}a{1,5}/)" };
+		ex = regex{ R"(a{1,5}a{1,5})" };
 		WANT_EQ( "a{2,10}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a{1,5}a{2,6}/)" };
+		ex = regex{ R"(a{1,5}a{2,6})" };
 		WANT_EQ( "a{3,11}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/a{2,5}a{1,5}/)" };
+		ex = regex{ R"(a{2,5}a{1,5})" };
 		WANT_EQ( "a{3,10}", ex.strStruct().stdstr() );
-		ex = regex{ R"(/\d\d+:/)" };
+		ex = regex{ R"(\d\d+:)" };
 		WANT_EQ( "\\d{2,}:", ex.strStruct().stdstr() );
-		ex = regex{ R"(/(x+x+)+y/)" };
+		ex = regex{ R"((x+x+)+y)" };
 		WANT_EQ( "(x{2,})+y", ex.strStruct().stdstr() );
-		ex = regex{ R"(/(x+?x+?)+?y/)" };
+		ex = regex{ R"((x+?x+?)+?y)" };
 		WANT_EQ( "(x{2,}?)+?y", ex.strStruct().stdstr() );
 	}
 
@@ -67,7 +66,7 @@ namespace eon
 	TEST( RegExTest, match_any_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/./)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(.)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8" ) ) << "Didn't match digit";
 		WANT_TRUE( expr.match( "b" ) ) << "Didn't match letter";
@@ -77,7 +76,7 @@ namespace eon
 	TEST( RegExTest, match_any_two )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/../)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(..)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "82" ) ) << "Didn't match digits";
 		WANT_TRUE( expr.match( "bx" ) ) << "Didn't match letters";
@@ -88,7 +87,7 @@ namespace eon
 	TEST( RegExTest, match_any_three )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.{3}/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(.{3})" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8bβ" ) ) << "Didn't match 3";
 		WANT_FALSE( expr.match( "8β" ) ) << "Matched 2";
@@ -97,7 +96,7 @@ namespace eon
 	TEST( RegExTest, match_any_range )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.{2,3}/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(.{2,3})" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8bβ" ) ) << "Didn't match 3";
 		WANT_TRUE( expr.match( "8b" ) ) << "Didn't match 2";
@@ -106,7 +105,7 @@ namespace eon
 	TEST( RegExTest, match_any_range_fixed )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/^.{2,3}$/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(^.{2,3}$)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8bβ" ) ) << "Didn't match 3";
 		WANT_TRUE( expr.match( "8b" ) ) << "Didn't match 2";
@@ -117,7 +116,7 @@ namespace eon
 	TEST( RegExTest, match_digit_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\d/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\d)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8" ) ) << "Didn't match digit";
 		WANT_FALSE( expr.match( "b" ) ) << "Matched letter";
@@ -125,7 +124,7 @@ namespace eon
 	TEST( RegExTest, match_digit_single_not )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/!\d/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(!\d)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "b" ) ) << "Didn't match letter";
 		WANT_FALSE( expr.match( "8" ) ) << "Matched digit";
@@ -133,7 +132,7 @@ namespace eon
 	TEST( RegExTest, match_digit_two )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\d\d/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\d\d)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "82" ) ) << "Didn't match digit";
 		WANT_FALSE( expr.match( "6b" ) ) << "Match with letter";
@@ -143,7 +142,7 @@ namespace eon
 	TEST( RegExTest, match_wordchar_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\w/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\w)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8" ) ) << "Didn't match digit";
 		WANT_TRUE( expr.match( "b" ) ) << "Didn't match letter";
@@ -154,7 +153,7 @@ namespace eon
 	TEST( RegExTest, match_wordchar_two )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\w\w/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\w\w)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "8b" ) ) << "Didn't match digit + letter";
 		WANT_TRUE( expr.match( "_8" ) ) << "Didn't match underscore + digit";
@@ -167,7 +166,7 @@ namespace eon
 	TEST( RegExTest, match_nonwordchar_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\W/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\W)" ) << "Failed to parse";
 
 		WANT_FALSE( expr.match( "8") )<< "Matched digit";
 		WANT_FALSE( expr.match( "b") )<< "Matched letter";
@@ -179,7 +178,7 @@ namespace eon
 	TEST( RegExTest, match_chargroup_single )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/[aβc]/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"([aβc])" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "a" ) ) << "Didn't match 'a'";
 		WANT_TRUE( expr.match( "β" ) ) << "Didn't match unicode letter";
@@ -190,109 +189,77 @@ namespace eon
 	TEST( RegExTest, match_capture_greedy_1 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.*@<key>(\w+): @<value>(\w+).*/)" )
-			<< "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(.*@<key>(\w+): @<value>(\w+).*)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
-		WANT_EQ( "e", result.group( name_key ).stdstr() )
-			<< "Wrong key for basic";
-		WANT_EQ( 2, result.group( name_key ).begin().numChar() )
-			<< "Wrong start position for basic";
-		WANT_EQ( "two", result.group( name_value ).stdstr() )
-			<< "Wrong value for basic";
+		WANT_EQ( "e", result.group( name_key ).stdstr() ) << "Wrong key for basic";
+		WANT_EQ( 2, result.group( name_key ).begin().numChar() ) << "Wrong start position for basic";
+		WANT_EQ( "two", result.group( name_value ).stdstr() ) << "Wrong value for basic";
 
-		WANT_TRUE( result = expr.match( "  alpha: beta  " ) )
-			<< "Didn't match centered";
-		WANT_EQ( "a", result.group( name_key ).stdstr() )
-			<< "Wrong key for centered";
-		WANT_EQ( "beta", result.group( name_value ).stdstr() )
-			<< "Wrong value for centered";
+		WANT_TRUE( result = expr.match( "  alpha: beta  " ) ) << "Didn't match centered";
+		WANT_EQ( "a", result.group( name_key ).stdstr() ) << "Wrong key for centered";
+		WANT_EQ( "beta", result.group( name_value ).stdstr() ) << "Wrong value for centered";
 
-		WANT_TRUE( result = expr.match( "βγέ: ΨΩΣ" ) )
-			<< "Didn't match unicode";
-		WANT_EQ( "έ", result.group( name_key ).stdstr() )
-			<< "Wrong key for unicode";
-		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() )
-			<< "Wrong value for unicode";
+		WANT_TRUE( result = expr.match( "βγέ: ΨΩΣ" ) ) << "Didn't match unicode";
+		WANT_EQ( "έ", result.group( name_key ).stdstr() ) << "Wrong key for unicode";
+		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() ) << "Wrong value for unicode";
 	}
 	TEST( RegExTest, match_capture_greedy_2 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\W*@<key>(\w+): @<value>(\w+)\W*/)" )
-			<< "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\W*@<key>(\w+): @<value>(\w+)\W*)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
-		WANT_EQ( "one", result.group( name_key ).stdstr() )
-			<< "Wrong key for basic";
-		WANT_EQ( "two", result.group( name_value ).stdstr() )
-			<< "Wrong value for basic";
+		WANT_EQ( "one", result.group( name_key ).stdstr() ) << "Wrong key for basic";
+		WANT_EQ( "two", result.group( name_value ).stdstr() ) << "Wrong value for basic";
 
-		WANT_TRUE( result = expr.match( "  alpha: beta  " ) )
-			<< "Didn't match centered";
-		WANT_EQ( "alpha", result.group( name_key ).stdstr() )
-			<< "Wrong key for centered";
-		WANT_EQ( "beta", result.group( name_value ).stdstr() )
-			<< "Wrong value for centered";
+		WANT_TRUE( result = expr.match( "  alpha: beta  " ) ) << "Didn't match centered";
+		WANT_EQ( "alpha", result.group( name_key ).stdstr() ) << "Wrong key for centered";
+		WANT_EQ( "beta", result.group( name_value ).stdstr() ) << "Wrong value for centered";
 
-		WANT_TRUE( result = expr.match( "βγέ: ΨΩΣ" ) )
-			<< "Didn't match unicode";
-		WANT_EQ( "βγέ", result.group( name_key ).stdstr() )
-			<< "Wrong key for unicode";
-		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() )
-			<< "Wrong value for unicode";
+		WANT_TRUE( result = expr.match( "βγέ: ΨΩΣ" ) ) << "Didn't match unicode";
+		WANT_EQ( "βγέ", result.group( name_key ).stdstr() ) << "Wrong key for unicode";
+		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() ) << "Wrong value for unicode";
 	}
 	TEST( RegExTest, match_capture_nongreedy )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/.*?@<key>(\w+): @<value>(\w+).*?/)" )
-			<< "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(.*?@<key>(\w+): @<value>(\w+).*?)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
-		WANT_EQ( "one", result.group( name_key ).stdstr() )
-			<< "Wrong key for basic";
-		WANT_EQ( "two", result.group( name_value ).stdstr() )
-			<< "Wrong value for basic";
+		WANT_EQ( "one", result.group( name_key ).stdstr() ) << "Wrong key for basic";
+		WANT_EQ( "two", result.group( name_value ).stdstr() ) << "Wrong value for basic";
 
-		WANT_TRUE( result = expr.match( "  alpha: beta  " ) )
-			<< "Didn't match centered";
-		WANT_EQ( "alpha", result.group( name_key ).stdstr() )
-			<< "Wrong key for centered";
-		WANT_EQ( "beta", result.group( name_value ).stdstr() )
-			<< "Wrong value for centered";
+		WANT_TRUE( result = expr.match( "  alpha: beta  " ) ) << "Didn't match centered";
+		WANT_EQ( "alpha", result.group( name_key ).stdstr() ) << "Wrong key for centered";
+		WANT_EQ( "beta", result.group( name_value ).stdstr() ) << "Wrong value for centered";
 
-		WANT_TRUE( result = expr.match( "βγέ: ΨΩΣ" ) )
-			<< "Didn't match unicode";
-		WANT_EQ( "βγέ", result.group( name_key ).stdstr() )
-			<< "Wrong key for unicode";
-		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() )
-			<< "Wrong value for unicode";
+		WANT_TRUE( result = expr.match( "βγέ: ΨΩΣ" ) ) << "Didn't match unicode";
+		WANT_EQ( "βγέ", result.group( name_key ).stdstr() ) << "Wrong key for unicode";
+		WANT_EQ( "ΨΩΣ", result.group( name_value ).stdstr() ) << "Wrong value for unicode";
 	}
 	TEST( RegExTest, match_capture_issue1 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = "/^.*?@<m>(p.*i).*$/" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = "^.*?@<m>(p.*i).*$" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_FALSE( result = expr.match( "alpha" ) ) << "Matched alpha";
 		WANT_TRUE( result = expr.match( "pi" ) ) << "Didn't match pi";
 		if( result )
-		{
 			WANT_EQ( "pi", string( result.group( eon::name::get( "m" ) ) ).stdstr() ) << "Wrong capture for pi";
-		}
 		WANT_TRUE( result = expr.match( "spring" ) ) << "Didn't match spring";
 		if( result )
-		{
 			WANT_EQ( "pri", string( result.group( eon::name::get( "m" ) ) ).stdstr() ) << "Wrong capture for spring";
-		}
 	}
 
 	TEST( RegExTest, match_newline_tab )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/one\n\ttwo/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(one\n\ttwo)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one\n	two" ) );
@@ -302,7 +269,7 @@ namespace eon
 	TEST( RegExTest, match_name1 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/(\w+){name}/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"((\w+){name})" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "12_" ) );
@@ -311,7 +278,7 @@ namespace eon
 	TEST( RegExTest, match_name2 )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/\s+(\w+){name}\s+/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(\s+(\w+){name}\s+)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "   12_   " ) );
@@ -321,7 +288,7 @@ namespace eon
 	TEST( MatchOrTest, simple_binary )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/a|b/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(a|b)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "a" ) ) << "Didn't match 'a'";
@@ -331,7 +298,7 @@ namespace eon
 	TEST( MatchOrTest, simple_multi )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/a|b|c|d/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(a|b|c|d)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "a" ) ) << "Didn't match 'a'";
@@ -343,45 +310,37 @@ namespace eon
 	TEST( MatchOrTest, complex_binary )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/alpha|beta/)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(alpha|beta)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "alpha" ) ) << "Didn't match 'alpha'";
 		WANT_TRUE( result = expr.match( "beta" ) ) << "Didn't match 'beta'";
-		WANT_FALSE( result = expr.match( "gamma" ) )
-			<< "Didn't fail to match 'gamma'";
+		WANT_FALSE( result = expr.match( "gamma" ) ) << "Didn't fail to match 'gamma'";
 	}
 	TEST( MatchOrTest, complex_multi )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/alpha|beta|gamma|delta/)" )
-			<< "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(alpha|beta|gamma|delta)" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "alpha" ) ) << "Didn't match 'alpha'";
 		WANT_TRUE( result = expr.match( "beta" ) ) << "Didn't match 'beta'";
 		WANT_TRUE( result = expr.match( "gamma" ) ) << "Didn't match 'gamma'";
 		WANT_TRUE( result = expr.match( "delta" ) ) << "Didn't match 'delta'";
-		WANT_FALSE( result = expr.match( "epsilon" ) )
-			<< "Didn't fail to match 'epsilon'";
+		WANT_FALSE( result = expr.match( "epsilon" ) ) << "Didn't fail to match 'epsilon'";
 	}
 	TEST( MatchOrTest, group_binary )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(/(alpha|beta){1,2}/)" )
-			<< "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"((alpha|beta){1,2})" ) << "Failed to parse";
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "alpha" ) ) << "Didn't match 'alpha'";
 		WANT_TRUE( result = expr.match( "beta" ) ) << "Didn't match 'beta'";
-		WANT_TRUE( result = expr.match( "alphabeta" ) )
-			<< "Didn't match 'alphabeta'";
-		WANT_TRUE( result = expr.match( "alphaalpha" ) )
-			<< "Didn't match 'alphaalpha'";
-		WANT_TRUE( result = expr.match( "betabeta" ) )
-			<< "Didn't match 'betabeta'";
-		WANT_FALSE( result = expr.match( "gamma" ) )
-			<< "Didn't fail to match 'gamma'";
+		WANT_TRUE( result = expr.match( "alphabeta" ) ) << "Didn't match 'alphabeta'";
+		WANT_TRUE( result = expr.match( "alphaalpha" ) ) << "Didn't match 'alphaalpha'";
+		WANT_TRUE( result = expr.match( "betabeta" ) ) << "Didn't match 'betabeta'";
+		WANT_FALSE( result = expr.match( "gamma" ) ) << "Didn't fail to match 'gamma'";
 	}
 
 
@@ -389,27 +348,23 @@ namespace eon
 	{
 		string str_good{ "Eon is great!" };
 		string str_bad{ "Eon is not great!" };
-		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
-		WANT_TRUE( expr.match( str_good.substr() ) );
-		WANT_FALSE( expr.match( str_bad.substr() ) );
+		regex expr{ R"(^(\w+) is (\w+)(.)$)" };
+		WANT_TRUE( expr.match( str_good ) );
+		WANT_FALSE( expr.match( str_bad ) );
 	}
 	TEST( MiscTests, group_match )
 	{
 		string str_good{ "Eon is great!" };
-		regex expr{ R"(/@<one>(\w+) is @<2_>(\w+)@<three>(.)/)" };
+		regex expr{ R"(@<one>(\w+) is @<2_>(\w+)@<three>(.))" };
 		
 		rx::match match;
-		REQUIRE_NO_EXCEPT( match = expr.match( str_good.substr() ) );
+		REQUIRE_NO_EXCEPT( match = expr.match( str_good ) );
 		WANT_TRUE( match );
 		REQUIRE_EQ( 4, match.size() ) << "Wrong number of groups";
-		WANT_EQ( str_good.stdstr(), match.all().stdstr() )
-			<< "Wrong complete match";
-		WANT_EQ( "Eon", match.group( name::get( "one" ) ).stdstr() )
-			<< "Wrong first group";
-		WANT_EQ( "great", match.group( name::get( "2_" ) ).stdstr() )
-			<< "Wrong second group";
-		WANT_EQ( "!", match.group( name::get( "three" ) ).stdstr() )
-			<< "Wrong third group";
+		WANT_EQ( str_good.stdstr(), match.all().stdstr() ) << "Wrong complete match";
+		WANT_EQ( "Eon", match.group( name::get( "one" ) ).stdstr() ) << "Wrong first group";
+		WANT_EQ( "great", match.group( name::get( "2_" ) ).stdstr() ) << "Wrong second group";
+		WANT_EQ( "!", match.group( name::get( "three" ) ).stdstr() ) << "Wrong third group";
 	}
 
 	TEST( MiscTests, utf8_match )
@@ -419,25 +374,25 @@ namespace eon
 		str_good += "on is great!";
 		str_bad += char_t( 0xC6 );
 		str_bad += "Eon is not great!";
-		regex expr{ R"(/^(\w+) is (\w+)(.)$/)" };
-		WANT_TRUE( expr.match( str_good.substr() ) );
-		WANT_FALSE( expr.match( str_bad.substr() ) );
+		regex expr{ R"(^(\w+) is (\w+)(.)$)" };
+		WANT_TRUE( expr.match( str_good ) );
+		WANT_FALSE( expr.match( str_bad ) );
 	}
 
 	TEST( MiscTests, horror1 )
 	{
-		regex expr{ R"(/(x+x+)+y/)" };
+		regex expr{ R"((x+x+)+y)" };
 		WANT_FALSE( expr.match( "xxxxxxxxxxxxxxxxxxxx" ) );
 	}
 	TEST( MiscTests, horror2 )
 	{
-		regex expr{ R"(/(x+?x+?)+?y/)" };
+		regex expr{ R"((x+?x+?)+?y)" };
 		WANT_FALSE( expr.match( "xxxxxxxxxxxxxxxxxxxx" ) );
 	}
 
 	TEST( MiscTests, repetitions1 )
 	{
-		regex expr{ R"(/\d\d+:/)" };
+		regex expr{ R"(\d\d+:)" };
 		WANT_FALSE( expr.match( "9:" ) );
 		WANT_TRUE( expr.match( "99:" ) );
 		WANT_TRUE( expr.match( "999:" ) );
@@ -447,7 +402,7 @@ namespace eon
 	TEST( MiscTests, advanced1 )
 	{
 		string str{ "alpha: 1:99:7 beta ." };
-		regex expr{ R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" };
+		regex expr{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
 		WANT_TRUE( expr.match( str ) );
 	}
 
@@ -464,8 +419,8 @@ namespace eon
 		std::chrono::steady_clock::time_point start, end;
 		std::chrono::nanoseconds time1{ 0 }, time2{ 0 };
 
-		regex expr1{ R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" };
-		regex expr2{ R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/o)" };
+		regex expr1{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
+		regex expr2( R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)", "o" );
 		int matches1 = 0, matches2 = 0;
 		std::cout << "\n";
 
@@ -508,18 +463,15 @@ namespace eon
 		count /= 50;
 #endif
 		std::chrono::steady_clock clock;
-		string e_pattern{
-			R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" };
-		std::string s_pattern{
-			R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
+		string e_pattern{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
+		std::string s_pattern{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
 		std::vector<eon::regex> e_list;
 		std::vector<std::regex> s_list;
 
 		auto e_start = clock.now();
 		for( size_t i = 0; i < count; ++i )
 		{
-			REQUIRE_NO_EXCEPT( erx = e_pattern.substr() )
-				<< "Failed to parse #" << string::toString( i );
+			REQUIRE_NO_EXCEPT( erx = e_pattern ) << "Failed to parse #" << string::toString( i );
 			e_list.push_back( std::move( erx ) );
 		}
 		auto e_end = clock.now();
@@ -527,8 +479,7 @@ namespace eon
 		auto s_start = clock.now();
 		for( size_t i = 0; i < count; ++i )
 		{
-			REQUIRE_NO_EXCEPT( srx.assign( s_pattern ) )
-				<< "Failed to parse #" << string::toString( i );
+			REQUIRE_NO_EXCEPT( srx.assign( s_pattern ) ) << "Failed to parse #" << string::toString( i );
 			s_list.push_back( std::move( srx ) );
 		}
 		auto s_end = clock.now();
@@ -538,20 +489,17 @@ namespace eon
 		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
 		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
-		std::cout << "\nEon regex (" + string::toString( e_list.size() )
-			<< "): " << string::toString( e_ms.count() ) << "ms\n";
-		std::cout << "Std regex (" + string::toString( s_list.size() )
-			<< "): " << string::toString( s_ms.count() ) << "ms\n";
+		std::cout << "\nEon regex (" + string::toString( e_list.size() ) << "): " << string::toString( e_ms.count() )
+			<< "ms\n";
+		std::cout << "Std regex (" + string::toString( s_list.size() ) << "): " << string::toString( s_ms.count() )
+			<< "ms\n";
 	}
 	TEST( SpeedCmp, eon_std_match )
 	{
 		eon::regex erx;
-		REQUIRE_NO_EXCEPT( erx =
-			R"(/^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$/)" )
-			<< "Failed to parse Eon regex";
+		REQUIRE_NO_EXCEPT( erx = R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) << "Failed to parse Eon regex";
 		std::regex srx;
-		REQUIRE_NO_EXCEPT( srx = std::regex(
-			R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) )
+		REQUIRE_NO_EXCEPT( srx = std::regex( R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) )
 			<< "Failed to parse std regex";
 		size_t count = 5000;
 #ifdef _DEBUG
@@ -622,7 +570,7 @@ namespace eon
 				if( match == details.second )
 					++s_successes;
 			}
-		}	//*/
+		}
 		auto s_end = clock.now();
 
 		auto e_time = e_end - e_start;
@@ -630,9 +578,9 @@ namespace eon
 		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
 		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
-		std::cout << "\nEon regex (" << string::toString( e_successes )
-			<< "): " << string::toString( e_ms.count() ) << "ms\n";
-		std::cout << "Std regex (" << string::toString( s_successes )
-			<< "): " << string::toString( s_ms.count() ) << "ms\n";
+		std::cout << "\nEon regex (" << string::toString( e_successes ) << "): " << string::toString( e_ms.count() )
+			<< "ms\n";
+		std::cout << "Std regex (" << string::toString( s_successes ) << "): " << string::toString( s_ms.count() )
+			<< "ms\n";
 	}
 }
