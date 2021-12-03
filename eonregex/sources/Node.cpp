@@ -38,7 +38,6 @@ namespace eon
 
 
 
-
 		bool Node::match( RxData& data, size_t steps )
 		{
 			// If there are fewer characters remaining than the minimum

@@ -19,6 +19,9 @@ namespace eon
 	using charsize_t = uint16_t;
 #endif
 
+#define UTF8_ACCEPT 0
+#define UTF8_REJECT 1
+
 	/**************************************************************************
 	  Exception used when two iterators are supposed to be for the same source
 	  string are not, or an interator is supposed to be for a specific source
@@ -221,28 +224,28 @@ namespace eon
 		inline operator bool() const noexcept { return CodepointSize > 0; }
 
 		//* Check if the iterator is at reverse end of string (before first)
-		inline bool atREnd() const noexcept { return CodepointSize == 0 && Pos == Begin; }
+		inline bool atREnd() const noexcept { return CodepointSize == 0 && Pos == Source; }
 
 		//* Check if the iterator is at the end of the string (after last)
-		inline bool atEnd() const noexcept { return CodepointSize == 0 && Pos > Begin; }
+		inline bool atEnd() const noexcept { return CodepointSize == 0 && Pos > Source; }
 
 
 		//* Check if this iterator is for a string starting at the specified
 		//* raw buffer address
-		inline bool sameBuffer( const char* buffer_start ) const noexcept { return Begin == buffer_start; }
+		inline bool sameBuffer( const char* buffer_start ) const noexcept { return Source == buffer_start; }
 
 		//* Check if compatible with other iterator (same source string)
-		inline bool compatibleWith( const string_iterator& other ) const noexcept { return sameBuffer( other.Begin ); }
+		inline bool compatibleWith( const string_iterator& other ) const noexcept { return sameBuffer( other.Source ); }
 
 		//* Assert compatible iterators
 		//* Throws [eon::WrongSource] if not.
 		inline void assertCompatibleWith( const string_iterator& other ) const {
-			if( Begin != other.Begin ) throw WrongSource(); }
+			if( Source != other.Source ) throw WrongSource(); }
 
 		//* Assert that iterator is for a source string starting at the
 		//* specified raw buffer address
 		// Throws [eon::WrongSource] if not.
-		inline void assertSameBuffer( const char* begin ) const { if( Begin != begin ) throw WrongSource(); }
+		inline void assertSameBuffer( const char* begin ) const { if( Source != begin ) throw WrongSource(); }
 
 
 		//* Get the codepoint at 'this'  position
@@ -254,12 +257,15 @@ namespace eon
 		inline size_t numChar() const noexcept { return NumChar; }
 
 		//* Get byte position in source string
-		inline size_t numByte() const noexcept { return Pos - Begin; }
+		inline size_t numByte() const noexcept { return Pos - Source; }
+
+		//* Get the number of bytes making up the code point
+		inline size_t codepointSize() const noexcept { return CodepointSize; }
 
 
 		//* Check if the entire string is byte characters only
 		//* (Allows for optimizations.)
-		inline bool bytesOnly() const noexcept { return NumChars == End - Begin; }
+		inline bool bytesOnly() const noexcept { return NumChars == SourceEnd - Source; }
 
 		//* Check if the string contains only valid UTF-8 characters
 		//* Will return 'true' if ASCII only, but not if there are any invalid
@@ -413,8 +419,8 @@ namespace eon
 		//
 	private:
 		const char* Pos{ nullptr };			// Address of character in string
-		const char* Begin{ nullptr };		// Start of string
-		const char* End{ nullptr };			// End of string
+		const char* Source{ nullptr };		// Start of source string
+		const char* SourceEnd{ nullptr };	// End of source string
 		char_t Codepoint{ nochar };			// Translated code point
 		charsize_t CodepointSize{ 0 };		// Number of bytes in code point
 		size_t NumChar{ 0 };				// Character position from start

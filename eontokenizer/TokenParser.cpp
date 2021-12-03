@@ -3,18 +3,17 @@
 
 namespace eon
 {
-	size_t tokenparser::lineStart() const
+	size_t TokenParser::lineStart() const
 	{
 		for( size_t i = Cur; i > 0; --i )
 		{
-			if( at( i - 1 ).newline() )
+			if( at( i - 1 ).is( name_newline ) )
 				return i;
 		}
 		return 0;
 	}
 
-	bool tokenparser::match(
-		const std::initializer_list<eon::string>& elements ) const noexcept
+	bool TokenParser::match( const std::initializer_list<eon::string>& elements )
 	{
 		if( !*this )
 			return false;
@@ -23,7 +22,7 @@ namespace eon
 		{
 			if( pos == Tokens.size() )
 				return false;
-			if( element == "\n" && Tokens[ pos ].newline() )
+			if( element == "\n" && Tokens[ pos ].is( name_newline ) )
 				continue;
 			if( !element.empty() )
 			{
@@ -31,14 +30,12 @@ namespace eon
 					;
 				else if( element.startsWith( '*' ) )
 				{
-					if( !Tokens[ pos ].endsWith(
-						element.substr( element.begin() + 1 ) ) )
+					if( !Tokens[ pos ].endsWith( element.substr( element.begin() + 1 ) ) )
 						return false;
 				}
 				else if( element.endsWith( '*' ) )
 				{
-					if( !Tokens[ pos ].startsWith( element.substr(
-						element.begin(),
+					if( !Tokens[ pos ].startsWith( element.substr( element.begin(),
 						element.begin() + ( element.numChars() - 1 ) ) ) )
 						return false;
 				}

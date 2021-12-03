@@ -3,100 +3,91 @@
 
 namespace eon
 {
-	std::vector<token> tokenizer::operator()( const source& source )
+	std::vector<Token> Tokenizer::operator()( source::Ref src )
 	{
-		SrcRef = source;
+		Source = src;
+		CurMatch = source::Ref( Source.source(), Source.start(), Source.source().push( Source.start(), 1 ) );
 		auto& chars = Characters::get();
-		while( SrcRef.chr() != nochar )
+		source::Ref unmatched( Source.source(), Source.start(), Source.start() );
+		while( !Source.atEnd( CurMatch.last() ) )
 		{
-			auto category = chars.category( SrcRef.chr() );
-			if( category >= charcat::letter_lowercase
-				&& category <= charcat::letter_uppercase )
-				scanLetter( tokencat::letter );
-			else if( category == charcat::number_ascii_digit )
-				scanNumber( tokencat::number );
-			else if( category == charcat::number_decimal_digit )
-				scanSameChar( tokencat::extended_number );
-			else if( category >= charcat::number_letter
-				&& category <= charcat::number_other )
-				scanSameChar( tokencat::other_number );
-			else if( category == charcat::separator_space )
+			auto match_name = _match();
+			if( match_name != no_name )
 			{
-				if( SrcRef.chr() == NewlineChr )
+				if( unmatched )
 				{
-					Tokens.push_back( token( SrcRef, tokencat::newline ) );
-					if( !SrcRef.advance() )
-						break;
+					Tokens.push_back( Token( unmatched, name_undef ) );
+					unmatched = source::Ref();
 				}
-				else
-					scanSameChar( tokencat::space );
+				CurMatchName = match_name;
 			}
-			else if( category >= charcat::separator_line
-				&& category <= charcat::separator_paragraph )
-				scanSameChar( tokencat::separator );
-			else if( category >= charcat::punctuation_connector
-				&& category <= charcat::punctuation_open )
-				scanSingleChar( tokencat::punctuation );
-			else if( category >= charcat::symbol_currency
-				&& category <= charcat::symbol_other )
-				scanSingleChar( tokencat::symbol );
-			else if( category >= charcat::other_control
-				&& category <= charcat::other_surrogate )
-				scanSingleChar( tokencat::other );
+			else if( CurMatchName != no_name )
+			{
+				CurMatch.pullEnd();
+				Tokens.push_back( Token( CurMatch, CurMatchName ) );
+				CurMatch.startToEnd();
+				CurMatchName = no_name;
+			}
 			else
-				scanSameChar( tokencat::undef );
+			{
+				if( !unmatched )
+					unmatched = CurMatch;
+				else
+					unmatched.pushEnd();
+				CurMatch.pushStart();
+			}
+			if( !CurMatch.pushEnd() )
+			{
+				if( match_name != no_name )
+					Tokens.push_back( Token( CurMatch, match_name ) );
+				else if( unmatched )
+					Tokens.push_back( Token( unmatched, name_undef ) );
+				break;
+			}
 		}
 		return std::move( Tokens );
 	}
 
-	void tokenizer::scanSameChar( tokencat category )
+
+
+
+	name_t Tokenizer::_match()
 	{
-		auto pos = SrcRef.pos();
-		while( pos.advance( SrcRef.source() ) && pos.chr() == SrcRef.chr() )
-			;
-		Tokens.push_back( token(
-			SrcRef.source(), SrcRef.pos().line(),	// Source and line number
-			SrcRef.pos().area().begin(),			// First character
-			pos.area().begin(),						// End character
-			category ) );
-		SrcRef = pos;	// Move past the read token
-	}
-	void tokenizer::scanSingleChar( tokencat category )
-	{
-		auto pos = SrcRef.pos();
-		pos.advance( SrcRef.source() );
-		Tokens.push_back( token(
-			SrcRef.source(), SrcRef.pos().line(),	// Source and line number
-			SrcRef.pos().area().begin(),			// First character
-			pos.area().begin(),						// End character
-			category ) );
-		SrcRef = pos;	// Move past the read token
-	}
-	void tokenizer::scanLetter( tokencat category )
-	{
-		auto& chars = Characters::get();
-		auto pos = SrcRef.pos();
-		while( pos.advance( SrcRef.source() ) && chars.isLetter( pos.chr() ) )
-			;
-		Tokens.push_back( token(
-			SrcRef.source(), SrcRef.pos().line(),	// Source and line number
-			SrcRef.pos().area().begin(),			// First character
-			pos.area().begin(),						// End character
-			category ) );
-		SrcRef = pos;	// Move past the read token
-	}
-	void tokenizer::scanNumber( tokencat category )
-	{
-		auto& chars = Characters::get();
-		auto pos = SrcRef.pos();
-		while( pos.advance( SrcRef.source() )
-			&& chars.isNumberAsciiDigit( pos.chr() ) )
-			;
-		Tokens.push_back( token(
-			SrcRef.source(), SrcRef.pos().line(),	// Source and line number
-			SrcRef.pos().area().begin(),			// First character
-			pos.area().begin(),						// End character
-			category ) );
-		SrcRef = pos;	// Move past the read token
+		auto chr = CurMatch.source().chr( CurMatch.last() );
+		if( chr == NewlineChr )
+			return CurMatch.numChars() == 1 ? name_newline : no_name;
+
+		auto f1 = CharMap.find( chr );
+		if( f1 != CharMap.end() && ( CurMatchName == no_name || CurMatchName == f1->second.first ) )
+		{
+			if( f1->second.second == Match::sequence || CurMatch.numChars() == 1 )
+				return f1->second.first;
+		}
+//		auto f1 = CharMap.find( *Source.pos().area().last() );
+//		if( f1 != CharMap.end() && ( CurMatchName == no_name || CurMatchName == f1->second.first ) )
+//		{
+//			if( f1->second.second == Match::sequence || Source.pos().area().numChars() == 1 )
+//				return f1->second.first;
+//		}
+
+		auto f2 = CatMap.find( Characters::get().category( chr ) );
+		if( f2 != CatMap.end() && ( CurMatchName == no_name || CurMatchName == f2->second.first ) )
+		{
+			if( f2->second.second == Match::sequence || CurMatch.numChars() == 1 )
+				return f2->second.first;
+		}
+//		auto f2 = CatMap.find( Characters::get().category( *Source.pos().area().last() ) );
+//		if( f2 != CatMap.end() && ( CurMatchName == no_name || CurMatchName == f2->second.first ) )
+//		{
+//			if( f2->second.second == Match::sequence || Source.pos().area().numChars() == 1 )
+//				return f2->second.first;
+//		}
+
+		auto f3 = SeqMap.find( CurMatch.str() );
+//		auto f3 = SeqMap.find( Source.pos().area() );
+		if( f3 != SeqMap.end() )
+			return f3->second;
+
+		return no_name;
 	}
 }

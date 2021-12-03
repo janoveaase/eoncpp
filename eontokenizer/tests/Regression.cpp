@@ -7,18 +7,17 @@ namespace eon
 	TEST( TokenizerTest, basic )
 	{
 		string raw{ "This is a 02   \tline test\nLine #2!" };
-		source src( "test", std::move( raw ) );
-		auto tokens = tokenizer()( src );
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
 		REQUIRE_EQ( 18, tokens.size() ) << "Wrong number of tokens";
 
-		string expected{
-			"This; ;is; ;a; ;02;   ;\t;line; ;test;\n;Line; ;#;2;!" };
+		string expected{ "This; ;is; ;a; ;02;   ;\t;line; ;test;\n;Line; ;#;2;!" };
 		string actual;
 		for( auto& token : tokens )
 		{
 			if( !actual.empty() )
 				actual += ";";
-			actual += token.substr();
+			actual += token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
@@ -26,18 +25,17 @@ namespace eon
 	TEST( TokenizerTest, special )
 	{
 		string raw{ "++(())<<>>[[]]{{}}--**//" };
-		source src( "test", std::move( raw ) );
-		auto tokens = tokenizer()( src );
-		REQUIRE_EQ( 24, tokens.size() ) << "Wrong number of tokens";
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		WANT_EQ( 24, tokens.size() ) << "Wrong number of tokens";
 
-		string expected{
-			"+;+;(;(;););<;<;>;>;[;[;];];{;{;};};-;-;*;*;/;/" };
+		string expected{ "+;+;(;(;););<;<;>;>;[;[;];];{;{;};};-;-;*;*;/;/" };
 		string actual;
 		for( auto& token : tokens )
 		{
 			if( !actual.empty() )
 				actual += ";";
-			actual += token.substr();
+			actual += token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
@@ -62,9 +60,9 @@ namespace eon
 			"	}\n"
 			"	WANT_EQ( expected.stdstr(), actual.stdstr() );\n"
 			"}" };
-		source src( "test", std::move( raw ) );
-		auto tokens = tokenizer()( src );
-		REQUIRE_EQ( 252, tokens.size() ) << "Wrong number of tokens";
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		REQUIRE_EQ( 250, tokens.size() ) << "Wrong number of tokens";
 
 		string expected{
 			"TEST|(| |TokenizerTest|,| |basic| |)|\n"
@@ -80,8 +78,8 @@ namespace eon
 			"|\t|for|(| |auto|&| |token| |:| |tokens| |)|\n"
 			"|\t|{|\n"
 			"|\t\t|if|(| |!|actual|.|empty|(|)| |)|\n"
-			"|\t\t\t|actual| |+|=| |\"|;|\"|;|\n"
-			"|\t\t|actual| |+|=| |token|.|substr|(|)|;|\n"
+			"|\t\t\t|actual| |+=| |\"|;|\"|;|\n"
+			"|\t\t|actual| |+=| |token|.|substr|(|)|;|\n"
 			"|\t|}|\n"
 			"|\t|WANT|_|EQ|(| |expected|.|stdstr|(|)|,| |actual|.|stdstr|(|)| |)|;|\n"
 			"|}" };
@@ -90,7 +88,7 @@ namespace eon
 		{
 			if( !actual.empty() )
 				actual += "|";
-			actual += token.substr();
+			actual += token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
@@ -99,32 +97,107 @@ namespace eon
 	TEST( TokenParserTest, basic )
 	{
 		string raw{ "This is a 02   \tline test\nLine #2!" };
-		source src( "test", std::move( raw ) );
-		auto tokens = tokenizer()( src );
-		tokenparser parser( std::move( tokens ) );
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		TokenParser parser( std::move( tokens ) );
 		
-		REQUIRE_EQ( "This", parser.current().substr().stdstr() ) << "Wrong first token";
+		REQUIRE_EQ( "This", parser.current().str().stdstr() ) << "Wrong first token";
 		parser.forward();
-		REQUIRE_EQ( " ", parser.current().substr().stdstr() ) << "Wrong second token";
+		REQUIRE_EQ( " ", parser.current().str().stdstr() ) << "Wrong second token";
 		parser.forward();
-		REQUIRE_EQ( "is", parser.current().substr().stdstr() ) << "Wrong third token";
+		REQUIRE_EQ( "is", parser.current().str().stdstr() ) << "Wrong third token";
 
 		WANT_EQ( 0, parser.lineStart() ) << "Wrong first line start";
 		
 		parser.backward();
 		parser.backward();
-		REQUIRE_EQ( "This", parser.current().substr().stdstr() ) << "Wrong first token - again";
+		REQUIRE_EQ( "This", parser.current().str().stdstr() ) << "Wrong first token - again";
 
 		WANT_TRUE( parser.match( { "T*", "*", "is", "*", "*", " ", "*2" } ) ) << "Failed to match group";
 
 		parser.pos( 8 );
-		REQUIRE_EQ( "\t", parser.current().substr().stdstr() ) << "Wrong eigth token";
+		REQUIRE_EQ( "\t", parser.current().str().stdstr() ) << "Wrong eigth token";
 
-		REQUIRE_EQ( "test", parser.ahead( 3 ).substr().stdstr() ) << "Wrong eleventh token";
+		REQUIRE_EQ( "test", parser.ahead( 3 ).str().stdstr() ) << "Wrong eleventh token";
 
-		REQUIRE_EQ( "#", parser.at( 15 ).substr().stdstr() ) << "Wrong fifteenth token";
+		REQUIRE_EQ( "#", parser.at( 15 ).str().stdstr() ) << "Wrong fifteenth token";
 
 		parser.pos( 15 );
 		REQUIRE_EQ( 13, parser.lineStart() ) << "Wrong second line start";
+	}
+
+
+	TEST( ReTokenizerTest, basic )
+	{
+		string raw{ "_sum_1 += 2 + 2num" };
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		TokenParser parser( std::move( tokens ) );
+
+		ReTokenizer retok;
+		retok.addRule( new ReTokenizer::ComboRule(
+			name_name, { name_letters, name_digits, name_underscore }, regex{ R"(^\d+$)" } ) );
+		retok.addRule( new ReTokenizer::RemoveRule( { name_space } ) );
+		tokens = retok( parser );
+
+		string expected{ "name=_sum_1, operator=+=, digits=2, operator=+, name=2num" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ", ";
+			actual += *token.type();
+			actual += "=" + token.str();
+		}
+		WANT_EQ( expected.stdstr(), actual.stdstr() );
+	}
+	TEST( ReTokenizerTest, enclosed )
+	{
+		string raw{ "one \"two \\\" three\" (four and five) [six[seven]eight]" };
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		TokenParser parser( std::move( tokens ) );
+
+		ReTokenizer retok;
+		retok.addRule( new ReTokenizer::EncloseRule( name_string, name_doublequote, name_backslash ) );
+		retok.addRule( new ReTokenizer::EncloseRule( name::get( "parenthesized" ), name_open, name_close, false ) );
+		retok.addRule( new ReTokenizer::EncloseRule( name::get( "nested" ), name_open_square, name_close_square, true ) );
+		retok.addRule( new ReTokenizer::RemoveRule( { name_space } ) );
+		tokens = retok( parser );
+
+		string expected{ "letters=one, string=two \\\" three, parenthesized=four and five, nested=six[seven]eight" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ", ";
+			actual += *token.type();
+			actual += "=" + token.str();
+		}
+		WANT_EQ( expected.stdstr(), actual.stdstr() );
+	}
+	TEST( ReTokenizerTest, linestart )
+	{
+		string raw{ "   one\n  two\n three\nfour" };
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		TokenParser parser( std::move( tokens ) );
+
+		ReTokenizer retok;
+		retok.addRule( new ReTokenizer::LinestartRule( name_indentation, name_space ) );
+		retok.addRule( new ReTokenizer::RemoveRule( { name_newline } ) );
+		tokens = retok( parser );
+
+		string expected{
+			"indentation=   , letters=one, indentation=  , letters=two, indentation= , letters=three, letters=four" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ", ";
+			actual += *token.type();
+			actual += "=" + token.str();
+		}
+		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
 }

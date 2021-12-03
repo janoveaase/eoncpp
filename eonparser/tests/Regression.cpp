@@ -7,7 +7,7 @@ namespace eon
 	TEST( TokenizerTest, basic )
 	{
 		string raw{ "This is a 02   \tline test\nLine #2!" };
-		source src( "test", std::move( raw ) );
+		Source src( "test", std::move( raw ) );
 		auto tokens = tokenizer()( src );
 		REQUIRE_EQ( 18, tokens.size() ) << "Wrong number of tokens";
 
@@ -45,15 +45,15 @@ namespace eon
 			"}" };
 		source src( "test", std::move( raw ) );
 		auto tokens = tokenizer()( src );
-		REQUIRE_EQ( 250, tokens.size() ) << "Wrong number of tokens";
+		WANT_EQ( 252, tokens.size() ) << "Wrong number of tokens";
 
 		string expected{
 			"TEST|(| |TokenizerTest|,| |basic| |)|\n"
 			"|{|\n"
 			"|\t|string| |raw|{| |\"|This| |is| |a| |02|   |\\|tline| |test|\\|nLine| |#|2|!|\"| |}|;|\n"
-			"|\t|source| |src|(| |\"|test|\"|,| |std|::|move|(| |raw| |)| |)|;|\n"
+			"|\t|source| |src|(| |\"|test|\"|,| |std|:|:|move|(| |raw| |)| |)|;|\n"
 			"|\t|auto| |tokens| |=| |Tokenizer|(|)|(| |src| |)|;|\n"
-			"|\t|REQUIRE|_|EQ|(| |18|,| |tokens|.|size|(|)| |)| |<<| |\"|Wrong| |number| |of| |tokens|\"|;|\n"
+			"|\t|REQUIRE|_|EQ|(| |18|,| |tokens|.|size|(|)| |)| |<|<| |\"|Wrong| |number| |of| |tokens|\"|;|\n"
 			"|\n"
 			"|\t|string| |expected|{|\n"
 			"|\t\t|\"|This|;| |;|is|;| |;|a|;| |;|02|;|   |;|\\|t|;|line|;| |;|test|;|\\|n|;|Line|;| |;|#|;|2|;|!|\"| |}|;|\n"

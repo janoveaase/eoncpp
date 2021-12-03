@@ -26,7 +26,7 @@ namespace eon
 		regex() = default;
 
 		//* Copy the 'other' expression
-		inline regex( const regex& other ) { *this = other; }
+		inline regex( const regex& other ) { if( !other.empty() ) *this = other; }
 
 		//* Take ownership of the 'other' expression
 		inline regex( regex&& other ) noexcept { *this = std::move( other ); }
@@ -35,19 +35,27 @@ namespace eon
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
-		inline regex( const substring& expression ) { Raw = expression; Graph.parse( Raw.substr() ); }
+		inline regex( string expression, string flags = string() ) {
+			Raw = expression; Flags = flags; Graph.parse( Raw.substr(), Flags.substr() ); }
+		inline regex( substring expression, substring flags ) {
+			Raw = expression; Flags = flags; Graph.parse( Raw.substr(), Flags.substr() ); }
 
 		//* Construct for an std::string 'expression'
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
-		inline regex( const std::string& expression ) { Raw = substring( expression ); Graph.parse( Raw.substr() ); }
+		inline regex( const std::string& expression, std::string flags = std::string() ) {
+			Raw = substring( expression ); Flags = substring( flags ); Graph.parse( Raw.substr(), Flags.substr() ); }
 
 		//* Construct for a 'const char*' (C-string)
 		//* WARNING: Will throw InvalidExpression if invalid formatting.
 		//*          The exception message will contain details about what's
 		//*          wrong with the 'expression' string.
-		inline regex( const char* expression ) { Raw = substring( expression ); Graph.parse( Raw.substr() ); }
+		inline regex( const char* expression, const char* flags = nullptr ) {
+			if( expression ) Raw = substring( expression ); if( flags ) Flags = substring( flags );
+			Graph.parse( Raw.substr(), Flags.substr() ); }
+
+		//* Construct for a source
 
 
 		//* Default destruction
@@ -61,15 +69,17 @@ namespace eon
 		**********************************************************************/
 
 		//* Copy the 'other' expression
-		inline regex& operator=( const regex& other ) { Graph = other.Graph; Raw = other.Raw; return *this; }
+		inline regex& operator=( const regex& other ) {
+			Graph = other.Graph; Raw = other.Raw; Flags = other.Flags; return *this; }
 
 		//* Take ownership of the details of the 'other' expression
 		inline regex& operator=( regex&& other ) noexcept {
-			Graph = std::move( other.Graph ); Raw = std::move( other.Raw ); return *this; }
+			Graph = std::move( other.Graph ); Raw = std::move( other.Raw ); Flags = std::move( other.Flags );
+			return *this; }
 
 
 		//* Clear this expression
-		inline void clear() noexcept { Graph.clear(); Raw.clear(); }
+		inline void clear() noexcept { Graph.clear(); Raw.clear(); Flags.clear(); }
 		
 
 
@@ -81,11 +91,13 @@ namespace eon
 		//* Check if there is an expression
 		inline bool empty() const noexcept { return Raw.empty(); }
 
-		//* Get the complete pattern (boundary markers and flags included)
+		//* Get the raw pattern
 		inline const string& str() const noexcept { return Raw; }
 
-		//* Get the complete (optimized) pattern, boundary markers and flags
-		//* not included!
+		//* Get the flags
+		inline const string& flags() const noexcept { return Flags; }
+
+		//* Get the complete (optimized) pattern
 		inline string strStruct() const { return Graph.strStruct(); }
 
 
@@ -134,6 +146,6 @@ namespace eon
 
 	private:
 		rx::Graph Graph;
-		string Raw;
+		string Raw, Flags;
 	};
 }

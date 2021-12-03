@@ -1,5 +1,5 @@
 #pragma once
-#include "SourcePos.h"
+#include "Raw.h"
 
 
 /******************************************************************************
@@ -8,140 +8,216 @@
 namespace eon
 {
 	/**************************************************************************
-	  Exception used when attempting to access a referenced source when no such
-	  source exists.
+	  The 'source' namespace encloses all source functionality
 	**************************************************************************/
-	EONEXCEPT( NoSource );
-
-
-
-
-	/**************************************************************************
-	  Eon Source Reference Class - eon::sourceref
-
-	  A source reference is a reference to a source, a line in that source and
-	  a position on that line. There is an optional number-of-characters
-	  attribute that is used to make a source reference span multiple
-	  characaters.
-
-	  NOTE: Position and number of characters is in pure characters, meaning 1
-	        tab = 1 character pos.
-	**************************************************************************/
-	class sourceref
+	namespace source
 	{
-	public:
-
 		/**********************************************************************
-		  Construction
+		  Exception used when attempting to access a referenced source when no
+		  such source exists.
 		**********************************************************************/
-
-		//* Default constructor, no source reference
-		sourceref() noexcept = default;
-
-		//* Copy another source reference
-		inline sourceref( const sourceref& rhs ) { *this = rhs; }
-
-		//* Construct for a source, locate to start of that source
-		inline sourceref( const source& src ) { *this = src; }
-
-		//* Construct for a source, specify position within that source
-		inline sourceref( const source& src, const sourcepos& pos ) noexcept {
-			Src = &src; Pos = pos; }
-
-
-		//* Default destructor
-		~sourceref() = default;
+		EONEXCEPT( NoSource );
 
 
 
 
 		/**********************************************************************
-		  Modifier Methods
+		  Eon Source Reference Class - eon::source::Ref
+
+		  A source reference is a reference to a source, it includes a
+		  source::Pos marking the start of the referenced area and another that
+		  marks the end. The end is not inclusive (one character past the last
+		  charcater of the reference).
+
+		  Because we in the case of file input do not read the entire file from
+		  start to end beforehand, we do not know the exact number of UTF-8
+		  characters in the file. (Not until we have worked our way through it
+		  to the end.) Because of this, initial (default) end position for a
+		  source reference will only have the byte count of the source, not the
+		  character count. This is called an 'implicit' end position, as
+		  opposed to an 'explicit' where the character count is also known.
+		  The effect is that some methods will not work when end position is
+		  implicit. Each affected method will have information about a this in
+		  their comments!
 		**********************************************************************/
+		class Ref
+		{
+		public:
 
-		//* Assign a copy the 'other' source reference
-		inline sourceref& operator=( const sourceref& other ) noexcept {
-			Src = other.Src; Pos = other.Pos; return *this; }
+			/******************************************************************
+			  Construction
+			******************************************************************/
 
-		//* Assign to a (new) source, locate to start of that source
-		inline sourceref& operator=( const source& src ) noexcept {
-			Src = &src; Pos = sourcepos( *Src ); return *this; }
+			//* Default constructor, no source reference
+			//* WARNING: This is just a place holder for class attributes!
+			//*          Using a source reference without a source will result
+			//*          in undefined behavior!
+			Ref() noexcept = default;
 
-		//* Assign a new position to this source reference
-		inline sourceref& operator=( const sourcepos& pos ) noexcept {
-			Pos = pos; return *this; }
+			//* Copy another source reference
+			inline Ref( const Ref& rhs ) { *this = rhs; }
 
+			//* Construct for a source, reference the entire source
+			inline Ref( Raw& src ) { *this = src; }
 
-		//* Set end of the source reference
-		inline void setEnd( const string_iterator& end ) noexcept {
-			Pos.setEnd( end ); }
+			//* Construct for a source, reference from specified start to the
+			//* end of the source
+			inline Ref( Raw& src, Pos start ) noexcept { Source = &src; Start = start; End.BytePos = Source->numBytes(); }
 
-
-		//* Move 'this' source reference's position to the next character in
-		//* the source
-		//* Newline will cause line number to increment and position on line to
-		//* be zero.
-		//* NOTE: The number of characters will be ignored (and set to 1).
-		//* NOTE: This method will check [atEnd] and return 'false' if at end.
-		inline bool advance() noexcept { return Pos.advance( *Src ); }
-
-
+			//* Construct for a source, reference the specified area
+			inline Ref( Raw& src, Pos start, Pos end ) noexcept { Source = &src; Start = start; End = end; }
 
 
-		/**********************************************************************
-		  Read-only Methods
-		**********************************************************************/
-
-		//* Check if 'this' source reference references an actual source
-		inline operator bool() const { return Src != nullptr; }
-
-		//* Get source name
-		//* Returns an empty string if no source attached
-		inline const string& name() const noexcept {
-			return Src != nullptr ? Src->name() : string::Empty; }
-
-		//* Get position within source
-		inline const sourcepos& pos() const noexcept { return Pos; }
-
-		//* Check if 'this' source reference refers to the of the source
-		//* Returns 'true' if no source!
-		inline bool atEnd() const noexcept {
-			return Src != nullptr ? Pos.atEnd( *Src ) : true; }
-
-		//* Get character at current position
-		//* Returns 'eon::nochar' if invalid source reference
-		inline char_t chr() const noexcept {
-			return Src != nullptr ? Pos.chr() : nochar; }
-
-		//* Get the full string referenced by 'this'
-		inline substring str() const noexcept {
-			return Src != nullptr ? Pos.area() : substring(); }
-
-		//* Access the source
-		//* WARNING: Throws [eon::NoSource] if no source has been set!
-		inline const eon::source& source() const {
-			if( Src != nullptr ) return *Src; else throw NoSource(); }
-
-
-		//* Get the full source reference in text form
-		//* Format: "<source name>:<line>:<pos>[-<pos>]"
-		//* (The last part of the range is excluded if only 1 character)
-		string textRefRange() const;
-
-		//* Get position reference in text form
-		//* Format: "<source name>:<line>:<pos>"
-		string textRefPos() const;
-
-		//* Get line reference in text form
-		//* Format: "<source name>:<line>"
-		string textRefLine() const;
+			//* Default destructor
+			~Ref() = default;
 
 
 
 
-	private:
-		const eon::source* Src{ nullptr };
-		sourcepos Pos;
-	};
+			/******************************************************************
+			  Modifier Methods
+			******************************************************************/
 
+			//* Assign a copy the 'other' source reference
+			inline Ref& operator=( const Ref& other ) noexcept {
+				Source = other.Source; Start = other.Start; End = other.End; return *this; }
+
+			//* Assign to a (new) source, reference the entire source
+			inline Ref& operator=( Raw& src ) noexcept {
+				Source = &src; Start = Pos(); End.BytePos = Source->numBytes(); return *this; }
+
+
+			//* Push (move forward) start position a number of characters
+			//* If moving past end, end position will follow start!
+			//* Returns true if moved one or more characters
+			inline bool pushStart( size_t num_characters = 1 ) noexcept {
+				try { Start = Source->push( Start, num_characters ); if( End < Start ) End = Start; return true; }
+				catch( ... ) {} return false; }
+
+			//* Pull (move backward) start position a number of characters
+			//* Will not move if already as start of source!
+			//* Returns true if moved one or more characters
+			inline bool pullStart( size_t num_characters = 1 ) noexcept {
+				try { Start = Source->pull( Start, Pos(), num_characters ); return true; } catch( ... ) {} return false; }
+
+			//* Pull (move backward) start position to start of current line
+			//* Will not move if already at start of line!
+			//* Returns true if moved one or more characters
+			bool pullStartOfLine() noexcept;
+
+			//* Move start position to end position
+			//* END POSITION MUST BE EXPLICIT!
+			inline void startToEnd() noexcept { if( End.charPos() > 0 ) { Start = End; } }
+
+			//* Set start position to specified value
+			//* If new start is beyond the current end, the end position will
+			//* be moved to the new start!
+			//* Returns true if set, won't set to after end!
+			inline bool start( Pos pos ) noexcept {
+				if( !Source->atEnd( pos ) ) { Start = pos; if( End < Start ) End = Start; return true; } return false; }
+
+			//* Push (move forward) end position a number of characters
+			//* END POSITION MUST BE EXPLICIT!
+			//* Returns true if moved one or more characters
+			inline bool pushEnd( size_t num_characters = 1 ) noexcept {
+				try { End = Source->push( End, num_characters ); return true; } catch( ... ) {} return false; }
+
+			//* Push (move forward) end position to end of line
+			//* Will not move if already at end of line!
+			//* Returns true if moved one or more characters
+			bool pushEndOfLine() noexcept;
+
+			//* Pull (move backward) end position a number of characters
+			//* END POSITION MUST BE EXPLICIT!
+			//* Will not move beyond current start position!
+			//* Returns true if moved one or more characters
+			inline bool pullEnd( size_t num_characters = 1 ) noexcept {
+				try { End = Source->pull( End, Start, num_characters ); return true; } catch( ... ) {} return false; }
+
+			//* Send end position to specified value
+			//* Will not set to after end of source nor before current start
+			//* position!
+			//* Returns true if set
+			inline bool end( Pos pos ) noexcept {
+				if( pos >= Start && !Source->beyondEnd( pos ) ) { End = pos; return true; } return false; }
+
+
+
+
+
+			/******************************************************************
+			  Read-only Methods
+			******************************************************************/
+
+			//* Check if source reference is empty (end == start)
+			inline bool empty() const noexcept { return numBytes() == 0; }
+
+			//* Check if source reference refers to something
+			inline operator bool() const { return numBytes() > 0; }
+
+			//* Check if end position is explicit
+			inline bool explicitEnd() const noexcept { return End.CharPos > 0 && End.BytePos > 0; }
+
+			//* Get source name
+			inline const string& name() const noexcept { return Source->name(); }
+
+			//* Get start position
+			inline const Pos& start() const noexcept { return Start; }
+
+			//* Get end position
+			inline const Pos& end() const noexcept { return End; }
+
+			//* Get last position (just before end)
+			//* END POSITION MUST BE EXPLICIT!
+			inline Pos last() {
+				return End == Start || End.bytePos() == Start.bytePos() + 1 ? Start : Source->pull( End, Start, 1 ); }
+
+			//* Get number of bytes in reference area (including newlines and
+			//* carriage return, if any).
+			inline size_t numBytes() const noexcept { return End.bytePos() - Start.bytePos(); }
+
+			//* Get number of characters in reference area (including newlines
+			//* and carriage return, if any)
+			//* END POSITION MUST BE EXPLICIT!
+			inline size_t numChars() const noexcept {
+				return End.bytePos() > 0 ? End.charPos() - Start.charPos() : 0; }
+
+			//* Check if start position is at end of source
+			inline bool startAtEnd() const noexcept { return Source->atEnd( Start ); }
+
+			//* Check if end position is at end of source
+			inline bool endAtEnd() const noexcept { return Source->atEnd( End ); }
+
+			//* Check if the specified position is at (or beyond) the end of
+			//* this source reference
+			inline bool atEnd( const Pos& pos ) const noexcept {
+				return End.bytePos() > 0 ? pos >= End : pos.bytePos() >= Source->numBytes(); }
+
+			//* Get character at start position
+			//* Returns [eon::nochar] if at or beyond source end!
+			inline char_t chr() const noexcept { return Source->chr( Start ); }
+
+			//* Get the referenced source area as a string
+			//* Returns empty if empty area (including implicit end position)
+			inline string str() const noexcept { return Source->str( Start, End ); }
+
+			//* Access the source
+			inline const Raw& source() const noexcept { return *Source; }
+			inline Raw& source() noexcept { return *Source; }
+
+
+			//* Get start position as string on the format: "<line>:<pos>"
+			inline string startStr() const { return Start.str(); }
+
+			//* Get end position as string on the format: "<line>:<pos>"
+			inline string endStr() const { return End.str(); }
+
+
+
+
+		private:
+			Raw* Source{ nullptr };
+			Pos Start, End;
+		};
+	}
 }

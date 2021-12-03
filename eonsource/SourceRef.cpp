@@ -3,36 +3,52 @@
 
 namespace eon
 {
-	string sourceref::textRefRange() const
+	namespace source
 	{
-		if( Src != nullptr )
+		bool Ref::pullStartOfLine() noexcept
 		{
-			if( Pos.area().numChars() > 1 )
-				return textRefPos() + "-"
-				+ string( Pos.pos( *Src ) + 1 + Pos.area().numChars() );
-			else
-				return textRefPos();
+			if( Start.bytePos() == 0 )
+				return false;
+			Pos beg;
+			try
+			{
+				auto start = Source->pull( Start, beg, 1 );
+				while( true )
+				{
+					if( Source->chr( start ) != NewlineChr )
+					{
+						Start = start;
+						if( Start.bytePos() == 0 )
+							break;
+						start = Source->pull( start, beg, 1 );
+					}
+					else
+						break;
+				}
+				return true;
+			}
+			catch( ... ) {}
+			return false;
 		}
-		else
-			return textRefLine();
-	}
-	string sourceref::textRefPos() const
-	{
-		if( Src != nullptr )
-			return textRefLine() + ":" + string( Pos.pos( *Src ) + 1 );
-		else
-			return textRefLine();
-	}
-	string sourceref::textRefLine() const
-	{
-		string txt;
-		if( Src != nullptr )
+
+		bool Ref::pushEndOfLine() noexcept
 		{
-			txt += Src->name();
-			txt += ":" + string( Pos.line() + 1 );
+			if( Source->chr( End ) == NewlineChr )
+				return false;
+			try
+			{
+				while( true )
+				{
+					End = Source->push( End, 1 );
+					if( Source->atEnd( End ) )
+						break;
+					if( Source->chr( End ) == NewlineChr )
+						break;
+				}
+				return true;
+			}
+			catch( ... ) {}
+			return false;
 		}
-		else
-			txt = "N/A";
-		return txt;
 	}
 }

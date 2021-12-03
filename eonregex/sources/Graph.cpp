@@ -22,46 +22,27 @@ namespace eon
 		Graph& Graph::operator=( const Graph& other )
 		{
 			Source = other.Source;
-			ExprSub = other.ExprSub;
-			FlagsSub = other.FlagsSub;
 			Head = other.Head->copy();
 			MyFlags = other.MyFlags;
-			Separator = other.Separator;
 			return *this;
 		}
 		Graph& Graph::operator=( Graph&& other ) noexcept
 		{
 			Source = std::move( other.Source );
-			ExprSub = std::move( other.ExprSub );
-			FlagsSub = std::move( other.FlagsSub );
 			Head = other.Head; other.Head = nullptr;
 			MyFlags = std::move( other.MyFlags );
-			Separator = other.Separator; other.Separator = '/';
 			return *this;
 		}
 
-		void Graph::parse( const substring& source )
+		void Graph::parse( substring source, substring flags )
 		{
+			if( source.empty() )
+				return;
+
 			Source = source;
+			parseFlags( flags );
 
-			// We have (or should have) a full source:
-			//   <sep><expr><sep>[<flags>]
-			// Let's make sure
-			if( source.numChars() <= 2 )
-			{
-				throw InvalidExpression(
-					"Regular expressions must be on the form: "
-					"/<expression>/[flags]\n(The boundary character '/' can "
-					"be a (any) different character not occurring within the "
-					"expression!)\nExample: /\\w+/i" );
-			}
-			auto chr = Source.begin();
-			Separator = *chr;
-			auto last = Source.last();
-			parseFlags( last );
-
-			if( *( chr + 1 ) != Separator )
-				parse();
+			parse();
 
 			// TODO: Find out why matching runs slower with this done!
 			removeDuplicates();
@@ -72,17 +53,17 @@ namespace eon
 
 		void Graph::parse()
 		{
-			ParseParam param( ExprSub );
+			ParseParam param( Source );
 			if( !parse( param ) )
 				Head = param.extract();
 		}
 
-		void Graph::parseFlags( string::iterator& last )
+		void Graph::parseFlags( substring flags )
 		{
 			string invalid;
-			for( ; *last != Separator; --last )
+			for( auto c : flags )
 			{
-				switch( *last )
+				switch( c )
 				{
 					case 'i':
 						MyFlags |= Flag::icase;
@@ -97,15 +78,14 @@ namespace eon
 						MyFlags |= Flag::accuracy;
 						break;
 					default:
-						invalid += *last;
+						invalid += c;
 						break;
 				}
 			}
-			ExprSub = substring( Source.begin() + 1, last );
-			FlagsSub = substring( last + 1, Source.end() );
-			if( !invalid.empty() )
-				throw InvalidExpression( "At position "
-					+ string( FlagsSub.begin() - Source.begin() ) + ": Invalid flag(s): " + invalid );
+			if( invalid.numChars() == 1 )
+				throw InvalidExpression( "Invalid flag: " + invalid );
+			else if( invalid.numChars() > 1 )
+				throw InvalidExpression( "Invalid flags: " + invalid );
 		}
 
 		void Graph::ParseParam::set( Node* node ) noexcept

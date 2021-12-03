@@ -41,9 +41,9 @@ namespace eon
 		if( empty() )
 			return 0;
 		if( Beg < End )
-			return pos < static_cast<size_t>( End.Begin - Beg.Begin ) ? *( Beg.Begin + pos ) : 0;
+			return pos < static_cast<size_t>( End.Source - Beg.Source ) ? *( Beg.Source + pos ) : 0;
 		else
-			return pos < static_cast<size_t>( Beg.Begin - End.Begin ) ? *( End.Begin + pos ) : 0;
+			return pos < static_cast<size_t>( Beg.Source - End.Source ) ? *( End.Source + pos ) : 0;
 	}
 
 	bool substring::blank() const noexcept
@@ -255,6 +255,45 @@ namespace eon
 		else
 			return num + ( dec / dec_pow );
 	}
+	long double substring::toLongDouble( char_t decimal_separator ) const
+	{
+		if( empty() )
+			return 0.0;
+		long double num = 0.0, dec = 0.0, dec_pow = 1.0;
+		int point = 0;
+		auto i = begin();
+		long double sign = *i == '+' ? 1.0 : *i == '-' ? -1.0 : 0.0;
+		if( sign != 0.0 )
+			++i;
+		for( ; i != end(); ++i )
+		{
+			if( *i == decimal_separator )
+			{
+				if( ++point > 1 )
+					break;
+			}
+			else
+			{
+				if( !isDigit( *i ) )
+					break;
+				if( point == 0 )
+				{
+					num *= 10.0;
+					num += ( *i - ZeroChr );
+				}
+				else
+				{
+					dec *= 10.0;
+					dec += ( *i - ZeroChr );
+					dec_pow *= 10.0;
+				}
+			}
+		}
+		if( sign )
+			return sign * ( num + ( dec / dec_pow ) );
+		else
+			return num + ( dec / dec_pow );
+	}
 
 	substring substring::trimNumber( char_t decimal_separator ) const
 	{
@@ -360,8 +399,8 @@ namespace eon
 			auto found = _findFirst( Beg.Pos, numBytes(), to_find.begin().Pos, to_find.numBytes() );
 			if( found != nullptr )
 			{
-				return substring( string_iterator( Beg, found, found - Beg.Begin ),
-					string_iterator( Beg, found + to_find.numBytes(), ( found + to_find.numBytes() ) - Beg.Begin ) );
+				return substring( string_iterator( Beg, found, found - Beg.Source ),
+					string_iterator( Beg, found + to_find.numBytes(), ( found + to_find.numBytes() ) - Beg.Source ) );
 			}
 			else
 				return substring( End.getEnd() );
@@ -394,8 +433,8 @@ namespace eon
 
 			auto found = _findFirst( Beg.Pos, numBytes(), static_cast<char>( to_find ) );
 			if( found != nullptr )
-				return substring( string_iterator( Beg, found, found - Beg.Begin ),
-					string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Begin ) );
+				return substring( string_iterator( Beg, found, found - Beg.Source ),
+					string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Source ) );
 			else
 				return substring( End.getEnd() );
 		}
@@ -425,8 +464,8 @@ namespace eon
 			auto found = _findLast( Beg.Pos, numBytes(), to_find.begin().Pos, to_find.numBytes() );
 			if( found != nullptr )
 			{
-				return substring( string_iterator( Beg, found, found - Beg.Begin ),
-					string_iterator( Beg, found + to_find.numBytes(), ( found + to_find.numBytes() ) - Beg.Begin ) );
+				return substring( string_iterator( Beg, found, found - Beg.Source ),
+					string_iterator( Beg, found + to_find.numBytes(), ( found + to_find.numBytes() ) - Beg.Source ) );
 			}
 			else
 				return substring( End.getEnd() );
@@ -460,12 +499,12 @@ namespace eon
 			auto found = _findLast( Beg.Pos, numBytes(), static_cast<char>( to_find ) );
 			if( found != nullptr )
 			{
-				if( found < Beg.End )
-					return substring( string_iterator( Beg, found, found - Beg.Begin ),
-						string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Begin ) );
+				if( found < Beg.SourceEnd )
+					return substring( string_iterator( Beg, found, found - Beg.Source ),
+						string_iterator( Beg, found + 1, ( found + 1 ) - Beg.Source ) );
 				else
 					return substring( string_iterator( Beg, found,
-						found - Beg.Begin ), End );
+						found - Beg.Source ), End );
 			}
 			else
 				return substring( End.getEnd() );

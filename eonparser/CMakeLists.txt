@@ -4,11 +4,19 @@ message(STATUS " - EonParser")
 
 set(PARSER_HEADERS
 	Parser.h
-	DocNode.h
+	RegexRule.h
+	BoolLiteralRule.h
+	NamePathRule.h
+	ParseExpression.h
+	ToolBox.h
 )
 set(PARSER_SOURCES
 	Parser.cpp
-	DocNode.cpp
+	RegexRule.cpp
+	BoolLiteralRule.cpp
+	NamePathRule.cpp
+	ParseExpression.cpp
+	ToolBox.cpp
 )
 
 add_library(EonParser STATIC ${PARSER_HEADERS} ${PARSER_SOURCES})
@@ -44,6 +52,6 @@ if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
 
-add_executable(EonParserApp main.cpp)
-target_link_libraries(EonParserApp EonParser)
-set_target_properties(EonParserApp PROPERTIES OUTPUT_NAME "eonparser")
+#add_executable(EonParserApp main.cpp)
+#target_link_libraries(EonParserApp EonParser)
+#set_target_properties(EonParserApp PROPERTIES OUTPUT_NAME "eonparser")
