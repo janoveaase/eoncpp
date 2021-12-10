@@ -5,9 +5,8 @@
 
 void usage( const std::string& prog )
 {
-	std::cout << "Usage: " << prog.c_str() << " [--eonfilter=<regex>]\n";
-	std::cout << "If run with filter, "
-		"only tests matching that filter regex pattern will be run.\n";
+	eon::term << "Usage: " << prog.c_str() << " [--eonfilter=<regex>]\n";
+	eon::term << "If run with filter, only tests matching that filter regex pattern will be run.\n";
 }
 
 class Args
@@ -49,46 +48,79 @@ bool runTest( const std::string& exe, eontest::EonTest::TestRef& test )
 	return !failed;
 }
 
-void runTests( const std::string& exe, const std::string& filter, std::list<std::string>& failed )
+eon::string duration( std::chrono::steady_clock::time_point start, std::chrono::steady_clock::time_point end )
 {
-	if( !eontest::EonTest::Tests )
-		throw TestError( "No tests have been defined!" );
+	auto duration = end - start;
+	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count();
+	std::vector<eon::string> elms;
+	if( dur / 3600000 != 0 )
+		elms.push_back( eon::string( dur / 3600000 ) + "h" );
+	if( ( dur % 3600000 ) / 60000 != 0 )
+		elms.push_back( eon::string( ( dur % 3600000 ) / 60000 ) + "m" );
+	elms.push_back( eon::string( ( dur % 60000 ) / 1000 ) + "." + eon::string( dur % 1000 ).padLeft( 3, '0' ) + "s" );
+	return eon::string( " " ).join( elms );
+}
+size_t runTests( const std::string& exe, const std::string& filter, std::list<std::string>& failed )
+{
+	using namespace eontest;
+	if( !EonTest::Tests )
+		return 0 ;
 
 	std::regex pattern( filter );
 	auto start = std::chrono::high_resolution_clock::now();
-	for( auto& test : *eontest::EonTest::Tests )
+	size_t total = 0;
+	for( auto& test : *EonTest::Tests )
 	{
-		if( !filter.empty() && !std::regex_match(
-			test.TestClass + "." + test.TestName, pattern ) )
+		if( !filter.empty() && !std::regex_match( test.TestClass + "." + test.TestName, pattern ) )
 			continue;
-		std::cout << "Running " << test.TestClass << "." << test.TestName
-			<< ": ";
+		++total;
+		eon::string test_name = test.TestClass + "." + test.TestName;
+		size_t col_w = eon::term.width() < 70 ? eon::term.width() : 70;
+		eon::term << eon::style::note << "-- Start " << test_name << " "
+			<< eon::string().padRight( col_w - test_name.numChars() + 9, '-' ) << eon::style::normal << "\n";
+		auto st = std::chrono::high_resolution_clock::now();
 		try
 		{
-			if( !runTest( exe, test ) )
+			auto success = runTest( exe, test );
+			auto en = std::chrono::high_resolution_clock::now();
+			if( success )
+			{
+				eon::term << eon::style::reference << "   " + test_name + "   " << eon::style::blue
+					<< duration( st, en ).padLeft( col_w - test_name.numChars() + 6 ) << " " << eon::style::success
+					<< " PASS " << eon::style::normal << "\n\n";
+			}
+			else
+			{
+				eon::term << eon::style::reference << "   " + test_name + "   " << eon::style::blue
+					<< duration( st, en ).padLeft( col_w - test_name.numChars() + 6 ) << " " << eon::style::error
+					<< " FAIL " << eon::style::normal << "\n\n";
 				failed.push_back( test.TestClass + "." + test.TestName );
+			}
 		}
 		catch( std::exception& e )
 		{
-			std::cerr << "FAIL\nERROR: std::exception:\n";
-			std::cerr << e.what() << "\n";
+			auto en = std::chrono::high_resolution_clock::now();
+			eon::term << "ERROR: std::exception:\n";
+			eon::term << e.what() << "\n";
+			eon::term << eon::style::reference << "   " + test_name + "   " << eon::style::blue
+				<< duration( st, en ).padLeft( col_w - test_name.numChars() + 6 ) << " " << eon::style::error << " FAIL "
+				<< eon::style::normal << "\n\n";
 			failed.push_back( test.TestClass + "." + test.TestName );
 		}
 		catch( ... )
 		{
-			std::cerr << "FAIL\nERROR: Unknown error\n";
+			auto en = std::chrono::high_resolution_clock::now();
+			eon::term << "ERROR: Unknown error\n";
+			eon::term << eon::style::reference << "   " + test_name + "   " << eon::style::blue
+				<< duration( st, en ).padLeft( col_w - test_name.numChars() + 6 ) << " " << eon::style::error << " FAIL "
+				<< eon::style::normal << "\n\n";
 			failed.push_back( test.TestClass + "." + test.TestName );
 		}
 	}
-	std::cout << "\n";
+	eon::term << "\n";
 	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = end - start;
-	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-	auto s = std::to_string( dur.count() / 1000 );
-	auto ms = std::to_string( dur.count() % 1000 );
-	if( ms.size() < 3 )
-		ms = std::string( 3 - ms.size(), '0' ) + ms;
-	std::cout << "Total run time: " << s << "." << ms << " seconds\n";
+	eon::term << "Total run time: " << eon::style::blue << duration( start, end ) << eon::style::normal << "\n\n";
+	return total;
 }
 
 
@@ -99,18 +131,26 @@ int main( int argc, const char* argv[] )
 		return args.Result < 0 ? 0 : args.Result;
 
 	std::list<std::string> failed;
-	runTests( args.Exe, args.Filter, failed );
+	auto total = runTests( args.Exe, args.Filter, failed );
 
 	eontest::EonTest::reset();
 
-	if( !failed.empty() )
+	if( total == 0 )
 	{
-		std::cerr << "\nThe following tests failed:\n";
-		for( auto& name : failed )
-			std::cerr << "  - " << name << "\n";
-		std::cerr << "\n";
+		eon::term << eon::style::error << " No tests have been defined! " << eon::style::normal << "\n";
 		return 4;
 	}
-
-	return 0;
+	else if( failed.empty() )
+	{
+		eon::term << eon::style::success << " All tests passed! " << eon::style::normal << "\n";
+		return 0;
+	}
+	else
+	{
+		eon::term << "\n" << eon::style::error << "The following tests failed:" << eon::style::normal << "\n";
+		for( auto& name : failed )
+			eon::term << "  - " << eon::style::red << name << eon::style::normal << "\n";
+		eon::term << "\n";
+		return 4;
+	}
 }

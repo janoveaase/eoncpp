@@ -105,33 +105,39 @@ namespace eontest
 		auto exp_lines = _splitLines( encode( expected, dummy1 ) );
 		auto act_lines = _splitLines( encode( actual, dummy2 ) );
 		auto diff_line = _findFirstDiffLine( exp_lines, act_lines );
+		eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr << eon::style::normal
+			<< "\n";
+		eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr << eon::style::normal
+			<< "\n";
 		if( diff_line == exp_lines.size() || diff_line == act_lines.size() )
 		{
-			_Messages << "\nFailed to compare equal (at line " << std::to_string( diff_line + 1 ) << ")\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
 			if( diff_line < exp_lines.size() )
-				_Messages << "Expected value: \"" << _extractLine( exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+			{
+				eon::term << eon::style::strong << "Expected line #" << eon::string( diff_line + 1 ) << ": "
+					<< eon::style::normal << "\"" << eon::style::green
+					<< _extractLine( exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << eon::style::normal << "\"\n";
+				eon::term << eon::style::red << "No matching actual line!\n";
+			}
 			else
-				_Messages << "  Actual value: \"" << _extractLine( act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+			{
+				eon::term << "No matching expected line!\n";
+				eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
+					<< _extractLine( act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+			}
 		}
 		else
 		{
 			auto diff_pos = _findFirstDiffPos( exp_lines[ diff_line ], act_lines[ diff_line ] );
-			_Messages << "\nFailed to compare equal (at line " << std::to_string( diff_line + 1 ) << ", position "
-				<< std::to_string( diff_pos + 1 ) << ")\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-			_Messages << "Expected value: \"" << _extractLine( exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos )
-				<< "\"\n";
-			_Messages << "  Actual value: \"" << _extractLine( act_lines[ diff_line ], diff_pos, 79 - 19, start_pos )
-				<< "\"\n";
-			_Messages << std::string( diff_pos - start_pos + 17, ' ' ) << "^\n";
-			std::string marker{ "Different here" };
+			eon::term << "Expected line #" << eon::string( diff_line + 1 ) << ": \""
+				<< _extractLine( exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+			eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
+				<< _extractLine( act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+			eon::term << eon::string( diff_pos - start_pos + 17, ' ' ) << "^\n";
+			std::string marker{ "Different here!" };
 			if( diff_pos > marker.size() + 2 )
-				_Messages << std::string( diff_pos - start_pos + 17 - marker.size() - 1, ' ' ) << marker << "-'\n";
+				eon::term << eon::string( diff_pos - start_pos + 17 - marker.size() - 1, ' ' ) << marker << "-'\n";
 			else
-				_Messages << std::string( diff_pos - start_pos + 17, ' ' ) << "'-" << marker << "\n";
+				eon::term << eon::string( diff_pos - start_pos + 17, ' ' ) << "'-" << marker << "\n";
 		}
 		return false;
 	}
@@ -173,8 +179,8 @@ namespace eontest
 		}
 		return expected.size() < actual.size() ? expected.size() : actual.size();
 	}
-	std::string EonTest::_extractLine( const std::string& line,
-		size_t diff_pos, size_t available_size, size_t& start_pos ) const
+	std::string EonTest::_extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
+		const
 	{
 		size_t start{ 0 }, end{ 0 };
 		if( diff_pos <= 16 )

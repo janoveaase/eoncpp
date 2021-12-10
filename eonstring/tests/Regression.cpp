@@ -506,9 +506,9 @@ namespace eon
 		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 			s_time );
 
-		std::cout << "\nEon string (" << e_sum << "): " << string::toString( e_ms.count() )
+		eon::term << "Eon string (" << e_sum << "): " << string::toString( e_ms.count() )
 			<< "ms\n";
-		std::cout << "Std string (" << s_sum << "): " << string::toString( s_ms.count() )
+		eon::term << "Std string (" << s_sum << "): " << string::toString( s_ms.count() )
 			<< "ms\n";
 	}
 
@@ -555,14 +555,14 @@ namespace eon
 #else
 		size_t max = 100000;
 #endif
-		std::cout << "Running " << max << " iterations ...\n";
+		eon::term << "Running " << max << " iterations ...\n";
 		for( size_t i = 0; i < max; ++i )
 		{
 			WANT_EQ( exp.stdstr(), base.replace( "one", "two" ).stdstr() )
 				<< "Wrong value in iteration " + std::to_string( i );
 		}
 		auto end = std::chrono::high_resolution_clock::now();
-		std::cout << "Replace took "
+		eon::term << "Replace took "
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(
 				end - start ).count()
 			<< " msec\n";

@@ -10,6 +10,7 @@
 #include <chrono>
 #include <eonstring/String.h>
 #include <eonname/Name.h>
+#include <eonterminal/Terminal.h>
 
 
 
@@ -37,42 +38,6 @@ namespace eontest
 #define TEST_ID( test_class, test_name ) #test_class"_"#test_name
 #define TEST_LINE std::to_string( __LINE__ )
 
-	// Replace std::stringstream for user messages
-	class _stringstream
-	{
-	public:
-		_stringstream() { auto x = std::setprecision( std::numeric_limits<double>::digits10 + 2 ); }
-		_stringstream( const _stringstream& other ) { *this = other; }
-
-		_stringstream& operator=( const _stringstream& other ) { Strm << other.Strm.str(); return *this; }
-
-
-		template<typename T>
-		inline _stringstream& operator<<( const T& value )
-		{
-			Strm << value;
-			return *this;
-		}
-		template<typename T>
-		inline _stringstream& operator<<( T* const& value ) {
-			if( value == nullptr ) Strm << "(nullptr)"; else Strm << value; return *this; }
-		inline _stringstream& operator<<( bool value ) { Strm << ( value ? "true" : "false" ); return *this; }
-		std::string str() const
-		{
-			const std::string& in = Strm.str();
-			std::string out;
-			for( auto c : in )
-			{
-				if( c == '\0' ) out += "\\0";
-					else out += c;
-			}
-			return out;
-		}
-	private:
-		std::stringstream Strm;
-	};
-
-
 
 	// Create a test
 	// Specify a test class name and the name of the test
@@ -91,7 +56,7 @@ namespace eontest
 
 
 #define EON_MESSAGE_LOCATION( file, line, fatal )\
-	::eontest::EonTest::Report( *this, file, line, fatal ) = ::eontest::_stringstream()
+	::eontest::EonTest::Report( *this, file, line, fatal ) = std::stringstream()
 
 #define FAILURE_MESSAGE_( fatal ) \
 	EON_MESSAGE_LOCATION( __FILE__, __LINE__, fatal )
@@ -133,38 +98,47 @@ namespace eontest
 	catch( std::exception& e )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: --|" << #expression << "|-- throws:\n";\
-		_Messages << e.what() << "\n";\
-		_Messages << "Expected no exceptions\n";\
+		eon::term << "Expression: " << #expression << "\n";\
+		eon::term << "Throws: " << e.what() << "\n";\
+		eon::term << "Expected no exceptions!\n";\
 	}\
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: --|" << #expression << "|-- throws\n";\
-		_Messages << "Expected no exceptions\n"; }
+		eon::term << "Expression: " << #expression << "\n";\
+		eon::term << "Throws a non-standard exception!\n";\
+		eon::term << "Expected no exceptions!\n"; }
 #define WANT_NO_EXCEPT( expression )\
 	_NO_EXCEPT( expression ); if( Failed ) NONFATAL_MESSAGE
 #define REQUIRE_NO_EXCEPT( expression )\
 	_NO_EXCEPT( expression ); if( Failed ) FATAL_MESSAGE
 
 	// Test that a specific exception is thrown
-#define _EXCEPT( expression, exception )\
+#define _EXCEPT( expression, exception_name )\
 	try { expression;\
 		Failed = true;\
-		_Messages << "\nExpression: --|" << #expression << "|-- doesn't throw\n";\
-		_Messages << "Expected exception: " << #exception << "\n";\
+		eon::term << "Expression: " << #expression << "\n";\
+		eon::term << "Doesn't throw any exceptions!\n";\
+		eon::term << "Expected exception: " << #exception_name << "\n";\
 	}\
-	catch( exception ) { /* This is what we want! */ }\
+	catch( exception_name ) { /* This is what we want! */ }\
+	catch( std::exception& e )\
+	{\
+		Failed = true;\
+		eon::term << "Expression: " << #expression << "\n";\
+		eon::term << "Throws wrong exception: " << e.what() << "\n";\
+		eon::term << "Expected exception: " << #exception_name << "\n";\
+	}\
 	catch( ... )\
 	{\
 		Failed = true;\
-		_Messages << "\nExpression: --|" << #expression << "|-- doesn't throw \""\
-			<< #exception << "\"\n";\
-		_Messages << "A different exception was thrown\n"; }
-#define WANT_EXCEPT( expression, exception )\
-	_EXCEPT( expression, exception ); if( Failed ) NONFATAL_MESSAGE
-#define REQUIRE_EXCEPT( expression, exception )\
-	_EXCEPT( expression, exception ); if( Failed ) FATAL_MESSAGE
+		eon::term << "Expression: " << #expression << "\n";\
+		eon::term << "Throws a non-standard exception!\n";\
+		eon::term << "Expected exception: " << #exception_name << "\n"; }
+#define WANT_EXCEPT( expression, exception_name )\
+	_EXCEPT( expression, exception_name ); if( Failed ) NONFATAL_MESSAGE
+#define REQUIRE_EXCEPT( expression, exception_name )\
+	_EXCEPT( expression, exception_name ); if( Failed ) FATAL_MESSAGE
 
 	// Test that something is equal to something else
 #define WANT_EQ( expected, actual )\
@@ -249,28 +223,28 @@ namespace eontest
 	public:
 		std::string _TestExe;
 		std::string _TestID;
-		_stringstream _Messages;
 		bool Failed{ false };
 
 	public:
 		EonTest() = default;
-		virtual ~EonTest()
-		{
-			std::cout << ( Failed ? "FAIL" : "OK" ) << "\n";
-			auto str = _Messages.str();
-			if( !str.empty() ) std::cout << "----------" << str
-				<< "----------\n";
-		}
+		virtual ~EonTest() = default;
 
 
 		void runTest( const std::string& exe )
 		{
 			_TestExe = exe;
 			try { prepare(); }
+			catch( std::exception& e )
+			{
+				Failed = true;
+				eon::term << "Failure in 'prepare' method of test!\n";
+				eon::term << "Throws: " << e.what() << "\n";
+			}
 			catch( ... )
 			{
 				Failed = true;
-				_Messages << "Failure in 'prepare' method of test\n";
+				eon::term << "Failure in 'prepare' method of test!\n";
+				eon::term << "Throws non-standard exception!\n";
 			}
 			if( !Failed )
 			{
@@ -282,14 +256,21 @@ namespace eontest
 				{
 					// Test was aborted!
 					Failed = true;
-					_Messages << "Test aborted!\n";
+					eon::term << "Test aborted!\n";
 				}
 			}
 			try { cleanup(); }
+			catch( std::exception& e )
+			{
+				Failed = true;
+				eon::term << "Failure in 'cleanup' method of test!\n";
+				eon::term << "Throws: " << e.what() << "\n";
+			}
 			catch( ... )
 			{
 				Failed = true;
-				_Messages << "Failure in 'cleanup' method of test\n";
+				eon::term << "Failure in 'cleanup' method of test!\n";
+				eon::term << "Throws non-standard exception!\n";
 			}
 		}
 
@@ -324,18 +305,22 @@ namespace eontest
 		{
 			EonTest* Test{ nullptr };
 			bool Fatal{ false };
+			const char* File{ nullptr };
+			int Line{ 0 };
 			Report( EonTest& test, const char* file, int line, bool fatal )
 			{
 				Test = &test;
 				Test->Failed = true;
 				Fatal = fatal;
-				Test->_reportLocation( file, line );
+				File = file;
+				Line = line;
 			}
-			Report& operator=( _stringstream ss )
+			Report& operator=( std::stringstream ss )
 			{
 				auto str = ss.str();
 				if( !str.empty() )
-					Test->_Messages << str << "\n";
+					eon::term << str << "\n";
+				Test->_reportLocation( File, Line );
 				if( Fatal )
 					throw std::string( "" );
 				return *this;
@@ -343,19 +328,25 @@ namespace eontest
 		};
 
 	public:
-		inline void _reportLocation( const char* file, int line ) { _Messages << "In " << file << ":" << line << "\n"; }
+		inline void _reportLocation( const char* file, int line ) { eon::term << "In " << file << ":" << line << "\n"; }
 		std::string encode( const std::string& str, size_t& diffpos );
 
 		bool _testTrue( bool value, const char* expression )
 		{
 			if( !value )
-				_Messages << "\nExpression: --|" << expression << "|--=false\nExpected true\n";
+			{
+				eon::term << "Expression: " << expression << "\n";
+				eon::term << "Expected 'true', got 'false'!\n";
+			}
 			return value;
 		}
 		bool _testFalse( bool value, const char* expression )
 		{
 			if( value )
-				_Messages << "\nExpression: --|" << expression << "|--=true\nExpected false\n";
+			{
+				eon::term << "Expression: " << expression << "\n";
+				eon::term << "Expected 'false', got 'true'!\n";
+			}
 			return !value;
 		}
 
@@ -401,11 +392,11 @@ namespace eontest
 			if( expected != actual )
 			{
 				Failed = true;
-				_Messages << "\nFailed to compare equal\n";
-				_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-				_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-				_Messages << "Expected value: \"" << expected << "\"\n";
-				_Messages << "  Actual value: \"" << actual << "\"\n";
+				eon::term << "Expected expression: " << exp_expr << "\n";
+				eon::term << "  Actual expression: " << act_expr << "\n";
+				eon::term << "Expected value: \"" << expected << "\"\n";
+				eon::term << "  Actual value: \"" << actual << "\"\n";
+				eon::term << "Expected value should be equal to actual!\n";
 				return false;
 			}
 			else
@@ -451,12 +442,11 @@ namespace eontest
 			if( expected != actual )
 				return true;
 			Failed = true;
-			_Messages << "\nFailed to compare not equal\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-			size_t dummy{ SIZE_MAX };
-			_Messages << "Expected value: \"" << expected << "\"\n";
-			_Messages << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected expression: " << exp_expr << "\n";
+			eon::term << "  Actual expression: " << act_expr << "\n";
+			eon::term << "Expected value: \"" << expected << "\"\n";
+			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value should not be equal to actual!\n";
 			return false;
 		}
 		
@@ -499,12 +489,11 @@ namespace eontest
 			if( expected < actual )
 				return true;
 			Failed = true;
-			_Messages << "\nFailed to compare less than\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-			size_t dummy{ SIZE_MAX };
-			_Messages << "Expected value: \"" << expected << "\"\n";
-			_Messages << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected expression: " << exp_expr << "\n";
+			eon::term << "  Actual expression: " << act_expr << "\n";
+			eon::term << "Expected value: \"" << expected << "\"\n";
+			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value should be less than actual!\n";
 			return false;
 		}
 		
@@ -547,12 +536,11 @@ namespace eontest
 			if( expected <= actual )
 				return true;
 			Failed = true;
-			_Messages << "\nFailed to compare less than or equal to\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-			size_t dummy{ SIZE_MAX };
-			_Messages << "Expected value: \"" << expected << "\"\n";
-			_Messages << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected expression: " << exp_expr << "\n";
+			eon::term << "  Actual expression: " << act_expr << "\n";
+			eon::term << "Expected value: \"" << expected << "\"\n";
+			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value should be less than or equal to actual!\n";
 			return false;
 		}
 		
@@ -595,12 +583,11 @@ namespace eontest
 			if( expected > actual )
 				return true;
 			Failed = true;
-			_Messages << "\nFailed to compare greater than\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-			size_t dummy{ SIZE_MAX };
-			_Messages << "Expected value: \"" << expected << "\"\n";
-			_Messages << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected expression: " << exp_expr << "\n";
+			eon::term << "  Actual expression: " << act_expr << "\n";
+			eon::term << "Expected value: \"" << expected << "\"\n";
+			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value should be greater than actual!\n";
 			return false;
 		}
 		
@@ -643,12 +630,11 @@ namespace eontest
 			if( expected >= actual )
 				return true;
 			Failed = true;
-			_Messages << "\nFailed to compare greater than or equal to\n";
-			_Messages << "Expected expression: --|" << exp_expr << "|--\n";
-			_Messages << "  Actual expression: --|" << act_expr << "|--\n";
-			size_t dummy{ SIZE_MAX };
-			_Messages << "Expected value: \"" << expected << "\"\n";
-			_Messages << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected expression: " << exp_expr << "\n";
+			eon::term << "  Actual expression: " << act_expr << "\n";
+			eon::term << "Expected value: \"" << expected << "\"\n";
+			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value should be greater than or equal to actual!\n";
 			return false;
 		}
 
@@ -656,6 +642,7 @@ namespace eontest
 		std::vector<std::string> _splitLines( const std::string& str ) const;
 		size_t _findFirstDiffLine( const std::vector<std::string>& expected, const std::vector<std::string>& actual ) const;
 		size_t _findFirstDiffPos( const std::string& expected, const std::string& actual ) const;
-		std::string _extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos ) const;
+		std::string _extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
+			const;
 	};
 }

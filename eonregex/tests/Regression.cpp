@@ -422,7 +422,6 @@ namespace eon
 		regex expr1{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
 		regex expr2( R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)", "o" );
 		int matches1 = 0, matches2 = 0;
-		std::cout << "\n";
 
 		for( auto i = 0; i < iterations; ++i )
 		{
@@ -441,8 +440,8 @@ namespace eon
 
 		auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>( time1 );
 		auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>( time2 );
-		std::cout << "Non-optimized: " << string::toString( duration1.count() ).separateThousands() << " microsecs\n";
-		std::cout << "    Optimized: " << string::toString( duration2.count() ).separateThousands() << " microsecs\n";
+		eon::term << "Non-optimized: " << string::toString( duration1.count() ).separateThousands() << " microsecs\n";
+		eon::term << "    Optimized: " << string::toString( duration2.count() ).separateThousands() << " microsecs\n";
 
 		WANT_EQ( iterations, matches1 );
 		WANT_EQ( iterations, matches2 );
@@ -489,9 +488,9 @@ namespace eon
 		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
 		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
-		std::cout << "\nEon regex (" + string::toString( e_list.size() ) << "): " << string::toString( e_ms.count() )
+		eon::term << "Eon regex (" + string::toString( e_list.size() ) << "): " << string::toString( e_ms.count() )
 			<< "ms\n";
-		std::cout << "Std regex (" + string::toString( s_list.size() ) << "): " << string::toString( s_ms.count() )
+		eon::term << "Std regex (" + string::toString( s_list.size() ) << "): " << string::toString( s_ms.count() )
 			<< "ms\n";
 	}
 	TEST( SpeedCmp, eon_std_match )
@@ -578,9 +577,9 @@ namespace eon
 		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
 		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
-		std::cout << "\nEon regex (" << string::toString( e_successes ) << "): " << string::toString( e_ms.count() )
+		eon::term << "Eon regex (" << string::toString( e_successes ) << "): " << string::toString( e_ms.count() )
 			<< "ms\n";
-		std::cout << "Std regex (" << string::toString( s_successes ) << "): " << string::toString( s_ms.count() )
+		eon::term << "Std regex (" << string::toString( s_successes ) << "): " << string::toString( s_ms.count() )
 			<< "ms\n";
 	}
 	TEST( SpeedCmp, eon_match_only )
@@ -639,7 +638,7 @@ namespace eon
 		auto e_time = end - start;
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
 
-		std::cout << "\nEon regex (" << string::toString( successes )
+		eon::term << "Eon regex (" << string::toString( successes )
 			<< "): " << string::toString( ms.count() ) << "ms\n";
 	}
 }

@@ -714,8 +714,7 @@ namespace eon
 		return string( half, fill ) + *this + string( diff - half, fill );
 	}
 
-	string string::indentLines( size_t indentation_level,
-		char_t indentation_char ) const
+	string string::indentLines( size_t indentation_level, char_t indentation_char ) const
 	{
 		auto lines = splitSequential<std::list<substring>>( NewlineChr );
 		string result;
@@ -746,8 +745,7 @@ namespace eon
 
 
 
-	string string::separateThousands( char_t thousands_sep,
-		char_t decimal_separator ) const
+	string string::separateThousands( char_t thousands_sep, char_t decimal_separator ) const
 	{
 		if( !isFloat() && !isUInt() && !isInt() )
 			return *this;
@@ -759,8 +757,7 @@ namespace eon
 		if( sep.begin() - begin() < 4 )
 			return *this;
 
-		string formatted(
-			substr( begin(), begin() + sep.begin().numChar() % 3 ) );
+		string formatted( substr( begin(), begin() + sep.begin().numChar() % 3 ) );
 		auto pos = begin() + formatted.numChars();
 		while( pos != sep.begin() )
 		{
@@ -772,8 +769,7 @@ namespace eon
 		formatted += substr( sep.begin() );
 		return formatted;
 	}
-	string string::roundNumber( size_t max_decimals,
-		char_t decimal_separator ) const
+	string string::roundNumber( size_t max_decimals, char_t decimal_separator ) const
 	{
 		if( !isFloat() && !isUInt() && !isInt() )
 			return *this;

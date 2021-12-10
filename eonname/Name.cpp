@@ -213,4 +213,21 @@ namespace eon
 	const name_t name_return = name::get( "return" );
 	const name_t name_data = name::get( "data" );
 	const name_t name_shared = name::get( "shared" );
+	const name_t name_normal = name::get( "normal" );
+	const name_t name_strong = name::get( "strong" );
+	const name_t name_weak = name::get( "weak" );
+	const name_t name_red = name::get( "red" );
+	const name_t name_green = name::get( "green" );
+	const name_t name_yellow = name::get( "yellow" );
+	const name_t name_blue = name::get( "blue" );
+	const name_t name_magenta = name::get( "magenta" );
+	const name_t name_cyan = name::get( "cyan" );
+	const name_t name_dark = name::get( "dark" );
+	const name_t name_black = name::get( "black" );
+	const name_t name_bright = name::get( "bright" );
+	const name_t name_white = name::get( "white" );
+	const name_t name_note = name::get( "note" );
+	const name_t name_warning = name::get( "warning" );
+	const name_t name_quote = name::get( "quote" );
+	const name_t name_code = name::get( "code" );
 }
