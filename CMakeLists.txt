@@ -14,7 +14,7 @@ set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Postfix to debug builds")
 set(EON_BUILD_TESTS ON CACHE BOOL "Include tests in build?")
 set(EON_BUILD_FILESYS ON CACHE BOOL "Include the File System package")
 set(EON_BUILD_TOKENIZER ON CACHE BOOL "Build the Tokenizer package")
-set(EON_BUILD_PARSER ON CACHE BOOL "Build the Eon Parser package")
+set(EON_BUILD_PARSER OFF CACHE BOOL "Build the Eon Parser package")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-D_DEBUG)
