@@ -505,7 +505,7 @@ namespace eon
 		SetConsoleTextAttribute( Console, FGColors[ Foreground ] | BGColors[ Background ] );
 	}
 #else
-	void Terminal::_checkPlatformConsole() noexcept
+	void Terminal::_checkPlatform() noexcept
 	{
 		winsize size;
 		ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
@@ -514,7 +514,7 @@ namespace eon
 	}
 	void Terminal::_setColors() noexcept
 	{
-		static bool was_bold = false;
+/*		static bool was_bold = false;
 		std::string format;
 		if( Bold )
 		{
@@ -538,7 +538,7 @@ namespace eon
 		if( !Err )
 			std::cout << format.c_str() << "\033[" << fg << "m\033[" << bg << 'm';
 		else
-			std::cerr << format.c_str() << "\033[" << fg << "m\033[" << bg << 'm';
+			std::cerr << format.c_str() << "\033[" << fg << "m\033[" << bg << 'm';*/
 	}
 #endif
 }
