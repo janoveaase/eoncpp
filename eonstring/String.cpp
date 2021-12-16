@@ -114,8 +114,7 @@ namespace eon
 		return *this;
 	}
 
-	string& string::operator=(
-		const std::initializer_list<char_t>& codepoints )
+	string& string::operator=( const std::initializer_list<char_t>& codepoints )
 	{
 		clear();
 		reserve( codepoints.size() );
@@ -139,8 +138,7 @@ namespace eon
 			*this += static_cast<byte_t>( chr );
 		return *this;
 	}
-	string& string::operator=(
-		const std::initializer_list<unsigned char>& chars )
+	string& string::operator=( const std::initializer_list<unsigned char>& chars )
 	{
 		clear();
 		reserve( chars.size() );
@@ -158,8 +156,7 @@ namespace eon
 		std::smatch match;
 		if( std::regex_match( encoded_iterator.stdstr(), match, pattern ) )
 		{
-			return iterator( Bytes.c_str(), Bytes.size(), NumChars,
-				Bytes.c_str() + std::atoi( match[ 1 ].str().c_str() ),
+			return iterator( Bytes.c_str(), Bytes.size(), NumChars, Bytes.c_str() + std::atoi( match[ 1 ].str().c_str() ),
 				std::atoi( match[ 2 ].str().c_str() ) );
 		}
 		else
@@ -171,13 +168,10 @@ namespace eon
 		std::smatch match;
 		if( std::regex_match( encode_substring.stdstr(), match, pattern ) )
 		{
-			return substring(
+			return substring( iterator( Bytes.c_str(), Bytes.size(), NumChars, Bytes.c_str()
+					+ std::atoi( match[ 1 ].str().c_str() ), std::atoi( match[ 2 ].str().c_str() ) ),
 				iterator( Bytes.c_str(), Bytes.size(), NumChars, Bytes.c_str()
-					+ std::atoi( match[ 1 ].str().c_str() ), std::atoi(
-						match[ 2 ].str().c_str() ) ),
-				iterator( Bytes.c_str(), Bytes.size(), NumChars, Bytes.c_str()
-					+ std::atoi( match[ 3 ].str().c_str() ), std::atoi(
-						match[ 4 ].str().c_str() ) ) );
+					+ std::atoi( match[ 3 ].str().c_str() ), std::atoi( match[ 4 ].str().c_str() ) ) );
 		}
 		else
 			return substring( end() );
@@ -195,8 +189,8 @@ namespace eon
 		if( _ascii() )		// Optimized ASCII handling
 		{
 			if( start.numByte() + pos < Bytes.size() )
-				return iterator( Bytes.c_str(), Bytes.size(), start.numChar()
-					+ pos, Bytes.c_str() + start.numChar() + pos );
+				return iterator( Bytes.c_str(), Bytes.size(), start.numChar() + pos, Bytes.c_str() + start.numChar()
+					+ pos );
 			else
 				return end();
 		}
@@ -209,8 +203,7 @@ namespace eon
 
 	string::iterator string::rebase( const iterator& other ) const noexcept
 	{
-		if( other
-			&& other.numByte() < numBytes() && other.numChar() < NumChars )
+		if( other && other.numByte() < numBytes() && other.numChar() < NumChars )
 		{
 			// The iterator is inside of our range
 			return iterator( Bytes.c_str(), numBytes(), NumChars,
@@ -219,12 +212,10 @@ namespace eon
 		return end();
 	}
 
-	string::iterator string::rebaseMoved( const iterator& other )
-		const noexcept
+	string::iterator string::rebaseMoved( const iterator& other ) const noexcept
 	{
 		if( other )
-			return iterator( Bytes.c_str(), numBytes(), NumChars,
-				Bytes.c_str() + other.numByte(), other.numChar() );
+			return iterator( Bytes.c_str(), numBytes(), NumChars, Bytes.c_str() + other.numByte(), other.numChar() );
 		else
 			return end();
 	}
@@ -232,20 +223,17 @@ namespace eon
 
 
 
-	string::iterator string::insert(
-		const iterator& pos, const string& substr )
+	string::iterator string::insert( const iterator& pos, const string& substr )
 	{
 		pos.assertSameBuffer( Bytes.c_str() );
 		if( !pos )
 		{
 			*this += substr;
-			return iterator( Bytes.c_str(), Bytes.size(), NumChars,
-				Bytes.c_str() + pos.numByte() );
+			return iterator( Bytes.c_str(), Bytes.size(), NumChars, Bytes.c_str() + pos.numByte() );
 		}
 		Bytes.insert( pos.numByte(), substr.Bytes );
 		NumChars += substr.NumChars;
-		return iterator( Bytes.c_str(), Bytes.size(), NumChars,
-			Bytes.c_str() + pos.numByte() );
+		return iterator( Bytes.c_str(), Bytes.size(), NumChars, Bytes.c_str() + pos.numByte() );
 	}
 
 	string& string::erase( const substring& sub ) noexcept
@@ -253,6 +241,10 @@ namespace eon
 		if( sub.empty() )
 			return *this;
 		auto area = sub.lowToHigh();
+		if( area.begin().numByte() >= Bytes.size() )
+			return *this;
+		if( area.begin().numByte() + area.numBytes() > Bytes.size() )
+			area.end() = end();
 		Bytes.erase( area.begin().numByte(), area.numBytes() );
 		NumChars -= area.numChars();
 		return *this;
@@ -272,8 +264,7 @@ namespace eon
 		for( auto i = area.begin(); i != area.end(); ++i )
 		{
 			if( *i <= 0xFFFF )
-				result += static_cast<char_t>(
-					std::toupper( static_cast<int>( *i ) ) );
+				result += static_cast<char_t>( std::toupper( static_cast<int>( *i ) ) );
 			else
 				result += *i;
 		}
@@ -311,8 +302,7 @@ namespace eon
 			return upper( area );
 		else
 		{
-			return string( substr( begin(), area.begin() ) )
-				+ string( substr( area.begin(), area.begin() + 1 ) ).upper()
+			return string( substr( begin(), area.begin() ) ) + string( substr( area.begin(), area.begin() + 1 ) ).upper()
 				+ string( substr( area.begin() + 1 ) );
 		}
 	}
@@ -393,8 +383,7 @@ namespace eon
 		return substring( sub.iterator( s ), sub.iterator( e ) );
 	}
 
-	string string::replace( const string& find, const string& replacement,
-		const substring& sub ) const
+	string string::replace( const string& find, const string& replacement, const substring& sub ) const
 	{
 		if( sub.empty() )
 			return *this;
@@ -421,8 +410,7 @@ namespace eon
 			result += substr( pos );
 		return result;
 	}
-	string string::replace( char_t find, char_t replacement,
-		const substring& sub ) const
+	string string::replace( char_t find, char_t replacement, const substring& sub ) const
 	{
 		if( sub.empty() )
 			return *this;
@@ -442,8 +430,7 @@ namespace eon
 		return result;
 	}
 
-	inline string _escape( const string& src, const substring& sub,
-		const std::unordered_map<char_t, char_t>& singletons )
+	inline string _escape( const string& src, const substring& sub, const std::unordered_map<char_t, char_t>& singletons )
 	{
 		if( sub.empty() )
 			return src;
@@ -544,8 +531,7 @@ namespace eon
 				}
 
 				// Hex
-				else if( ( *c1 == 'x' || *c1 == 'X' )
-					&& c1 + 1 != area.end() && isHexDigit( *( c1 + 1 ) ) )
+				else if( ( *c1 == 'x' || *c1 == 'X' ) && c1 + 1 != area.end() && isHexDigit( *( c1 + 1 ) ) )
 				{
 					++c;
 					byte_t val{ 0 };
@@ -607,11 +593,8 @@ namespace eon
 		string result;
 		for( auto c : area )
 		{
-			if( c < '\n'
-				|| ( c > '\n' && c < ' ' )
-				|| c > 126 )
-				result += "&#" + string( static_cast<int32_t>( c ) )
-				+ SemiColonChr;
+			if( c < '\n' || ( c > '\n' && c < ' ' ) || c > 126 )
+				result += "&#" + string( static_cast<int32_t>( c ) ) + SemiColonChr;
 			else
 				result += c;
 		}
@@ -627,8 +610,7 @@ namespace eon
 		{
 			if( *i == '&' && i.numChar() < NumChars - 4 && *( i + 1 ) == '#' )
 			{
-				auto end = substring( i, area.end() ).findFirst(
-					SemiColonChr );
+				auto end = substring( i, area.end() ).findFirst( SemiColonChr );
 				if( end )
 				{
 					auto num = substr( i + 2, end.begin() );
@@ -736,8 +718,7 @@ namespace eon
 			else
 				result += NewlineChr;
 			if( !line->empty() )
-				result += string(
-					indentation_level, indentation_char ) + *line;
+				result += string( indentation_level, indentation_char ) + *line;
 		}
 		return result;
 	}
@@ -787,8 +768,7 @@ namespace eon
 		if( max_decimals == 0 )
 			digits.erase( digits.begin() + sep, digits.end() );
 		else
-			digits.erase( digits.begin() + sep + 1 + max_decimals,
-				digits.end() );
+			digits.erase( digits.begin() + sep + 1 + max_decimals, digits.end() );
 		if( digit >= 5 )
 			_roundUp( digits, digits.size() - 1 );
 
@@ -824,8 +804,7 @@ namespace eon
 		*this += element;
 		return *this;
 	}
-	string& string::push_front( const string& element,
-		const string& separator )
+	string& string::push_front( const string& element, const string& separator )
 	{
 		if( !empty() )
 			*this = element + separator + *this;
@@ -835,8 +814,7 @@ namespace eon
 	}
 	string& string::orderList( const string& separator )
 	{
-		auto elements = substr().splitNonsequential<std::set<substring>>(
-			separator.substr() );
+		auto elements = substr().splitNonsequential<std::set<substring>>( separator.substr() );
 		return *this = separator.join( elements );
 	}
 
@@ -868,8 +846,7 @@ namespace eon
 
 
 
-	size_t string::_findDecimalSeparator( std::vector<char_t>& digits,
-		char_t decimal_separator ) noexcept
+	size_t string::_findDecimalSeparator( std::vector<char_t>& digits, char_t decimal_separator ) noexcept
 	{
 		for( size_t i = 0; i < digits.size(); ++i )
 		{

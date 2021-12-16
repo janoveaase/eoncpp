@@ -933,4 +933,15 @@ namespace eon
 		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() )
 			<< "Wrong double max";
 	}
+
+	TEST( String, real_issue_seen1 )
+	{
+		eon::string source{ "log/test/function/unit_context/gt_context.cpp:340" };
+		eon::string exp = source;
+		eon::substring sub;
+		sub.begin() = eon::string_iterator( source.c_str(), 93, source.numChars(), source.c_str() + 93, 93 );
+		sub.end() = eon::string_iterator( source.c_str(), 103, source.numChars(), source.c_str() + 103, 103 );
+		source.erase( sub );
+		WANT_EQ( exp, source );
+	}
 }

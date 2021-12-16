@@ -304,8 +304,7 @@ namespace eon
 		CodepointSize = 1;
 		for( size_t i = 0; i < max_char_len; ++i, ++CodepointSize )
 		{
-			if( !_utf8Decode( state, Codepoint,
-				static_cast<unsigned char>( *( Pos + i ) ) ) )
+			if( !_utf8Decode( state, Codepoint, static_cast<unsigned char>( *( Pos + i ) ) ) )
 				return;
 		}
 	}
