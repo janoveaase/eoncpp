@@ -125,16 +125,14 @@ namespace eon
 		//* NOTE: An 'empty' substring can be valid if obth 'begin' and 'end'
 		//*       are 'valid', but referring to the same character in the
 		//*       source string.
-		inline operator bool() const noexcept {
-			return static_cast<bool>( Beg ) || static_cast<bool>( End ); }
+		inline operator bool() const noexcept { return static_cast<bool>( Beg ) || static_cast<bool>( End ); }
 
 		//* An empty substring is one where begin and end are the same (valid
 		//* or not)
 		inline bool empty() const noexcept { return numChars() == 0; }
 
 		//* Get number of characters in substring
-		inline size_t numChars() const noexcept {
-			return static_cast<size_t>( End >= Beg ? End - Beg : Beg - End ); }
+		inline size_t numChars() const noexcept { return static_cast<size_t>( End >= Beg ? End - Beg : Beg - End ); }
 
 		//* Get number of bytes in substring
 		size_t numBytes() const noexcept;
@@ -284,10 +282,12 @@ namespace eon
 		//* Get iterator for the start of the substring
 		inline string_iterator& begin() noexcept { return Beg; }
 		inline const string_iterator& begin() const noexcept { return Beg; }
+		inline const string_iterator& cbegin() const noexcept { return Beg; }
 
 		//* Get iterator for the end of the substring
 		inline string_iterator& end() noexcept { return End; }
 		inline const string_iterator& end() const noexcept { return End; }
+		inline const string_iterator& cend() const noexcept { return End; }
 
 		//* Get iterator for the last character in the substring
 		//* Returns 'end()' if 'high-to-low' ordering or empty substring.
@@ -302,17 +302,13 @@ namespace eon
 	public:
 
 		//* Check if the substring contains the given substring
-		inline bool contains( const substring& sub ) const noexcept {
-			return static_cast<bool>( findFirst( sub ) ); }
+		inline bool contains( const substring& sub ) const noexcept { return static_cast<bool>( findFirst( sub ) ); }
 
 		//* Check if the substring contains the given codepoint
-		inline bool contains( char_t cp ) const noexcept {
-			return static_cast<bool>( findFirst( cp ) ); }
+		inline bool contains( char_t cp ) const noexcept { return static_cast<bool>( findFirst( cp ) ); }
 
-		//* Check if the substring contains any of the charcters in the given
-		//* substring
-		inline bool containsAnyOf( const substring& sub ) const noexcept {
-			return static_cast<bool>( findFirstOf( sub ) ); }
+		//* Check if the substring contains any of the charcters in the given substring
+		inline bool containsAnyOf( const substring& sub ) const noexcept { return static_cast<bool>( findFirstOf( sub ) ); }
 
 		//* Check if the substring contains any charcters other than the ones
 		//* in the given substring
