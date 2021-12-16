@@ -38,6 +38,39 @@ namespace eontest
 #define TEST_ID( test_class, test_name ) #test_class"_"#test_name
 #define TEST_LINE std::to_string( __LINE__ )
 
+	// Replace std::stringstream for user messages
+	class _stringstream
+	{
+	public:
+		_stringstream() { auto x = std::setprecision( std::numeric_limits<double>::digits10 + 2 ); }
+		_stringstream( const _stringstream& other ) { *this = other; }
+
+		_stringstream& operator=( const _stringstream& other ) { Strm << other.Strm.str(); return *this; }
+
+		template<typename T>
+		inline _stringstream& operator<<( const T& value ) { Strm << value; return *this; }
+		template<typename T>
+		inline _stringstream& operator<<( T* const& value )
+		{
+			if( value == nullptr ) Strm << "(nullptr)";
+				else Strm << value;
+			return *this; }
+		inline _stringstream& operator<<( bool value ) { Strm << ( value ? "true" : "false" ); return *this; }
+		std::string str() const
+		{
+			const std::string& in = Strm.str();
+			std::string out;
+			for( auto c : in )
+			{
+				if( c == '\0' ) out += "\\0";
+					else out += c;
+			}
+			return out;
+		}
+	private:
+		std::stringstream Strm;
+	};
+
 
 	// Create a test
 	// Specify a test class name and the name of the test
@@ -56,7 +89,7 @@ namespace eontest
 
 
 #define EON_MESSAGE_LOCATION( file, line, fatal )\
-	::eontest::EonTest::Report( *this, file, line, fatal ) = std::stringstream()
+	::eontest::EonTest::Report( *this, file, line, fatal ) = ::eontest::_stringstream()
 
 #define FAILURE_MESSAGE_( fatal ) \
 	EON_MESSAGE_LOCATION( __FILE__, __LINE__, fatal )
@@ -315,7 +348,7 @@ namespace eontest
 				File = file;
 				Line = line;
 			}
-			Report& operator=( std::stringstream ss )
+			Report& operator=( ::eontest::_stringstream ss )
 			{
 				auto str = ss.str();
 				if( !str.empty() )

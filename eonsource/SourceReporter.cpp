@@ -1,4 +1,5 @@
 #include "SourceReporter.h"
+#include <cmath>
 
 
 namespace eon

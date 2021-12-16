@@ -48,7 +48,8 @@ bool runTest( const std::string& exe, eontest::EonTest::TestRef& test )
 	return !failed;
 }
 
-eon::string duration( std::chrono::steady_clock::time_point start, std::chrono::steady_clock::time_point end )
+eon::string duration( std::chrono::high_resolution_clock::time_point start,
+ std::chrono::high_resolution_clock::time_point end )
 {
 	auto duration = end - start;
 	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count();
