@@ -67,13 +67,13 @@ namespace eon
 		//* Check for an explicit type [eon::name]
 		inline bool is( name_t type ) const noexcept { return Type == type; }
 
-		//* Check if this token's characters matches exactl those of the
+		//* Check if this token's characters matches exactly those of the
 		//* specified string
-		inline bool match( const string& str ) { return str.numChars() == Src.numChars() && str == Src.str(); }
+		inline bool match( const string& str ) const { return str.numChars() == Src.numChars() && str == Src.str(); }
 
 		//* Check if this token's characters matches exactly those of the
 		//* specified C-string
-		inline bool match( const char* cstr ) { return match( string( cstr ) ); }
+		inline bool match( const char* cstr ) const { return match( string( cstr ) ); }
 
 		//* Check if this token's character sequence starts with the same
 		//* characters as the specified substring
