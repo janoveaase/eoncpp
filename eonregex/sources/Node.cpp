@@ -110,7 +110,6 @@ namespace eon
 			// Match as many as possible from the start
 			auto matches = _stack();
 			matches.push( data );
-			size_t msize = 1;
 			matchMax( matches, steps );
 
 			// No next means we have nothing more to do

@@ -22,7 +22,9 @@ namespace eon
 		{
 		public:
 			RxData() = default;
-			inline RxData( const RxData& other ) { *this = other; }
+			inline RxData( const RxData& other ) {
+				if( other.Captures ) { Captures = new captures_t( *other.Captures ); }
+				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; }
 			inline RxData( RxData&& other ) noexcept { *this = std::move( other ); }
 			inline RxData( const substring& source ) noexcept { Src = source; Pos = Src.begin(); }
 			inline RxData( const substring& source, Flag flags ) {
