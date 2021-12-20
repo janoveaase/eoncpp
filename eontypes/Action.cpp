@@ -97,12 +97,7 @@ namespace eon
 			if( returntype != no_name )
 				signature += "@" + *returntype;
 			for( auto& argument : arguments )
-			{
-				if( argument.qualifier() == type::Qualifier::syntax )
-					signature += "$#" + *( (NameInstance*)argument.value() )->value();
-				else
-					signature += "$" + *argument.value()->type().asName();
-			}
+				signature += "$" + *argument.value()->type().asName();
 			return name::compilerGet( std::move( signature ) );
 		}
 

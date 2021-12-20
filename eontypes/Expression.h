@@ -78,6 +78,10 @@ namespace eon
 			//* Get object as string representation
 			inline void str( type::Stringifier& str ) const override { Value.infixStr( str ); }
 
+			//* Check if the expression is empty or not
+			inline bool empty() const noexcept { return Value.type() == NodeType::undef; }
+			inline operator bool() const noexcept { return Value.type() != NodeType::undef; }
+
 
 
 

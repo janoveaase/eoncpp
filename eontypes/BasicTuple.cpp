@@ -256,24 +256,17 @@ namespace eon
 				if( general_type != rhs.value()->generalType() )
 					return general_type < rhs.value()->generalType() ? -1 : 1;
 
-				// If we have syntax attributes, compare on names
-				if( lhs.qualifier() & Qualifier::syntax )
-					cmp = ( (NameInstance*)lhs.value() )->compare( *(NameInstance*)rhs.value() );
+				// If we have tuples, then compare as such
+				if( general_type == name_dynamic )
+					cmp = ( (BasicTuple*)lhs.value() )->compare( *(BasicTuple*)rhs.value() );
+				else if( general_type == name_tuple )
+					cmp = ( (Tuple*)lhs.value() )->compare( *(Tuple*)rhs.value() );
+				else if( general_type == name_meta )
+					cmp = ( (MetaData*)lhs.value() )->compare( *(MetaData*)rhs.value() );
+				else if( general_type == name_instance )
+					cmp = ( (Instance*)lhs.value() )->compare( *(Instance*)rhs.value() );
 
-				else
-				{
-					// If we have tuples, then compare as such
-					if( general_type == name_dynamic )
-						cmp = ( (BasicTuple*)lhs.value() )->compare( *(BasicTuple*)rhs.value() );
-					else if( general_type == name_tuple )
-						cmp = ( (Tuple*)lhs.value() )->compare( *(Tuple*)rhs.value() );
-					else if( general_type == name_meta )
-						cmp = ( (MetaData*)lhs.value() )->compare( *(MetaData*)rhs.value() );
-					else if( general_type == name_instance )
-						cmp = ( (Instance*)lhs.value() )->compare( *(Instance*)rhs.value() );
-
-					// TODO: Should we include enums and definitions here?
-				}
+				// TODO: Should we include enums and definitions here?
 
 				if( cmp != 0 )
 					return cmp;

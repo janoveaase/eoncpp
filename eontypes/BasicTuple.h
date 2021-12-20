@@ -135,6 +135,7 @@ namespace eon
 
 			//* Check if there are any attributes at all
 			inline bool empty() const noexcept { return Attributes.empty(); }
+			inline operator bool() const noexcept { return !Attributes.empty(); }
 
 			//* Get number of attributes in tuple
 			inline index_t numAttributes() const noexcept { return Attributes.size(); }
@@ -238,7 +239,7 @@ namespace eon
 			T& value( index_t pos )
 			{
 				auto& attribute = at( pos );
-				if( attribute.qualifier() & type::Qualifier::syntax ) {
+				if( attribute.type().isName( name_syntax ) ) {
 					if( typeid( T ) == typeid( name_t ) ) return *(T*)_nameValue( pos ); else throw type::WrongType(); }
 				auto object = (Object*)attribute.value();
 				if( object )
@@ -288,6 +289,9 @@ namespace eon
 			BasicTuple& operator+=( T&& value ) { *this += type::Attribute( isEDT()
 				? type::Handler::moveConstructData( value ) : type::Handler::moveConstruct( std::move( value ) ) );
 				if( Finalized ) _generateTupleID(); return *this; }
+
+			//* Add a new named read-only attribute
+			//* Throws [eon::type::AccessDenied] if not adding to (meta)data tuple!
 			BasicTuple& add( name_t name, const char* str ) { return add( name, string( str ) ); }
 			template<typename T>
 			BasicTuple& add( name_t name, const T& value )
@@ -421,8 +425,7 @@ namespace eon
 
 			// Get type based on position.
 			// Assumes 'pos' is < NumAttributes!
-			inline TypeTuple _type( index_t pos ) const noexcept { auto& a = Attributes[ pos ];
-				if( a.qualifier() & type::Qualifier::syntax ) return TypeTuple( { name_syntax } ); else return a.type(); }
+			inline TypeTuple _type( index_t pos ) const noexcept { return Attributes[ pos ].type(); }
 
 			void _str( type::Stringifier& str ) const;
 

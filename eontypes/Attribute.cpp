@@ -1,4 +1,5 @@
 #include "Attribute.h"
+#include "MetaData.h"
 
 
 namespace eon
@@ -29,6 +30,62 @@ namespace eon
 				default:
 					return "N/A";
 			}
+		}
+
+
+
+
+		Attribute::Attribute( name_t name, MetaData&& meta, Object* value )
+		{
+			Name = name;
+			Meta = new MetaData( std::move( meta ) );
+			if( value )
+				Type = value->type();
+			assign( value );
+		}
+		Attribute::Attribute( name_t name, const TypeTuple& type, MetaData&& meta, Object* value )
+		{
+			Name = name;
+			Type = type;
+			Meta = new MetaData( std::move( meta ) );
+			assign( value );
+		}
+		Attribute::Attribute( name_t name, name_t type, MetaData&& meta, Object* value )
+		{
+			Name = name;
+			Type = TypeTuple( { type } );
+			Meta = new MetaData( std::move( meta ) );
+			assign( value );
+		}
+		Attribute::Attribute( name_t name, MetaData&& meta, Qualifier qual, Object* value )
+		{
+			Name = name;
+			Meta = new MetaData( std::move( meta ) );
+			Qual = qual;
+			if( value )
+				Type = value->type();
+			assign( value );
+		}
+		Attribute::Attribute( name_t name, const TypeTuple& type, MetaData&& meta, Qualifier qual, Object* value )
+		{
+			Name = name;
+			Type = type;
+			Meta = new MetaData( std::move( meta ) );
+			Qual = qual;
+			assign( value );
+		}
+		Attribute::Attribute( name_t name, name_t type, MetaData&& meta, Qualifier qual, Object* value )
+		{
+			Name = name;
+			Type = TypeTuple( { type } );
+			Meta = new MetaData( std::move( meta ) );
+			Qual = qual;
+			assign( value );
+		}
+		Attribute::~Attribute()
+		{
+			if( Meta != nullptr )
+				delete Meta;
 		}
 	}
 }

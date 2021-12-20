@@ -138,6 +138,10 @@ namespace eon
 		//* Check if the type tuple is just a single name
 		inline bool isName() const noexcept { return Elements.size() == 1 && Elements[ 0 ]->isNameElement(); }
 
+		//* Check if the type tuple is just a single name, matching the one given
+		inline bool isName( name_t name ) const noexcept {
+			return isName() && ((NameElement*)( Elements[ 0 ] ))->Value == name; }
+
 		//* Check if the type tuple is for a tuple (any type)
 		inline bool isTuple() const noexcept { return IsTuple; }
 

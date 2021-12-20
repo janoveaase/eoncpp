@@ -34,6 +34,7 @@ namespace eon
 
 		// Take ownership of other tuple
 		inline DynamicTuple( DynamicTuple&& other ) noexcept : type::BasicTuple( std::move( other ) ) {}
+		inline DynamicTuple( type::BasicTuple&& other ) : type::BasicTuple( name_meta, std::move( other ) ) { finalize(); }
 
 		// Destruct tuple
 		virtual ~DynamicTuple() = default;

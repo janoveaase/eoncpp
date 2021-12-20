@@ -62,6 +62,7 @@ namespace eon
 			static inline Node newAction( Action* action ) { return Node( NodeType::action, (Object*)action ); }
 			static inline Node newValue( Object* value ) { return Node( NodeType::value, value ); }
 			static inline Node newName( name_t name ) { return Node( name ); }
+			static inline Node newEllipsis() { return Node( name_ellipsis ); }
 
 
 
@@ -75,6 +76,7 @@ namespace eon
 			inline bool isAction() const noexcept { return Type == NodeType::action; }
 			inline bool isValue() const noexcept { return Type == NodeType::value; }
 			inline bool isName() const noexcept { return Type == NodeType::name_only; }
+			inline bool isEllipsis() const noexcept { return Type == NodeType::name_only && Name == name_ellipsis; }
 
 			// Get as infix string
 			void infixStr( type::Stringifier& str ) const;
