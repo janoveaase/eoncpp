@@ -61,6 +61,13 @@ namespace eon
 			//*         from the start point if end of source was reached.
 			Pos pull( Pos start_point, Pos end_point, size_t num_characters ) override;
 
+			//* Check if the specified portion of the source matches exactly
+			//* with the given string value
+			inline bool match( const eon::string& value, Pos start, Pos end ) const noexcept override {
+				return ((File*)this)->str( start, end ) == value; }
+			bool match( const char* value, Pos start, Pos end ) const noexcept override {
+				return ( (File*)this )->str( start, end ) == value; }
+
 			//* Get characater at specified position
 			//* Returns [eon::nochar] if at or beyond source end!
 			char_t chr( const Pos& pos ) noexcept override;

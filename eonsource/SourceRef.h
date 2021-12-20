@@ -193,6 +193,10 @@ namespace eon
 			inline bool atEnd( const Pos& pos ) const noexcept {
 				return End.bytePos() > 0 ? pos >= End : pos.bytePos() >= Source->numBytes(); }
 
+			//* Check if source matches exactly the specified string value
+			inline bool match( const eon::string& value ) const noexcept { return Source->match( value, Start, End ); }
+			inline bool match( const char* value ) const noexcept { return Source->match( value, Start, End ); }
+
 			//* Get character at start position
 			//* Returns [eon::nochar] if at or beyond source end!
 			inline char_t chr() const noexcept { return Source->chr( Start ); }

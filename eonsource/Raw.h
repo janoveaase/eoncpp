@@ -80,6 +80,11 @@ namespace eon
 			//* Check if specified position is beyond the end of the source
 			inline bool beyondEnd( const Pos& pos ) const noexcept { return pos.bytePos() > numBytes(); }
 
+			//* Check if the specified portion of the source matches exactly
+			//* with the given string value
+			virtual bool match( const eon::string& value, Pos start, Pos end ) const noexcept = 0;
+			virtual bool match( const char* value, Pos start, Pos end ) const noexcept = 0;
+
 			//* Get characater at specified position
 			//* Returns [eon::nochar] if at or beyond source end!
 			virtual char_t chr( const Pos& pos ) noexcept = 0;
