@@ -19,12 +19,12 @@ namespace eon
 	class ByteType : public type::TypeDef
 	{
 	public:
-		ByteType() : TypeDef( name_byte ) {}
+		ByteType() : TypeDef( name_byte, source::Ref() ) {}
 		~ByteType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "byte" ); }
 
@@ -41,17 +41,16 @@ namespace eon
 	class ByteInstance : public type::Instance
 	{
 	public:
-		ByteInstance() : Instance( name_byte ) {}
-		ByteInstance( byte_t value ) : Instance( name_byte ) { Value = value; }
+		ByteInstance() : Instance( name_byte, source::Ref() ) {}
+		ByteInstance( byte_t value, source::Ref source ) : Instance( name_byte, source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		inline void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (ByteType*)scope.find( name_byte ) )->instantiate( Value ); }
+		inline Object* copy() override { return new ByteInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( byte_t ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		void str( type::Stringifier& str ) const override;
-		inline Instance* copy() const override { return new ByteInstance( Value ); }
+		inline Instance* copy() const override { return new ByteInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const ByteInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }
 

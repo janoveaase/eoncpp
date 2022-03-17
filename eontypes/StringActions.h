@@ -2,6 +2,7 @@
 
 #include "String.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -25,7 +26,8 @@ namespace eon
 		class StringConstruct : public type::Action
 		{
 		public:
-			inline StringConstruct() : Action( name_string, Type::instance, name_construct, name_string, DynamicTuple() ) {}
+			inline StringConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~StringConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -33,8 +35,8 @@ namespace eon
 		class StringCopyConstruct : public type::Action
 		{
 		public:
-			inline StringCopyConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_string ) } ), { name_memory_denied } ) {}
+			inline StringCopyConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_string ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -43,8 +45,8 @@ namespace eon
 		class StringBoolConstruct : public type::Action
 		{
 		public:
-			inline StringBoolConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
+			inline StringBoolConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_bool ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringBoolConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -52,8 +54,8 @@ namespace eon
 		class StringByteConstruct : public type::Action
 		{
 		public:
-			inline StringByteConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
+			inline StringByteConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_byte ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -61,8 +63,8 @@ namespace eon
 		class StringCharConstruct : public type::Action
 		{
 		public:
-			inline StringCharConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
+			inline StringCharConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_char ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringCharConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -70,8 +72,8 @@ namespace eon
 		class StringIntConstruct : public type::Action
 		{
 		public:
-			inline StringIntConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_int ) } ), { name_memory_denied } ) {}
+			inline StringIntConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_int ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringIntConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -79,8 +81,8 @@ namespace eon
 		class StringShortConstruct : public type::Action
 		{
 		public:
-			inline StringShortConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
+			inline StringShortConstruct() : Action( name_string, Type::instance, name_constructor, name_string,
+				DynamicTuple( { type::Attribute( name_other, name_short ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringShortConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -88,8 +90,8 @@ namespace eon
 		class StringLongConstruct : public type::Action
 		{
 		public:
-			inline StringLongConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
+			inline StringLongConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_long ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringLongConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -97,8 +99,8 @@ namespace eon
 		class StringFloatConstruct : public type::Action
 		{
 		public:
-			inline StringFloatConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
+			inline StringFloatConstruct() : Action( name_string, Type::instance, name_constructor, name_string,
+				DynamicTuple( { type::Attribute( name_other, name_float ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringFloatConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -106,8 +108,8 @@ namespace eon
 		class StringLowConstruct : public type::Action
 		{
 		public:
-			inline StringLowConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
+			inline StringLowConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringLowConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -115,8 +117,8 @@ namespace eon
 		class StringHighConstruct : public type::Action
 		{
 		public:
-			inline StringHighConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
+			inline StringHighConstruct() : Action( name_string, Type::instance, name_constructor, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_high ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringHighConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -124,54 +126,63 @@ namespace eon
 		class StringIndexConstruct : public type::Action
 		{
 		public:
-			inline StringIndexConstruct( scope::Global& scope ) : Action( name_string, Type::instance, name_construct, name_string,
-				DynamicTuple( { type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
+			inline StringIndexConstruct() : Action( name_string, Type::instance, name_constructor, name_string,
+				DynamicTuple( { type::Attribute( name_other, name_index ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~StringIndexConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-
-		class StringCmp : public type::Action
+		class StringNameConstruct : public type::Action
 		{
 		public:
-			inline StringCmp( scope::Global& scope ) : Action( name_string, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_string ) } ), {} ) {}
+			inline StringNameConstruct() : Action( name_string, Type::instance, name_constructor, name_string,
+				DynamicTuple( { type::Attribute( name_other, name_name ) } ), { name_memory_denied }, source::Ref() ) {}
+			virtual ~StringNameConstruct() = default;
+			void die() override {}
+			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
+		};
+
+		class StringCmp : public OperatorAction
+		{
+		public:
+			inline StringCmp() : OperatorAction( name_string, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_string ) } ), {}, source::Ref() ) {}
 			virtual ~StringCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class StringPlus : public type::Action
+		class StringPlus : public OperatorAction
 		{
 		public:
-			inline StringPlus( scope::Global& scope ) : Action( name_string, opcode::plus, name_string, DynamicTuple(
-				{ type::Attribute( name_other, name_string ) } ), {} ) {}
+			inline StringPlus() : OperatorAction( name_string, opcode::plus, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_string ) } ), {}, source::Ref() ) {}
 			virtual ~StringPlus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class StringMinusString : public type::Action
+		class StringMinusString : public OperatorAction
 		{
 		public:
-			inline StringMinusString( scope::Global& scope ) : Action( name_string, opcode::minus, name_string, DynamicTuple(
-				{ type::Attribute( name_other, name_string ) } ), {} ) {}
+			inline StringMinusString() : OperatorAction( name_string, opcode::minus, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_string ) } ), {}, source::Ref() ) {}
 			virtual ~StringMinusString() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class StringMultiplyInt : public type::Action
+		class StringMultiplyInt : public OperatorAction
 		{
 		public:
-			inline StringMultiplyInt( scope::Global& scope ) : Action( name_string, opcode::multiply, name_string, DynamicTuple(
-				{ type::Attribute( name_other, name_int ) } ), {} ) {}
+			inline StringMultiplyInt() : OperatorAction( name_string, opcode::multiply, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_int ) } ), {}, source::Ref() ) {}
 			virtual ~StringMultiplyInt() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class StringMultiplyIndex : public type::Action
+		class StringMultiplyIndex : public OperatorAction
 		{
 		public:
-			inline StringMultiplyIndex( scope::Global& scope ) : Action( name_string, opcode::multiply, name_string, DynamicTuple(
-				{ type::Attribute( name_other, name_index ) } ), {} ) {}
+			inline StringMultiplyIndex() : OperatorAction( name_string, opcode::multiply, name_string, DynamicTuple( {
+				type::Attribute( name_other, name_index ) } ), {}, source::Ref() ) {}
 			virtual ~StringMultiplyIndex() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

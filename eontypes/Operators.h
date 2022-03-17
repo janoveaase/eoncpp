@@ -40,12 +40,13 @@ namespace eon
 				_beg,
 				open_brace = _beg,	// (
 				close_brace,		// )
+				comma,				// ,
 
 				plus,				// a + b
 				minus,				// a - b
 				multiply,			// a * b
 				divide,				// a / b
-				cmp,				// a cmp b
+				cmp,				// a <=> b
 				eq,					// a == b
 				ne,					// a != b
 				lt,					// a < b
@@ -119,8 +120,15 @@ namespace eon
 
 				_end
 			};
+/*			static std::unordered_map<code, name_t> CodeToName;
+			static std::unordered_map<code, string> CodeToSymbol;
+			static std::unordered_map<string, code> SymbolToCode;
+			static name_t codeToName( code op_code );
+			static const string& codeToSymbol( code op_code );
+			static code symbolToCode( const string& symbol, code context = code::undef );*/
 			static code mapCode( const string& str, code context = code::undef );
 			static string mapCode( code op_code );
+
 
 			//* Most operators consist of only a single operator symbol or name
 			//* While multi-operand operators must have a symbol/name between
@@ -180,28 +188,31 @@ namespace eon
 		public:
 
 			static inline size_t numOperands( code op_code ) {
-				return Ops[ static_cast<size_t>( op_code ) ].NumOperands; }
+				_prep(); return Ops[ static_cast<size_t>( op_code ) ].NumOperands; }
 
 			static inline Precedence inputPrecedence( code op_code ) {
-				return Ops[ static_cast<size_t>( op_code ) ].InputPrecedence; }
+				_prep(); return Ops[ static_cast<size_t>( op_code ) ].InputPrecedence; }
 			static inline Precedence stackPrecedence( code op_code ) {
-				return Ops[ static_cast<size_t>( op_code ) ].StackPrecedence; }
+				_prep(); return Ops[ static_cast<size_t>( op_code ) ].StackPrecedence; }
 
 			static inline const std::vector<Seq>& sequence( code op_code ) {
-				return Ops[ static_cast<size_t>( op_code ) ].Sequence; }
+				_prep(); return Ops[ static_cast<size_t>( op_code ) ].Sequence; }
 			static inline index_t posInSequence( const std::vector<Seq>& sequence, code op_code ) noexcept {
-				for( index_t i = 0; i < sequence.size(); ++i ) if( sequence[ i ].Op == op_code ) return i; return no_index; }
+				for( index_t i = 0; i < sequence.size(); ++i ) if( sequence[ i ].Op == op_code ) return i;
+				return no_index; }
 
 
 
 
-			/******************************************************************
-			  Helpers
-			******************************************************************/
+			///////////////////////////////////////////////////////////////////
+			//
+			// Helpers
+			//
 		private:
 
-			static inline void add( OperatorDetails&& op ) {
-				Ops.push_back( std::move( op ) ); }
+			static inline void _add( OperatorDetails&& op ) { Ops.push_back( std::move( op ) ); }
+
+			static void _prep();
 
 
 

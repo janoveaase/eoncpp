@@ -2,9 +2,7 @@
 #include "Bool.h"
 #include "Byte.h"
 #include "Char.h"
-#include "Int.h"
-#include "Short.h"
-#include "Long.h"
+#include "Integer.h"
 #include "Float.h"
 #include "Low.h"
 #include "Index.h"
@@ -14,22 +12,22 @@ namespace eon
 {
 	void registerHighActions( scope::Global& scope )
 	{
-		scope.add( name_construct, new actions::HighConstruct() );
-		scope.add( name_construct, new actions::HighCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::HighBoolConstruct( scope ) );
-		scope.add( name_construct, new actions::HighByteConstruct( scope ) );
-		scope.add( name_construct, new actions::HighCharConstruct( scope ) );
-		scope.add( name_construct, new actions::HighIntConstruct( scope ) );
-		scope.add( name_construct, new actions::HighShortConstruct( scope ) );
-		scope.add( name_construct, new actions::HighLongConstruct( scope ) );
-		scope.add( name_construct, new actions::HighLowConstruct( scope ) );
-		scope.add( name_construct, new actions::HighFloatConstruct( scope ) );
-		scope.add( name_construct, new actions::HighIndexConstruct( scope ) );
-		scope.add( name_cmp, new actions::HighCmp( scope ) );
-		scope.add( name_plus, new actions::HighPlus( scope ) );
-		scope.add( name_minus, new actions::HighMinus( scope ) );
-		scope.add( name_multiply, new actions::HighMultiply( scope ) );
-		scope.add( name_divide, new actions::HighDivide( scope ) );
+		scope.addAction( name_construct, new actions::HighConstruct() );
+		scope.addAction( name_construct, new actions::HighCopyConstruct() );
+		scope.addAction( name_construct, new actions::HighBoolConstruct() );
+		scope.addAction( name_construct, new actions::HighByteConstruct() );
+		scope.addAction( name_construct, new actions::HighCharConstruct() );
+		scope.addAction( name_construct, new actions::HighIntConstruct() );
+		scope.addAction( name_construct, new actions::HighShortConstruct() );
+		scope.addAction( name_construct, new actions::HighLongConstruct() );
+		scope.addAction( name_construct, new actions::HighLowConstruct() );
+		scope.addAction( name_construct, new actions::HighFloatConstruct() );
+		scope.addAction( name_construct, new actions::HighIndexConstruct() );
+		scope.addAction( name_cmp, new actions::HighCmp() );
+		scope.addAction( name_op_plus, new actions::HighPlus() );
+		scope.addAction( name_op_minus, new actions::HighMinus() );
+		scope.addAction( name_op_multiply, new actions::HighMultiply() );
+		scope.addAction( name_op_divide, new actions::HighDivide() );
 	}
 
 

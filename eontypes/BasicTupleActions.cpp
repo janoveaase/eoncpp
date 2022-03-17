@@ -1,111 +1,75 @@
-#include "BasicTupleActions.h"
 #include "Tuple.h"
+#include "DataTuple.h"
+#include "BasicTupleActions.h"
 
 
 namespace eon
 {
 	void registerBasicTupleActions( scope::Global& scope )
 	{
-		scope.add( name_cmp, new actions::BasicTupleCmp( scope ) );
-		scope.add( name_plus, new actions::BasicTuplePlusDynamic( scope ) );
-		scope.add( name_plus, new actions::BasicTuplePlusTuple( scope ) );
-		scope.add( name_minus, new actions::BasicTupleMinusDynamic( scope ) );
-		scope.add( name_minus, new actions::BasicTupleMinusTuple( scope ) );
-		scope.add( name_element, new actions::BasicTupleElementIndex( scope ) );
-		scope.add( name_element, new actions::BasicTupleElementInt( scope ) );
-		scope.add( name_element, new actions::BasicTupleElementName( scope ) );
-		scope.add( name_slice, new actions::BasicTupleSlice( scope ) );
-	}
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<Tuple, Tuple>() );
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<Tuple, DataTuple>() );
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<Tuple, DynamicTuple>() );
+
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<DataTuple, Tuple>() );
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<DataTuple, DataTuple>() );
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<DataTuple, DynamicTuple>() );
+
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<DynamicTuple, Tuple>() );
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<DynamicTuple, DataTuple>() );
+		scope.addOperator( type::operators::code::cmp, new actions::TupleCmp<DynamicTuple, DynamicTuple>() );
 
 
 
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<Tuple, Tuple>() );
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<Tuple, DataTuple>() );
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<Tuple, DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<DataTuple, Tuple>() );
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<DataTuple, DataTuple>() );
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<DataTuple, DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<DynamicTuple, Tuple>() );
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<DynamicTuple, DataTuple>() );
+		scope.addOperator( type::operators::code::assign, new actions::TupleAssign<DynamicTuple, DynamicTuple>() );
 
-	namespace actions
-	{
-		type::Object* BasicTupleCmp::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto& arg2 = *_operand<DynamicTuple>( scope, action_node, 1 );
-			auto rval = new IntInstance();
-			rval->value( arg1.compare( arg2 ) );
-			return rval;
-		}
 
-		type::Object* BasicTuplePlusDynamic::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto& arg2 = *_operand<DynamicTuple>( scope, action_node, 1 );
-			auto rval = new DynamicTuple( arg1 );
-			*rval += arg2;
-			return rval;
-		}
-		type::Object* BasicTuplePlusTuple::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto& arg2 = *_operand<Tuple>( scope, action_node, 1 );
-			auto rval = new DynamicTuple( arg1 );
-			*rval += arg2;
-			return rval;
-		}
-		type::Object* BasicTupleMinusDynamic::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto& arg2 = *_operand<DynamicTuple>( scope, action_node, 1 );
-			auto rval = new DynamicTuple( arg1 );
-			*rval -= arg2;
-			return rval;
-		}
-		type::Object* BasicTupleMinusTuple::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto& arg2 = *_operand<Tuple>( scope, action_node, 1 );
-			auto rval = new DynamicTuple( arg1 );
-			*rval -= arg2;
-			return rval;
-		}
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<Tuple, Tuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<Tuple, DataTuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<Tuple, DynamicTuple, DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<DataTuple, DataTuple, DataTuple>() );
+		
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<DynamicTuple, Tuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<DynamicTuple, DataTuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::plus, new actions::TuplePlus<DynamicTuple, DynamicTuple, DynamicTuple>() );
+		
 
-		type::Object* BasicTupleElementIndex::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto arg2 = _operand<IndexInstance>( scope, action_node, 1 );
-			return arg1.at( arg2->value() ).value();
-		}
-		type::Object* BasicTupleElementInt::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto arg2 = _operand<IntInstance>( scope, action_node, 1 );
-			auto pos = arg2->value() > 0 ? static_cast<index_t>( arg2->value() )
-				: arg1.numAttributes() - static_cast<index_t>( -arg2->value() );
-			return arg1.at( pos ).value();
-		}
-		type::Object* BasicTupleElementName::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto arg2 = _operand<NameInstance>( scope, action_node, 1 );
-			return arg1.at( arg2->value() ).value();
-		}
+		scope.addOperator( type::operators::code::minus, new actions::TuplePlus<Tuple, Tuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::minus, new actions::TuplePlus<Tuple, DataTuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::minus, new actions::TuplePlus<Tuple, DynamicTuple, DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::minus, new actions::TupleMinus<DataTuple, DataTuple, DataTuple>() );
+		
+		scope.addOperator( type::operators::code::minus, new actions::TupleMinus<DynamicTuple, Tuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::minus, new actions::TupleMinus<DynamicTuple, DataTuple, DynamicTuple>() );
+		scope.addOperator( type::operators::code::minus, new actions::TupleMinus<DynamicTuple, DynamicTuple, DynamicTuple>() );
+		
 
-		type::Object* BasicTupleSlice::execute( scope::Scope& scope, type::Node& action_node )
-		{
-			auto& arg1 = *_operand<DynamicTuple>( scope, action_node, 0 );
-			auto arg2 = _operand<IntInstance>( scope, action_node, 1 );
-			auto arg3 = _operand<IntInstance>( scope, action_node, 2 );
-			auto first = arg2->value() > 0 ? static_cast<index_t>( arg2->value() )
-				: arg1.numAttributes() - static_cast<index_t>( -arg2->value() );
-			auto last = arg3->value() > 0 ? static_cast<index_t>( arg3->value() )
-				: arg1.numAttributes() - static_cast<index_t>( -arg3->value() );
-			auto rval = new DynamicTuple();
-			if( first < last )
-			{
-				for( auto i = first; i <= last; ++i )
-					*rval += arg1.at( i ).value();
-			}
-			else if( first > last )
-			{
-				for( auto i = last; i >= first; --i )
-					*rval += arg1.at( i ).value();
-			}
-			return rval;
-		}
+		scope.addOperator( type::operators::code::element, new actions::TupleElementIndex<Tuple>() );
+		scope.addOperator( type::operators::code::element, new actions::TupleElementIndex<DataTuple>() );
+		scope.addOperator( type::operators::code::element, new actions::TupleElementIndex<DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::element, new actions::TupleElementInt<Tuple>() );
+		scope.addOperator( type::operators::code::element, new actions::TupleElementInt<DataTuple>() );
+		scope.addOperator( type::operators::code::element, new actions::TupleElementInt<DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::element, new actions::TupleElementName<Tuple>() );
+		scope.addOperator( type::operators::code::element, new actions::TupleElementName<DataTuple>() );
+		scope.addOperator( type::operators::code::element, new actions::TupleElementName<DynamicTuple>() );
+		
+		scope.addOperator( type::operators::code::slice, new actions::TupleSlice<Tuple>() );
+		scope.addOperator( type::operators::code::slice, new actions::TupleSlice<DataTuple>() );
+		scope.addOperator( type::operators::code::slice, new actions::TupleSlice<DynamicTuple>() );
 	}
 }

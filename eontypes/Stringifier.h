@@ -73,7 +73,7 @@ namespace eon
 
 			//* Add another "word" to the output string
 			inline Stringifier& addWord( const string& word ) { _indent(); _addSpacing(); Output += word; return *this; }
-			inline Stringifier& addWord( name_t name ) { return addWord( *name ); }
+			inline Stringifier& addWord( name_t name ) { return addWord( str( name ) ); }
 
 			//* Add spaces to the output string
 			//* Automatic spacing "once" will be reset to "none"!
@@ -134,6 +134,11 @@ namespace eon
 
 			const string& output() const noexcept { return Output; }
 			string&& output() noexcept { return std::move( Output ); }
+
+			//* Reset the stringifier so it can be used again
+			inline void reset() noexcept {
+				Output.clear(); IndentNewLines = false; Indentation = 0; Space = Spacing::none; Raw = false;
+				TupleStack.clear(); }
 
 
 

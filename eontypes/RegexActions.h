@@ -2,6 +2,7 @@
 
 #include "Regex.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -25,7 +26,8 @@ namespace eon
 		class RegexConstruct : public type::Action
 		{
 		public:
-			inline RegexConstruct() : Action( name_regex, Type::instance, name_construct, name_regex, DynamicTuple() ) {}
+			inline RegexConstruct() : Action( name_regex, Type::instance, name_constructor, name_regex, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~RegexConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -33,8 +35,8 @@ namespace eon
 		class RegexCopyConstruct : public type::Action
 		{
 		public:
-			inline RegexCopyConstruct( scope::Global& scope ) : Action( name_regex, Type::instance, name_construct, name_regex,
-				DynamicTuple( { type::Attribute( name_other, name_regex ) } ), { name_memory_denied } ) {}
+			inline RegexCopyConstruct() : Action( name_regex, Type::instance, name_constructor, name_regex, DynamicTuple( {
+				type::Attribute( name_other, name_regex ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~RegexCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -43,18 +45,18 @@ namespace eon
 		class RegexStringConstruct : public type::Action
 		{
 		public:
-			inline RegexStringConstruct( scope::Global& scope ) : Action( name_regex, Type::instance, name_construct, name_regex,
-				DynamicTuple( { type::Attribute( name_other, name_string ) } ), { name_memory_denied } ) {}
+			inline RegexStringConstruct() : Action( name_regex, Type::instance, name_constructor, name_regex, DynamicTuple( {
+				type::Attribute( name_other, name_string ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~RegexStringConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class RegexCmp : public type::Action
+		class RegexCmp : public OperatorAction
 		{
 		public:
-			inline RegexCmp( scope::Global& scope ) : Action( name_regex, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_regex ) } ) ) {}
+			inline RegexCmp() : OperatorAction( name_regex, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_regex ) } ), {}, source::Ref() ) {}
 			virtual ~RegexCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

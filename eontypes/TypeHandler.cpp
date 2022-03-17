@@ -6,12 +6,8 @@
 #include "Bool.h"
 #include "Byte.h"
 #include "Char.h"
-#include "Int.h"
-#include "Short.h"
-#include "Long.h"
-#include "Float.h"
-#include "Low.h"
-#include "High.h"
+#include "Integer.h"
+#include "Floatingpt.h"
 #include "Index.h"
 #include "Handle.h"
 #include "Name.h"
@@ -20,7 +16,6 @@
 #include "Regex.h"
 #include "NamePath.h"
 #include "Path.h"
-#include "MetaData.h"
 #include "DataTuple.h"
 #include "DynamicTuple.h"
 #include "Tuple.h"
@@ -42,7 +37,7 @@ namespace eon
 				LegalDataTupleAttributeTypes = {
 					name_bool, name_byte, name_char, name_int, name_short, name_long,
 					name_float, name_low, name_high, name_name, name_bytes, name_string,
-					name_regex, name_namepath, name_path, name_meta, name_data };
+					name_regex, name_namepath, name_path, name_data };
 				RawToEonTypeMap = {
 					{ std::type_index( typeid( bool ) ), name_bool },
 					{ std::type_index( typeid( byte_t ) ), name_byte },
@@ -57,9 +52,8 @@ namespace eon
 					{ std::type_index( typeid( std::string ) ), name_bytes },
 					{ std::type_index( typeid( string ) ), name_string },
 					{ std::type_index( typeid( regex ) ), name_regex },
-					{ std::type_index( typeid( nameref ) ), name_namepath },
+					{ std::type_index( typeid( namepath ) ), name_namepath },
 					{ std::type_index( typeid( path ) ), name_path },
-					{ std::type_index( typeid( MetaData ) ), name_meta },
 					{ std::type_index( typeid( DataTuple ) ), name_data }
 				};
 				GenericToDataTupleAttributeTypeMap = {
@@ -78,7 +72,6 @@ namespace eon
 					{ name_regex, name_regex },
 					{ name_namepath, name_namepath },
 					{ name_path, name_path },
-					{ name_meta, name_meta },
 					{ name_data, name_data }
 				};
 			}
@@ -109,80 +102,78 @@ namespace eon
 
 
 
-		Object* Handler::__copyConstruct( name_t type, name_t target_type, const void* value )
+		Object* Handler::__copyConstruct( name_t type, name_t target_type, const void* value, source::Ref source )
 		{
 			if( type == name_bool )
-				return new BoolInstance( *(const bool*)value );
+				return new BoolInstance( *(const bool*)value, source );
 			else if( type == name_byte )
-				return new ByteInstance( *(const byte_t*)value );
+				return new ByteInstance( *(const byte_t*)value, source );
 			else if( type == name_char )
-				return new CharInstance( *(const char_t*)value );
+				return new CharInstance( *(const char_t*)value, source );
 			else if( type == name_int )
 			{
 				if( type == target_type )
-					return new IntInstance( *(const int_t*)value );
+					return new IntegerInstance<int_t>( *(const int_t*)value, source );
 				else
 				{
 					int_t source_val = *(const int_t*)value;
 					long_t target_val = static_cast<long_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_short )
 			{
 				if( type == target_type )
-					return new ShortInstance( *(const short_t*)value );
+					return new IntegerInstance<short_t>( *(const short_t*)value, source );
 				else
 				{
 					short_t source_val = *(const short_t*)value;
 					long_t target_val = static_cast<long_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_long )
-				return new LongInstance( *(const long_t*)value );
+				return new IntegerInstance<long_t>( *(const long_t*)value, source );
 			else if( type == name_float )
 			{
 				if( type == target_type )
-					return new FloatInstance( *(const flt_t*)value );
+					return new FloatingptInstance<flt_t>( *(const flt_t*)value, source );
 				else
 				{
 					flt_t source_val = *(const flt_t*)value;
 					high_t target_val = static_cast<high_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_low )
 			{
 				if( type == target_type )
-					return new LowInstance( *(const low_t*)value );
+					return new FloatingptInstance<low_t>( *(const low_t*)value, source );
 				else
 				{
 					short_t source_val = *(const short_t*)value;
 					high_t target_val = static_cast<high_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_high )
-				return new HighInstance( *(const high_t*)value );
+				return new FloatingptInstance<high_t>( *(const high_t*)value, source );
 			else if( type == name_index )
-				return new IndexInstance( *(const index_t*)value );
+				return new IndexInstance( *(const index_t*)value, source );
 			else if( type == name_name )
-				return new NameInstance( *(const name_t*)value );
+				return new NameInstance( *(const name_t*)value, source );
 			else if( type == name_handle )
-				return new HandleInstance( *(const handle_t*)value );
+				return new HandleInstance( *(const handle_t*)value, source );
 			else if( type == name_bytes )
-				return new BytesInstance( *(const std::string*)value );
+				return new BytesInstance( *(const std::string*)value, source );
 			else if( type == name_string )
-				return new StringInstance( *(const string*)value );
+				return new StringInstance( *(const string*)value, source );
 			else if( type == name_regex )
-				return new RegexInstance( *(const regex*)value );
+				return new RegexInstance( *(const regex*)value, source );
 			else if( type == name_namepath )
-				return new NamePathInstance( *(const nameref*)value );
+				return new NamePathInstance( *(const namepath*)value, source );
 			else if( type == name_path )
-				return new PathInstance( *(const path*)value );
-			else if( type == name_meta )
-				return new MetaData( *(const MetaData*)value );
+				return new PathInstance( *(const path*)value, source );
 			else if( type == name_data )
 				return new DataTuple( *(const DataTuple*)value );
 			else if( type == name_dynamic )
@@ -192,80 +183,78 @@ namespace eon
 			else
 				throw IncompatibleType();
 		}
-		Object* Handler::__moveConstruct( name_t type, name_t target_type, const void* value )
+		Object* Handler::__moveConstruct( name_t type, name_t target_type, const void* value, source::Ref source )
 		{
 			if( type == name_bool )
-				return new BoolInstance( *(bool*)value );
+				return new BoolInstance( *(bool*)value, source );
 			else if( type == name_byte )
-				return new ByteInstance( *(byte_t*)value );
+				return new ByteInstance( *(byte_t*)value, source );
 			else if( type == name_char )
-				return new CharInstance( *(char_t*)value );
+				return new CharInstance( *(char_t*)value, source );
 			else if( type == name_int )
 			{
 				if( type == target_type )
-					return new IntInstance( *(int_t*)value );
+					return new IntegerInstance<int_t>( *(int_t*)value, source );
 				else
 				{
 					int_t source_val = *(int_t*)value;
 					long_t target_val = static_cast<long_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_short )
 			{
 				if( type == target_type )
-					return new ShortInstance( *(short_t*)value );
+					return new IntegerInstance<short_t>( *(short_t*)value, source );
 				else
 				{
 					short_t source_val = *(short_t*)value;
 					long_t target_val = static_cast<long_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_long )
-				return new LongInstance( *(long_t*)value );
+				return new IntegerInstance<long_t>( *(long_t*)value, source );
 			else if( type == name_float )
 			{
 				if( type == target_type )
-					return new FloatInstance( *(flt_t*)value );
+					return new FloatingptInstance<flt_t>( *(flt_t*)value, source );
 				else
 				{
 					flt_t source_val = *(flt_t*)value;
 					high_t target_val = static_cast<high_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_low )
 			{
 				if( type == target_type )
-					return new LowInstance( *(low_t*)value );
+					return new FloatingptInstance<low_t>( *(low_t*)value, source );
 				else
 				{
 					short_t source_val = *(short_t*)value;
 					high_t target_val = static_cast<high_t>( source_val );
-					return __copyConstruct( target_type, target_type, &target_val );
+					return __copyConstruct( target_type, target_type, &target_val, source );
 				}
 			}
 			else if( type == name_high )
-				return new HighInstance( *(high_t*)value );
+				return new FloatingptInstance<high_t>( *(high_t*)value, source );
 			else if( type == name_index )
-				return new IndexInstance( *(index_t*)value );
+				return new IndexInstance( *(index_t*)value, source );
 			else if( type == name_name )
-				return new NameInstance( *(name_t*)value );
+				return new NameInstance( *(name_t*)value, source );
 			else if( type == name_handle )
-				return new HandleInstance( *(handle_t*)value );
+				return new HandleInstance( *(handle_t*)value, source );
 			else if( type == name_bytes )
-				return new BytesInstance( std::move( *(std::string*)value ) );
+				return new BytesInstance( std::move( *(std::string*)value ), source );
 			else if( type == name_string )
-				return new StringInstance( std::move( *(string*)value ) );
+				return new StringInstance( std::move( *(string*)value ), source );
 			else if( type == name_regex )
-				return new RegexInstance( std::move( *(regex*)value ) );
+				return new RegexInstance( std::move( *(regex*)value ), source );
 			else if( type == name_namepath )
-				return new NamePathInstance( std::move( *(nameref*)value ) );
+				return new NamePathInstance( std::move( *(namepath*)value ), source );
 			else if( type == name_path )
-				return new PathInstance( std::move( *(path*)value ) );
-			else if( type == name_meta )
-				return new MetaData( std::move( *(MetaData*)value ) );
+				return new PathInstance( std::move( *(path*)value ), source );
 			else if( type == name_data )
 				return new DataTuple( std::move( *(DataTuple*)value ) );
 			else if( type == name_dynamic )

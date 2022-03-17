@@ -2,6 +2,7 @@
 
 #include "Bytes.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -25,7 +26,8 @@ namespace eon
 		class BytesConstruct : public type::Action
 		{
 		public:
-			inline BytesConstruct() : Action( name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple() ) {}
+			inline BytesConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~BytesConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -33,9 +35,8 @@ namespace eon
 		class BytesCopyConstruct : public type::Action
 		{
 		public:
-			inline BytesCopyConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_bytes ) } ), { name_memory_denied } ) {}
+			inline BytesCopyConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_bytes ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -44,9 +45,8 @@ namespace eon
 		class BytesBoolConstruct : public type::Action
 		{
 		public:
-			inline BytesBoolConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
+			inline BytesBoolConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_bool ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesBoolConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -54,9 +54,8 @@ namespace eon
 		class BytesByteConstruct : public type::Action
 		{
 		public:
-			inline BytesByteConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
+			inline BytesByteConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_byte ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -64,9 +63,8 @@ namespace eon
 		class BytesCharConstruct : public type::Action
 		{
 		public:
-			inline BytesCharConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
+			inline BytesCharConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_char ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesCharConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -74,9 +72,8 @@ namespace eon
 		class BytesIntConstruct : public type::Action
 		{
 		public:
-			inline BytesIntConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_int ) } ), { name_memory_denied } ) {}
+			inline BytesIntConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_int ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesIntConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -84,9 +81,8 @@ namespace eon
 		class BytesShortConstruct : public type::Action
 		{
 		public:
-			inline BytesShortConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
+			inline BytesShortConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesShortConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -94,9 +90,8 @@ namespace eon
 		class BytesLongConstruct : public type::Action
 		{
 		public:
-			inline BytesLongConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
+			inline BytesLongConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_long ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesLongConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -104,9 +99,8 @@ namespace eon
 		class BytesFloatConstruct : public type::Action
 		{
 		public:
-			inline BytesFloatConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
+			inline BytesFloatConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_float ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesFloatConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -114,9 +108,8 @@ namespace eon
 		class BytesLowConstruct : public type::Action
 		{
 		public:
-			inline BytesLowConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
+			inline BytesLowConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesLowConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -124,9 +117,8 @@ namespace eon
 		class BytesHighConstruct : public type::Action
 		{
 		public:
-			inline BytesHighConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
+			inline BytesHighConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_high ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesHighConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -134,28 +126,27 @@ namespace eon
 		class BytesIndexConstruct : public type::Action
 		{
 		public:
-			inline BytesIndexConstruct( scope::Global& scope ) : Action(
-				name_bytes, Type::instance, name_construct, name_bytes, DynamicTuple(
-					{ type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
+			inline BytesIndexConstruct() : Action( name_bytes, Type::instance, name_constructor, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_index ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BytesIndexConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class BytesCmp : public type::Action
+		class BytesCmp : public OperatorAction
 		{
 		public:
-			inline BytesCmp( scope::Global& scope ) : Action( name_bytes, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_bytes ) } ) ) {}
+			inline BytesCmp() : OperatorAction( name_bytes, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_bytes ) } ), {}, source::Ref() ) {}
 			virtual ~BytesCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class BytesPlus : public type::Action
+		class BytesPlus : public OperatorAction
 		{
 		public:
-			inline BytesPlus( scope::Global& scope ) : Action( name_bytes, opcode::plus, name_bytes, DynamicTuple(
-				{ type::Attribute( name_other, name_bytes ) } ) ) {}
+			inline BytesPlus() : OperatorAction( name_bytes, opcode::plus, name_bytes, DynamicTuple( {
+				type::Attribute( name_other, name_bytes ) } ), {}, source::Ref() ) {}
 			virtual ~BytesPlus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

@@ -20,12 +20,12 @@ namespace eon
 	class PathType : public type::TypeDef
 	{
 	public:
-		PathType() : TypeDef( name_path ) {}
+		PathType() : TypeDef( name_path, source::Ref() ) {}
 		~PathType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "path" ); }
 
@@ -41,18 +41,18 @@ namespace eon
 	class PathInstance : public type::Instance
 	{
 	public:
-		PathInstance() : Instance( name_path ) {}
-		PathInstance( const path& value ) : Instance( name_path ) { Value = value; }
-		PathInstance( path&& value ) : Instance( name_path ) { Value = std::move( value ); }
+		PathInstance() : Instance( name_path, source::Ref() ) {}
+		PathInstance( const path& value, source::Ref source ) : Instance( name_path, source ) { Value = value; }
+		PathInstance( path&& value, source::Ref source ) : Instance( name_path, source ) { Value = std::move( value ); }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (PathType*)scope.find( name_path ) )->instantiate( Value ); }
+		inline Object* copy() override { return new PathInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( path ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
-		inline void str( type::Stringifier& str ) const override { str.addWord( Value.str() ); }
-		inline Instance* copy() const override { return new PathInstance( Value ); }
+		inline void str( type::Stringifier& str ) const override {
+			str.addRaw( "p\"" ); str.addWord( Value.str() ); str.addRaw( "\"" ); }
+		inline Instance* copy() const override { return new PathInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const PathInstance*)&other; return Value.compare( o.Value ); }
 

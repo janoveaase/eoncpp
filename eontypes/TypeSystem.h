@@ -3,6 +3,7 @@
 #include "TypeDefinitions.h"
 #include "TypeTuple.h"
 #include "Stringifier.h"
+#include <eonsource/SourceRef.h>
 
 
 
@@ -11,14 +12,6 @@
 ******************************************************************************/
 namespace eon
 {
-	namespace scope
-	{
-		class Scope;
-	}
-
-
-
-
 	/**************************************************************************
 	  The 'eon::type' namespace encloses all hidden type functionality
 	**************************************************************************/
@@ -29,11 +22,23 @@ namespace eon
 		{
 		public:
 			Object() = delete;
-			inline Object( name_t type ) { Type = type; }
-			inline Object( TypeTuple type ) { Type = type; }
+			inline Object( name_t type, source::Ref source ) { Type = type; Source = source; }
+			inline Object( TypeTuple type, source::Ref source ) { Type = type; Source = source; }
+			inline Object( const Object& other ) { Type = other.Type; Source = other.Source; }
+			inline Object( Object&& other ) noexcept { Type = std::move( other.Type ); Source = std::move( other.Source ); }
+
+			inline Object& operator=( const Object& other ) { Type = other.Type; Source = other.Source; return *this; }
+			inline Object& operator=( Object&& other ) noexcept {
+				Type = std::move( other.Type ); Source = other.Source; return *this; }
 
 			//* Get the type name
 			inline const TypeTuple& type() const noexcept { return Type; }
+
+			//* Get the source
+			inline const source::Ref& source() const noexcept { return Source; }
+
+			//* Set the source
+			inline void source( source::Ref source ) noexcept { Source = source; }
 
 			//* Get the C++ type
 			virtual std::type_index rawType() const noexcept = 0;
@@ -52,11 +57,11 @@ namespace eon
 			virtual void callDestructor() = 0;
 
 			//* Create a copy of 'this'
-			virtual Object* copy( scope::Scope& scope ) = 0;
+			virtual Object* copy() = 0;
 
 			//* Create a new object that consumes 'this'
 			//* For primitives, this is the same as copy
-			virtual Object* consume( scope::Scope& scope ) { return copy( scope ); }
+			virtual Object* consume() { return copy(); }
 
 			//* Get object as string representation
 			virtual void str( Stringifier& str ) const = 0;
@@ -64,6 +69,7 @@ namespace eon
 
 		protected:
 			TypeTuple Type;
+			source::Ref Source;
 		};
 
 
@@ -77,7 +83,7 @@ namespace eon
 		{
 		public:
 			Definition() = delete;
-			inline Definition( name_t name ) noexcept : Object( name ) {}
+			inline Definition( name_t name, source::Ref source ) noexcept : Object( name, source ) {}
 
 			//* Identify this as a 'definition'
 			virtual name_t generalType() const noexcept override { return name_definition; }
@@ -97,7 +103,7 @@ namespace eon
 		{
 		public:
 			Instance() = delete;
-			inline Instance( name_t type ) : Object( type ) {}
+			inline Instance( name_t type, source::Ref source ) : Object( type, source ) {}
 
 			//* Identify this as an 'instance'
 			inline name_t generalType() const noexcept override { return name_instance; }
@@ -145,7 +151,7 @@ namespace eon
 		{
 		public:
 			TypeDef() = delete;
-			inline TypeDef( name_t name ) : Definition( name ) {};
+			inline TypeDef( name_t name, source::Ref source ) : Definition( name, source ) {};
 
 			//* Identify this as an 'instance'
 			inline name_t generalType() const noexcept override { return name_type; }
@@ -187,7 +193,7 @@ namespace eon
 		{
 		public:
 			Enum() = delete;
-			inline Enum( name_t name, uint8_t unit_size ) : Definition( name ) {
+			inline Enum( name_t name, uint8_t unit_size, source::Ref source ) : Definition( name, source ) {
 				UnitSize = unit_size; }
 
 			//* Identify this as an 'instance'
@@ -207,8 +213,9 @@ namespace eon
 		class TypeTupleObject : public Object
 		{
 		public:
-			TypeTupleObject() : Object( name_typetuple ) {}
-			TypeTupleObject( TypeTuple&& value ) : Object( name_typetuple ) { Value = std::move( value ); }
+			TypeTupleObject() : Object( name_typetuple, source::Ref() ) {}
+			TypeTupleObject( TypeTuple&& value ) : Object( name_typetuple, value.source() ) {
+				Value = std::move( value ); }
 			virtual ~TypeTupleObject() = default;
 
 			//* Get the C++ type
@@ -228,11 +235,11 @@ namespace eon
 			inline void callDestructor() override { this->~TypeTupleObject(); }
 
 			//* Create a copy of 'this'
-			Object* copy( scope::Scope& scope ) override { return new TypeTupleObject( TypeTuple( Value ) ); }
+			Object* copy() override { return new TypeTupleObject( TypeTuple( Value ) ); }
 
 			//* Create a new object that consumes 'this'
 			//* For primitives, this is the same as copy
-			inline Object* consume( scope::Scope& scope ) override { return new TypeTupleObject( std::move( Value ) ); }
+			inline Object* consume() override { return new TypeTupleObject( std::move( Value ) ); }
 
 			//* Get object as string representation
 			inline void str( Stringifier& str ) const override { return Value.str( str ); }

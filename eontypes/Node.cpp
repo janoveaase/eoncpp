@@ -1,26 +1,56 @@
 #include "Node.h"
 #include "Action.h"
-#include "MetaData.h"
 
 
 namespace eon
 {
 	namespace type
 	{
-		Node& Node::copy( const Node& other, scope::Scope& scope )
+		Node& Node::operator=( const Node& other )
+		{
+			Source = other.Source;
+			Type = other.Type;
+			Name = other.Name;
+			Define = other.Define;
+			Item = other.Item ? other.Item->copy() : nullptr;
+			Children = other.Children;
+			return *this;
+		}
+		Node& Node::operator=( Node&& other ) noexcept
+		{
+			Source = other.Source;
+			Type = other.Type; other.Type = NodeType::undef;
+			Name = other.Name; other.Name = no_name;
+			Define = other.Define; other.Define = false;
+			Item = other.Item; other.Item = nullptr;
+			Children = std::move( other.Children );
+			return *this;
+		}
+
+		Node& Node::claim( Node&& other ) noexcept
+		{
+			Source = other.Source;
+			Type = other.Type; other.Type = NodeType::undef;
+			Name = other.Name; other.Name = no_name;
+			other.Define = false;
+			Item = other.Item; other.Item = nullptr;
+			Children = std::move( other.Children );
+			return *this;
+		}
+		Node& Node::copy( const Node& other )
 		{
 			Type = other.Type;
-			Item = other.Item ? other.Item->copy( scope ) : nullptr;
+			Item = other.Item ? other.Item->copy() : nullptr;
 			Name = other.Name;
 			Children.clear();
 			for( auto& child : other.Children )
 			{
 				if( child.isAction() )
-					Children.push_back( Node::newAction( (Action*)child.Item->copy( scope ) ) );
+					Children.push_back( Node::newAction( (Action*)child.Item->copy() ) );
 				else if( child.isName() )
-					Children.push_back( Node::newName( child.Name ) );
+					Children.push_back( Node::newName( child.Name, child.source() ) );
 				else
-					Children.push_back( Node::newValue( child.Item->copy( scope ) ) );
+					Children.push_back( Node::newValue( child.Item->copy() ) );
 			}
 			return *this;
 		}
@@ -39,10 +69,14 @@ namespace eon
 			str.spacingAlways();
 			if( isName() )
 				str.addWord( Name );
+			else if( isOperator() )
+			{
+				std::vector<bool> need_par = _operandsNeedingParenthesis( opr() );
+				_infixOpStr( opr(), str, need_par );
+			}
 			else
 			{
-				std::vector<bool> need_par = _operandsNeedingParenthesis( action() );
-				switch( action().actionType() )
+/*				switch( action().actionType() )
 				{
 					case actions::Type::instance:
 						_infixInstanceStr( action(), str, need_par );
@@ -70,28 +104,74 @@ namespace eon
 						break;
 					default:
 						break;
-				}
+				}*/
 			}
 		}
 
 
 
 
-		std::vector<bool> Node::_operandsNeedingParenthesis( const Action& action ) const
+		int Node::compare( const Node& other ) const noexcept
+		{
+			if( Type < other.Type )
+				return -1;
+			else if( other.Type > Type )
+				return 1;
+			if( Name < other.Name )
+				return -1;
+			else if( other.Name < Name )
+				return 1;
+			if( Item )
+			{
+				if( other.Item )
+				{
+					if( Item->generalType() == name_instance )
+					{
+						auto cmp = ( (Instance*)Item )->compare( *(Instance*)other.Item );
+						if( cmp != 0 )
+							return cmp;
+					}
+				}
+				else
+					return 1;
+			}
+			else if( other.Item )
+				return -1;
+
+			auto my_child = Children.begin();
+			auto other_child = other.Children.begin();
+			for( ; my_child != Children.end() && other_child != other.Children.end(); ++my_child, ++other_child )
+			{
+				auto cmp = my_child->compare( *other_child );
+				if( cmp != 0 )
+					return cmp;
+			}
+			if( my_child != Children.end() )
+				return 1;
+			else if( other_child != other.Children.end() )
+				return -1;
+			else
+				return 0;
+		}
+
+
+
+
+		std::vector<bool> Node::_operandsNeedingParenthesis( const actions::OperatorAction& opr ) const
 		{
 			std::vector<bool> need;
 			for( auto& child : Children )
 			{
-				if( child.isAction() )
+				if( child.isOperator() )
 				{
 					// If the child is an operator of lower precedence that the
 					// parent action, we must enclose!
-					if( child.isAction() && ( child.action().inputPrecedence() < action.inputPrecedence() ) )
+					if( child.opr().inputPrecedence() < opr.inputPrecedence() )
 						need.push_back( true );
 
 					// Same if right-to-left associativity and the first
 					// operand is an action.
-					else if( action.rightToLeft() && !child.Children.empty() && child.Children[ 0 ].isAction() )
+					else if( opr.rightToLeft() && !child.Children.empty() && child.Children[ 0 ].isOperator() )
 						need.push_back( true );
 
 					// Not needed otherwise
@@ -106,41 +186,60 @@ namespace eon
 			return need;
 		}
 
-		void Node::_infixInstanceStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+/*		void Node::_postfixStr( type::Stringifier& str ) const
+		{
+			if( isValue() )
+			{
+				Item->str( str );
+				return;
+			}
+
+			str.spacingAlways();
+			if( isName() )
+				str.addWord( Name );
+			else
+			{
+				for( auto& child : Children )
+					child.postfixStr( str );
+				Item->str( str );
+			}
+		}*/
+
+		void Node::_infixInstanceStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			str.addWord( action.type().asName() );
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixPreFirstStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixPreFirstStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			str.addWord( action.type().asName() );
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixPreLastStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixPreLastStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			str.addWord( action.type().asName() );
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixGetStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixGetStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixSetStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixSetStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixHelperStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixHelperStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixTypeStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixTypeStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			str.addWord( action.type().asName() );
 			str.addRaw( "'s" ); str.resetRaw();
 			str.addWord( action.name() );
 			_infixStr( action, str, need_par );
 		}
-		void Node::_infixStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			bool prev_was_syntax = false;
 			for( size_t arg_no = 0; arg_no < Children.size(); ++arg_no )
@@ -152,6 +251,15 @@ namespace eon
 				}
 
 				auto& arg = action.arguments().at( arg_no );
+
+				if( arg.value() )
+				{
+					if( arg.value()->generalType() == name_modify )
+						str.addWord( "modify" );
+					else if( arg.value()->generalType() != name_reference )
+						str.addWord( "consume" );
+				}
+
 				auto& val = Children[ arg_no ];
 				if( val.isName() )
 					str.addWord( val.name() );
@@ -163,9 +271,6 @@ namespace eon
 						str.addRaw( "=" );
 					}
 
-					if( arg.qualifier() == Qualifier::modify || arg.qualifier() == Qualifier::consume )
-						str.addWord( mapQualifier( arg.qualifier() ) );
-
 					val.infixStr( str );
 				}
 
@@ -174,7 +279,7 @@ namespace eon
 			}
 		}
 
-		void Node::_infixOpStr( const Action& action, Stringifier& str, const std::vector<bool>& need_par ) const
+		void Node::_infixOpStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			auto& sequence = operators::sequence( action.opCode() );
 			auto op = sequence.begin();
@@ -184,6 +289,8 @@ namespace eon
 				case 1:
 					for( ; op != end && op->Prefix; ++op )
 						str.addWord( operators::mapCode( op->Op ) );
+					if( Children[ 0 ].Define )
+						str.addWord( "define" );
 					Children[ 0 ].infixStr( str );
 					for( ; op != end; ++op )
 						str.addWord( operators::mapCode( op->Op ) );
@@ -191,6 +298,8 @@ namespace eon
 				case 2:
 					for( ; op != end && op->Prefix; ++op )
 						str.addWord( operators::mapCode( op->Op ) );
+					if( Children[ 0 ].Define )
+						str.addWord( "define" );
 					_infixOpArgStr( 0, str, need_par );
 					str.addWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
@@ -202,6 +311,8 @@ namespace eon
 				case 3:
 					for( ; op != end && op->Prefix; ++op )
 						str.addWord( operators::mapCode( op->Op ) );
+					if( Children[ 0 ].Define )
+						str.addWord( "define" );
 					_infixOpArgStr( 0, str, need_par );
 					str.addWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
@@ -217,6 +328,8 @@ namespace eon
 				case 4:
 					for( ; op != end && op->Prefix; ++op )
 						str.addWord( operators::mapCode( op->Op ) );
+					if( Children[ 0 ].Define )
+						str.addWord( "define" );
 					_infixOpArgStr( 0, str, need_par );
 					str.addWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )

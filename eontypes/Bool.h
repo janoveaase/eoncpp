@@ -19,12 +19,12 @@ namespace eon
 	class BoolType : public type::TypeDef
 	{
 	public:
-		BoolType() : TypeDef( name_bool ) {}
+		BoolType() : TypeDef( name_bool, source::Ref() ) {}
 		~BoolType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type:: AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "bool" ); }
 
@@ -39,17 +39,16 @@ namespace eon
 	class BoolInstance : public type::Instance
 	{
 	public:
-		BoolInstance() : Instance( name_bool ) {}
-		BoolInstance( bool value ) : Instance( name_bool ) { Value = value; }
+		BoolInstance() : Instance( name_bool, source::Ref() ) {}
+		BoolInstance( bool value, source::Ref source ) : Instance( name_bool, source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		inline void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (BoolType*)scope.find( name_bool ) )->instantiate( Value ); }
+		inline Object* copy() override { return new BoolInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( bool ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( type::Stringifier& str ) const override { str.addWord( Value ? "true" : "false" ); }
-		inline Instance* copy() const override { return new BoolInstance( Value ); }
+		inline Instance* copy() const override { return new BoolInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const BoolInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }
 

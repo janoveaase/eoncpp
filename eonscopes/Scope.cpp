@@ -6,34 +6,65 @@ namespace eon
 {
 	namespace scope
 	{
-		void Global::add( name_t name, type::Object* item )
+		Global::~Global()
 		{
-			if( item->generalType() != name_group
-				|| item->generalType() != name_definition || item->generalType() != name_type
-				|| item->generalType() != name_enum || item->generalType() != name_action )
-				throw Unsupported( *item->generalType() );
-			if( Items.find( name ) != Items.end() )
-				throw DuplicateName( *name );
-
-			Items[ name ] = item;
-			if( item->generalType() == name_definition || item->generalType() == name_type )
-				Definitions[ std::type_index( typeid( name ) ) ] = (type::Definition*)item;
-			else if( item->generalType() == name_action )
+			for( auto& elm : Actions )
 			{
-				auto act = (type::Action*)item;
-				Actions[ act->name() ].push_back( act );
+				for( auto act : elm.second )
+					delete act;
 			}
 		}
 
-		void _Local::add( name_t name, type::Object* item )
-		{
-			if( item->generalType() != name_instance || item->generalType() != name_tuple
-				|| item->generalType() != name_lambda )
-				throw Unsupported( *item->generalType() );
-			if( Items.find( name ) != Items.end() )
-				throw DuplicateName( *name );
 
-			Items[ name ] = item;
+
+
+
+		std::list<type::Action*> Global::getActions( name_t name, const TypeTuple& type, const TypeTuple& args,
+			const TypeTuple& return_type ) const noexcept
+		{
+			std::list<type::Action*> result;
+			auto found = Actions.find( name );
+			if( found == Actions.end() )
+				return result;
+			for( auto i = found->second.begin(); i != found->second.end(); ++i )
+			{
+				auto& action = **i;
+
+				// Step 1: Make sure object type matches
+				if(
+					( action.instanceType().isTuple() && type.isTuple()
+						&& action.instanceType().tupleType() == type.tupleType() )
+					|| action.instanceType() == type )
+				{
+					// Step 2: Make sure return type matches
+					if( action.returnType().compatibleWith( return_type ) )
+					{
+						// Step 3: Make sure arguments match
+						if( args.compatibleWith( action.arguments().type() ) )
+							result.push_back( &action );
+					}
+				}
+			}
+			return result;
+		}
+		std::list<type::Action*> Global::getActions( name_t name, const TypeTuple& type, const TypeTuple& args )
+			const noexcept
+		{
+			std::list<type::Action*> result;
+			auto found = Actions.find( name );
+			if( found == Actions.end() )
+				return result;
+			for( auto i = found->second.begin(); i != found->second.end(); ++i )
+			{
+				auto& action = **i;
+
+				if( action.instanceType() == type )
+				{
+					if( args.compatibleWith( action.arguments().type() ) )
+						result.push_back( &action );
+				}
+			}
+			return result;
 		}
 	}
 }

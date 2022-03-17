@@ -2,6 +2,7 @@
 
 #include <eonexcept/Exception.h>
 #include <typeindex>
+#include <unordered_set>
 
 
 
@@ -30,6 +31,13 @@ namespace eon
 	**************************************************************************/
 	namespace type
 	{
+		//* Check if a type name names a tuple type
+		inline static bool isTupleType( name_t name ) noexcept {
+			static std::unordered_set<name_t> tuples;
+			if( tuples.empty() ) tuples = { name_plain, name_data, name_dynamic };
+			return tuples.find( name ) != tuples.end(); }
+
+
 		// Exception thrown when trying to set a null value
 		EONEXCEPT( NullValue );
 

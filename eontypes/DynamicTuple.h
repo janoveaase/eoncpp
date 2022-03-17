@@ -20,21 +20,22 @@ namespace eon
 	public:
 
 		// Construct an empty tuple
-		inline DynamicTuple() : type::BasicTuple( name_dynamic ) {}
+		inline DynamicTuple() : type::BasicTuple( name_dynamic, source::Ref() ) {}
 
 		// Construct tuple of unnamed attributes based on values only
-		inline DynamicTuple( std::initializer_list<Object*> values ) : type::BasicTuple( name_dynamic, values ) {}
+		inline DynamicTuple( std::initializer_list<Object*> values, source::Ref source = source::Ref() )
+			: type::BasicTuple( name_dynamic, values, source ) {}
 
 		// Construct tuple for the specified attribute elements
-		inline DynamicTuple( std::initializer_list<type::Attribute> attributes )
-			: type::BasicTuple( name_dynamic, attributes ) {}
+		inline DynamicTuple( std::initializer_list<type::Attribute> attributes, source::Ref source = source::Ref() )
+			: type::BasicTuple( name_dynamic, attributes, source ) {}
 
 		// Copy other tuple
 		inline DynamicTuple( const DynamicTuple& other ) : type::BasicTuple( other ) {}
 
 		// Take ownership of other tuple
 		inline DynamicTuple( DynamicTuple&& other ) noexcept : type::BasicTuple( std::move( other ) ) {}
-		inline DynamicTuple( type::BasicTuple&& other ) : type::BasicTuple( name_meta, std::move( other ) ) { finalize(); }
+		inline DynamicTuple( type::BasicTuple&& other ) : type::BasicTuple( std::move( other ) ) { finalize(); }
 
 		// Destruct tuple
 		virtual ~DynamicTuple() = default;
@@ -68,6 +69,8 @@ namespace eon
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
 		//* Create a copy of 'this'
-		inline type::Object* copy( scope::Scope& scope ) override { return new DynamicTuple( *this ); }
+		inline type::Object* copy() override { return new DynamicTuple( *this ); }
+
+		static inline name_t tupleType() noexcept { return name_dynamic; }
 	};
 }

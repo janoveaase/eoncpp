@@ -13,5 +13,5 @@ namespace eon
 
 
 
-	type::Instance* BoolType::instantiate( bool value ) const { return new BoolInstance( value ); }
+	type::Instance* BoolType::instantiate( bool value ) const { return new BoolInstance( value, source::Ref() ); }
 }

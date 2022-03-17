@@ -28,21 +28,23 @@ namespace eon
 	public:
 
 		// Construct an empty tuple
-		inline DataTuple() : type::BasicTuple( name_data ) {}
+		inline DataTuple() : type::BasicTuple( name_data, source::Ref() ) {}
 
 		// Construct tuple of unnamed attributes based on values only
-		inline DataTuple( std::initializer_list<Object*> values ) : type::BasicTuple( name_data, values ) {}
+		inline DataTuple( std::initializer_list<Object*> values, source::Ref source )
+			: type::BasicTuple( name_data, values, source ) {}
 
 		// Construct tuple for the specified attribute elements
-		inline DataTuple( std::initializer_list<type::Attribute> attributes )
-			: type::BasicTuple( name_data, attributes ) {}
+		inline DataTuple( std::initializer_list<type::Attribute> attributes, source::Ref source )
+			: type::BasicTuple( name_data, attributes, source ) {}
 
 		// Copy other tuple
 		inline DataTuple( const DataTuple& other ) : type::BasicTuple( other ) {}
 
 		// Take ownership of other tuple
 		inline DataTuple( DataTuple&& other ) noexcept : type::BasicTuple( std::move( other ) ) {}
-		inline DataTuple( type::BasicTuple&& other ) : type::BasicTuple( name_data, std::move( other ) ) { finalize(); }
+		inline DataTuple( type::BasicTuple&& other ) : type::BasicTuple( std::move( other ) ) {
+			finalize(); }
 
 		// Destruct tuple
 		virtual ~DataTuple() = default;
@@ -76,6 +78,8 @@ namespace eon
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
 		//* Create a copy of 'this'
-		inline type::Object* copy( scope::Scope& scope ) override { return new DataTuple( *this ); }
+		inline type::Object* copy() override { return new DataTuple( *this ); }
+
+		static inline name_t tupleType() noexcept { return name_data; }
 	};
 }

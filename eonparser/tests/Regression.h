@@ -1,11 +1,20 @@
 #pragma once
 
 #include <eontest/Test.h>
-#include <eontokenizer/Tokenizer.h>
-#include <chrono>
-
+#include <eonsource/String.h>
+#include <eontypes/Primitives.h>
+#include <eontypes/BasicTupleActions.h>
+#include <eontypes/StandardTypes.h>
+#include <eonparser/RawParser.h>
+#include <eonparser/ParseExpression.h>
 
 namespace eon
 {
-	class TokenizerTest : public eontest::EonTest {};
+	class RawParserTest : public eontest::EonTest
+	{
+	public:
+		string format( const std::vector<parser::Element>& elements );
+	};
+
+	class ParseExpressionTest : public eontest::EonTest {};
 }

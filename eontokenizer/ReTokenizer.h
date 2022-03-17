@@ -156,7 +156,7 @@ namespace eon
 		{
 		public:
 			inline SequenceRule( name_t name, std::vector<name_t>&& sequence, regex&& exclude = regex() ) : RuleDef( name ) {
-				Sequence = std::move( Sequence ); Exclude = std::move( exclude ); }
+				Sequence = std::move( sequence ); Exclude = std::move( exclude ); }
 			virtual ~SequenceRule() = default;
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:

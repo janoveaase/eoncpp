@@ -76,7 +76,7 @@ namespace eon
 			//* Construct target allowing only for messages at specified
 			//* severity level range.
 			inline MessageTarget( severity filter_high, severity filter_low = severity::note ) noexcept {
-				FilterHigh = filter_low; }
+				FilterHigh = filter_high; FilterLow = filter_low; }
 
 
 			//* This method is called whenever a message at or more severe than
@@ -193,7 +193,14 @@ namespace eon
 			{
 				Target() = default;
 				Target( MessageTarget* trg, bool owned ) { Trg = trg; Owned = owned; }
+				Target( const Target& ) = delete;
+				Target( Target&& other ) noexcept { *this = std::move( other ); }
 				~Target() { if( Trg && Owned ) delete Trg; }
+
+				Target& operator=( const Target& ) = delete;
+				inline Target& operator=( Target&& other ) noexcept {
+					Trg = other.Trg; Owned = other.Owned; if( Owned ) { other.Trg = nullptr; other.Owned = false; }
+					return *this; }
 				MessageTarget* Trg{ nullptr };
 				bool Owned{ false };
 			};

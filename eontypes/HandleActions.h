@@ -2,6 +2,7 @@
 
 #include "Handle.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -25,7 +26,8 @@ namespace eon
 		class HandleConstruct : public type::Action
 		{
 		public:
-			inline HandleConstruct() : Action( name_handle, Type::instance, name_construct, name_handle, DynamicTuple() ) {}
+			inline HandleConstruct() : Action( name_handle, Type::instance, name_constructor, name_handle, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~HandleConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -33,18 +35,18 @@ namespace eon
 		class HandleCopyConstruct : public type::Action
 		{
 		public:
-			inline HandleCopyConstruct( scope::Global& scope ) : Action( name_handle, Type::instance, name_construct, name_handle,
-				DynamicTuple( { type::Attribute( name_other, name_handle ) } ), { name_memory_denied } ) {}
+			inline HandleCopyConstruct() : Action( name_handle, Type::instance, name_constructor, name_handle, DynamicTuple( {
+				type::Attribute( name_other, name_handle ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~HandleCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class HandleCmp : public type::Action
+		class HandleCmp : public OperatorAction
 		{
 		public:
-			inline HandleCmp( scope::Global& scope ) : Action( name_handle, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_handle ) } ) ) {}
+			inline HandleCmp() : OperatorAction( name_handle, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_handle ) } ), {}, source::Ref() ) {}
 			virtual ~HandleCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

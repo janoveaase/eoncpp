@@ -23,13 +23,15 @@ namespace eon
 	public:
 
 		// Construct an empty tuple
-		inline Tuple() : type::BasicTuple( name_plain ) {}
+		inline Tuple() : type::BasicTuple( name_plain, source::Ref() ) {}
 
 		// Construct tuple of unnamed attributes based on values only
-		inline Tuple( std::initializer_list<type::Object*> values ) : type::BasicTuple( name_plain, values ) {}
+		inline Tuple( std::initializer_list<type::Object*> values, source::Ref source )
+			: type::BasicTuple( name_plain, values, source ) {}
 
 		// Construct tuple for the specified attribute elements
-		inline Tuple( std::initializer_list<type::Attribute> attributes ) : type::BasicTuple( name_plain, attributes ) {}
+		inline Tuple( std::initializer_list<type::Attribute> attributes, source::Ref source )
+			: type::BasicTuple( name_plain, attributes, source ) {}
 
 		// Copy other tuple
 		inline Tuple( const Tuple& other ) : type::BasicTuple( other ) {}
@@ -48,6 +50,7 @@ namespace eon
 
 
 		// Copy
+		inline type::Object* copy() override { return new Tuple( *this ); }
 		inline Tuple& operator=( const Tuple& other ) noexcept {
 			*static_cast<type::BasicTuple*>( this ) = other; return *this; }
 
@@ -57,5 +60,15 @@ namespace eon
 
 
 		virtual void callDestructor() override { this->~Tuple(); }
+
+
+
+
+		/**********************************************************************
+		  Basic Access
+		**********************************************************************/
+	public:
+
+		static inline name_t tupleType() noexcept { return name_plain; }
 	};
 }

@@ -14,7 +14,7 @@ namespace eon
 
 
 
-	type::Instance* CharType::instantiate( char_t value ) const { return new CharInstance( value ); }
+	type::Instance* CharType::instantiate( char_t value ) const { return new CharInstance( value, source::Ref() ); }
 
 	void CharInstance::str( type::Stringifier& str ) const
 	{

@@ -82,6 +82,12 @@ namespace eon
 		inline void registerSequenceToken( name_t type_name, string&& sequence ) {
 			SeqMap[ std::move( sequence ) ] = type_name; }
 
+		//* Make any sequence of letters, ascii numerals and underscore a 'name'
+		//* These tokens will be tagged using the name "name" (eon::name_name).
+		//* Requires one or more of the names "letters" (eon::name_letters), "underscore" (eon::name_underscore) and
+		//* "digits" (eon::name_digits) to be registered by other rules!
+		inline void registerEonNameTokens( bool enable = true ) { MatchEonNames = enable; }
+
 
 
 
@@ -103,6 +109,9 @@ namespace eon
 
 		name_t _match();
 
+		inline bool _isNameCandidate( name_t name ) const noexcept {
+			return name == name_letters || name == name_digits || name == name_underscore || name == name_name; }
+
 
 
 
@@ -119,6 +128,7 @@ namespace eon
 
 		source::Ref Source, CurMatch;
 		name_t CurMatchName{ no_name };
+		bool MatchEonNames{ false };
 		std::unordered_map<char_t, std::pair<name_t, Match>> CharMap;
 		std::map<charcat, std::pair<name_t, Match>> CatMap;
 		std::unordered_map<string, name_t> SeqMap;

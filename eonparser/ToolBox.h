@@ -1,15 +1,15 @@
 #pragma once
+#include "Element.h"
 #include <eonsource/String.h>
 #include <eonsource/File.h>
 #include <eonsource/SourceReporter.h>
-#include <eontokenizer/Tokenizer.h>
-#include <eontokenizer/ReTokenizer.h>
 #include <eonfilesys/Path.h>
 #include <eonregex/RegEx.h>
 #include <eonscopes/Scope.h>
 #include <eontypes/Node.h>
 #include <eontypes/Operators.h>
 #include <eontypes/Tuple.h>
+#include <eonstack/Stack.h>
 
 
 /******************************************************************************
@@ -49,7 +49,9 @@ namespace eon
 
 				expression,		// An expression
 				type_tuple,		// A type tuple
-				tuple,			// A plain tuple
+				tuple,			// A tuple that is undecided as of yet
+				plain_tuple,	// A plain tuple
+				dynamic_tuple,	// A dynamic tuple
 				data_tuple,		// A data tuple
 				meta_data,		// A meta data tuple
 			};
@@ -63,10 +65,16 @@ namespace eon
 		public:
 
 			ToolBox() = default;
+			ToolBox( std::vector<Element>&& elements, source::Reporter& reporter, scope::Scope& scope ) {
+				Elements = std::move( elements ); Reporter = &reporter; Scope = &scope; pushIndent( 0 ); }
+			ToolBox( const ToolBox& ) = delete;
+			ToolBox( ToolBox&& other ) noexcept { *this = std::move( other ); }
+
 			virtual ~ToolBox() = default;
 
-			inline void init( source::Ref source, source::Reporter& reporter, scope::Scope& scope ) {
-				Source = source; Reporter = &reporter; Scope = &scope; _prepare(); }
+
+			ToolBox& operator=( const ToolBox& ) = delete;
+			ToolBox& operator=( ToolBox&& other ) noexcept;
 
 
 
@@ -77,17 +85,15 @@ namespace eon
 			******************************************************************/
 		public:
 
-			//* Get fully configured Tokenizer object
-			Tokenizer& tokenizer();
+			//* Create a new ToolBox object for the same data, but with parsing
+			//* details reset
+			//* The new ToolBox object must be sync'd back when done!
+			//* 'this' ToolBox cannot be used in the meantime!!
+			ToolBox split();
 
-			//* Get fully configured ReTokenizer object
-			ReTokenizer& retok();
+			//* Sync back a previously split off ToolBox object
+			void sync( ToolBox&& other ) noexcept;
 
-			//* Access the source
-			inline const source::Ref& source() const noexcept { return Source; }
-
-			//* Access the token parser
-			inline TokenParser& parser() noexcept { return Parser; }
 
 			//* Access the reporter
 			inline source::Reporter& reporter() const noexcept { return *Reporter; }
@@ -95,6 +101,8 @@ namespace eon
 
 			//* Check context
 			inline Context context() const noexcept { return ContextStack.empty() ? Context::global : ContextStack.top(); }
+			inline bool underTupleContext() const noexcept {
+				return ContextStack.size() > 1 && ContextStack.element( 1 ) == Context::tuple; }
 
 			//* Push a new context onto the context stack
 			inline void push( Context context ) { ContextStack.push( context ); }
@@ -113,11 +121,38 @@ namespace eon
 			inline void popIndent() noexcept { IndentStack.pop(); }
 
 
+			//* Make sure there is a current element
+			inline operator bool() const noexcept { return CurElm < Elements.size(); }
+
+			//* Access the current element
+			inline const Element& current() const { return Elements[ CurElm ]; }
+
+			//* Consume the object value of current element
+			//* WARNING: No checking is done to see if it is an existing object value!
+			inline type::Object* consumeObject() { return Elements[ CurElm ].consumeObjValue(); }
+
+			//* Check if there is an element a number of steps ahead
+			inline bool exists( int_t steps = 1 ) const noexcept {
+				return steps < 0 ? CurElm >= -steps : CurElm + steps < Elements.size(); }
+
+			//* Look ahead a number of elements
+			inline const Element& peek( int_t steps = 1 ) const { return Elements[ CurElm + steps ]; }
+
+			//* Move current element marker forward
+			inline void forward( index_t steps = 1 ) noexcept { CurElm += steps; }
+
+			//* Move current element marker backward
+			inline void backward( index_t steps = 1 ) noexcept { if( steps >= CurElm ) CurElm = 0; else CurElm -= steps; }
+
+			//* Access the last element
+			inline const Element& last() const { return Elements[ Elements.size() - 1 ]; }
+
+
 			//* Access the operator stack
-			inline std::stack<type::Action*>& opStack() noexcept { return OpStack; }
+			inline stack<type::Action*>& opStack() noexcept { return OpStack; }
 
 			//* Access the tree stack
-			inline std::stack<type::Node>& treeStack() noexcept { return TreeStack; }
+			inline stack<type::Node>& treeStack() noexcept { return TreeStack; }
 
 			//* Check if operator and tree stacks are ready a new expression
 			inline bool ready() const noexcept { return OpStack.empty() && TreeStack.empty(); }
@@ -138,9 +173,6 @@ namespace eon
 			//
 		private:
 
-			// Prepare for parsing by tokenizing and re-tokenizing to get an
-			// optimal token stream
-			void _prepare();
 
 
 
@@ -151,15 +183,16 @@ namespace eon
 			//
 		private:
 
-			source::Ref Source;
-			TokenParser Parser;
 			source::Reporter* Reporter{ nullptr };
-			std::stack<Context> ContextStack;
 
-			std::stack<index_t> IndentStack;
+			std::vector<Element> Elements;
+			size_t CurElm{ 0 };
 
-			std::stack<type::Action*> OpStack;
-			std::stack<type::Node> TreeStack;
+			stack<Context> ContextStack;
+			stack<index_t> IndentStack;
+
+			stack<type::Action*> OpStack;
+			stack<type::Node> TreeStack;
 
 			scope::Scope* Scope{ nullptr };
 		};

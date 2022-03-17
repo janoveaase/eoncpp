@@ -13,6 +13,8 @@ namespace eon
 
 
 
-	type::Instance* NamePathType::instantiate( const nameref& value ) const { return new NamePathInstance( value ); }
-	type::Instance* NamePathType::instantiate( nameref&& value ) const { return new NamePathInstance( std::move( value ) ); }
+	type::Instance* NamePathType::instantiate( const namepath& value ) const {
+		return new NamePathInstance( value, source::Ref() ); }
+	type::Instance* NamePathType::instantiate( namepath&& value ) const {
+		return new NamePathInstance( std::move( value ), source::Ref() ); }
 }

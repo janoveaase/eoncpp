@@ -1,6 +1,7 @@
 #pragma once
 
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
+#include <eonsource/SourceRef.h>
 #include "TypeDefinitions.h"
 #include "Stringifier.h"
 #include <vector>
@@ -75,25 +76,56 @@ namespace eon
 	public:
 
 		TypeTuple() = default;
-		inline TypeTuple( name_t tuple_type ) { IsTuple = true; Elements.push_back( new NameElement( tuple_type ) ); _makeName(); }
-//		inline TypeTuple( name_t value ) { Elements.push_back( new NameElement( value ) ); _makeName(); }
-//		inline TypeTuple( name_t name, name_t value ) { _add( new NameElement( name, value ) ); _makeName(); }
-//		inline TypeTuple( NameElement* element ) { _add( element ); _makeName(); }
-//		inline TypeTuple( EllipsisElement* element ) { _add( element ); _makeName(); }
-		inline TypeTuple( std::initializer_list<TypeElement*> elements ) {
-			for( auto elm : elements ) _add( elm ); _makeName(); }
-		inline TypeTuple( std::vector<TypeElement*> elements ) { for( auto elm : elements ) _add( elm ); _makeName(); }
-		inline TypeTuple( name_t tuple_type, std::vector<TypeElement*> elements ) { IsTuple = true; Elements.push_back(
-			new NameElement( tuple_type ) ); for( auto elm : elements ) _add( elm ); _makeName(); }
-		inline TypeTuple( std::initializer_list<name_t> names ) {
-			for( auto name : names ) Elements.push_back( new NameElement( name ) ); _makeName(); }
-		inline TypeTuple( name_t name, const TypeTuple& other ) {
-			auto cpy = new TypeTuple( other ); cpy->Name = name; _add( cpy ); }
+
 		inline TypeTuple( const TypeTuple& other ) { *this = other; }
 		inline TypeTuple( TypeTuple&& other ) noexcept { *this = std::move( other ); }
 
+		enum class own_attributes
+		{
+			no,
+			yes
+		};
+		inline TypeTuple( std::vector<TypeElement*> attributes, name_t tuple_type, own_attributes own = own_attributes::no ) {
+			TupleType = tuple_type; for( auto elm : attributes ) _add( elm ); _makeName(); OwnElements = own; }
+
+		inline TypeTuple( name_t type_name ) {
+			if( type_name != no_name ) Elements.push_back( new NameElement( type_name ) ); _makeName(); }
+		inline TypeTuple( std::initializer_list<name_t> names ) {
+			for( auto name : names ) { if( name != no_name ) Elements.push_back( new NameElement( name ) ); } _makeName(); }
+
+		inline TypeTuple( std::initializer_list<TypeTuple> args ) { for( auto& arg : args ) _add( new TypeTuple( arg ) ); }
+
+		inline TypeTuple( const TypeTuple& other, name_t new_name ) { *this = other; Name = new_name; }
+
+		inline TypeTuple( std::initializer_list<TypeElement*> elements ) {
+			for( auto elm : elements ) _add( elm ); _makeName(); }
+		inline TypeTuple( std::vector<TypeElement*> elements ) { for( auto elm : elements ) _add( elm ); _makeName(); }
+
 		// Destruct tuple
-		virtual ~TypeTuple() = default;
+		virtual ~TypeTuple() { if( OwnElements == own_attributes::yes ) { for( auto elm : Elements ) delete elm; } }
+
+
+
+
+		/**********************************************************************
+		  Factory Construction
+		**********************************************************************/
+	public:
+
+		static inline TypeTuple tuple( name_t tuple_type ) { return TypeTuple( std::vector<TypeElement*>(), tuple_type ); }
+		static inline TypeTuple tuple( name_t tuple_type, std::vector<TypeElement*> attributes ) {
+			return TypeTuple( attributes, tuple_type ); }
+
+		static inline TypeTuple name( name_t type_name ) {
+			return type::isTupleType( type_name ) ? tuple( type_name ) : TypeTuple( type_name ); }
+		static inline TypeTuple name( std::initializer_list<name_t> names ) { return TypeTuple( names ); }
+
+		static inline TypeTuple args( std::initializer_list<TypeTuple> arg_types ) { return TypeTuple( arg_types ); }
+
+		static inline TypeTuple rename( const TypeTuple& other, name_t new_name ) { return TypeTuple( other, new_name ); }
+
+		static inline TypeTuple type( std::initializer_list<TypeElement*> elements ) { return TypeTuple( elements ); }
+		static inline TypeTuple type( std::vector<TypeElement*> elements ) { return TypeTuple( elements ); }
 
 
 
@@ -104,25 +136,29 @@ namespace eon
 	public:
 
 		inline TypeTuple& operator=( name_t value ) {
-			Name = no_name; Elements.clear(); Elements.push_back( new NameElement( value ) ); _makeName(); return *this; }
+			TupleType = no_name; Name = no_name; Elements.clear(); Elements.push_back( new NameElement( value ) );
+			_makeName(); return *this; }
 		inline TypeTuple& operator=( NameElement* element ) {
-			Name = no_name; Elements.clear(); _add( element ); _makeName(); return *this; }
+			TupleType = no_name; Name = no_name; Elements.clear(); _add( element ); _makeName(); return *this; }
 		inline TypeTuple& operator=( std::initializer_list<TypeElement*> elements ) {
-			Name = no_name; for( auto& elm : elements ) _add( elm ); _makeName(); return *this; }
-		inline TypeTuple& operator=( std::initializer_list<name_t> names ) { Name = no_name; Elements.clear();
+			TupleType = no_name; Name = no_name; for( auto& elm : elements ) _add( elm ); _makeName(); return *this; }
+		inline TypeTuple& operator=( std::initializer_list<name_t> names ) {
+			TupleType = no_name; Name = no_name; Elements.clear();
 			for( auto name : names ) Elements.push_back( new NameElement( name ) ); _makeName(); return *this; }
-		inline TypeTuple& operator=( const TypeTuple& other ) { IsTuple = other.IsTuple; Name = other.Name;
-			Named = other.Named; Elements = other.Elements; AsName = other.AsName; return *this; }
-		inline TypeTuple& operator=( TypeTuple&& other ) noexcept { IsTuple = other.IsTuple; other.IsTuple = false;
-			Name = other.Name; other.Name = no_name; Named = std::move( other.Named );
-			Elements = std::move( other.Elements ); AsName = other.AsName; other.AsName = no_name; return *this; }
+		inline TypeTuple& operator=( const TypeTuple& other ) {
+			TupleType = other.TupleType; Name = other.Name; Named = other.Named; Elements = other.Elements;
+			AsName = other.AsName; return *this; }
+		inline TypeTuple& operator=( TypeTuple&& other ) noexcept {
+			TupleType = other.TupleType; other.TupleType = no_name; Name = other.Name; other.Name = no_name;
+			Named = std::move( other.Named ); Elements = std::move( other.Elements ); AsName = other.AsName;
+			other.AsName = no_name; return *this; }
 
-		inline TypeTuple& operator+=( name_t value ) {
+		inline TypeTuple& operator<<( name_t value ) {
 			Elements.push_back( new NameElement( value ) ); _makeName(); return *this; }
-		inline TypeTuple& operator+=( NameElement* element ) { _add( element ); _makeName(); return *this; }
-		inline TypeTuple& operator+=( const TypeTuple& other ) {
+		inline TypeTuple& operator<<( NameElement* element ) { _add( element ); _makeName(); return *this; }
+		inline TypeTuple& operator<<( const TypeTuple& other ) {
 			for( auto& elm : other.Elements ) _add( elm ); _makeName(); return *this; }
-		inline TypeTuple& operator+=( TypeElement* element ) { _add( element ); _makeName(); return *this; }
+		inline TypeTuple& operator<<( TypeElement* element ) { _add( element ); _makeName(); return *this; }
 
 
 
@@ -143,11 +179,11 @@ namespace eon
 			return isName() && ((NameElement*)( Elements[ 0 ] ))->Value == name; }
 
 		//* Check if the type tuple is for a tuple (any type)
-		inline bool isTuple() const noexcept { return IsTuple; }
+		inline bool isTuple() const noexcept { return TupleType != no_name; }
 
 		//* Get the general tuple type that this type tuple is for
 		//* Returns no_name if not for a tuple!
-		inline name_t tupleType() const noexcept { return IsTuple ? ( (const NameElement*)Elements[ 0 ] )->Value : no_name; }
+		inline name_t tupleType() const noexcept { return TupleType; }
 
 		//* Get type tuple as name
 		inline name_t asName() const noexcept { return AsName; }
@@ -158,6 +194,12 @@ namespace eon
 		//* Get type tuple as string representation
 		void str( type::Stringifier& str ) const;
 		inline string str() const { type::Stringifier strf; str( strf ); return strf.output(); }
+
+		//* Get source
+		inline const source::Ref& source() const noexcept { return Source; }
+
+		//* Set source
+		inline void source( source::Ref source ) noexcept { Source = std::move( source ); }
 
 
 
@@ -183,16 +225,19 @@ namespace eon
 		inline int compare( const TypeTuple& other ) const noexcept {
 			return AsName < other.AsName ? -1 : other.AsName < AsName ? 1 : 0; }
 
-		inline bool operator<( const TypeTuple& other ) const noexcept { return AsName < other.AsName; }
-		inline bool operator<=( const TypeTuple& other ) const noexcept { return AsName <= other.AsName; }
-		inline bool operator>( const TypeTuple& other ) const noexcept { return AsName > other.AsName; }
-		inline bool operator>=( const TypeTuple& other ) const noexcept { return AsName >= other.AsName; }
-		inline bool operator==( const TypeTuple& other ) const noexcept { return AsName == other.AsName; }
-		inline bool operator!=( const TypeTuple& other ) const noexcept { return AsName != other.AsName; }
+		inline bool operator<( const TypeTuple& other ) const noexcept { return compare( other ) < 0; }
+		inline bool operator<=( const TypeTuple& other ) const noexcept { return compare( other ) <= 0; }
+		inline bool operator>( const TypeTuple& other ) const noexcept { return compare( other ) > 0; }
+		inline bool operator>=( const TypeTuple& other ) const noexcept { return compare( other ) >= 0; }
+		inline bool operator==( const TypeTuple& other ) const noexcept { return compare( other ) == 0; }
+		inline bool operator!=( const TypeTuple& other ) const noexcept { return compare( other ) != 0; }
 
 		//* Check if types are compatible
+		//* NOTE: Tuple types are not compared!
 		bool compatibleWith( const TypeTuple& other ) const noexcept;
 		bool compatibleWith( const TypeElement& other ) const noexcept override {
+			if( isName() && other.isNameElement() )
+				return asName() == ( (NameElement*)&other )->Value;
 			return other.isTupleElement() ? compatibleWith( *( (TypeTuple*)&other ) ) : false; }
 
 
@@ -218,9 +263,11 @@ namespace eon
 		//
 	protected:
 
-		bool IsTuple{ false };
+		name_t TupleType{ no_name };
 		std::vector<TypeElement*> Elements;
+		own_attributes OwnElements{ own_attributes::no };
 		std::unordered_map<name_t, size_t> Named;
 		name_t AsName{ no_name };
+		source::Ref Source;
 	};
 }

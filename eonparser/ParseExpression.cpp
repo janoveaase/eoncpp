@@ -2,23 +2,20 @@
 #include <eontypes/Bool.h>
 #include <eontypes/Byte.h>
 #include <eontypes/Char.h>
-#include <eontypes/Int.h>
-#include <eontypes/Short.h>
-#include <eontypes/Long.h>
-#include <eontypes/Float.h>
-#include <eontypes/Low.h>
-#include <eontypes/High.h>
+#include <eontypes/Integer.h>
+#include <eontypes/Floatingpt.h>
 #include <eontypes/Name.h>
 #include <eontypes/Handle.h>
 #include <eontypes/String.h>
 #include <eontypes/Bytes.h>
 #include <eontypes/Path.h>
 #include <eontypes/Regex.h>
+#include <eontypes/ExpressionObj.h>
 #include <eontypes/NamePath.h>
 #include <eontypes/OperatorAction.h>
-#include <eontypes/Expression.h>
 #include <eontypes/DataTuple.h>
-#include <eontypes/MetaData.h>
+#include <eontypes/TypeTuple.h>
+#include <eontypes/DynamicTuple.h>
 
 
 namespace eon
@@ -28,36 +25,13 @@ namespace eon
 		bool ParseExpression::operator()( ToolBox& tools, type::Node& result )
 		{
 			Tools = &tools;
-			if( !Tools->parser() )
-				return false;
-
 			if( !Tools->ready() )
-			{
 				Tools->reset();
-				Tools->reporter().warning( "Parser reset after errors!", Tools->parser().current().source() );
-			}
 
 			// Start context
 			Tools->push( ToolBox::Context::expression );
-			bool status = false;
 
-			// Accept literal exception
-			if( Tools->parser().current().is( name_name )
-				&& Tools->parser().current().str() == "e"
-				&& Tools->parser().ahead().is( name_open ) )
-			{
-				Tools->parser().forward( 2 );
-				Literal = true;
-				status = _parse( result );
-			}
-			else
-			{
-				// Not a literal expression
-				// We trust that the caller has determined that we are actually parsing
-				// an expression (or at least that the source at current position is
-				// not the start of any other known construct).
-				status = _parse( result );
-			}
+			bool status = _parse( result );
 
 			// End context
 			Tools->popContext();
@@ -69,49 +43,75 @@ namespace eon
 
 		bool ParseExpression::_parse( type::Node& result )
 		{
-			// This method is only called if there is at least one token left
-			for( ; ; )
+			source::Ref src = Tools->current().source();
+
+			for( ; *Tools; )
 			{
-				// If we are in an expression context and we have a literal
-				// expression, then ")" will end it
-				if( Tools->context() == ToolBox::Context::expression
-					&& Literal
-					&& Tools->parser().current().is( name_close ) )
+				// If we are in an expression context, the following will end
+				// the expression: ')' (if operator stack is empty), ';'
+
+				// If we are in an expression context, there are some considerations we need to make
+				if( Tools->context() == ToolBox::Context::expression )
 				{
-					Tools->parser().forward();
-					break;
+					// Closing parenthesis and empty operator stack will end expression
+					if( Tools->current().is( name_close ) && Tools->opStack().empty() )
+						break;
+
+					// Semi-colon will always end
+					if( Tools->current().is( name_symbol ) && Tools->current().symbValue() == ';' )
+						break;
+
+					// If we have a tuple above, then comma will end
+					if( Context == name_tuple && Tools->current().is( name_operator )
+						&& Tools->current().opValue() == type::operators::code::comma )
+						break;
 				}
 
-				if( !_processToken() )
+				if( !_processElement() )
 					return false;
 			}
+			src.end( *Tools ? Tools->current().source().start() : Tools->last().source().end() );
+			
+			if( !Tools->opStack().empty() )
+				_popOperatorsUntil( type::operators::code::_end );
 
-			// TODO: Complete the tree stack
-
+			if( Tools->treeStack().size() != 1 )
+			{
+				Tools->reporter().error( "Not a valid expression!", src );
+				return false;
+			}
+			result.claim( std::move( Tools->treeStack().top() ) );
+			Tools->treeStack().pop();
+			if( result.isValue() && result.value()->generalType() == name_expression )
+				( (type::Expression*)result.value() )->resultType();
+		
 			return true;
 		}
 
-		bool ParseExpression::_processToken()
+		bool ParseExpression::_processElement()
 		{
-			if( Tools->parser() )
+			if( Tools )
 			{
-				_checkContext();
 				switch( Tools->context() )
 				{
 					case ToolBox::Context::expression:
-						if( !_processExpressionToken() )
+						if( !_processExpressionElement() )
+							return false;
+						break;
+					case ToolBox::Context::tuple:
+						if( !_parseOpenTuple() )
 							return false;
 						break;
 					case ToolBox::Context::data_tuple:
 						if( !_parseDataTuple() )
 							return false;
 						break;
-					case ToolBox::Context::meta_data:
-						if( !_parseMetaTuple() )
+					case ToolBox::Context::plain_tuple:
+						if( !_parsePlainTuple() )
 							return false;
 						break;
-					case ToolBox::Context::tuple:
-						if( !_parseTuple() )
+					case ToolBox::Context::dynamic_tuple:
+						if( !_parseDynamicTuple() )
 							return false;
 						break;
 					case ToolBox::Context::type_tuple:
@@ -127,286 +127,620 @@ namespace eon
 			return true;
 		}
 
-		void ParseExpression::_checkContext()
+/*		void ParseExpression::_checkContext()
 		{
+			// Must have a next element for this to be relevant
+			if( !Tools->exists() )
+				return;
+			
 			// Check if we have a plain tuple
-			if( Tools->parser().ahead().is( name_symbol ) && Tools->parser().ahead().str() == "," )
+			if( Tools->ahead().is( name_symbol ) && Tools->ahead().symbValue() == ',' )
 				Tools->push( ToolBox::Context::tuple );
 
 			// Check for type tuple
-			else if( Tools->parser().match( { "T", "(" } ) )
+			else if( Tools->current().is( name_name) && *Tools->current().nameValue() == "T"
+				&& Tools->ahead().is( name_brace ) && Tools->ahead().nameValue() == name_open )
 				Tools->push( ToolBox::Context::type_tuple );
 
-			// Check for meta data
-			else if( Tools->parser().match( { "M", "(" } ) )
-				Tools->push( ToolBox::Context::meta_data );
-
 			// Check for data tuple
-			else if( Tools->parser().match( { "D", "(" } ) )
+			else if( Tools->current().is( name_name ) && *Tools->current().nameValue() == "data"
+				&& Tools->ahead().is( name_brace ) && Tools->ahead().nameValue() == name_open )
 				Tools->push( ToolBox::Context::data_tuple );
-		}
+		}*/
 
-		bool ParseExpression::_processExpressionToken()
+		bool ParseExpression::_processExpressionElement()
 		{
-			// Try to map an explicit operator first
-			auto type = type::operators::mapCode( Tools->parser().current().str() );
-			if( type != type::operators::code::undef )
-			{
-				if( !_parseOperator( type ) )
-					return false;
-			}
-			else
-			{
-				auto& token = Tools->parser().current();
+			if( Tools->current().is( name_operator ) )
+				return _parseOperator( Tools->current().opValue() );
+			else if( Tools->current().is( name_open ) )
+				return _parseOperator( type::operators::code::open_brace );
+			else if( Tools->current().is( name_close ) )
+				return _parseOperator( type::operators::code::close_brace );
+			else if( Tools->current().is( name_name ) && eon::str( Tools->current().nameValue() ) == "e"
+				&& Tools->exists() && Tools->peek().is( name_open ) )
+				return _parseExpression();
+			else if( Tools->current().is( name_defvar ) )
+				return _processDefineVar();
+			else if( Tools->current().is( name_symbol ) )
+				return _processSymbolElement();
 
-				if( token.is( name_name ) )
-				{
-					if( !_parseName() )
-						return false;
-				}
-				else if( token.is( name::get( "literal_name" ) ) )
-					_parseLiteralName();
-				else if( token.is( name_string ) )
-					_parseString();
-				else if( token.is( name_bytes ) )
-					_parseBytes();
-				else if( token.is( name_path ) )
-					_parsePath();
-				else if( token.is( name_char ) )
-					_parseChar();
-				else if( token.is( name_byte ) )
-					_parseByte();
-				else if( token.is( name_indentation ) )
-					_parseIndentation();
-				else if( token.is( name_regex ) )
-					_parseRegex();
-				else if( token.is( name_bool ) )
-					_parseBool();
-				else if( token.is( name_float ) )
-					_parseFloat();
-				else if( token.is( name_namepath ) )
-					_parseNamePath();
-				else if( token.is( name_digits ) )
-					_parseInt();
+			else if( Tools->current().is( name_name ) )
+				return _processNameElement();
+			else if( Tools->current().is( name_string ) || Tools->current().is( name_bytes )
+				|| Tools->current().is( name_path ) || Tools->current().is( name_char )
+				|| Tools->current().is( name_byte ) || Tools->current().is( name_indentation )
+				|| Tools->current().is( name_regex ) || Tools->current().is( name_bool )
+				|| Tools->current().is( name_float ) || Tools->current().is( name_namepath )
+				|| Tools->current().is( name_int ) || Tools->current().is( name_short )
+				|| Tools->current().is( name_long ) || Tools->current().is( name_low ) || Tools->current().is( name_high ) )
+			{
+//				if( Tools->context() == ToolBox::Context::expression
+//					&& Tools->exists() && Tools->peek().is( name_symbol ) && Tools->peek().symbValue() == ',' )
+//				{
+//					Tools->push( ToolBox::Context::tuple );
+//					return true;
+//				}
+				Tools->treeStack().push( type::Node::newValue( Tools->consumeObject() ) );
+				Tools->forward();
 			}
+
+			else if( Tools->current().is( name_indentation ) )
+				_parseIndentation();
+
 			return true;
 		}
 
-		bool ParseExpression::_parseTuple()
+		bool ParseExpression::_processNameElement()
 		{
-			auto parenthesized = Tools->parser().current().is( name_open );
-			if( parenthesized )
-				Tools->parser().forward();
+			// Name followed by parenthesis has special meaning
+			if( Tools->exists() && Tools->peek().is( name_open ) )
+			{
+				// It is either a tuple of some kind
+				if( eon::str( Tools->current().nameValue() ) == "p" )
+				{
+					Tools->push( ToolBox::Context::plain_tuple );
+					Tools->forward();
+					return true;
+				}
+				else if( eon::str( Tools->current().nameValue() ) == "T" )
+				{
+					Tools->push( ToolBox::Context::type_tuple );
+					Tools->forward();
+					return true;
+				}
+				else if( Tools->current().nameValue() == name_dynamic )
+				{
+					Tools->push( ToolBox::Context::dynamic_tuple );
+					Tools->forward();
+					return true;
+				}
+				else if( Tools->current().nameValue() == name_data )
+				{
+					Tools->push( ToolBox::Context::data_tuple );
+					Tools->forward();
+					return true;
+				}
 
-			// A literal tuple runs until ")" if parenthesized and ";" if not
-			type::BasicTuple tuple;
-			if( !_parseTuple( tuple, type::BasicTuple::Class::tuple, parenthesized ) )
+				// Or an action call
+				else
+					return _parseActionCall();
+			}
+
+			// If the name matches that of an operator, it may - or may not -
+			// be one
+			auto op_type = type::operators::mapCode( eon::str( Tools->current().nameValue() ) );
+			if( op_type != type::operators::code::undef )
+				return _parseOperator( op_type );
+
+			// Seems to be just another name
+			return _parseName();
+		}
+		bool ParseExpression::_processSymbolElement()
+		{
+			// TODO: Handle ...
+			return false;
+		}
+
+		bool ParseExpression::_processDefineVar()
+		{
+			Tools->forward();		// Skip "define"
+
+			// We know that we have name + "as" or "="
+			auto name = Tools->current().nameValue();
+			source::Ref name_source = Tools->current().source();
+			Tools->forward();
+
+			if( Tools->current().is( name_name ) )		// Must be "as"
+			{
+				Tools->forward();
+
+				// TODO: Implement!"
+			}
+			else										// Must be "="
+			{
+				Tools->forward();
+				type::Node value;
+				auto sub = Tools->split();
+				if( ParseExpression()( sub, value ) )
+				{
+					Tools->sync( std::move( sub ) );
+
+					auto type = value.resultType();
+					if( type.isTuple() )
+					{
+						// We need to create a new assignment operation with
+						// our new variable on the left side and 'value' on
+						// the right.
+						auto operators = Tools->scope().global().getActions( compilerName( "$op_=" ), type,
+							TypeTuple::args( { type } ), type );
+
+						if( !_checkOperator( operators,
+							actions::OperatorAction( type::operators::code::assign, 2, source::Ref() ),
+							type.str() + ", " + type.str(), type ) )
+							return false;
+
+						auto assign = type::Node::newOperator( (actions::OperatorAction*)*operators.begin() );
+						assign.add( type::Node::newName( name, name_source, true ) );
+						assign.add( std::move( value ) );
+						Tools->treeStack().push( std::move( assign ) );
+						return true;
+					}
+					else if( type.isName() )
+					{
+						auto type_obj = Tools->scope().find( type.asName() );
+						if( type_obj && type_obj->generalType() == name_type )
+						{
+//							auto val = ( (type::TypeDef*)type_obj )->instantiate();
+//							Tools->scope().add( name, val );
+
+							// We need to create a new assignment operation with
+							// our new variable on the left side and 'value' on
+							// the right.
+							auto operators = Tools->scope().global().getActions( compilerName( "$op_=" ), type,
+								TypeTuple::args( { type } ), type );
+
+							if( !_checkOperator( operators,
+								actions::OperatorAction( type::operators::code::assign, 2, source::Ref() ),
+								type.str() + ", " + type.str(), type ) )
+								return false;
+
+							auto assign = type::Node::newOperator( (actions::OperatorAction*)*operators.begin() );
+							assign.add( type::Node::newName( name, name_source, true ) );
+//							assign.add( type::Node::newValue( val ) );
+							assign.add( std::move( value ) );
+							Tools->treeStack().push( std::move( assign ) );
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
+		}
+
+		bool ParseExpression::_parseActionCall()
+		{
+			// An action call is identified by a name and a '('
+			auto name = Tools->current().nameValue();
+			Tools->forward( 2 );
+
+			// Everything up to matching ')' is part of the arguments
+			while( *Tools && !Tools->current().is( name_close ) )
+			{
+			}
+
+			return false;
+		}
+		bool ParseExpression::_parseOperator( type::operators::code type )
+		{
+			Tools->forward();
+			if( type == type::operators::code::close_brace )
+			{
+				auto result = _popOperatorsUntil( type::operators::code::open_brace );
+				if( result && !Tools->opStack().empty() )
+				{
+					Tools->opStack().pop();
+					return true;
+				}
+				Tools->reporter().error( "Missing matching '('!", Tools->peek( -1 ).source() );
 				return false;
+			}
+			else
+			{
+				auto& sequence = type::operators::sequence( type );
+				if( sequence.size() > 1 && type != sequence[ 0 ].Op )
+				{
+					// We can ignore all opereators except the first and the last!
+					if( sequence[ sequence.size() - 1 ].Op == type )
+						return _popOperatorsUntil( sequence[ 0 ].Op );
+					else
+						return true;
+				}
+				else
+					_popOperatorsFor( type );
+			}
+
+			return _pushOperatorAction( type );
+		}
+		bool ParseExpression::_pushOperatorAction( type::operators::code type )
+		{
+			// For operators, we always know exactly how many arguments/
+			// operands are required, while the type of arguments depend on the
+			// type of the first operand - which we won't know until the
+			// expression is complete.
+			Tools->opStack().push(
+				new actions::OperatorAction( type, type::operators::numOperands( type ), Tools->current().source() ) );
+			return true;
+		}
+
+		bool ParseExpression::_parseExpression()
+		{
+			source::Ref src = Tools->current().source();
+			Tools->forward( 1 );
+			if( Tools )
+			{
+				type::Node expr;
+				auto sub = Tools->split();
+				if( ParseExpression()( sub, expr ) )
+				{
+					Tools->sync( std::move( sub ) );
+					Tools->treeStack().push( type::Node::newValue( new type::Expression( std::move( expr ), true ) ) );
+					return true;
+				}
+			}
+			else
+			{
+				src.end( Tools->last().source().end() );
+				Tools->reporter().error( "Literal expression started!", src );
+			}
+			return false;
+		}
+
+		bool ParseExpression::_parseName()
+		{
+			// Is it 'me' or 'my'?
+			if( Tools->current().nameValue() == name_me || eon::str( Tools->current().nameValue() ) == "my" )
+			{
+				auto me = Tools->scope().find( name_me );
+				if( !me )
+				{
+					Tools->reporter().error(
+						"Use of \"" + eon::str( Tools->current().nameValue() ) + "\" only possible inside actions!",
+						Tools->current().source() );
+					return false;
+				}
+				Tools->treeStack().push( type::Node::newValue( me ) );
+				Tools->forward();
+				return true;
+			}
+
+			// Is it a known entity?
+			auto var = Tools->scope().find( Tools->current().nameValue() );
+			if( var )
+			{
+				if( var->generalType() == name_action )
+					Tools->opStack().push( (type::Action*)var );
+				else
+					Tools->treeStack().push( type::Node::newValue( var ) );
+				Tools->forward();
+				return true;
+			}
+
+			// Unknown entity
+			Tools->treeStack().push( type::Node::newName( Tools->current().nameValue(), Tools->current().source() ) );
+			Tools->forward();
+			return true;
+		}
+		void ParseExpression::_parseIndentation()
+		{
+		}
+
+
+
+
+		bool ParseExpression::_parseOpenTuple()
+		{
+			source::Ref source = Tools->current().source();
+
+			// May or may not be parenthesized
+			name_t end_of_tuple = Tools->current().is( name_open ) ? name_close : no_name;
+			if( end_of_tuple )
+				Tools->forward();
+
+			// Tuple runs until ")" if parenthesized and any operator/action or ';' if not
+			type::BasicTuple tuple( name_open, source::Ref() );
+			if( !_parseTuple( tuple, name_open, end_of_tuple ) )
+				return false;
+			source.end( *Tools ? Tools->current().source().start() : Tools->last().source().start() );
+			tuple.source( source );
 			Tools->treeStack().push( type::Node::newValue( new Tuple( std::move( tuple ) ) ) );
+			Tools->popContext();
+			return true;
+		}
+		bool ParseExpression::_parsePlainTuple()
+		{
+			// Data tuples are always parenthesized
+			source::Ref source = Tools->current().source();
+			Tools->forward();
+
+			// Tuple runs until ")"
+			Tuple tuple;
+			if( !_parseTuple( tuple, name_data, name_close ) )
+				return false;
+			source.end( *Tools ? Tools->current().source().start() : Tools->last().source().start() );
+			tuple.source( source );
+			Tools->treeStack().push( type::Node::newValue( new Tuple( std::move( tuple ) ) ) );
+			Tools->popContext();
 			return true;
 		}
 		bool ParseExpression::_parseDataTuple()
 		{
-			// Literal data tuples start with "D" + "("
-			Tools->parser().forward( 2 );
+			// Data tuples are always parenthesized
+			source::Ref source = Tools->current().source();
+			Tools->forward();
 
-			// A literal tuple runs until ")"
-			type::BasicTuple tuple;
-			if( !_parseTuple( tuple, type::BasicTuple::Class::data, true ) )
+			// Tuple runs until ")"
+			DataTuple tuple;
+			if( !_parseTuple( tuple, name_data, name_close ) )
 				return false;
+			source.end( *Tools ? Tools->current().source().start() : Tools->last().source().start() );
+			tuple.source( source );
 			Tools->treeStack().push( type::Node::newValue( new DataTuple( std::move( tuple ) ) ) );
+			Tools->popContext();
 			return true;
 		}
-		bool ParseExpression::_parseMetaTuple()
+		bool ParseExpression::_parseDynamicTuple()
 		{
-			// Literal data tuples start with "M" + "("
-			Tools->parser().forward( 2 );
+			// Type tuples are always parenthesized
+			source::Ref source = Tools->current().source();
+			Tools->forward();
 
-			// A literal tuple runs until ")"
-			type::BasicTuple tuple;
-			if( !_parseTuple( tuple, type::BasicTuple::Class::meta, true ) )
+			// Tuple runs until ")"
+			DynamicTuple tuple;
+			if( !_parseTuple( tuple, name_data, name_close ) )
 				return false;
-			Tools->treeStack().push( type::Node::newValue( new MetaData( std::move( tuple ) ) ) );
+			source.end( *Tools ? Tools->current().source().start() : Tools->last().source().start() );
+			tuple.source( source );
+			Tools->treeStack().push( type::Node::newValue( new DynamicTuple( std::move( tuple ) ) ) );
+			Tools->popContext();
 			return true;
 		}
-		bool ParseExpression::_parseTuple( type::BasicTuple& tuple, type::BasicTuple::Class cls, bool parenthesized )
+		bool ParseExpression::_parseTuple( type::BasicTuple& tuple, name_t tuple_type, name_t end_of_tuple )
 		{
-			// Note that we parse as a dynamic tuple!
-			while( Tools->parser() )
+			if( !_endOfTuple( end_of_tuple ) )
 			{
-				// Check for end of tuple
-				if( parenthesized )
+				while( Tools )
 				{
-					if( Tools->parser().current().is( name_close ) )
-					{
-						Tools->parser().forward();
-						break;
-					}
-				}
-				else if( Tools->parser().current().is( name_symbol ) && Tools->parser().current().str() == ";" )
-				{
-					Tools->parser().forward();
-					break;
-				}
+					if( !_parseTupleAttribute( tuple, tuple_type ) )
+						return false;
 
-				if( !_parseTupleAttribute( tuple ) )
-					return false;
-
-				// Expect comma, or ")" if parenthesized, ";" if not
-				if( Tools->parser().current().is( name_symbol ) && Tools->parser().current().str() == "," )
-					Tools->parser().forward();
-				else if( parenthesized )
-				{
-					if( !Tools->parser().current().is( name_close ) )
-					{
-						Tools->reporter().error( "Expected comma or ')' here!", Tools->parser().current().source() );
-						return nullptr;
-					}
-				}
-				else if( !Tools->parser().current().is( name_symbol ) || Tools->parser().current().str() != ";" )
-				{
-					Tools->reporter().error( "Expected comma or ';' here!", Tools->parser().current().source() );
-					return nullptr;
-				}
-			}
-			return new type::BasicTuple( std::move( tuple ) );
-		}
-		bool ParseExpression::_parseTupleAttribute( type::BasicTuple& tuple )
-		{
-			static std::set<string> qualifiers{ "read", "modify", "consume" };
-			// We accept the following constructs:
-			// 1. "("
-			// 2. [[<name>] [as <type>]][=[read|modify|consume] <value>|...]
-
-			// Prepare attribute details
-			type::Qualifier qual{ type::Qualifier::read };	// Default is read!
-			name_t name{ no_name };
-			source::Ref name_src;
-			TypeTuple type;
-			source::Ref type_src;
-			MetaData* meta{ nullptr };
-			type::Object* value{ nullptr };
-			source::Ref src = Tools->parser().current().source();
-
-			// Check for name
-			if( Tools->parser().current().is( name_name )
-				&& ( ( Tools->parser().ahead().is( name_name ) && Tools->parser().ahead().str() == "as" )
-					|| ( Tools->parser().ahead().is( name_operator ) && Tools->parser().ahead().str() == "=" ) ) )
-			{
-				name = name::get( Tools->parser().current().str() );
-				name_src = Tools->parser().current().source();
-				Tools->parser().forward();
-
-				if( Tools->parser().current().is( name_name ) && Tools->parser().ahead().str() == "as" )
-				{
-					Tools->parser().forward();
-					if( Tools->parser().current().is( name_name ) )
-					{
-						type += name_name;
-						type_src = Tools->parser().current().source();
-						Tools->parser().forward();
-					}
-					else if( Tools->parser().match( { "T", "(" } ) )
-					{
-						type_src = Tools->parser().current().source();
-						auto tp = __parseTypeTuple();
-						type = std::move( *tp );
-						type_src.end( Tools->parser().current().source().start() );
-						delete tp;
-					}
+					if( Tools->current().is( name_operator ) && Tools->current().opValue() == type::operators::code::comma )
+						Tools->forward();
+					else if( _endOfTuple( end_of_tuple ) )
+						return true;
 					else
 					{
-						Tools->reporter().error( "Expected a type specification here!", Tools->parser().current().source() );
+						Tools->reporter().error( "Illegal part of tuple!", Tools->current().source() );
 						return false;
 					}
 				}
 			}
-
-			// We have a value if there is no name or we have a "="
-			if( !name || Tools->parser().ahead().is( name_operator ) && Tools->parser().ahead().str() == "=" )
+			return true;
+		}
+		bool ParseExpression::_endOfTuple( name_t end_of_tuple )
+		{
+			if( end_of_tuple != no_name )
 			{
-				if( name )	// Skip the "="
-					Tools->parser().forward();
-
-				// Check for qualifiers
-				if( Tools->parser().current().is( name_name )
-					&& qualifiers.find( Tools->parser().current().str() ) != qualifiers.end() )
+				if( Tools->current().is( end_of_tuple ) )
 				{
-					qual = type::mapQualifier( Tools->parser().current().str() );
-					Tools->parser().forward();
-				}
-
-				// Get value
-				if( Tools->parser().current().is( name_point ) && Tools->parser().current().str() == "..." )
-					Tools->parser().forward();		// We can skip the ellipsis value
-				else
-				{
-					// Get value as expression
-					auto& source = Tools->parser().current().source();
-					type::Node expr;
-					if( !ParseExpression()( *Tools, expr ) )
-					{
-						Tools->reporter().error( "Expected a value here!", source );
-						return false;
-					}
-
-					if( expr.isValue() )
-						value = expr.consumeValue();
-					else if( expr.isAction() )
-						value = new type::Expression( std::move( expr ) );
+					Tools->forward();
+					return true;
 				}
 			}
 
-			// If we have no value, then we must have a type
-			else if( type )
+			// For others, either ';' or reduction in indentation or an action/operator.
+			else
 			{
-				if( type.isName() )
+				if( Tools->current().is( name_symbol ) && Tools->current().symbValue() == ';' )
 				{
-					auto inst_type = Tools->scope().find( type.asName() );
-					if( inst_type &&
-						( inst_type->generalType() == name_definition || inst_type->generalType() == name_instance ) )
-						value = ( (type::Definition*)inst_type )->instantiate();
+					Tools->forward();
+					return true;
 				}
-				if( !value )
+				else if( Tools->current().is( name_indentation )
+					&& Tools->current().numValue() <= Tools->indentLevel() )
+					return true;
+			}
+
+			return false;
+		}
+		bool ParseExpression::_parseTupleAttribute( type::BasicTuple& tuple, name_t tuple_type )
+		{
+			// Format: [[[[<qualifier>] <name>] [as <type>]] = ][<value>]
+			// Format: [T(<type>) = [<value>]]
+
+			source::Ref src = Tools->current().source();
+
+			// Get each attribute element in order:
+
+			auto qualifier = _parseAttributeQualifier( tuple_type );
+			if( qualifier == no_name )
+				return false;
+
+			source::Ref name_src;
+			auto name = _parseAttributeName( name_src );
+
+			TypeTuple type;
+			if( !_parseAttributeType( type, name != no_name ) )
+				return false;
+
+			type::Expression expr;
+			if( !_parseAttributeValue( expr ) )
+				return false;
+			type::Object* value{ nullptr };
+			if( expr.value().isValue() )
+				value = expr.value().consumeValue();
+			else
+				value = new type::Expression( std::move( expr ) );
+
+			if( Tools )
+				src.end( Tools->current().source().start() );
+			else
+				src.end( Tools->last().source().end() );
+
+			if( !type )
+			{
+				if( !_getTypeFromValue( type, value, src ) )
 				{
-					Tools->reporter().error( *type.asName() + " cannot provide a default/inital value!", type_src );
+					delete value;
 					return false;
 				}
 			}
-			else
+			else if( type && value )
 			{
-				if( Tools->parser() )
-					src.end( Tools->parser().current().source().start() );
-				else
-					src.end( Tools->parser().last().source().start() );
-				Tools->reporter().error( "Attribute defined without explicit type and without value!", src );
+				if( !_valueMatchesType( value, type, src ) )
+				{
+					delete value;
+					return false;
+				}
 			}
 
-			// If we have no type, try to deduce from value
-			if( !type )
+			// Deal with qualifiers
+			if( qualifier == name_read )
 			{
-				if( value->generalType() != name_action )	// The only type we can't deduce outright
-					type = value->type();
+				if( !type.isName() || ! isPrimitive( type.asName() ) )
+					value = new Reference( value );
 			}
+			else if( qualifier == name_modify )
+				value = new Modifiable( value );
 
 			// Finalize
-			if( Tools->parser() )
-				src.end( Tools->parser().current().source().start() );
-			else
-				src.end( Tools->parser().last().source().start() );
 			try
 			{
-				tuple += type::Attribute( qual, name, meta, type, value );
+				tuple += type::Attribute( name, type, value );
 			}
 			catch( type::AccessDenied )
 			{
 				Tools->reporter().error( "Not a legal attribute for this type of tuple!", src );
+				delete value;
 				return false;
 			}
 			catch( type::DuplicateName )
 			{
 				Tools->reporter().error( "This name is already in use!", name_src );
+				delete value;
 				return false;
+			}
+			return true;
+		}
+		name_t ParseExpression::_parseAttributeQualifier( name_t tuple_type )
+		{
+			static std::set<name_t> qualifiers{ name_read, name_modify, name_take };
+			if( Tools->current().is( name_name )
+				&& qualifiers.find( Tools->current().nameValue() ) != qualifiers.end() )
+			{
+				if( Tools->peek().is( name_name ) && Tools->peek().nameValue() != name_as )
+				{
+					if( tuple_type != name_args && tuple_type != name_return )
+					{
+						Tools->reporter().error( "Qualifiers are only permitted in argument and return type definitions!",
+							Tools->current().source() );
+						return no_name;
+					}
+				}
+				name_t qual = Tools->current().nameValue();
+				Tools->forward();
+				return qual;
+			}
+			return name_read;
+		}
+		name_t ParseExpression::_parseAttributeName( source::Ref& name_src )
+		{
+			if( !Tools->current().is( name_name ) )
+				return no_name;
+
+			auto name = Tools->current().nameValue();
+			name_src = Tools->current().source();
+			Tools->forward();
+			return name;
+		}
+		bool ParseExpression::_parseAttributeType( TypeTuple& output, bool have_name )
+		{
+			auto have_as = Tools->current().is( name_name ) && Tools->current().nameValue() == name_as;
+			if( !have_name && have_as )
+			{
+				Tools->reporter().error( "Nameless attributes do not specify type using \"as\"! Use a type-tuple.",
+					Tools->current().source() );
+				return false;
+			}
+			if( have_as )
+				Tools->forward();
+
+			if( Tools->current().is( name_typetuple ) )
+			{
+				Tools->forward();
+				return __parseTypeTuple( output, no_name, name_close );
+			}
+
+			if( Tools->current().is( name_name ) )
+				return __parseTypeTuple( output, no_name, no_name );
+
+			// We don't have a type specified
+			return true;
+		}
+		bool ParseExpression::_parseAttributeValue( type::Expression& value )
+		{
+			if( Tools->current().is( name_operator ) && Tools->current().opValue() == type::operators::code::assign )
+				Tools->forward();
+
+			if( Tools->current().is( name_ellipsis ) )
+			{
+				Tools->forward();
+				value = type::Expression( type::Node::newEllipsis() );
+				return true;
+			}
+			else
+			{
+				// Get value as expression
+				auto& source = Tools->current().source();
+				type::Node expr;
+				auto sub = Tools->split();
+				if( !ParseExpression( name_tuple )( sub, expr ) )
+				{
+					Tools->sync( std::move( sub ) );
+					Tools->reporter().error( "Expected a value here!", source );
+					return false;
+				}
+				Tools->sync( std::move( sub ) );
+
+				value = type::Expression( std::move( expr ) );
+				value.resultType();
+				return true;
+			}
+		}
+		bool ParseExpression::_getTypeFromValue( TypeTuple& output, type::Object* value, source::Ref src )
+		{
+			if( !value )
+			{
+				Tools->reporter().error( "Attribute must have a type or a value!", src );
+				return false;
+			}
+			output = value->type();
+			return true;
+		}
+		bool ParseExpression::_valueMatchesType( type::Object* value, const TypeTuple& type, source::Ref src )
+		{
+			if( value->generalType() == name_action )
+			{
+				// TODO: Find a way to get type!
+			}
+			else
+			{
+				if( value->type() != type )
+				{
+					Tools->reporter().error( "Attribute specifies type " + type.str() + " but value has type "
+						+ value->type().str() + "!", src );
+					return false;
+				}
 			}
 			return true;
 		}
@@ -414,42 +748,61 @@ namespace eon
 		bool ParseExpression::_parseTypeTuple()
 		{
 			// We have seen the following tokens: "T", "("
-			Tools->parser().forward( 2 );
+			source::Ref source = Tools->current().source();
+			Tools->forward( 2 );
 
-			auto tuple = __parseTypeTuple();
-			if( !tuple )
+			TypeTuple type;
+			if( !__parseTypeTuple( type, no_name, name_close ) )
 				return false;
-			Tools->treeStack().push( type::Node::newValue( new type::TypeTupleObject( std::move( *tuple ) ) ) );
-			delete tuple;
+			source.end( *Tools ? Tools->current().source().start() : Tools->last().source().start() );
+			type.source( source );
+			Tools->treeStack().push( type::Node::newValue( new type::TypeTupleObject( std::move( type ) ) ) );
 			return true;
 		}
-		TypeTuple* ParseExpression::__parseTypeTuple( name_t name )
+		bool ParseExpression::__parseTypeTuple( TypeTuple& output, name_t name, name_t end_of_tuple )
 		{
 			TypeTuple tuple;
 			if( name != no_name )
 				tuple.name( name );
-			while( Tools->parser() )
+			if( !_endOfTypeTuple( end_of_tuple ) )
 			{
-				// We end the type tuple at matching ")"
-				if( Tools->parser().current().is( name_close ) )
+				while( Tools )
 				{
-					Tools->parser().forward();
-					break;
-				}
+					if( !_parseTypeTupleAttribute( tuple ) )
+						return TypeTuple();
 
-				if( !_parseTypeTupleAttribute( tuple ) )
-					break;
-
-				// Expect comma or ")"
-				if( Tools->parser().current().is( name_symbol ) && Tools->parser().current().str() == "," )
-					Tools->parser().forward();
-				else if( !Tools->parser().current().is( name_close ) )
-				{
-					Tools->reporter().error( "Expected comma or ')' here!", Tools->parser().current().source() );
-					return nullptr;
+					if( Tools->current().is( name_operator ) && Tools->current().opValue() == type::operators::code::comma )
+						Tools->forward();
+					else if( _endOfTuple( end_of_tuple ) )
+						break;
+					else
+					{
+						Tools->reporter().error( "Illegal part of type tuple!", Tools->current().source() );
+						return TypeTuple();
+					}
 				}
 			}
-			return new TypeTuple( std::move( tuple ) );
+			return tuple;
+		}
+		bool ParseExpression::_endOfTypeTuple( name_t end_of_tuple )
+		{
+			if( end_of_tuple )
+			{
+				if( Tools->current().is( end_of_tuple ) )
+				{
+					Tools->forward();
+					return true;
+				}
+			}
+
+			// For others, '='.
+			else
+			{
+				if( Tools->current().is( name_operator ) && Tools->current().opValue() == type::operators::code::assign )
+					return true;
+			}
+
+			return false;
 		}
 		bool ParseExpression::_parseTypeTupleAttribute( TypeTuple& tuple )
 		{
@@ -459,236 +812,239 @@ namespace eon
 			// 3. <type-name>
 
 			// Do we have a sub-tuple?
-			if( Tools->parser().current().is( name_open ) )
+			if( Tools->current().is( name_open ) )
 			{
-				Tools->parser().forward();
+				Tools->forward();
 				return _parseSubTypeTuple( tuple );
 			}
 
 			// Do we have name and type?
-			else if( Tools->parser().ahead().str() == "=" )
+			else if( Tools->peek().is( name_operator ) && Tools->peek().opValue() == type::operators::code::assign )
 				return _parseTypeTupleNameAndType( tuple );
 
 			// Must be single type name
-			else if( Tools->parser().current().is( name_name ) )
+			else if( Tools->current().is( name_name ) )
 			{
-				tuple += new NameElement( name::get( Tools->parser().current().str() ) );
-				Tools->parser().forward();
+				tuple << new NameElement( Tools->current().nameValue() );
+				Tools->forward();
 				return true;
 			}
 
-			Tools->reporter().error( "Expected an attribute name or type-tuple here!", Tools->parser().current().source() );
+			Tools->reporter().error( "Expected an attribute name or type-tuple here!", Tools->current().source() );
 			return false;
 		}
 		bool ParseExpression::_parseSubTypeTuple( TypeTuple& tuple, name_t sub_name )
 		{
-			auto sub = __parseTypeTuple( sub_name );
-			if( !sub )
+			TypeTuple sub;
+			if( !__parseTypeTuple( sub, sub_name, name_close ) )
 				return false;
-			tuple += sub;
+			tuple << sub;
 			return true;
 		}
 		bool ParseExpression::_parseTypeTupleNameAndType( TypeTuple& tuple )
 		{
-			if( !Tools->parser().current().is( name_name ) )
+			if( !Tools->current().is( name_name ) )
 			{
-				Tools->reporter().error( "Expected a valid type name here!", Tools->parser().current().source() );
+				Tools->reporter().error( "Expected a valid type name here!", Tools->current().source() );
 				return false;
 			}
-			auto name = eon::name::get( Tools->parser().current().str() );
-			Tools->parser().forward( 2 );
+			auto name = Tools->current().nameValue();
+			Tools->forward( 2 );
 
 			// Next is either a name or a type tuple
-			if( Tools->parser().current().is( name_name ) )
+			if( Tools->current().is( name_name ) )
 			{
-				Tools->parser().forward();
-				tuple += new NameElement( name, name::get( Tools->parser().current().str() ) );
-				Tools->parser().forward();
+				Tools->forward();
+				tuple << new NameElement( name, Tools->current().nameValue() );
+				Tools->forward();
 				return true;
 			}
-			else if( Tools->parser().current().is( name_open ) )
+			else if( Tools->current().is( name_open ) )
 			{
-				Tools->parser().forward();
+				Tools->forward();
 				return _parseSubTypeTuple( tuple, name );
 			}
-			Tools->reporter().error( "Expected a type name or type tuple here!", Tools->parser().current().source() );
+			Tools->reporter().error( "Expected a type name or type tuple here!", Tools->current().source() );
 			return false;
 		}
 
-		bool ParseExpression::_parseOperator( type::operators::code type )
+		bool ParseExpression::_popOperatorsUntil( type::operators::code op )
 		{
-			Tools->parser().forward();
-			if( type == type::operators::code::close_brace )
+			while( !Tools->opStack().empty() && Tools->opStack().top()->instanceType().isName( name_operator )
+				&& ((actions::OperatorAction*)Tools->opStack().top())->opCode() != op )
 			{
-				if( !_popOpsUntil( type::operators::code::open_brace ) )
+				if( !_popOperatorArgs() )
 					return false;
 			}
-			else
-			{
-				auto& sequence = type::operators::sequence( type );
-				if( sequence.size() > 1 && type != sequence[ 0 ].Op )
-				{
-					// We can ignore all opereators except the first and the last!
-					if( sequence[ sequence.size() - 1 ].Op == type )
-						return _popOpsUntil( sequence[ 0 ].Op );
-					else
-						return true;
-				}
-				else
-					_popOpsFor( type );
-			}
-
-			_addAction( new actions::OperatorAction( type ) );
 			return true;
 		}
-		bool ParseExpression::_parseName()
-		{
-			// Is it 'me' or 'my'?
-			if( Tools->parser().current().str() == "me" || Tools->parser().current().str() == "my" )
-			{
-				auto me = Tools->scope().get( name_me );
-				if( !me )
-				{
-					Tools->reporter().error(
-						"Use of \"" + Tools->parser().current().str() + "\" only possible within an action!",
-						Tools->parser().current().source() );
-					return false;
-				}
-				Tools->treeStack().push( type::Node::newValue( me ) );
-				Tools->parser().forward();
-				return true;
-			}
-
-			// Is it a known entity?
-			auto name = name::get( Tools->parser().current().str() );
-			auto var = Tools->scope().find( name );
-			if( var )
-			{
-				if( var->generalType() == name_action )
-					_addAction( (type::Action*)var );
-				else
-					Tools->treeStack().push( type::Node::newValue( var ) );
-				return true;
-			}
-
-			// Unknown entity
-			Tools->treeStack().push( type::Node::newName( name ) );
-			return true;
-		}
-		void ParseExpression::_parseLiteralName()
-		{
-			Tools->treeStack().push( type::Node::newValue(
-				new NameInstance( name::get( Tools->parser().current().str() ) ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseString()
-		{
-			Tools->treeStack().push( type::Node::newValue( new StringInstance( Tools->parser().current().str() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseBytes()
-		{
-			Tools->treeStack().push( type::Node::newValue( new BytesInstance( Tools->parser().current().str() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parsePath()
-		{
-			Tools->treeStack().push( type::Node::newValue( new PathInstance( Tools->parser().current().str() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseChar()
-		{
-			Tools->treeStack().push( type::Node::newValue( new CharInstance( *Tools->parser().current().str().begin() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseByte()
-		{
-			Tools->treeStack().push( type::Node::newValue( new ByteInstance( static_cast<byte_t>( *Tools->parser().current().str().begin() ) ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseIndentation()
-		{
-		}
-		void ParseExpression::_parseRegex()
-		{
-			Tools->treeStack().push( type::Node::newValue( new RegexInstance( Tools->parser().current().str() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseBool()
-		{
-			Tools->treeStack().push( type::Node::newValue( new BoolInstance( Tools->parser().current().str() == "true" ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseFloat()
-		{
-			Tools->treeStack().push( type::Node::newValue( new HighInstance( Tools->parser().current().str().toLongDouble() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseNamePath()
-		{
-			Tools->treeStack().push( type::Node::newValue( new NamePathInstance( Tools->parser().current().str() ) ) );
-			Tools->parser().forward();
-		}
-		void ParseExpression::_parseInt()
-		{
-			Tools->treeStack().push( type::Node::newValue( new LongInstance( Tools->parser().current().str().toInt64() ) ) );
-			Tools->parser().forward();
-		}
-
-		void ParseExpression::_addAction( type::Action* action )
-		{
-			Tools->treeStack().push( type::Node::newAction( action ) );
-		}
-
-		bool ParseExpression::_popOpsUntil( type::operators::code op )
-		{
-			while( !Tools->opStack().empty() && Tools->opStack().top()->opCode() != op )
-				_processPopArgs( op );
-			if( !Tools->opStack().empty() && Tools->opStack().top()->opCode() == op )
-			{
-				Tools->opStack().pop();
-				return true;
-			}
-			Tools->reporter().error( "Missing previous '" + type::operators::mapCode( op ) + "'!",
-				Tools->parser().current().source() );
-			return false;
-		}
-		bool ParseExpression::_popOpsFor( type::operators::code op )
+		bool ParseExpression::_popOperatorsFor( type::operators::code op )
 		{
 			auto input_prec = type::operators::inputPrecedence( op );
-			while( !Tools->opStack().empty()
-				&& input_prec <= type::operators::stackPrecedence( Tools->opStack().top()->opCode() ) )
-				_processPopArgs( op );
+			while( !Tools->opStack().empty() && input_prec <= Tools->opStack().top()->stackPrecedence() )
+				_popOperatorArgs();
 			return true;
 		}
-		bool ParseExpression::_processPopArgs( type::operators::code op )
+		bool ParseExpression::_popOperatorArgs()
 		{
-			auto root = type::Node::newAction( Tools->opStack().top() );
-			auto arg_pos = Tools->opStack().top()->arguments().numAttributes();
-			for( auto& arg : Tools->opStack().top()->arguments() )
-			{
-				// We skip syntax elements
-				if( arg.type().asName() == name_syntax )
-					continue;
+			auto action = (actions::OperatorAction*)Tools->opStack().top();
 
-				if( arg.value() == nullptr && Tools->treeStack().empty() )
-				{
-					if( arg.name() )
-						Tools->reporter().error(
-							"Missing required argument \"" + *arg.name() + "\" of type " + arg.type().str() + "!",
-							Tools->parser().current().source() );
-					else
-						Tools->reporter().error(
-							"Missing required argument #" + string( arg_pos ) + " of type " + arg.type().str() + "!",
-							Tools->parser().current().source() );
-					return false;
-				}
-				root.add( std::move( Tools->treeStack().top() ) );
-				Tools->treeStack().pop();
-				--arg_pos;
-			}
+			// The arguments are in reverse ordering, which needs to be corrected
+			auto args = _getArgsInOrder( action->numArguments(), action->opCode() );
+			if( args.size() < action->numArguments() )
+				return false;
+
+			// The node for these arguments
+			type::Node op_node;
+
+			// If we have the comma operator, we actually have a tuple
+			if( action->opCode() == type::operators::code::comma )
+				op_node = _finalizeTuple( std::move( args ) );
+
+			// Otherwise, we have a proper operator
+			else
+				op_node = _finalizeOperator( action, std::move( args ) );
+
 			Tools->opStack().pop();
-			Tools->treeStack().push( std::move( root ) );
+			Tools->treeStack().push( std::move( op_node ) );
+			return true;
+		}
+		std::list<type::Node> ParseExpression::_getArgsInOrder( index_t num_args, type::operators::code op )
+		{
+			std::list<type::Node> args;
+			for( index_t i = 0; i < num_args; ++i )
+			{
+				if( Tools->treeStack().empty() )
+				{
+					Tools->reporter().error( "Missing operand #" + string( num_args - i ) + " for operator \""
+						+ type::operators::mapCode( op ) + "\"!", Tools->current().source() );
+					break;
+				}
+				args.push_front( std::move( Tools->treeStack().top() ) );
+				Tools->treeStack().pop();
+			}
+			return args;
+		}
+		type::Node ParseExpression::_finalizeTuple( std::list<type::Node>&& args )
+		{
+			Tuple* tuple{ nullptr };
+
+			// If the first argument is a non-finalized tuple, we add the second argument as an attribute to it
+			auto arg = args.begin();
+			if( arg->isValue() && arg->value()->generalType() == name_tuple
+				&& ( (type::BasicTuple*)arg->value() )->isPlain() && !( (type::BasicTuple*)arg->value() )->finalized() )
+				tuple = (Tuple*)arg->consumeValue();
+
+			// Otherwise, we create a tuple and add the first argument as the first attribute
+			else
+			{
+				tuple = new Tuple();
+				tuple->source( arg->source() );
+				if( arg->isValue() )
+					tuple->add( arg->consumeValue() );
+				else if( arg->isOperator() )
+					tuple->add( new ExprInstance( std::move( *arg ), arg->source() ) );
+				else if( arg->isAction() )
+					tuple->add( new ExprInstance( std::move( *arg ), arg->source() ) );
+			}
+
+			// Add the second argument as attribute
+			++arg;
+			if( arg->isValue() )
+				tuple->add( arg->consumeValue() );
+			else if( arg->isOperator() )
+				tuple->add( new ExprInstance( std::move( *arg ), arg->source() ) );
+			else if( arg->isAction() )
+				tuple->add( new ExprInstance( std::move( *arg ), arg->source() ) );
+			source::Ref source = tuple->source();
+			source.end( arg->source().end() );
+			tuple->source( source );
+			return type::Node::newValue( tuple );
+		}
+		type::Node ParseExpression::_finalizeOperator( actions::OperatorAction* action, std::list<type::Node>&& args )
+		{
+			// Add the arguments to an operator node
+			auto op_node = type::Node::newOperator( action );
+			for( auto& arg : args )
+				op_node.add( std::move( arg ) );
+
+			// Now we need to figure out if there is an action for this
+			// operator based on the first operand - if any
+			if( op_node.numChildren() > 0 )
+			{
+				auto& child = op_node.child( 0 );
+				TypeTuple type = child.isValue() ? child.value()->type()
+					: child.isAction() ? child.action().returnType()
+					: child.isOperator() ? child.opr().returnType()
+					: child.isName() ? TypeTuple::name( name_name )
+					: child.isEllipsis() ? TypeTuple::name( name_ellipsis ) : TypeTuple();
+				TypeTuple args;
+				for( size_t i = 1; i < op_node.numChildren(); ++i )
+				{
+					if( op_node.child( i ).isValue() )
+						args << new TypeTuple( op_node.child( i ).value()->type() );
+					else if( op_node.child( i ).isOperator() )
+						args << new TypeTuple( op_node.child( i ).opr().returnType() );
+					else if( op_node.child( i ).isAction() )
+						args << new TypeTuple( op_node.child( i ).action().returnType() );
+				}
+				// TODO: Find out if we can identify return type and include it below!
+				auto operators = Tools->scope().global().getActions( op_node.opr().name(), type, args );
+				if( !_checkOperator( operators, *action, _args( op_node ), TypeTuple() ) )
+					return false;
+				op_node.action( **operators.begin() );
+			}
+			return op_node;
+		}
+
+		string ParseExpression::_args( const type::Node& node ) const
+		{
+			string args;
+			for( size_t i = 0; i < node.numChildren(); ++i )
+			{
+				if( !args.empty() )
+					args += ", ";
+				auto& child = node.child( i );
+				if( child.isOperator() )
+					args += child.opr().returnType().str();
+				else if( child.isAction() )
+					args += child.action().returnType().str();
+				else if( child.isValue() )
+					args += child.value()->type().str();
+			}
+			return args;
+		}
+
+		bool ParseExpression::_checkOperator( const std::list<type::Action*>& operators, actions::OperatorAction& op,
+			string args, const TypeTuple& return_type ) const
+		{
+			string rtype = return_type ? "->" + return_type.str() : "";
+			if( operators.empty() )
+			{
+				Tools->reporter().error( "No action implemented for operator \""
+					+ type::operators::mapCode( op.opCode() ) + "\" (" + args + ")" + rtype,
+					op.source() );
+				return false;
+			}
+			if( operators.size() > 1 )
+			{
+				Tools->reporter().error( "Ambiguous operator \"" + type::operators::mapCode( op.opCode() )
+					+ "\" (" + args + ")" + rtype, op.source() );
+				for( auto& action : operators )
+				{
+					string args;
+					for( auto& arg : action->arguments() )
+					{
+						if( !args.empty() )
+							args += ", ";
+						args += arg.type().str();
+					}
+					string rtype = action->returnType() ? "->" + action->returnType().str() : "";
+					Tools->reporter().note( "Could be \"" + eon::str( op.name() ) + "\" (" + args + ")" + rtype,
+						op.source() );
+				}
+				return false;
+			}
 			return true;
 		}
 	}

@@ -2,6 +2,7 @@
 
 #include "NamePath.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -25,7 +26,8 @@ namespace eon
 		class NamePathConstruct : public type::Action
 		{
 		public:
-			inline NamePathConstruct() : Action( name_namepath, Type::instance, name_construct, name_namepath, DynamicTuple() ) {}
+			inline NamePathConstruct() : Action( name_namepath, Type::instance, name_constructor, name_namepath,
+				DynamicTuple(), {}, source::Ref() ) {}
 			virtual ~NamePathConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -33,19 +35,18 @@ namespace eon
 		class NamePathCopyConstruct : public type::Action
 		{
 		public:
-			inline NamePathCopyConstruct( scope::Global& scope ) : Action( name_namepath, 
-				Type::instance, name_construct, name_namepath, DynamicTuple(
-					{ type::Attribute( name_other, name_namepath ) } ), { name_memory_denied } ) {}
+			inline NamePathCopyConstruct() : Action( name_namepath, Type::instance, name_constructor, name_namepath,
+				DynamicTuple( { type::Attribute( name_other, name_namepath ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~NamePathCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class NamePathCmp : public type::Action
+		class NamePathCmp : public OperatorAction
 		{
 		public:
-			inline NamePathCmp( scope::Global& scope ) : Action( name_namepath,  opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_namepath ) } ) ) {}
+			inline NamePathCmp() : OperatorAction( name_namepath, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_namepath ) } ), {}, source::Ref() ) {}
 			virtual ~NamePathCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

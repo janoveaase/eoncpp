@@ -2,9 +2,10 @@
 
 #include "Byte.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include "Bool.h"
 #include "Char.h"
-#include "Int.h"
+#include "Integer.h"
 #include <eonscopes/Scope.h>
 
 
@@ -28,7 +29,8 @@ namespace eon
 		class ByteConstruct : public type::Action
 		{
 		public:
-			inline ByteConstruct() : Action( name_byte, Type::instance, name_construct, name_byte, DynamicTuple() ) {}
+			inline ByteConstruct() : Action( name_byte, Type::instance, name_constructor, name_byte, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~ByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -36,18 +38,18 @@ namespace eon
 		class ByteCopyConstruct : public type::Action
 		{
 		public:
-			inline ByteCopyConstruct( scope::Global& scope ) : Action( name_byte, Type::instance, name_construct, name_byte,
-				DynamicTuple( { type::Attribute( name_other, new ByteInstance() ) } ), { name_memory_denied } ) {}
+			inline ByteCopyConstruct() : Action( name_byte, Type::instance, name_constructor, name_byte, DynamicTuple( {
+				type::Attribute( name_other, new ByteInstance() ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~ByteCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class ByteCmp : public type::Action
+		class ByteCmp : public OperatorAction
 		{
 		public:
-			inline ByteCmp( scope::Global& scope ) : Action( name_byte, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, new ByteInstance() ) } ) ) {}
+			inline ByteCmp() : OperatorAction( name_byte, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, new ByteInstance() ) } ), {}, source::Ref() ) {}
 			virtual ~ByteCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

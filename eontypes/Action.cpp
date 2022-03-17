@@ -1,5 +1,7 @@
 #include "Action.h"
 #include "Name.h"
+#include "Node.h"
+#include "Reference.h"
 
 
 namespace eon
@@ -33,114 +35,114 @@ namespace eon
 	}
 	namespace type
 	{
-		Action::Action( const TypeTuple& type, type::operators::code op_code, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( actions::Type::_operator, name::compilerGet( type::operators::mapCode( op_code ) ),
-				return_type.asName(), arguments ) )
+		Action::Action( const TypeTuple& instance_type, actions::Type action_type, name_t name,
+			const TypeTuple& return_type, DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
+			: Object( _generateType( name, return_type, arguments ), source )
 		{
-			_create( type, op_code, return_type, arguments, raises );
+			_create( instance_type, action_type, name, return_type, arguments, raises );
 		}
-		Action::Action( const TypeTuple& type, type::operators::code op_code, name_t return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( actions::Type::_operator, name::compilerGet( type::operators::mapCode( op_code ) ),
-				return_type, arguments ) )
+		Action::Action( const TypeTuple& instance_type, actions::Type action_type, name_t name, name_t return_type,
+			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
+			: Object( _generateType( name, TypeTuple::name( return_type ), arguments ), source )
 		{
-			_create( type, op_code, TypeTuple( { return_type } ), arguments, raises );
+			_create( instance_type, action_type, name, TypeTuple::name( return_type ), arguments, raises );
 		}
-		Action::Action( name_t type, type::operators::code op_code, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( actions::Type::_operator, name::compilerGet( type::operators::mapCode( op_code ) ),
-				return_type.asName(), arguments ) )
+		Action::Action( name_t instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
+			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
+			: Object( _generateType( name, return_type, arguments ), source )
 		{
-			_create( TypeTuple( { type } ), op_code, return_type, arguments, raises );
+			_create( TypeTuple::name( instance_type ), action_type, name, return_type, arguments, raises );
 		}
-		Action::Action( name_t type, type::operators::code op_code, name_t return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( actions::Type::_operator, name::compilerGet( type::operators::mapCode( op_code ) ),
-				return_type, arguments ) )
+		Action::Action( name_t instance_type, actions::Type action_type, name_t name, name_t return_type,
+			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
+			: Object( _generateType( name, TypeTuple::name( return_type ), arguments ), source )
 		{
-			_create( TypeTuple( { type } ), op_code, TypeTuple( { return_type } ), arguments, raises );
-		}
-
-		Action::Action( const TypeTuple& type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( action_type, name, return_type.asName(), arguments ) )
-		{
-			_create( type, action_type, name, return_type, arguments, raises );
-		}
-		Action::Action( const TypeTuple& type, actions::Type action_type, name_t name, name_t return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( action_type, name, return_type, arguments ) )
-		{
-			_create( type, action_type, name, TypeTuple( { return_type } ), arguments, raises );
-		}
-		Action::Action( name_t type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( action_type, name, return_type.asName(), arguments ) )
-		{
-			_create( TypeTuple( { type } ), action_type, name, return_type, arguments, raises );
-		}
-		Action::Action( name_t type, actions::Type action_type, name_t name, name_t return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-			: Object( _makeSignature( action_type, name, return_type, arguments ) )
-		{
-			_create( TypeTuple( { type } ), action_type, name, TypeTuple( { return_type } ), arguments, raises );
+			_create( TypeTuple::name( instance_type ), action_type, name, TypeTuple::name( return_type ), arguments,
+				raises );
 		}
 
 
 
 
-		name_t Action::_makeSignature( actions::Type type, name_t name, name_t returntype, const DynamicTuple& arguments )
-			const
+		index_t Action::numArgsWithoutDefaultValue() const noexcept
 		{
-			string signature{ mapType( type ) + "@" + *name };
-			if( returntype != no_name )
-				signature += "@" + *returntype;
+			index_t num = 0;
+			for( auto& arg : Arguments )
+			{
+				if( arg.value() == nullptr )
+					++num;
+			}
+			return num;
+		}
+
+
+
+
+		TypeTuple Action::_generateType( name_t name, const TypeTuple& returntype, const DynamicTuple& arguments )
+		{
+			TypeTuple type;
+			type << new NameElement( name, name_action );
+			if( returntype.isName() )
+				type << new NameElement( name_type, returntype.asName() );
+			else
+				type << new TypeTuple( TypeTuple::rename( returntype, name_type ) );
+			
+			TypeTuple args;
 			for( auto& argument : arguments )
-				signature += "$" + *argument.value()->type().asName();
-			return name::compilerGet( std::move( signature ) );
+			{
+				if( argument.name() )
+				{
+					if( argument.type().isName() )
+						args << new NameElement( argument.name(), argument.type().asName() );
+					else
+						args << new TypeTuple( TypeTuple::rename( argument.type(), argument.name() ) );
+				}
+				else
+				{
+					if( argument.type().isName() )
+						args << new NameElement( argument.type().asName() );
+					else
+						args << argument.type();
+				}
+			}
+			type << new TypeTuple( TypeTuple::rename( args, name_args ) );
+			return type;
 		}
 
-		void Action::_create( const TypeTuple& type, type::operators::code op_code, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
+		void Action::_create( const TypeTuple& instance_type, actions::Type action_type, name_t name,
+			const TypeTuple& return_type, DynamicTuple arguments, std::initializer_list<name_t> raises )
 		{
-			InstanceType = type;
-			ActionType = actions::Type::_operator;
-			Name = name::compilerGet( type::operators::mapCode( op_code ) );
-			ReturnType = return_type;
-			_initPrefixFirstAction();
-			Arguments += arguments;
-			_initPrefixLastAction();
-			Raises = raises;
-			OpCode = op_code;
-			InputPrecedence = type::operators::inputPrecedence( op_code );
-			StackPrecedence = type::operators::stackPrecedence( op_code );
-		}
-		void Action::_create( const TypeTuple& type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises )
-		{
-			InstanceType = type;
+			InstanceType = instance_type;
 			ActionType = action_type;
 			Name = name;
 			ReturnType = return_type;
 			_initPrefixFirstAction();
 			Arguments += arguments;
 			_initPrefixLastAction();
+			Arguments.finalize();
 			Raises = raises;
-			OpCode = type::operators::code::call;
-			InputPrecedence = type::operators::inputPrecedence( type::operators::code::call );
-			StackPrecedence = type::operators::stackPrecedence( type::operators::code::call );
 		}
 
 		void Action::_initPrefixFirstAction()
 		{
 			if( ActionType == actions::Type::prefix_first )
-				Arguments += Attribute( name_me, InstanceType, type::Qualifier::modify );
+				Arguments += Attribute( name_me, new Modifiable( InstanceType, source::Ref() ) );
 		}
 		void Action::_initPrefixLastAction()
 		{
 			if( ActionType == actions::Type::prefix_last )
-				Arguments += Attribute( name_me, InstanceType, type::Qualifier::modify );
+				Arguments += Attribute( name_me, new Modifiable( InstanceType, source::Ref() ) );
+		}
+
+		Object* Action::_childValue( scope::Scope& scope, Node& action_node, size_t arg_no )
+		{
+			auto& child = action_node.child( arg_no );
+			if( child.isAction() )
+				return child.action().execute( scope, child );
+			else if( child.isValue() )
+				return child.value();
+			else
+				return ( (NameType*)scope.find( name_name ) )->instantiate( child.name() );
 		}
 	}
 }

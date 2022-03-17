@@ -118,19 +118,16 @@ namespace eon
 		size_t lineStart() const;
 
 
-		//* Match a sequence of elements
-		//* Use "*" to match anything
-		//* Use "*<something>" to match element ending with "<something>"
-		//* Use "<something>*" to match element beginning with "<something>"
-		bool match( const std::initializer_list<eon::string>& elements );
-
-
 		//* Get position of current [eon::Token]
 		inline size_t pos() const noexcept { return Cur; }
 
 
 
 
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Attributes
+		//
 	private:
 		std::vector<Token> Tokens;
 		size_t Cur{ 0 };

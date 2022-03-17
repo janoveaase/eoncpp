@@ -7,11 +7,13 @@ set(TOKENIZER_HEADERS
 	Token.h
 	ReTokenizer.h
 	TokenParser.h
+	TokenMatcher.h
 )
 set(TOKENIZER_SOURCES
 	Tokenizer.cpp
 	ReTokenizer.cpp
 	TokenParser.cpp
+	TokenMatcher.cpp
 )
 
 add_library(EonTokenizer STATIC ${TOKENIZER_HEADERS} ${TOKENIZER_SOURCES})

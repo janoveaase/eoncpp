@@ -4,6 +4,7 @@
 #include <eontokenizer/Tokenizer.h>
 #include <eontokenizer/TokenParser.h>
 #include <eontokenizer/ReTokenizer.h>
+#include <eontokenizer/TokenMatcher.h>
 #include <eonsource/String.h>
 #include <chrono>
 
@@ -16,6 +17,7 @@ namespace eon
 		Tokenizer Tok;
 		void prepare()
 		{
+			Tok.registerEonNameTokens( false );
 			Tok.registerTokenChar( name_space, ' ', Tokenizer::Match::sequence );
 			Tok.registerTokenChar( name( "tab" ), '\t', Tokenizer::Match::sequence );
 			Tok.registerSequenceToken( name_operator, "+" );
@@ -23,7 +25,8 @@ namespace eon
 			Tok.registerSequenceToken( name_operator, "=" );
 			Tok.registerSequenceToken( name_operator, "+=" );
 			Tok.registerSequenceToken( name_operator, "+=" );
-			Tok.registerTokenChars( name_symbol, "<>{}!@#$%&/?*/^~,.:;", Tokenizer::Match::single );
+			Tok.registerTokenChars( name_symbol, "<>{}!@#$%&/?*/^~,:;", Tokenizer::Match::single );
+			Tok.registerTokenChar( name_point, '.', Tokenizer::Match::sequence );
 			Tok.registerTokenChar( name_backslash, '\\', Tokenizer::Match::single );
 			Tok.registerTokenChar( name_doublequote, '"', Tokenizer::Match::single );
 			Tok.registerTokenChar( name_singlequote, '\'', Tokenizer::Match::single );

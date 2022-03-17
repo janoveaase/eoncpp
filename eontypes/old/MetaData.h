@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include "BasicTuple.h"
 
@@ -6,7 +6,7 @@
 
 /******************************************************************************
   The 'eon' namespace encloses all public functionality
-******************************************************************************/
+****************************************************************************** /
 namespace eon
 {
 	/**************************************************************************
@@ -14,23 +14,24 @@ namespace eon
 
 	  A meta data object is a dynamic tuple for which all attributes are read-
 	  only and cannot be removed.
-	**************************************************************************/
+	************************************************************************** /
 	class MetaData : public type::BasicTuple
 	{
 		/**********************************************************************
 		  Construction
-		**********************************************************************/
+		********************************************************************** /
 	public:
 
 		// Construct an empty dynamic tuple
-		MetaData() : type::BasicTuple( name_meta ) {}
+		MetaData() : type::BasicTuple( name_meta, source::Ref() ) {}
 
 		// Construct dynamic tuple of unnamed attributes based on values only
-		inline MetaData( std::initializer_list<Object*> values ) : type::BasicTuple( name_meta, values ) {}
+		inline MetaData( std::initializer_list<Object*> values, source::Ref source )
+			: type::BasicTuple( name_meta, values, source ) {}
 
 		// Construct dynamic tuple for the specified attribute elements
-		inline MetaData( std::initializer_list<type::Attribute> attributes )
-			: type::BasicTuple( name_meta, attributes ) {}
+		inline MetaData( std::initializer_list<type::Attribute> attributes, source::Ref source )
+			: type::BasicTuple( name_meta, attributes, source ) {}
 
 		// Copy construct at specified (stack) memory, or if nullptr, in
 		// heap memory!
@@ -38,7 +39,7 @@ namespace eon
 
 		// Take ownership of other tuple
 		inline MetaData( MetaData&& other ) noexcept : type::BasicTuple( std::move( other ) ) {}
-		inline MetaData( type::BasicTuple&& other ) : type::BasicTuple( name_meta, std::move( other ) ) { finalize(); }
+		inline MetaData( type::BasicTuple&& other ) : type::BasicTuple( std::move( other ) ) { finalize(); }
 
 		// Destruct tuple
 		virtual ~MetaData() = default;
@@ -50,6 +51,7 @@ namespace eon
 
 
 		// Copy
+		inline type::Object* copy() override { return new MetaData( *this ); }
 		inline MetaData& operator=( const MetaData& other ) {
 			*static_cast<type::BasicTuple*>( this ) = other; return *this; }
 
@@ -59,6 +61,16 @@ namespace eon
 
 
 		void callDestructor() override { this->~MetaData(); }
+
+
+
+
+		/**********************************************************************
+		  Basic Access
+		********************************************************************** /
+	public:
+
+		static inline name_t tupleType() noexcept { return name_meta; }
 
 
 
@@ -78,3 +90,4 @@ namespace eon
 		inline void explicitPrefix( type::Stringifier& str ) const override { return standardPrefix( str ); }
 	};
 }
+*/

@@ -15,30 +15,30 @@ namespace eon
 	void registerLongActions( scope::Global& scope )
 	{
 		scope.add( name_construct, new actions::LongConstruct() );
-		scope.add( name_construct, new actions::LongCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::LongBoolConstruct( scope ) );
-		scope.add( name_construct, new actions::LongByteConstruct( scope ) );
-		scope.add( name_construct, new actions::LongCharConstruct( scope ) );
-		scope.add( name_construct, new actions::LongShortConstruct( scope ) );
-		scope.add( name_construct, new actions::LongIntConstruct( scope ) );
-		scope.add( name_construct, new actions::LongFloatConstruct( scope ) );
-		scope.add( name_construct, new actions::LongLowConstruct( scope ) );
-		scope.add( name_construct, new actions::LongHighConstruct( scope ) );
-		scope.add( name_construct, new actions::LongIndexConstruct( scope ) );
-		scope.add( name_cmp, new actions::LongCmp( scope ) );
-		scope.add( name_plus, new actions::LongPlus( scope ) );
-		scope.add( name_minus, new actions::LongMinus( scope ) );
-		scope.add( name_multiply, new actions::LongMultiply( scope ) );
-		scope.add( name_divide, new actions::LongDivide( scope ) );
-		scope.add( name_element, new actions::LongElementIndex( scope ) );
-		scope.add( name_element, new actions::LongElementInt( scope ) );
-		scope.add( name_slice, new actions::LongSlice( scope ) );
+		scope.add( name_construct, new actions::LongCopyConstruct() );
+		scope.add( name_construct, new actions::LongBoolConstruct() );
+		scope.add( name_construct, new actions::LongByteConstruct() );
+		scope.add( name_construct, new actions::LongCharConstruct() );
+		scope.add( name_construct, new actions::LongShortConstruct() );
+		scope.add( name_construct, new actions::LongIntConstruct() );
+		scope.add( name_construct, new actions::LongFloatConstruct() );
+		scope.add( name_construct, new actions::LongLowConstruct() );
+		scope.add( name_construct, new actions::LongHighConstruct() );
+		scope.add( name_construct, new actions::LongIndexConstruct() );
+		scope.add( name_cmp, new actions::LongCmp() );
+		scope.add( name_plus, new actions::LongPlus() );
+		scope.add( name_minus, new actions::LongMinus() );
+		scope.add( name_multiply, new actions::LongMultiply() );
+		scope.add( name_divide, new actions::LongDivide() );
+		scope.add( name_element, new actions::LongElementIndex() );
+		scope.add( name_element, new actions::LongElementInt() );
+		scope.add( name_slice, new actions::LongSlice() );
 		scope.add( name_bitnot, new actions::LongBitNot() );
-		scope.add( name_bitand, new actions::LongBitAnd( scope ) );
-		scope.add( name_bitor, new actions::LongBitOr( scope ) );
-		scope.add( name_bitxor, new actions::LongBitXor( scope ) );
-		scope.add( name_lshift, new actions::LongLShift( scope ) );
-		scope.add( name_rshift, new actions::LongRShift( scope ) );
+		scope.add( name_bitand, new actions::LongBitAnd() );
+		scope.add( name_bitor, new actions::LongBitOr() );
+		scope.add( name_bitxor, new actions::LongBitXor() );
+		scope.add( name_lshift, new actions::LongLShift() );
+		scope.add( name_rshift, new actions::LongRShift() );
 	}
 
 

@@ -30,16 +30,25 @@ namespace eon
 			******************************************************************/
 		public:
 
-			// Tuple states
-			enum class State
+			//* Tuple permissions
+			//* Permissions apply once the tuple has been finalized!
+			enum class Permission
 			{
-							// Can: Add new    modify    remove
-				open,		//        1          1         1
-				restricted,	//        1          1         0
-				_protected,	//        1          0         0
-				_static,	//        0          1         0
-				locked		//        0          0         0
+				none		= 0x00,
+				add_var		= 0x01,	// New variables can be added
+				del_var		= 0x02,	// Variables can be deleted
+				mod_var		= 0x04,	// Variables can be modified
+				add_cache	= 0x08,	// Caches can be added
+				add_act		= 0x10,	// Actions can be added
+				add_grp		= 0x20,	// Groups can be aded
+
+				open		= add_var | del_var | mod_var,
+				all			= open | add_cache | add_act | add_grp
 			};
+			inline friend bool operator&( Permission a, Permission b ) noexcept {
+				return static_cast<bool>( static_cast<int>( a ) & static_cast<int>( b ) ); }
+			inline friend Permission operator|( Permission a, Permission b ) noexcept {
+				return static_cast<Permission>( static_cast<int>( a ) | static_cast<int>( b ) ); }
 
 
 
@@ -50,25 +59,26 @@ namespace eon
 		public:
 
 			// Construct an empty tuple
-			inline BasicTuple( name_t tuple_type = name_basic ) : type::Object( name_tuple ) { _initState( tuple_type ); }
+			inline BasicTuple( name_t tuple_type, source::Ref source )
+				: type::Object( TypeTuple::tuple( tuple_type, std::vector<TypeElement*>() ), source ) {}
 
 			// Construct tuple with unnamed attributes based on values only
-			inline BasicTuple( name_t tuple_type, std::initializer_list<Object*> values )
-				: Object( _makeTupleID( values ) ) { _initState( tuple_type ); for( auto value : values ) *this += value; }
+			inline BasicTuple( name_t tuple_type, std::initializer_list<Object*> values, source::Ref source )
+				: Object( _makeTupleID( tuple_type, values ), source ) {
+				for( auto value : values ) *this += value; finalize(); }
 
 			// Construct tuple for the specified attribute elements
-			inline BasicTuple( name_t tuple_type, std::initializer_list<type::Attribute> attributes ) : Object(
-				_makeTupleID( attributes ) ) { _initState( tuple_type ); for( auto attribute : attributes ) *this += attribute; }
+			inline BasicTuple( name_t tuple_type, std::initializer_list<type::Attribute> attributes, source::Ref source )
+				: Object( _makeTupleID( tuple_type, attributes ), source ) {
+				for( auto& attribute : attributes ) *this += std::move( *(Attribute*)&attribute ); finalize(); }
 
 			// Copy other tuple
-			inline BasicTuple( const BasicTuple& other ) : Object( other.type() ) { TState = other.TState; *this = other; }
+			inline BasicTuple( const BasicTuple& other ) : Object( other.type(), other.source() ) {
+				Perm = other.Perm; *this = other; }
 
 			// Take ownership of other tuple
-			inline BasicTuple( BasicTuple&& other ) noexcept : type::Object( other.type() ) {
-				TState = other.TState; *this = std::move( other ); }
-			inline BasicTuple( name_t tuple_type, BasicTuple&& other ) : type::Object( other.type() ) {
-				_assertValidFor( tuple_type, other ); TState = other.TState;
-				*this = std::move( other ); }
+			inline BasicTuple( BasicTuple&& other ) noexcept : type::Object( other.type(), other.source() ) {
+				_assertValidForMe( other ); Perm = other.Perm; *this = std::move( other ); }
 
 			// Destruct tuple
 			virtual ~BasicTuple() = default;
@@ -88,7 +98,7 @@ namespace eon
 
 			// Transfer ownership
 			inline BasicTuple& operator=( BasicTuple&& other ) noexcept {
-				Finalized = other.Finalized; other.Finalized = false; TState = other.TState; other.TState = State::open;
+				Finalized = other.Finalized; other.Finalized = false; Perm = other.Perm; other.Perm = Permission::open;
 				Attributes = std::move( other.Attributes ); NamedAttribs = std::move( other.NamedAttribs );
 				*static_cast<Object*>( this ) = std::move( other ); return *this; }
 
@@ -114,13 +124,15 @@ namespace eon
 			inline bool isPlain() const noexcept { return Type.tupleType() == name_plain; }
 			inline bool isDynamic() const noexcept { return Type.tupleType() == name_dynamic; }
 			inline bool isData() const noexcept { return Type.tupleType() == name_data; }
-			inline bool isMeta() const noexcept { return Type.tupleType() == name_meta; }
-			inline bool isEDT() const noexcept { return isData() || isMeta(); }
+			inline bool isEDT() const noexcept { return isData(); }
 			inline bool isLambda() const noexcept { return Type.tupleType() == name_lambda; }
 			inline bool isArgs() const noexcept { return Type.tupleType() == name_args; }
 
+			//* Check if the tuple has been finalized
+			inline bool finalized() const noexcept { return Finalized; }
+
 			//* Create a copy of 'this'
-			virtual type::Object* copy( scope::Scope& scope ) override { return new BasicTuple( *this ); }
+			virtual type::Object* copy() override { return new BasicTuple( *this ); }
 
 			//* Get object as string representation
 			virtual void str( type::Stringifier& str ) const override;
@@ -191,9 +203,9 @@ namespace eon
 			const T& value( index_t pos ) const
 			{
 				auto& attribute = at( pos );
-				if( attribute.qualifier() & type::Qualifier::syntax ) {
-					if( typeid( T ) == typeid( name_t ) ) return *(T*)_nameValue( pos ); else throw type::WrongType(); }
-				auto object = (const Object*)attribute.Value;
+				if( attribute.type().isName( name_syntax ) ) {
+					if( typeid( T ) == typeid( name_t ) ) return *(T*)&_nameValue( pos ); else throw type::WrongType(); }
+				auto object = (const Object*)attribute.value();
 				if( object )
 				{
 					if( object->generalType() == name_instance )
@@ -207,13 +219,11 @@ namespace eon
 						auto tuple = (BasicTuple*)object;
 						if( tuple->isPlain() && typeid( T ) == typeid( Tuple ) )
 							return *(const T*)object;
-						else if( tuple->isDynamic() && typeid( T ) == typeid( DynamicTuple ) )
+						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
 							return *(const T*)object;
-						else if( tuple->isData() && typeid( T ) == typeid( DataTuple ) )
+						else if( tuple->isData() && isDataTuple( typeid( T ) ) )
 							return *(const T*)object;
-						else if( tuple->isMeta() && typeid( T ) == typeid( MetaData ) )
-							return *(const T*)object;
-						else if( tuple->isLambda() && typeid( T ) == typeid( Lambda ) )
+						else if( tuple->isLambda() && isLambda( typeid( T ) ) )
 							return *(const T*)object;
 					}
 				}
@@ -240,7 +250,7 @@ namespace eon
 			{
 				auto& attribute = at( pos );
 				if( attribute.type().isName( name_syntax ) ) {
-					if( typeid( T ) == typeid( name_t ) ) return *(T*)_nameValue( pos ); else throw type::WrongType(); }
+					if( typeid( T ) == typeid( name_t ) ) return *(T*)&_nameValue( pos ); else throw type::WrongType(); }
 				auto object = (Object*)attribute.value();
 				if( object )
 				{
@@ -258,8 +268,6 @@ namespace eon
 						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
 							return *(T*)object;
 						else if( tuple->isData() && isDataTuple( typeid( T ) ) )
-							return *(T*)object;
-						else if( tuple->isMeta() && isMetaData( typeid( T ) ) )
 							return *(T*)object;
 						else if( tuple->isLambda() && isLambda( typeid( T ) ) )
 							return *(T*)object;
@@ -279,22 +287,13 @@ namespace eon
 				: static_cast<index_t>( pos ) ); }
 
 
-			//* Add a new unnamed read-only attribute
-			//* Throws [eon::type::AccessDenied] if not adding to (meta)data tuple!
-			BasicTuple& operator+=( const char* str ) { return *this += string( str ); }
-			template<typename T>
-			BasicTuple& operator+=( const T& value ) { *this += type::Attribute( isEDT() ? type::Handler::copyConstructData(
-				value ) : type::Handler::copyConstruct( value ) ); if( Finalized ) _generateTupleID();  return *this; }
-			template<typename T>
-			BasicTuple& operator+=( T&& value ) { *this += type::Attribute( isEDT()
-				? type::Handler::moveConstructData( value ) : type::Handler::moveConstruct( std::move( value ) ) );
-				if( Finalized ) _generateTupleID(); return *this; }
+			//* Add a new named attribute
+			//* Throws [eon::type::AccessDenied] if not adding to data tuple!
+			BasicTuple& add( name_t name, Object* value ) { return *this += Attribute( name, value ); }
 
-			//* Add a new named read-only attribute
-			//* Throws [eon::type::AccessDenied] if not adding to (meta)data tuple!
-			BasicTuple& add( name_t name, const char* str ) { return add( name, string( str ) ); }
+			BasicTuple& addRaw( name_t name, const char* str ) { return addRaw( name, string( str ) ); }
 			template<typename T>
-			BasicTuple& add( name_t name, const T& value )
+			BasicTuple& addRaw( name_t name, const T& value )
 			{
 				auto tp = type::Handler::mapType<T>();
 				if( isEDT() )
@@ -306,14 +305,47 @@ namespace eon
 				return *this;
 			}
 			template<typename T>
-			BasicTuple& add( name_t name, T&& value )
+			BasicTuple& addRaw( name_t name, T&& value )
 			{
 				auto tp = type::Handler::mapType<T>();
 				if( isEDT() )
 					tp = type::Handler::mapToLegalForDataTuple( tp );
-				*this += type::Attribute( name, TypeTuple( { tp } ), isEDT()
-					? type::Handler::moveConstructData( std::move( value ) )
-					: type::Handler::moveConstruct( std::move( value ) ) );
+				*this += type::Attribute( name, TypeTuple::name( tp ),
+					isEDT() ? type::Handler::moveConstructData( std::move( value ), source() )
+						: type::Handler::moveConstruct( std::move( value ), source() ) );
+				if( Finalized )
+					_generateTupleID();
+				return *this;
+			}
+
+
+			//* Add a new unnamed attribute
+			//* Throws [eon::type::AccessDenied] if not adding to data tuple!
+			BasicTuple& add( Object* value ) { return *this += Attribute( value ); }
+			BasicTuple& add( Object&& value ) { return *this += Attribute( value.consume() ); }
+
+			BasicTuple& addRaw( const char* str ) { return addRaw( string( str ) ); }
+			template<typename T>
+			BasicTuple& addRaw( const T& value, source::Ref source )
+			{
+				auto tp = type::Handler::mapType<T>();
+				if( isEDT() )
+					tp = type::Handler::mapToLegalForDataTuple( tp );
+				*this += type::Attribute( tp, isEDT() ? type::Handler::copyConstructData( value, source )
+					: type::Handler::copyConstruct( value, source ) );
+				if( Finalized )
+					_generateTupleID();
+				return *this;
+			}
+			template<typename T>
+			BasicTuple& addRaw( T&& value )
+			{
+				auto tp = type::Handler::mapType<T>();
+				if( isEDT() )
+					tp = type::Handler::mapToLegalForDataTuple( tp );
+				*this += type::Attribute( TypeTuple::name( tp ),
+					isEDT() ? type::Handler::moveConstructData( std::move( value ), source() )
+						: type::Handler::moveConstruct( std::move( value ), source() ) );
 				if( Finalized )
 					_generateTupleID();
 				return *this;
@@ -325,18 +357,17 @@ namespace eon
 			BasicTuple* addPlainTuple( name_t name = no_name );
 			BasicTuple* addDynamicTuple( name_t name = no_name );
 			BasicTuple* addDataTuple( name_t name = no_name );
-			BasicTuple* addMetaData( name_t name = no_name );
 
 			//* Add a new detailed attribute
 			//* Throws [eon::type::AccessDenied] if adding is not permitted!
 			//* Throws [eon::type::DuplicateName] if named and name already exists!
-			BasicTuple& operator+=( type::Attribute attribute );
+			BasicTuple& operator+=( type::Attribute&& attribute );
 
 			//* Add multiple attributes
 			//* Throws [eon::type::AccessDenied] if adding is not permitted!
 			//* Throws [eon::type::DuplicateName] if named and name already exists!
 			inline BasicTuple& operator+=( std::initializer_list<type::Attribute> attributes ) {
-				for( auto& attribute : attributes ) *this += attribute; return *this; }
+				for( auto& attribute : attributes ) *this += std::move( *(Attribute*)&attribute ); return *this; }
 
 			//* Add another tuple
 			//* Throws [eon::type::DuplicateName] if the other tuple contains one
@@ -399,29 +430,29 @@ namespace eon
 			//
 		protected:
 
-			TypeTuple _makeTupleID( const std::initializer_list<type::Object*>& values );
-			TypeTuple _makeTupleID( const std::initializer_list<type::Attribute>& attributes );
+			static TypeTuple _makeTupleID( name_t tuple_type, const std::initializer_list<type::Object*>& values );
+			static TypeTuple _makeTupleID( name_t tuple_type, const std::initializer_list<type::Attribute>& attributes );
 			void _generateTupleID();
 
-			void _initState( name_t tuple_type ) noexcept;
-
-			inline bool _canAdd() const noexcept { return TState != State::locked && TState != State::_static; }
+			inline bool _canAddVar() const noexcept { return Perm & Permission::add_var; }
 			inline bool _canModify( size_t attribute_no ) const noexcept {
-				return TState != State::locked && TState != State::_protected
-					&& attribute_no < Attributes.size(); } //&& !( Attributes[ attribute_no ].qualifier() & Qualifier::read ); }
-			inline bool _canRemove() const noexcept { return TState == State::open; }
+				return Perm & Permission::mod_var && attribute_no < Attributes.size()
+					&& Attributes[ attribute_no ].value()->generalType() != name_action; }
+			inline bool _canDelVar() const noexcept { return Perm & Permission::del_var; }
+			inline bool _canAddCache() const noexcept { return Perm & Permission::add_cache; }
+			inline bool _canAddAct() const noexcept { return Perm & Permission::add_act; }
 
-			inline void _assertCanAdd() const { if( !_canAdd() ) throw AccessDenied(); }
-			void _assertCanAdd( const TypeTuple& type );
+			inline void _assertCanAddVar() const { if( !_canAddVar() ) throw AccessDenied(); }
+			void _assertCanAddVar( const TypeTuple& type );
 			inline void _assertCanModify( size_t attribute_no ) const {
 				if( !_canModify( attribute_no ) ) throw AccessDenied(); }
-			inline void _assertCanRemove() const { if( !_canRemove() ) throw AccessDenied(); }
+			inline void _assertCanDelVar() const { if( !_canDelVar() ) throw AccessDenied(); }
 
-			void _assertValidFor( name_t tuple_type, const BasicTuple& other );
+			void _assertValidForMe( const BasicTuple& other );
 
 			// Get attribute name value
 			// WARNING: Assumes 'pos' is valid and identifies a name value!
-			name_t _nameValue( index_t pos ) const noexcept;
+			const name_t& _nameValue( index_t pos ) const noexcept;
 
 			// Get type based on position.
 			// Assumes 'pos' is < NumAttributes!
@@ -438,10 +469,9 @@ namespace eon
 			virtual void explicitPostfix( type::Stringifier& str ) const { str.addWord( ")" ); }
 
 			// Check if the specified typeid matches
-			bool isDynamicTuple( const std::type_info& type );
-			bool isDataTuple( const std::type_info& type );
-			bool isMetaData( const std::type_info& type );
-			bool isLambda( const std::type_info& type );
+			bool isDynamicTuple( const std::type_info& type ) const;
+			bool isDataTuple( const std::type_info& type ) const;
+			bool isLambda( const std::type_info& type ) const;
 
 
 
@@ -453,7 +483,7 @@ namespace eon
 		protected:
 
 			bool Finalized{ false };
-			State TState{ State::open };
+			Permission Perm{ Permission::all };
 			std::vector<type::Attribute> Attributes;
 			std::unordered_map<name_t, index_t> NamedAttribs;
 		};

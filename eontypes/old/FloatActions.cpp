@@ -2,9 +2,7 @@
 #include "Bool.h"
 #include "Byte.h"
 #include "Char.h"
-#include "Int.h"
-#include "Short.h"
-#include "Long.h"
+#include "Integer.h"
 #include "Low.h"
 #include "High.h"
 #include "Index.h"
@@ -14,22 +12,22 @@ namespace eon
 {
 	void registerFloatActions( scope::Global& scope )
 	{
-		scope.add( name_construct, new actions::FloatConstruct() );
-		scope.add( name_construct, new actions::FloatCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatBoolConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatByteConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatCharConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatIntConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatShortConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatLongConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatLowConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatHighConstruct( scope ) );
-		scope.add( name_construct, new actions::FloatIndexConstruct( scope ) );
-		scope.add( name_cmp, new actions::FloatCmp( scope ) );
-		scope.add( name_plus, new actions::FloatPlus( scope ) );
-		scope.add( name_minus, new actions::FloatMinus( scope ) );
-		scope.add( name_multiply, new actions::FloatMultiply( scope ) );
-		scope.add( name_divide, new actions::FloatDivide( scope ) );
+		scope.addAction( name_construct, new actions::FloatConstruct() );
+		scope.addAction( name_construct, new actions::FloatCopyConstruct() );
+		scope.addAction( name_construct, new actions::FloatBoolConstruct() );
+		scope.addAction( name_construct, new actions::FloatByteConstruct() );
+		scope.addAction( name_construct, new actions::FloatCharConstruct() );
+		scope.addAction( name_construct, new actions::FloatIntConstruct() );
+		scope.addAction( name_construct, new actions::FloatShortConstruct() );
+		scope.addAction( name_construct, new actions::FloatLongConstruct() );
+		scope.addAction( name_construct, new actions::FloatLowConstruct() );
+		scope.addAction( name_construct, new actions::FloatHighConstruct() );
+		scope.addAction( name_construct, new actions::FloatIndexConstruct() );
+		scope.addAction( name_cmp, new actions::FloatCmp() );
+		scope.addAction( name_op_plus, new actions::FloatPlus() );
+		scope.addAction( name_op_minus, new actions::FloatMinus() );
+		scope.addAction( name_op_multiply, new actions::FloatMultiply() );
+		scope.addAction( name_op_divide, new actions::FloatDivide() );
 	}
 
 

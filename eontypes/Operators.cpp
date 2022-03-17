@@ -7,124 +7,20 @@ namespace eon
 {
 	namespace type
 	{
-		// OperatorDetails(code, num_operands, input_precedence, stack_precedence)
-		std::vector<operators::OperatorDetails> operators::Ops{
-			OperatorDetails( { code::undef }, 0, Precedence::none, Precedence::none ),
-			OperatorDetails( { code::open_brace }, 2, Precedence::max_hi, Precedence::none ),
-			OperatorDetails( { code::close_brace }, 2, Precedence::none, Precedence::max_lo ),
-			
-			OperatorDetails( { code::plus }, 2, Precedence::high_lo, Precedence::high_hi ),
-			OperatorDetails( { code::minus }, 2, Precedence::high_lo, Precedence::high_hi ),
-			OperatorDetails( { code::multiply }, 2, Precedence::upper_high_lo, Precedence::upper_high_hi ),
-			OperatorDetails( { code::divide }, 2, Precedence::upper_high_lo, Precedence::upper_high_hi ),
-			OperatorDetails( { code::cmp }, 2, Precedence::upper_mid_lo, Precedence::upper_mid_hi ),
-			OperatorDetails( { code::eq }, 2, Precedence::lower_mid_lo, Precedence::lower_mid_hi ),
-			OperatorDetails( { code::ne }, 2, Precedence::lower_mid_lo, Precedence::lower_mid_hi ),
-			OperatorDetails( { code::lt }, 2, Precedence::mid_lo, Precedence::mid_hi ),
-			OperatorDetails( { code::le }, 2, Precedence::mid_lo, Precedence::mid_hi ),
-			OperatorDetails( { code::gt }, 2, Precedence::mid_lo, Precedence::mid_hi ),
-			OperatorDetails( { code::ge }, 2, Precedence::mid_lo, Precedence::mid_hi ),
-			OperatorDetails( { code::plus_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { code::minus_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { code::multiply_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { code::divide_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::element ), Seq( code::element2 ) }, 2,
-				Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
-			OperatorDetails( { code::in }, 2, Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
-			OperatorDetails( { Seq( code::slice ), Seq( code::slice2 ), Seq( code::slice3 ) }, 3,
-				Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
-				
-			OperatorDetails( { code::member }, 2, Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
-			OperatorDetails( { code::true_cond }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::if_else ), Seq( code::if_else2 ) }, 3, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each ), Seq( code::for_each2, true ), Seq( code::for_each3 ) }, 3,
-				Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ), Seq( code::for_each_where3 ),
-				Seq( code::for_each_where4 ) }, 4, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { code::prefix_loop }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { code::postfix_loop }, 2, Precedence::min_hi, Precedence::min_lo ),
-
-			OperatorDetails( { code::assign }, 2, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { code::type }, 1, Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
-			OperatorDetails( { code::uid }, 1, Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
-			OperatorDetails( { code::is }, 2, Precedence::ultra_lo, Precedence::ultra_hi ),
-			OperatorDetails( { Seq( code::isnot ), Seq( code::isnot2, true ) }, 2,
-				Precedence::ultra_lo, Precedence::ultra_hi ),
-			OperatorDetails( { Seq( code::size_of ), Seq( code::size_of2, true ) }, 1,
-				Precedence::ultra_hi, Precedence::ultra_lo ),
-			OperatorDetails( { Seq( code::swap ), Seq( code::swap2 ) }, 2,
-				Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
-			OperatorDetails( { Seq( code::find ), Seq( code::find2 ) }, 2, Precedence::min_lo, Precedence::min_hi ),
-
-			OperatorDetails( { Seq( code::unary_minus, true ) }, 1, Precedence::ultra_hi, Precedence::ultra_lo ),
-			OperatorDetails( { Seq( code::not, true ) }, 1, Precedence::ultra_hi, Precedence::ultra_lo ),
-			OperatorDetails( { code::and }, 2, Precedence::upper_micro_lo, Precedence::upper_micro_hi ),
-			OperatorDetails( { code::or }, 2, Precedence::lower_micro_lo, Precedence::lower_micro_hi ),
-			OperatorDetails( { code::xor }, 2, Precedence::micro_lo, Precedence::micro_hi ),
-			OperatorDetails( { Seq( code::bit_not, true ) }, 1, Precedence::ultra_hi, Precedence::ultra_lo ),
-			OperatorDetails( { code::bit_and }, 2, Precedence::upper_low_lo, Precedence::upper_low_hi ),
-			OperatorDetails( { code::bit_or }, 2, Precedence::lower_low_lo, Precedence::lower_low_hi ),
-			OperatorDetails( { code::bit_xor }, 2, Precedence::low_lo, Precedence::low_hi ),
-			OperatorDetails( { code::bit_lsh }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi ),
-			OperatorDetails( { code::bit_rsh }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi ),
-			
-			OperatorDetails( { Seq( code::pct_of ), Seq( code::pct_of2, true ) }, 2,
-				Precedence::lower_high_lo, Precedence::lower_high_hi ),
-			OperatorDetails( { Seq( code::as_pct_of ), Seq( code::as_pct_of2, true ), Seq( code::as_pct_of3, true ) }, 2,
-				Precedence::lower_high_lo, Precedence::lower_high_hi ),
-
-			OperatorDetails( { code::return_nul }, 0, Precedence::max_hi, Precedence::max_lo ),
-			OperatorDetails( { Seq( code::return_val, true ) }, 1, Precedence::max_hi, Precedence::max_lo ),
-			OperatorDetails( { code::next_iteration }, 0, Precedence::min_lo, Precedence::min_hi ),
-			OperatorDetails( { code::end_loop }, 0, Precedence::min_lo, Precedence::min_hi ),
-			OperatorDetails( { Seq( code::bumpcall, true ) }, 1, Precedence::max_hi, Precedence::max_lo ),
-			OperatorDetails( { Seq( code::raise, true ) }, 1, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::call, true ) }, 1, Precedence::upper_ultra_hi, Precedence::upper_ultra_lo ),
-
-			// These are the second, third, etc. elements of sequence operators
-			OperatorDetails( { Seq( code::element ), Seq( code::element2 ) }, 2,
-				Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
-			OperatorDetails( { Seq( code::slice ), Seq( code::slice2 ), Seq( code::slice3 ) }, 3,
-				Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
-			OperatorDetails( { Seq( code::slice ), Seq( code::slice2 ), Seq( code::slice3 ) }, 3,
-				Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
-			OperatorDetails( { Seq( code::if_else ), Seq( code::if_else2 ) }, 3, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each ), Seq( code::for_each2, true ), Seq( code::for_each3 ) }, 3,
-				Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each ), Seq( code::for_each2, true ), Seq( code::for_each3 ) }, 3,
-				Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ), Seq( code::for_each_where3 ),
-				Seq( code::for_each_where4 ) }, 4, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ), Seq( code::for_each_where3 ),
-				Seq( code::for_each_where4 ) }, 4, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ), Seq( code::for_each_where3 ),
-				Seq( code::for_each_where4 ) }, 4, Precedence::min_hi, Precedence::min_lo ),
-			OperatorDetails( { Seq( code::isnot ), Seq( code::isnot2, true ) }, 2,
-				Precedence::ultra_lo, Precedence::ultra_hi ),
-			OperatorDetails( { Seq( code::size_of ), Seq( code::size_of2, true ) }, 1,
-				Precedence::ultra_hi, Precedence::ultra_lo ),
-			OperatorDetails( { Seq( code::swap ), Seq( code::swap2 ) }, 2,
-				Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
-			OperatorDetails( { Seq( code::find ), Seq( code::find2 ) }, 2, Precedence::min_lo, Precedence::min_hi ),
-			OperatorDetails( { Seq( code::pct_of ), Seq( code::pct_of2, true ) }, 2,
-				Precedence::lower_high_lo, Precedence::lower_high_hi ),
-			OperatorDetails( { Seq( code::as_pct_of ), Seq( code::as_pct_of2, true ), Seq( code::as_pct_of3, true ) }, 2,
-				Precedence::lower_high_lo, Precedence::lower_high_hi ),
-			OperatorDetails( { Seq( code::as_pct_of ), Seq( code::as_pct_of2, true ), Seq( code::as_pct_of3, true ) }, 2,
-				Precedence::lower_high_lo, Precedence::lower_high_hi )
-		};
+		std::vector<operators::OperatorDetails> operators::Ops;
 
 		operators::code operators::mapCode( const string& str, code context )
 		{
 			static std::unordered_map<string, std::unordered_set<code>> types{
 				{ "(", { code::open_brace } },
 				{ ")", { code::close_brace } },
+				{ ",", { code::comma } },
 
 				{ "+", { code::plus } },
 				{ "-", { code::minus, code::unary_minus } },
 				{ "*", { code::multiply } },
 				{ "/", { code::divide } },
-				{ "cmp", { code::cmp } },
+				{ "<=>", { code::cmp } },
 				{ "==", { code::eq } },
 				{ "!=", { code::ne } },
 				{ "<", { code::lt } },
@@ -263,12 +159,13 @@ namespace eon
 			static std::unordered_map<code, string> types{
 				{ code::open_brace, "(" },
 				{ code::close_brace, ")" },
+				{ code::comma, "," },
 
 				{ code::plus, "+" },
 				{ code::minus, "-" },
 				{ code::multiply, "*" },
 				{ code::divide, "/" },
-				{ code::cmp, "cmp" },
+				{ code::cmp, "<=>" },
 				{ code::eq, "==" },
 				{ code::ne, "!=" },
 				{ code::lt, "<" },
@@ -340,6 +237,129 @@ namespace eon
 				return found->second;
 			else
 				return "";
+		}
+
+
+
+
+		void operators::_prep()
+		{
+			if( Ops.empty() )
+			{
+				// NOTE: These are positioned in Ops based on their operator code!
+				//       I.e, code::plus = 3 = Ops[3]!
+				Ops = {
+					OperatorDetails( { code::undef }, 0, Precedence::none, Precedence::none ),
+					OperatorDetails( { code::open_brace }, 0, Precedence::max_hi, Precedence::none ),
+					OperatorDetails( { code::close_brace }, 0, Precedence::none, Precedence::max_lo ),
+					OperatorDetails( { code::comma }, 2, Precedence::min_lo, Precedence::min_hi ),
+
+					OperatorDetails( { code::plus }, 2, Precedence::high_lo, Precedence::high_hi ),
+					OperatorDetails( { code::minus }, 2, Precedence::high_lo, Precedence::high_hi ),
+					OperatorDetails( { code::multiply }, 2, Precedence::upper_high_lo, Precedence::upper_high_hi ),
+					OperatorDetails( { code::divide }, 2, Precedence::upper_high_lo, Precedence::upper_high_hi ),
+					OperatorDetails( { code::cmp }, 2, Precedence::upper_mid_lo, Precedence::upper_mid_hi ),
+					OperatorDetails( { code::eq }, 2, Precedence::lower_mid_lo, Precedence::lower_mid_hi ),
+					OperatorDetails( { code::ne }, 2, Precedence::lower_mid_lo, Precedence::lower_mid_hi ),
+					OperatorDetails( { code::lt }, 2, Precedence::mid_lo, Precedence::mid_hi ),
+					OperatorDetails( { code::le }, 2, Precedence::mid_lo, Precedence::mid_hi ),
+					OperatorDetails( { code::gt }, 2, Precedence::mid_lo, Precedence::mid_hi ),
+					OperatorDetails( { code::ge }, 2, Precedence::mid_lo, Precedence::mid_hi ),
+					OperatorDetails( { code::plus_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { code::minus_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { code::multiply_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { code::divide_assign }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::element ), Seq( code::element2 ) }, 2,
+						Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
+					OperatorDetails( { code::in }, 2, Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
+					OperatorDetails( { Seq( code::slice ), Seq( code::slice2 ), Seq( code::slice3 ) }, 3,
+						Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
+
+					OperatorDetails( { code::member }, 2, Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
+					OperatorDetails( { code::true_cond }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::if_else ), Seq( code::if_else2 ) }, 3,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each ), Seq( code::for_each2, true ), Seq( code::for_each3 ) }, 3,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ),
+						Seq( code::for_each_where3 ), Seq( code::for_each_where4 ) }, 4,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { code::prefix_loop }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { code::postfix_loop }, 2, Precedence::min_hi, Precedence::min_lo ),
+
+					OperatorDetails( { code::assign }, 2, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { code::type }, 1, Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
+					OperatorDetails( { code::uid }, 1, Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
+					OperatorDetails( { code::is }, 2, Precedence::ultra_lo, Precedence::ultra_hi ),
+					OperatorDetails( { Seq( code::isnot ), Seq( code::isnot2, true ) }, 2,
+						Precedence::ultra_lo, Precedence::ultra_hi ),
+					OperatorDetails( { Seq( code::size_of ), Seq( code::size_of2, true ) }, 1,
+						Precedence::ultra_hi, Precedence::ultra_lo ),
+					OperatorDetails( { Seq( code::swap ), Seq( code::swap2 ) }, 2, Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
+					OperatorDetails( { Seq( code::find ), Seq( code::find2 ) }, 2, Precedence::min_lo, Precedence::min_hi ),
+
+					OperatorDetails( { Seq( code::unary_minus, true ) }, 1, Precedence::ultra_hi, Precedence::ultra_lo ),
+					OperatorDetails( { Seq( code::not, true ) }, 1, Precedence::ultra_hi, Precedence::ultra_lo ),
+					OperatorDetails( { code::and }, 2, Precedence::upper_micro_lo, Precedence::upper_micro_hi ),
+					OperatorDetails( { code:: or }, 2, Precedence::lower_micro_lo, Precedence::lower_micro_hi ),
+					OperatorDetails( { code::xor }, 2, Precedence::micro_lo, Precedence::micro_hi ),
+					OperatorDetails( { Seq( code::bit_not, true ) }, 1, Precedence::ultra_hi, Precedence::ultra_lo ),
+					OperatorDetails( { code::bit_and }, 2, Precedence::upper_low_lo, Precedence::upper_low_hi ),
+					OperatorDetails( { code::bit_or }, 2, Precedence::lower_low_lo, Precedence::lower_low_hi ),
+					OperatorDetails( { code::bit_xor }, 2, Precedence::low_lo, Precedence::low_hi ),
+					OperatorDetails( { code::bit_lsh }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi ),
+					OperatorDetails( { code::bit_rsh }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi ),
+
+					OperatorDetails( { Seq( code::pct_of ), Seq( code::pct_of2, true ) }, 2,
+						Precedence::lower_high_lo, Precedence::lower_high_hi ),
+					OperatorDetails( { Seq( code::as_pct_of ), Seq( code::as_pct_of2, true ),
+						Seq( code::as_pct_of3, true ) }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi ),
+
+					OperatorDetails( { code::return_nul }, 0, Precedence::max_hi, Precedence::max_lo ),
+					OperatorDetails( { Seq( code::return_val, true ) }, 1, Precedence::max_hi, Precedence::max_lo ),
+					OperatorDetails( { code::next_iteration }, 0, Precedence::min_lo, Precedence::min_hi ),
+					OperatorDetails( { code::end_loop }, 0, Precedence::min_lo, Precedence::min_hi ),
+					OperatorDetails( { Seq( code::bumpcall, true ) }, 1, Precedence::max_hi, Precedence::max_lo ),
+					OperatorDetails( { Seq( code::raise, true ) }, 1, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::call, true ) }, 1, Precedence::upper_ultra_hi, Precedence::upper_ultra_lo ),
+
+					// These are the second, third, etc. elements of sequence operators
+					OperatorDetails( { Seq( code::element ), Seq( code::element2 ) }, 2,
+						Precedence::upper_ultra_lo, Precedence::upper_ultra_hi ),
+					OperatorDetails( { Seq( code::slice ), Seq( code::slice2 ), Seq( code::slice3 ) }, 3,
+						Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
+					OperatorDetails( { Seq( code::slice ), Seq( code::slice2 ), Seq( code::slice3 ) }, 3,
+						Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
+					OperatorDetails( { Seq( code::if_else ), Seq( code::if_else2 ) }, 3,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each ), Seq( code::for_each2, true ), Seq( code::for_each3 ) }, 3,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each ), Seq( code::for_each2, true ),
+						Seq( code::for_each3 ) }, 3, Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ),
+						Seq( code::for_each_where3 ), Seq( code::for_each_where4 ) }, 4,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ),
+						Seq( code::for_each_where3 ), Seq( code::for_each_where4 ) }, 4,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::for_each_where ), Seq( code::for_each_where2, true ),
+						Seq( code::for_each_where3 ), Seq( code::for_each_where4 ) }, 4,
+						Precedence::min_hi, Precedence::min_lo ),
+					OperatorDetails( { Seq( code::isnot ), Seq( code::isnot2, true ) }, 2,
+						Precedence::ultra_lo, Precedence::ultra_hi ),
+					OperatorDetails( { Seq( code::size_of ), Seq( code::size_of2, true ) }, 1,
+						Precedence::ultra_hi, Precedence::ultra_lo ),
+					OperatorDetails( { Seq( code::swap ), Seq( code::swap2 ) }, 2,
+						Precedence::lower_ultra_lo, Precedence::lower_ultra_hi ),
+					OperatorDetails( { Seq( code::find ), Seq( code::find2 ) }, 2, Precedence::min_lo, Precedence::min_hi ),
+					OperatorDetails( { Seq( code::pct_of ), Seq( code::pct_of2, true ) }, 2,
+						Precedence::lower_high_lo, Precedence::lower_high_hi ),
+					OperatorDetails( { Seq( code::as_pct_of ), Seq( code::as_pct_of2, true ),
+						Seq( code::as_pct_of3, true ) }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi ),
+					OperatorDetails( { Seq( code::as_pct_of ), Seq( code::as_pct_of2, true ),
+						Seq( code::as_pct_of3, true ) }, 2, Precedence::lower_high_lo, Precedence::lower_high_hi )
+				};
+			}
 		}
 	}
 }

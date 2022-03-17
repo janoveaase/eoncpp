@@ -1,5 +1,5 @@
 #include "RegexActions.h"
-#include "Int.h"
+#include "Integer.h"
 #include "String.h"
 #include "Index.h"
 
@@ -8,10 +8,10 @@ namespace eon
 {
 	void registerRegexActions( scope::Global& scope )
 	{
-		scope.add( name_construct, new actions::RegexConstruct() );
-		scope.add( name_copyconstruct, new actions::RegexCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::RegexStringConstruct( scope ) );
-		scope.add( name_cmp, new actions::RegexCmp( scope ) );
+		scope.addAction( name_constructor, new actions::RegexConstruct() );
+		scope.addAction( name_constructor, new actions::RegexCopyConstruct() );
+		scope.addAction( name_constructor, new actions::RegexStringConstruct() );
+		scope.addOperator( type::operators::code::cmp, new actions::RegexCmp() );
 	}
 
 
@@ -24,20 +24,20 @@ namespace eon
 		type::Object* RegexCopyConstruct::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<RegexInstance>( scope, action_node, 0 );
-			return new RegexInstance( arg1->value() );
+			return new RegexInstance( arg1->value(), arg1->source() );
 		}
 
 		type::Object* RegexStringConstruct::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<StringInstance>( scope, action_node, 0 );
-			return new RegexInstance( string( arg1->value() ).stdstr() );
+			return new RegexInstance( string( arg1->value() ).stdstr(), arg1->source() );
 		}
 
 		type::Object* RegexCmp::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<RegexInstance>( scope, action_node, 0 );
 			auto arg2 = _operand<RegexInstance>( scope, action_node, 1 );
-			auto rval = new IntInstance();
+			auto rval = new IntegerInstance<int_t>();
 			rval->value( arg1->value().str().compare( arg2->value().str() ) );
 			return rval;
 		}

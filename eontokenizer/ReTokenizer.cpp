@@ -119,15 +119,19 @@ namespace eon
 				parser.forward();
 			}
 			else
+			{
+				matched = Token();
 				break;
+			}
 		}
 
-		if( !matched.source() )
-			return false;
-		if( Exclude.empty() || !Exclude.match( matched.source().str() ) )
+		if( matched.source() )
 		{
-			output.push_back( std::move( matched ) );
-			return true;
+			if( Exclude.empty() || !Exclude.match( matched.source().str() ) )
+			{
+				output.push_back( std::move( matched ) );
+				return true;
+			}
 		}
 		parser.pos( initial );
 		return false;

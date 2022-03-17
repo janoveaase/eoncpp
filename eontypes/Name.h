@@ -19,12 +19,12 @@ namespace eon
 	class NameType : public type::TypeDef
 	{
 	public:
-		NameType() : TypeDef( name_name ) {}
+		NameType() : TypeDef( name_name, source::Ref() ) {}
 		~NameType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "name" ); }
 
@@ -39,17 +39,16 @@ namespace eon
 	class NameInstance : public type::Instance
 	{
 	public:
-		NameInstance() : Instance( name_name ) {}
-		NameInstance( name_t value ) : Instance( name_name ) { Value = value; }
+		NameInstance() : Instance( name_name, source::Ref() ) {}
+		NameInstance( name_t value, source::Ref source ) : Instance( name_name, source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (NameType*)scope.find( type().asName() ) )->instantiate( Value ); }
+		inline Object* copy() override { return new NameInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( name_t ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( type::Stringifier& str ) const override { str.addWord( Value ); }
-		inline Instance* copy() const override { return new NameInstance( Value ); }
+		inline Instance* copy() const override { return new NameInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const NameInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }
 

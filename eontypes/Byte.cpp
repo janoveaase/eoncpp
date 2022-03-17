@@ -13,7 +13,7 @@ namespace eon
 
 
 
-	type::Instance* ByteType::instantiate( byte_t value ) const { return new ByteInstance( value ); }
+	type::Instance* ByteType::instantiate( byte_t value ) const { return new ByteInstance( value, source::Ref() ); }
 
 	void ByteInstance::str( type::Stringifier& str ) const
 	{

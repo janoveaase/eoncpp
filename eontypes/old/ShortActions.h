@@ -33,9 +33,8 @@ namespace eon
 		class ShortCopyConstruct : public type::Action
 		{
 		public:
-			inline ShortCopyConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
+			inline ShortCopyConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
 			virtual ~ShortCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -44,9 +43,8 @@ namespace eon
 		class ShortBoolConstruct : public type::Action
 		{
 		public:
-			inline ShortBoolConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
+			inline ShortBoolConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
 			virtual ~ShortBoolConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -54,9 +52,8 @@ namespace eon
 		class ShortByteConstruct : public type::Action
 		{
 		public:
-			inline ShortByteConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
+			inline ShortByteConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
 			virtual ~ShortByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -64,9 +61,8 @@ namespace eon
 		class ShortCharConstruct : public type::Action
 		{
 		public:
-			inline ShortCharConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
+			inline ShortCharConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
 			virtual ~ShortCharConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -74,9 +70,8 @@ namespace eon
 		class ShortIntConstruct : public type::Action
 		{
 		public:
-			inline ShortIntConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_int ) } ), { name_memory_denied } ) {}
+			inline ShortIntConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_int ) } ), { name_memory_denied } ) {}
 			virtual ~ShortIntConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -84,9 +79,8 @@ namespace eon
 		class ShortLongConstruct : public type::Action
 		{
 		public:
-			inline ShortLongConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
+			inline ShortLongConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
 			virtual ~ShortLongConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -94,9 +88,8 @@ namespace eon
 		class ShortFloatConstruct : public type::Action
 		{
 		public:
-			inline ShortFloatConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
+			inline ShortFloatConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
 			virtual ~ShortFloatConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -104,9 +97,8 @@ namespace eon
 		class ShortLowConstruct : public type::Action
 		{
 		public:
-			inline ShortLowConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
+			inline ShortLowConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
 			virtual ~ShortLowConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -114,9 +106,8 @@ namespace eon
 		class ShortHighConstruct : public type::Action
 		{
 		public:
-			inline ShortHighConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
+			inline ShortHighConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
 			virtual ~ShortHighConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -124,9 +115,8 @@ namespace eon
 		class ShortIndexConstruct : public type::Action
 		{
 		public:
-			inline ShortIndexConstruct( scope::Global& scope ) : Action(
-				name_short, Type::instance, name_construct, name_short,
-				DynamicTuple( { type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
+			inline ShortIndexConstruct() : Action( name_short, Type::instance, name_construct, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
 			virtual ~ShortIndexConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -135,8 +125,8 @@ namespace eon
 		class ShortCmp : public type::Action
 		{
 		public:
-			inline ShortCmp( scope::Global& scope ) : Action( name_short, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortCmp() : Action( name_short, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -144,8 +134,8 @@ namespace eon
 		class ShortPlus : public type::Action
 		{
 		public:
-			inline ShortPlus( scope::Global& scope ) : Action( name_short, opcode::plus, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortPlus() : Action( name_short, opcode::plus, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortPlus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -153,8 +143,8 @@ namespace eon
 		class ShortMinus : public type::Action
 		{
 		public:
-			inline ShortMinus( scope::Global& scope ) : Action( name_short, opcode::minus, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortMinus() : Action( name_short, opcode::minus, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortMinus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -162,8 +152,8 @@ namespace eon
 		class ShortMultiply : public type::Action
 		{
 		public:
-			inline ShortMultiply( scope::Global& scope ) : Action( name_short, opcode::multiply, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortMultiply() : Action( name_short, opcode::multiply, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortMultiply() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -171,8 +161,8 @@ namespace eon
 		class ShortDivide : public type::Action
 		{
 		public:
-			inline ShortDivide( scope::Global& scope ) : Action( name_short, opcode::divide, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortDivide() : Action( name_short, opcode::divide, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortDivide() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -181,8 +171,8 @@ namespace eon
 		class ShortElementIndex : public type::Action
 		{
 		public:
-			inline ShortElementIndex( scope::Global& scope ) : Action( name_short, opcode::element, name_short, DynamicTuple(
-				{ type::Attribute( name_pos, name_index ) } ) ) {}
+			inline ShortElementIndex() : Action( name_short, opcode::element, name_short, DynamicTuple( {
+				type::Attribute( name_pos, name_index ) } ) ) {}
 			virtual ~ShortElementIndex() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -190,8 +180,8 @@ namespace eon
 		class ShortElementInt : public type::Action
 		{
 		public:
-			inline ShortElementInt( scope::Global& scope ) : Action( name_short, opcode::element, name_short, DynamicTuple(
-				{ type::Attribute( name_pos, name_int ) } ) ) {}
+			inline ShortElementInt() : Action( name_short, opcode::element, name_short, DynamicTuple( {
+				type::Attribute( name_pos, name_int ) } ) ) {}
 			virtual ~ShortElementInt() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -200,7 +190,7 @@ namespace eon
 		class ShortSlice : public type::Action
 		{
 		public:
-			inline ShortSlice( scope::Global& scope ) : Action( name_short, opcode::slice, name_short, DynamicTuple( {
+			inline ShortSlice() : Action( name_short, opcode::slice, name_short, DynamicTuple( {
 				type::Attribute( name::get( "first" ), name_int ),
 				type::Attribute( name::get( "last" ), name_int ) } ) ) {}
 			virtual ~ShortSlice() = default;
@@ -219,8 +209,8 @@ namespace eon
 		class ShortBitAnd : public type::Action
 		{
 		public:
-			inline ShortBitAnd( scope::Global& scope ) : Action( name_short, opcode::bit_and, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortBitAnd() : Action( name_short, opcode::bit_and, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortBitAnd() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -228,8 +218,8 @@ namespace eon
 		class ShortBitOr : public type::Action
 		{
 		public:
-			inline ShortBitOr( scope::Global& scope ) : Action( name_short, opcode::bit_or, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortBitOr() : Action( name_short, opcode::bit_or, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortBitOr() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -237,8 +227,8 @@ namespace eon
 		class ShortBitXor : public type::Action
 		{
 		public:
-			inline ShortBitXor( scope::Global& scope ) : Action( name_short, opcode::bit_xor, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_short ) } ) ) {}
+			inline ShortBitXor() : Action( name_short, opcode::bit_xor, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ) ) {}
 			virtual ~ShortBitXor() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -246,8 +236,8 @@ namespace eon
 		class ShortLShift: public type::Action
 		{
 		public:
-			inline ShortLShift( scope::Global& scope ) : Action( name_short, opcode::bit_lsh, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_index ) } ) ) {}
+			inline ShortLShift() : Action( name_short, opcode::bit_lsh, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_index ) } ) ) {}
 			virtual ~ShortLShift() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -255,8 +245,8 @@ namespace eon
 		class ShortRShift : public type::Action
 		{
 		public:
-			inline ShortRShift( scope::Global& scope ) : Action( name_short, opcode::bit_rsh, name_short, DynamicTuple(
-				{ type::Attribute( name_other, name_index ) } ) ) {}
+			inline ShortRShift() : Action( name_short, opcode::bit_rsh, name_short, DynamicTuple( {
+				type::Attribute( name_other, name_index ) } ) ) {}
 			virtual ~ShortRShift() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

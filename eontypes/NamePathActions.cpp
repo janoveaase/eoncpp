@@ -1,5 +1,5 @@
 #include "NamePathActions.h"
-#include "Int.h"
+#include "Integer.h"
 #include "String.h"
 #include "Index.h"
 
@@ -8,9 +8,9 @@ namespace eon
 {
 	void registerNamePathActions( scope::Global& scope )
 	{
-		scope.add( name_construct, new actions::NamePathConstruct() );
-		scope.add( name_copyconstruct, new actions::NamePathCopyConstruct( scope ) );
-		scope.add( name_cmp, new actions::NamePathCmp( scope ) );
+		scope.addAction( name_constructor, new actions::NamePathConstruct() );
+		scope.addAction( name_constructor, new actions::NamePathCopyConstruct() );
+		scope.addOperator( type::operators::code::cmp, new actions::NamePathCmp() );
 	}
 
 
@@ -23,14 +23,14 @@ namespace eon
 		type::Object* NamePathCopyConstruct::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<NamePathInstance>( scope, action_node, 0 );
-			return new NamePathInstance( arg1->value() );
+			return new NamePathInstance( arg1->value(), arg1->source() );
 		}
 
 		type::Object* NamePathCmp::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<NamePathInstance>( scope, action_node, 0 );
 			auto arg2 = _operand<NamePathInstance>( scope, action_node, 1 );
-			auto rval = new IntInstance();
+			auto rval = new IntegerInstance<int_t>();
 			rval->value( arg1->value() < arg2->value() ? -1 : arg2->value() < arg1->value() ? 1 : 0 );
 			return rval;
 		}

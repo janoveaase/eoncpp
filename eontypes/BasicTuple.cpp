@@ -1,11 +1,9 @@
 #include "BasicTuple.h"
 #include "Name.h"
-#include "MetaData.h"
 #include "Tuple.h"
 #include "TypeHandler.h"
 #include "DynamicTuple.h"
 #include "DataTuple.h"
-#include "MetaData.h"
 
 
 namespace eon
@@ -14,8 +12,27 @@ namespace eon
 	{
 		void BasicTuple::finalize() noexcept
 		{
-			if( tupleType() == name_plain )
-				TState = State::_static;
+			static std::unordered_map<name_t, Permission> perm{
+				{ name_open, Permission::mod_var },
+				{ name_plain, Permission::mod_var },
+				{ name_dynamic, Permission::open },
+				{ name_data, Permission::open },
+				{ name_lambda, Permission::add_var | Permission::mod_var },
+				{ name_args, Permission::add_var | Permission::mod_var },
+				{ name_return, Permission::add_var | Permission::mod_var },
+
+				{ name_locked, Permission::none },
+				{ name_static, Permission::mod_var },
+				{ name_protected, Permission::add_var },
+				{ name_restricted, Permission::add_var | Permission::mod_var },
+				{ name_open, Permission::open },
+
+				{ name_global, Permission::open | Permission::add_cache | Permission::add_grp },
+				{ name_action, Permission::add_var | Permission::mod_var },
+				{ name_local, Permission::add_var | Permission::mod_var }
+			};
+			Perm = perm.find( tupleType() )->second;
+
 			_generateTupleID();
 			Finalized = true;
 		}
@@ -23,7 +40,7 @@ namespace eon
 		BasicTuple& BasicTuple::operator=( const BasicTuple& other )
 		{
 			Finalized = false;
-			TState = other.TState;
+			Perm = other.Perm;
 			*static_cast<Object*>( this ) = other;
 			for( auto& attribute : other )
 			{
@@ -40,18 +57,26 @@ namespace eon
 		void BasicTuple::str( Stringifier& str ) const
 		{
 			auto ttype = tupleType();
-			if( ttype == name_meta )
+			if( ttype == name_data || ttype == name_dynamic )
 			{
-				str.addWord( "M(" );
+				str.spacingOnce();
+				str.addWord( eon::str( ttype ) + "(" );
+				str.noSpacing();
+			}
+			else if( ttype == name_plain )
+			{
+				str.spacingOnce();
+				str.addWord( "p(" );
 				str.noSpacing();
 			}
 			str.pushTuple( ttype );
 			_str( str );
 			str.popTuple();
-			if( ttype == name_meta )
+			if( isTupleType( ttype ) )
 			{
 				str.markRaw();
 				str.addWord( ")" );
+				str.spacingOnce();
 			}
 		}
 
@@ -62,12 +87,12 @@ namespace eon
 		{
 			if( Finalized )
 				throw AccessDenied();
-			static TypeTuple type( name_plain );
-			_assertCanAdd( type );
+			static auto type = TypeTuple::tuple( name_plain );
+			_assertCanAddVar( type );
 			if( name )
 			{
 				if( exists( name ) )
-					throw DuplicateName( *name );
+					throw DuplicateName( eon::str( name ) );
 				NamedAttribs[ name ] = Attributes.size();
 			}
 			auto tuple = new Tuple();
@@ -78,12 +103,12 @@ namespace eon
 		{
 			if( Finalized )
 				throw AccessDenied();
-			static TypeTuple type( name_dynamic );
-			_assertCanAdd( type );
+			static auto type = TypeTuple::tuple( name_dynamic );
+			_assertCanAddVar( type );
 			if( name )
 			{
 				if( exists( name ) )
-					throw DuplicateName( *name );
+					throw DuplicateName( eon::str( name ) );
 				NamedAttribs[ name ] = Attributes.size();
 			}
 			auto tuple = new DynamicTuple();
@@ -94,45 +119,29 @@ namespace eon
 		{
 			if( Finalized )
 				throw AccessDenied();
-			static TypeTuple type( name_data );
-			_assertCanAdd( type );
+			static auto type = TypeTuple::tuple( name_data );
+			_assertCanAddVar( type );
 			if( name )
 			{
 				if( exists( name ) )
-					throw DuplicateName( *name );
+					throw DuplicateName( eon::str( name ) );
 				NamedAttribs[ name ] = Attributes.size();
 			}
 			auto tuple = new DataTuple();
 			Attributes.push_back( Attribute( name, tuple->type(), tuple ) );
 			return tuple;
 		}
-		BasicTuple* BasicTuple::addMetaData( name_t name )
-		{
-			if( Finalized )
-				throw AccessDenied();
-			static TypeTuple type( name_meta  );
-			_assertCanAdd( type );
-			if( name )
-			{
-				if( exists( name ) )
-					throw DuplicateName( *name );
-				NamedAttribs[ name ] = Attributes.size();
-			}
-			auto tuple = new MetaData();
-			Attributes.push_back( Attribute( name, tuple->type(), (Object*)tuple ) );
-			return tuple;
-		}
 
-		BasicTuple& BasicTuple::operator+=( Attribute attribute )
+		BasicTuple& BasicTuple::operator+=( Attribute&& attribute )
 		{
-			_assertCanAdd( attribute.type() );
+			_assertCanAddVar( attribute.type() );
 			if( attribute.name() != no_name )
 			{
 				if( exists( attribute.name() ) )
-					throw DuplicateName( *attribute.name() );
+					throw DuplicateName( eon::str( attribute.name() ) );
 				NamedAttribs[ attribute.name() ] = Attributes.size();
 			}
-			Attributes.push_back( attribute );
+			Attributes.push_back( std::move( attribute ) );
 			if( Finalized )
 				_generateTupleID();
 			return *this;
@@ -141,11 +150,11 @@ namespace eon
 		{
 			for( auto& attribute : other.Attributes )
 			{
-				_assertCanAdd( attribute.type() );
+				_assertCanAddVar( attribute.type() );
 				if( attribute.name() != no_name )
 				{
 					if( exists( attribute.name() ) )
-						throw DuplicateName( *attribute.name() );
+						throw DuplicateName( eon::str( attribute.name() ) );
 					NamedAttribs[ attribute.name() ] = Attributes.size();
 				}
 				Attributes.push_back( attribute );
@@ -157,7 +166,7 @@ namespace eon
 
 		BasicTuple& BasicTuple::operator-=( const BasicTuple& other )
 		{
-			_assertCanRemove();
+			_assertCanDelVar();
 			if( !other.type().compatibleWith( Type ) )
 				throw AccessDenied();
 
@@ -261,8 +270,6 @@ namespace eon
 					cmp = ( (BasicTuple*)lhs.value() )->compare( *(BasicTuple*)rhs.value() );
 				else if( general_type == name_tuple )
 					cmp = ( (Tuple*)lhs.value() )->compare( *(Tuple*)rhs.value() );
-				else if( general_type == name_meta )
-					cmp = ( (MetaData*)lhs.value() )->compare( *(MetaData*)rhs.value() );
 				else if( general_type == name_instance )
 					cmp = ( (Instance*)lhs.value() )->compare( *(Instance*)rhs.value() );
 
@@ -277,7 +284,7 @@ namespace eon
 
 
 
-		TypeTuple BasicTuple::_makeTupleID( const std::initializer_list<Object*>& values )
+		TypeTuple BasicTuple::_makeTupleID( name_t tuple_type, const std::initializer_list<Object*>& values )
 		{
 			std::vector<TypeElement*> elements;
 			for( auto value : values )
@@ -290,19 +297,19 @@ namespace eon
 				else
 					elements.push_back( new TypeTuple( type ) );
 			}
-			return TypeTuple( tupleType(), elements );
+			return TypeTuple::tuple( tuple_type, elements );
 		}
-		TypeTuple BasicTuple::_makeTupleID( const std::initializer_list<Attribute>& attributes )
+		TypeTuple BasicTuple::_makeTupleID( name_t tuple_type, const std::initializer_list<Attribute>& attributes )
 		{
 			std::vector<TypeElement*> elements;
-			for( auto attribute : attributes )
+			for( auto& attribute : attributes )
 			{
 				if( attribute.type().isName() )
 					elements.push_back( new NameElement( attribute.type().asName() ) );
 				else
 					elements.push_back( new TypeTuple( attribute.type() ) );
 			}
-			return TypeTuple( tupleType(), elements );
+			return TypeTuple::tuple( tuple_type, elements );
 		}
 		void BasicTuple::_generateTupleID()
 		{
@@ -312,41 +319,24 @@ namespace eon
 				if( attribute.type().isName() )
 					elements.push_back( new NameElement( attribute.name(), attribute.type().asName() ) );
 				else
-					elements.push_back( new TypeTuple( attribute.name(), attribute.type() ) );
+					elements.push_back( new TypeTuple( TypeTuple::rename( attribute.type(), attribute.name() ) ) );
 			}
-			Type = TypeTuple( tupleType(), elements );
+			Type = TypeTuple::tuple( Type.tupleType(), elements );
 		}
 
-		void BasicTuple::_initState( name_t tuple_type ) noexcept
+		void BasicTuple::_assertCanAddVar( const TypeTuple& type )
 		{
-			Type = TypeTuple( tuple_type );
-			if( tuple_type == name_plain )
-				TState = State::restricted;
-			else if( tuple_type == name_dynamic )
-				TState = State::open;
-			else if( tuple_type == name_meta )
-				TState = State::restricted;
-			else if( tuple_type == name_lambda )
-				TState = State::restricted;
-			else if( tuple_type == name_args )
-				TState = State::restricted;
-		}
-
-		void BasicTuple::_assertCanAdd( const TypeTuple& type )
-		{
-			if( !_canAdd() )
+			if( !_canAddVar() )
 				throw AccessDenied();
 			
-			if( tupleType() == name_data || tupleType() == name_meta )
+			if( tupleType() == name_data )
 			{
-				if( tupleType() == name_meta && type.isTuple() )
-				{
-					if( type.tupleType() != name_meta )
-						throw AccessDenied( type.tupleType()->ucFirst()
-							+ " tuple is not a legal attribute type for tuple type " + *tupleType() + "!" );
-				}
+				if( type.isTuple() && type.tupleType() != name_data )
+					throw AccessDenied( eon::str( type.tupleType() ).ucFirst()
+						+ " tuple is not a legal attribute type for tuple type " + eon::str( tupleType() ) + "!" );
 				if( !Handler::legalForDataTuple( type ) )
-					throw AccessDenied( type.str() + " is not a legal attribute type for tuple type " + *tupleType() + "!" );
+					throw AccessDenied( type.str() + " is not a legal attribute type for tuple type "
+						+ eon::str( tupleType() ) + "!" );
 			}
 			
 			else if( tupleType() == name_lambda )
@@ -378,9 +368,9 @@ namespace eon
 			}
 		}
 
-		void BasicTuple::_assertValidFor( name_t tuple_type, const BasicTuple& other )
+		void BasicTuple::_assertValidForMe( const BasicTuple& other )
 		{
-			if( tuple_type == name_data || tuple_type == name_meta )
+			if( tupleType() == name_data )
 			{
 				for( auto& attribute : other )
 				{
@@ -390,7 +380,7 @@ namespace eon
 			}
 		}
 
-		name_t BasicTuple::_nameValue( index_t pos ) const noexcept
+		const name_t& BasicTuple::_nameValue( index_t pos ) const noexcept
 		{
 			return ( (const NameInstance*)Attributes[ pos ].value() )->value();
 		}
@@ -404,7 +394,8 @@ namespace eon
 					first = false;
 				else
 				{
-					str.addWord( "," );
+					str.addRaw( "," );
+					str.resetRaw();
 					str.spacingOnce();
 				}
 
@@ -437,6 +428,15 @@ namespace eon
 							str.popTuple();
 						}
 					}
+					else
+					{
+						str.pushTuple( ttype );
+						explicitPrefix( str );
+						( (const DataTuple*)element.value() )->_str( str );
+						str.noSpacing();
+						explicitPostfix( str );
+						str.popTuple();
+					}
 				}
 				else
 				{
@@ -450,9 +450,8 @@ namespace eon
 			}
 		}
 
-		bool BasicTuple::isDynamicTuple( const std::type_info& type ) { return type == typeid( DynamicTuple ); }
-		bool BasicTuple::isDataTuple( const std::type_info& type ) { return type == typeid( DataTuple ); }
-		bool BasicTuple::isMetaData( const std::type_info& type ) { return type == typeid( MetaData ); }
-		bool BasicTuple::isLambda( const std::type_info& type ) { return false; }// return type == typeid( Lambda ); }
+		bool BasicTuple::isDynamicTuple( const std::type_info& type ) const { return type == typeid( DynamicTuple ); }
+		bool BasicTuple::isDataTuple( const std::type_info& type ) const { return type == typeid( DataTuple ); }
+		bool BasicTuple::isLambda( const std::type_info& type ) const { return false; }// return type == typeid( Lambda ); }
 	}
 }

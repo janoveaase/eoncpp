@@ -2,6 +2,7 @@
 
 #include "Bool.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -23,7 +24,8 @@ namespace eon
 		class BoolConstruct : public type::Action
 		{
 		public:
-			inline BoolConstruct() : Action( name_bool, Type::instance, name_construct, name_bool, DynamicTuple() ) {}
+			inline BoolConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~BoolConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -31,8 +33,8 @@ namespace eon
 		class BoolCopyConstruct : public type::Action
 		{
 		public:
-			inline BoolCopyConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
+			inline BoolCopyConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -41,8 +43,8 @@ namespace eon
 		class BoolByteConstruct : public type::Action
 		{
 		public:
-			inline BoolByteConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
+			inline BoolByteConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_byte ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -50,8 +52,8 @@ namespace eon
 		class BoolCharConstruct : public type::Action
 		{
 		public:
-			inline BoolCharConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
+			inline BoolCharConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_char ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolCharConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -59,9 +61,8 @@ namespace eon
 		class BoolIntConstruct : public type::Action
 		{
 		public:
-			inline BoolIntConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_int ) } ),
-				{ name_memory_denied } ) {}
+			inline BoolIntConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_int ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolIntConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -69,8 +70,8 @@ namespace eon
 		class BoolShortConstruct : public type::Action
 		{
 		public:
-			inline BoolShortConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
+			inline BoolShortConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_short ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolShortConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -78,8 +79,8 @@ namespace eon
 		class BoolLongConstruct : public type::Action
 		{
 		public:
-			inline BoolLongConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
+			inline BoolLongConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_long ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolLongConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -87,8 +88,8 @@ namespace eon
 		class BoolFloatConstruct : public type::Action
 		{
 		public:
-			inline BoolFloatConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
+			inline BoolFloatConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_float ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolFloatConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -96,8 +97,8 @@ namespace eon
 		class BoolLowConstruct : public type::Action
 		{
 		public:
-			inline BoolLowConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
+			inline BoolLowConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_low ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolLowConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -105,8 +106,8 @@ namespace eon
 		class BoolHighConstruct : public type::Action
 		{
 		public:
-			inline BoolHighConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
+			inline BoolHighConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_high ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolHighConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -114,53 +115,53 @@ namespace eon
 		class BoolIndexConstruct : public type::Action
 		{
 		public:
-			inline BoolIndexConstruct( scope::Global& scope ) : Action( name_bool, Type::instance, name_construct, name_bool,
-				DynamicTuple( { type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
+			inline BoolIndexConstruct() : Action( name_bool, Type::instance, name_constructor, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_index ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~BoolIndexConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class BoolCmp : public type::Action
+		class BoolCmp : public OperatorAction
 		{
 		public:
-			inline BoolCmp( scope::Global& scope ) : Action( name_bool, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_bool ) } ) ) {}
+			inline BoolCmp() : OperatorAction( name_bool, opcode::cmp, name_int,
+				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class BoolNot : public type::Action
+		class BoolNot : public OperatorAction
 		{
 		public:
-			inline BoolNot() : Action( name_bool, opcode::not, name_bool, DynamicTuple() ) {}
+			inline BoolNot() : OperatorAction( name_bool, opcode::not, name_bool, DynamicTuple(), {}, source::Ref() ) {}
 			virtual ~BoolNot() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class BoolAnd : public type::Action
+		class BoolAnd : public OperatorAction
 		{
 		public:
-			inline BoolAnd( scope::Global& scope ) : Action( name_bool, opcode::and, name_bool, DynamicTuple(
-				{ type::Attribute( name_other, name_bool ) } ) ) {}
+			inline BoolAnd() : OperatorAction( name_bool, opcode::and, name_bool,
+				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolAnd() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class BoolOr : public type::Action
+		class BoolOr : public OperatorAction
 		{
 		public:
-			inline BoolOr( scope::Global& scope ) : Action( name_bool, opcode::or, name_bool, DynamicTuple(
-				{ type::Attribute( name_other, name_bool ) } ) ) {}
+			inline BoolOr() : OperatorAction( name_bool, opcode::or, name_bool, DynamicTuple( {
+				type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolOr() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
-		class BoolXor : public type::Action
+		class BoolXor : public OperatorAction
 		{
 		public:
-			inline BoolXor( scope::Global& scope ) : Action( name_bool, opcode::xor, name_bool, DynamicTuple(
-				{ type::Attribute( name_other, name_bool ) } ) ) {}
+			inline BoolXor() : OperatorAction( name_bool, opcode::xor, name_bool, DynamicTuple( {
+				type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolXor() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

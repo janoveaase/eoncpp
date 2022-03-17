@@ -36,8 +36,8 @@ namespace eon
 		class LowCopyConstruct : public type::Action
 		{
 		public:
-			inline LowCopyConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
+			inline LowCopyConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ), { name_memory_denied } ) {}
 			virtual ~LowCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -46,8 +46,8 @@ namespace eon
 		class LowBoolConstruct : public type::Action
 		{
 		public:
-			inline LowBoolConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
+			inline LowBoolConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_bool ) } ), { name_memory_denied } ) {}
 			virtual ~LowBoolConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -55,8 +55,8 @@ namespace eon
 		class LowByteConstruct : public type::Action
 		{
 		public:
-			inline LowByteConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
+			inline LowByteConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
 			virtual ~LowByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -64,8 +64,8 @@ namespace eon
 		class LowCharConstruct : public type::Action
 		{
 		public:
-			inline LowCharConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
+			inline LowCharConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
 			virtual ~LowCharConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -73,8 +73,8 @@ namespace eon
 		class LowIntConstruct : public type::Action
 		{
 		public:
-			inline LowIntConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_int ) } ), { name_memory_denied } ) {}
+			inline LowIntConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_int ) } ), { name_memory_denied } ) {}
 			virtual ~LowIntConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -82,8 +82,8 @@ namespace eon
 		class LowShortConstruct : public type::Action
 		{
 		public:
-			inline LowShortConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
+			inline LowShortConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_short ) } ), { name_memory_denied } ) {}
 			virtual ~LowShortConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -91,8 +91,8 @@ namespace eon
 		class LowLongConstruct : public type::Action
 		{
 		public:
-			inline LowLongConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
+			inline LowLongConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_long ) } ), { name_memory_denied } ) {}
 			virtual ~LowLongConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -100,8 +100,8 @@ namespace eon
 		class LowFloatConstruct : public type::Action
 		{
 		public:
-			inline LowFloatConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
+			inline LowFloatConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_float ) } ), { name_memory_denied } ) {}
 			virtual ~LowFloatConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -109,8 +109,8 @@ namespace eon
 		class LowHighConstruct : public type::Action
 		{
 		public:
-			inline LowHighConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
+			inline LowHighConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_high ) } ), { name_memory_denied } ) {}
 			virtual ~LowHighConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -118,8 +118,8 @@ namespace eon
 		class LowIndexConstruct : public type::Action
 		{
 		public:
-			inline LowIndexConstruct( scope::Global& scope ) : Action( name_low, Type::instance, name_construct, name_low,
-				DynamicTuple( { type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
+			inline LowIndexConstruct() : Action( name_low, Type::instance, name_construct, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_index ) } ), { name_memory_denied } ) {}
 			virtual ~LowIndexConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -128,8 +128,8 @@ namespace eon
 		class LowCmp : public type::Action
 		{
 		public:
-			inline LowCmp( scope::Global& scope ) : Action( name_low, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_low ) } ) ) {}
+			inline LowCmp() : Action( name_low, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ) ) {}
 			virtual ~LowCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -138,8 +138,8 @@ namespace eon
 		class LowPlus : public type::Action
 		{
 		public:
-			inline LowPlus( scope::Global& scope ) : Action( name_low, opcode::plus, name_low, DynamicTuple(
-				{ type::Attribute( name_other, name_low ) } ) ) {}
+			inline LowPlus() : Action( name_low, opcode::plus, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ) ) {}
 			virtual ~LowPlus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -147,8 +147,8 @@ namespace eon
 		class LowMinus : public type::Action
 		{
 		public:
-			inline LowMinus( scope::Global& scope ) : Action( name_low, opcode::minus, name_low, DynamicTuple(
-				{ type::Attribute( name_other, name_low ) } ) ) {}
+			inline LowMinus() : Action( name_low, opcode::minus, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ) ) {}
 			virtual ~LowMinus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -156,8 +156,8 @@ namespace eon
 		class LowMultiply : public type::Action
 		{
 		public:
-			inline LowMultiply( scope::Global& scope ) : Action( name_low, opcode::multiply, name_low, DynamicTuple(
-				{ type::Attribute( name_other, name_low ) } ) ) {}
+			inline LowMultiply() : Action( name_low, opcode::multiply, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ) ) {}
 			virtual ~LowMultiply() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -165,8 +165,8 @@ namespace eon
 		class LowDivide : public type::Action
 		{
 		public:
-			inline LowDivide( scope::Global& scope ) : Action( name_low, opcode::divide, name_low, DynamicTuple(
-				{ type::Attribute( name_other, name_low ) } ) ) {}
+			inline LowDivide() : Action( name_low, opcode::divide, name_low, DynamicTuple( {
+				type::Attribute( name_other, name_low ) } ) ) {}
 			virtual ~LowDivide() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

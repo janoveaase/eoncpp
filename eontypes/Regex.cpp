@@ -13,6 +13,7 @@ namespace eon
 
 
 
-	type::Instance* RegexType::instantiate( const regex& value ) const { return new RegexInstance( value ); }
-	type::Instance* RegexType::instantiate( regex&& value ) const { return new RegexInstance( std::move( value ) ); }
+	type::Instance* RegexType::instantiate( const regex& value ) const { return new RegexInstance( value, source::Ref() ); }
+	type::Instance* RegexType::instantiate( regex&& value ) const {
+		return new RegexInstance( std::move( value ), source::Ref() ); }
 }

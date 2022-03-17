@@ -2,12 +2,8 @@
 #include <eontypes/Bool.h>
 #include <eontypes/Byte.h>
 #include <eontypes/Char.h>
-#include <eontypes/Int.h>
-#include <eontypes/Short.h>
-#include <eontypes/Long.h>
-#include <eontypes/Float.h>
-#include <eontypes/Low.h>
-#include <eontypes/High.h>
+#include <eontypes/Integer.h>
+#include <eontypes/Floatingpt.h>
 #include <eontypes/Index.h>
 #include <eontypes/Name.h>
 #include <eontypes/Handle.h>
@@ -18,7 +14,6 @@
 #include <eontypes/NamePath.h>
 #include <eontypes/DynamicTuple.h>
 #include <eontypes/DataTuple.h>
-#include <eontypes/MetaData.h>
 
 
 
@@ -77,8 +72,9 @@ namespace eon
 
 	TEST( IntTest, instance )
 	{
-		using tt = IntType;
-		using ti = IntInstance;
+		using tt = IntegerType<int_t>;
+		using ti = IntegerInstance<int_t>;
+		type::Handler::init();
 
 		tt t;
 		std::shared_ptr<ti> i;
@@ -94,8 +90,9 @@ namespace eon
 
 	TEST( ShortTest, instance )
 	{
-		using tt = ShortType;
-		using ti = ShortInstance;
+		using tt = IntegerType<short_t>;
+		using ti = IntegerInstance<short_t>;
+		type::Handler::init();
 
 		tt t;
 		std::shared_ptr<ti> i;
@@ -111,8 +108,9 @@ namespace eon
 
 	TEST( LongTest, instance )
 	{
-		using tt = LongType;
-		using ti = LongInstance;
+		using tt = IntegerType<long_t>;
+		using ti = IntegerInstance<long_t>;
+		type::Handler::init();
 
 		tt t;
 		std::shared_ptr<ti> i;
@@ -128,8 +126,9 @@ namespace eon
 
 	TEST( FloatTest, instance )
 	{
-		using tt = FloatType;
-		using ti = FloatInstance;
+		using tt = FloatingptType<flt_t>;
+		using ti = FloatingptInstance<flt_t>;
+		type::Handler::init();
 
 		tt t;
 		std::shared_ptr<ti> i;
@@ -139,15 +138,16 @@ namespace eon
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( 0 ) ) ) );
 		WANT_EQ( 0, i->value() );
 
-		flt_t val = static_cast<flt_t>( -99.18 );
+		auto val = static_cast<flt_t>( -99.18 );
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( val ) ) ) );
 		WANT_EQ( val, i->value() );
 	}
 
 	TEST( LowTest, instance )
 	{
-		using tt = LowType;
-		using ti = LowInstance;
+		using tt = FloatingptType<low_t>;
+		using ti = FloatingptInstance<low_t>;
+		type::Handler::init();
 
 		tt t;
 		std::shared_ptr<ti> i;
@@ -157,15 +157,16 @@ namespace eon
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( 0 ) ) ) );
 		WANT_EQ( 0, i->value() );
 
-		flt_t val = static_cast<flt_t>( -99.18 );
+		auto val = static_cast<low_t>( -99.18 );
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( val ) ) ) );
 		WANT_EQ( val, i->value() );
 	}
 
 	TEST( HighTest, instance )
 	{
-		using tt = HighType;
-		using ti = HighInstance;
+		using tt = FloatingptType<high_t>;
+		using ti = FloatingptInstance<high_t>;
+		type::Handler::init();
 
 		tt t;
 		std::shared_ptr<ti> i;
@@ -175,7 +176,7 @@ namespace eon
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( 0 ) ) ) );
 		WANT_EQ( 0, i->value() );
 
-		flt_t val = static_cast<flt_t>( -99.18 );
+		auto val = static_cast<high_t>( -99.18 );
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( val ) ) ) );
 		WANT_EQ( val, i->value() );
 	}
@@ -310,10 +311,10 @@ namespace eon
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate() ) ) );
 		WANT_EQ( "@", i->value().str() );
 
-		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( nameref( "" ) ) ) ) );
+		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( namepath( "" ) ) ) ) );
 		WANT_EQ( "@", i->value().str() );
 
-		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( nameref( "@one/two/three" ) ) ) ) );
+		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( namepath( "@one/two/three" ) ) ) ) );
 		WANT_EQ( "@one/two/three", i->value().str() );
 	}
 
@@ -321,14 +322,16 @@ namespace eon
 	{
 		type::Handler::init();
 		Tuple tup;
-		tup += false;
-		tup += static_cast<int_t>( -54 );
-		tup += name_active;
-		tup += "I am string!";
+		tup.addRaw( false );
+		tup.addRaw( static_cast<int_t>( -54 ) );
+		tup.addRaw( name_active );
+		tup.addRaw( "I am string!" );
 		tup.finalize();
-		REQUIRE_EXCEPT( tup += 3.14, type::AccessDenied );
+		REQUIRE_EXCEPT( tup.addRaw( 3.14 ), type::AccessDenied );
 
-		TypeTuple exp_type( { name_plain, name_bool, name_int, name_name, name_string } );
+		std::vector<TypeElement*> attributes{ new NameElement( name_bool ), new NameElement( name_int ),
+			new NameElement( name_name ), new NameElement( name_string ) };
+		TypeTuple exp_type( attributes, name_plain, TypeTuple::own_attributes::yes );
 		WANT_EQ( exp_type.asName(), tup.type().asName() );
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
@@ -345,10 +348,10 @@ namespace eon
 	{
 		type::Handler::init();
 		Tuple tup;
-		tup += true;
-		tup.add( name::get( "two" ), static_cast<int_t>( -54 ) );
-		tup += name_active;
-		tup.add( name::get( "four" ), string( "I am string!" ) );
+		tup.addRaw( true );
+		tup.addRaw( eon::name( "two" ), static_cast<int_t>( -54 ) );
+		tup.addRaw( name_active );
+		tup.addRaw( eon::name( "four" ), string( "I am string!" ) );
 		tup.finalize();
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
@@ -357,56 +360,56 @@ namespace eon
 		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
 		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<int_t>( name::get( "two" ) ) );
+		WANT_EQ( -54, tup.value<int_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
-		WANT_EQ( "I am string!", tup.value<string>( name::get( "four" ) ) );
+		WANT_EQ( "I am string!", tup.value<string>( eon::name( "four" ) ) );
 	}
 	TEST( TupleTest, plain_deep )
 	{
 		type::Handler::init();
 		Tuple tup;
-		tup += "unnamed";
-		tup.add( name::get( "named" ), "Name" );
-		auto child = tup.addPlainTuple( name::get( "deep" ) );
-		auto grandchild = child->addPlainTuple( name::get( "deeper" ) );
-		*grandchild += "Rock";
-		*grandchild += "bottom";
+		tup.addRaw( "unnamed" );
+		tup.addRaw( eon::name( "named" ), "Name" );
+		auto child = tup.addPlainTuple( eon::name( "deep" ) );
+		auto grandchild = child->addPlainTuple( eon::name( "deeper" ) );
+		grandchild->addRaw( "Rock" );
+		grandchild->addRaw( "bottom" );
 		grandchild->finalize();
 		child->finalize();
 		tup.finalize();
 
 		type::Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\"))", str.output() );
+		WANT_EQ( "p(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.output() );
 	}
 	TEST( TupleTest, plain_compare )
 	{
 		type::Handler::init();
 		Tuple base, eq, ne, lt, gt;
 
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
+		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		base.addRaw( name_active );
+		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
-		eq.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		eq += name_active;
-		eq.add( name::get( "three" ), string( "Str" ) );
+		eq.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		eq.addRaw( name_active );
+		eq.addRaw( eon::name( "three" ), string( "Str" ) );
 		eq.finalize();
 
-		ne.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		ne += name_active;
-		ne.add( name::get( "two" ), string( "Str" ) );	// "two" vs. "three"
+		ne.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		ne.addRaw( name_active );
+		ne.addRaw( eon::name( "two" ), string( "Str" ) );	// "two" vs. "three"
 		ne.finalize();
 
-		lt.add( name::get( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt += name_active;
-		lt.add( name::get( "three" ), string( "Str" ) );
+		lt.addRaw( eon::name( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
+		lt.addRaw( name_active );
+		lt.addRaw( eon::name( "three" ), string( "Str" ) );
 		lt.finalize();
 
-		gt.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		gt += name_active;
-		gt.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
+		gt.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		gt.addRaw( name_active );
+		gt.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		gt.finalize();
 
 		WANT_FALSE( base < eq );
@@ -439,33 +442,33 @@ namespace eon
 		type::Handler::init();
 		Tuple base, c1, c2, n1, n2;
 
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
+		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		base.addRaw( name_active );
+		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		// Names in different places
-		c1.add( name::get( "three" ), string( "Str" ) );
-		c1 += name_active;
-		c1.add( name::get( "one" ), static_cast<int_t>( -54 ) );
+		c1.addRaw( eon::name( "three" ), string( "Str" ) );
+		c1.addRaw( name_active );
+		c1.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
 		c1.finalize();
 
 		// Unnamed, incomplete
-		c2 += static_cast<int_t>( -54 );
-		c2 += name_active;
+		c2.addRaw( static_cast<int_t>( -54 ) );
+		c2.addRaw( name_active );
 		c2.finalize();
 
 		// Wrong type
-		n1.add( name::get( "one" ), string( "Str" ) );
-		n1 += name_active;
-		n1.add( name::get( "three" ), static_cast<int_t>( -55 ) );
+		n1.addRaw( eon::name( "one" ), string( "Str" ) );
+		n1.addRaw( name_active );
+		n1.addRaw( eon::name( "three" ), static_cast<int_t>( -55 ) );
 		n1.finalize();
 
 		// Too many attributes
-		n2.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		n2 += name_active;
-		n2.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
-		n2 += std::string( "bytes" );
+		n2.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		n2.addRaw( name_active );
+		n2.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
+		n2.addRaw( std::string( "bytes" ) );
 		n2.finalize();
 
 		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
@@ -478,14 +481,16 @@ namespace eon
 	{
 		type::Handler::init();
 		DynamicTuple tup;
-		tup += false;
-		tup += static_cast<int_t>( -54 );
-		tup += name_active;
-		tup += string( "I am string!" );
+		tup.addRaw( false );
+		tup.addRaw( static_cast<int_t>( -54 ) );
+		tup.addRaw( name_active );
+		tup.addRaw( string( "I am string!" ) );
 		tup.finalize();
-		REQUIRE_NO_EXCEPT( tup += 3.14 );
+		REQUIRE_NO_EXCEPT( tup.addRaw( 3.14 ) );
 
-		TypeTuple exp_type( { name_dynamic, name_bool, name_int, name_name, name_string, name_float } );
+		std::vector<TypeElement*> attributes{ new NameElement( name_bool ), new NameElement( name_int ),
+			new NameElement( name_name ), new NameElement( name_string ), new NameElement{ name_float } };
+		TypeTuple exp_type( attributes, name_dynamic, TypeTuple::own_attributes::yes );
 		WANT_EQ( exp_type.asName(), tup.type().asName() );
 
 		REQUIRE_EQ( 5, tup.numAttributes() );
@@ -504,10 +509,10 @@ namespace eon
 	{
 		type::Handler::init();
 		DynamicTuple tup;
-		tup += true;
-		tup.add( name::get( "two" ), static_cast<int_t>( -54 ) );
-		tup += name_active;
-		tup.add( name::get( "four" ), string( "I am string!" ) );
+		tup.addRaw( true );
+		tup.addRaw( eon::name( "two" ), static_cast<int_t>( -54 ) );
+		tup.addRaw( name_active );
+		tup.addRaw( eon::name( "four" ), string( "I am string!" ) );
 		tup.finalize();
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
@@ -516,56 +521,56 @@ namespace eon
 		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
 		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<int_t>( name::get( "two" ) ) );
+		WANT_EQ( -54, tup.value<int_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
-		WANT_EQ( "I am string!", tup.value<string>( name::get( "four" ) ) );
+		WANT_EQ( "I am string!", tup.value<string>( eon::name( "four" ) ) );
 	}
 	TEST( TupleTest, dynamic_deep )
 	{
 		type::Handler::init();
 		DynamicTuple tup;
-		tup += "unnamed";
-		tup.add( name::get( "named" ), "Name" );
-		auto child = tup.addPlainTuple( name::get( "deep" ) );
-		auto grandchild = child->addDynamicTuple( name::get( "deeper" ) );
-		*grandchild += "Rock";
-		*grandchild += "bottom";
+		tup.addRaw( "unnamed" );
+		tup.addRaw( eon::name( "named" ), "Name" );
+		auto child = tup.addPlainTuple( eon::name( "deep" ) );
+		auto grandchild = child->addDynamicTuple( eon::name( "deeper" ) );
+		grandchild->addRaw( "Rock" );
+		grandchild->addRaw( "bottom" );
 		grandchild->finalize();
 		child->finalize();
 		tup.finalize();
 
 		type::Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\"))", str.output() );
+		WANT_EQ( "dynamic(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.output() );
 	}
 	TEST( TupleTest, dynamic_compare )
 	{
 		type::Handler::init();
 		DynamicTuple base, eq, ne, lt, gt;
 
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
+		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		base.addRaw( name_active );
+		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
-		eq.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		eq += name_active;
-		eq.add( name::get( "three" ), string( "Str" ) );
+		eq.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		eq.addRaw( name_active );
+		eq.addRaw( eon::name( "three" ), string( "Str" ) );
 		eq.finalize();
 
-		ne.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		ne += name_active;
-		ne.add( name::get( "two" ), string( "Str" ) );	// "two" vs. "three"
+		ne.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		ne.addRaw( name_active );
+		ne.addRaw( eon::name( "two" ), string( "Str" ) );	// "two" vs. "three"
 		ne.finalize();
 
-		lt.add( name::get( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt += name_active;
-		lt.add( name::get( "three" ), string( "Str" ) );
+		lt.addRaw( eon::name( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
+		lt.addRaw( name_active );
+		lt.addRaw( eon::name( "three" ), string( "Str" ) );
 		lt.finalize();
 
-		gt.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		gt += name_active;
-		gt.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
+		gt.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		gt.addRaw( name_active );
+		gt.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		gt.finalize();
 
 		WANT_FALSE( base < eq );
@@ -598,33 +603,33 @@ namespace eon
 		type::Handler::init();
 		DynamicTuple base, c1, c2, n1, n2;
 
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
+		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		base.addRaw( name_active );
+		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		// Names in different places
-		c1.add( name::get( "three" ), string( "Str" ) );
-		c1 += name_active;
-		c1.add( name::get( "one" ), static_cast<int_t>( -54 ) );
+		c1.addRaw( eon::name( "three" ), string( "Str" ) );
+		c1.addRaw( name_active );
+		c1.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
 		c1.finalize();
 
 		// Unnamed, incomplete
-		c2 += static_cast<int_t>( -54 );
-		c2 += name_active;
+		c2.addRaw( static_cast<int_t>( -54 ) );
+		c2.addRaw( name_active );
 		c2.finalize();
 
 		// Wrong type
-		n1.add( name::get( "one" ), string( "Str" ) );
-		n1 += name_active;
-		n1.add( name::get( "three" ), static_cast<int_t>( -55 ) );
+		n1.addRaw( eon::name( "one" ), string( "Str" ) );
+		n1.addRaw( name_active );
+		n1.addRaw( eon::name( "three" ), static_cast<int_t>( -55 ) );
 		n1.finalize();
 
 		// Too many attributes
-		n2.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		n2 += name_active;
-		n2.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
-		n2 += std::string( "bytes" );
+		n2.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		n2.addRaw( name_active );
+		n2.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
+		n2.addRaw( std::string( "bytes" ) );
 		n2.finalize();
 
 		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
@@ -637,14 +642,16 @@ namespace eon
 	{
 		type::Handler::init();
 		DataTuple tup;
-		tup += false;
-		tup += static_cast<int_t>( -54 );
-		tup += name_active;
-		tup += string( "I am string!" );
+		tup.addRaw( false );
+		tup.addRaw( static_cast<int_t>( -54 ) );
+		tup.addRaw( name_active );
+		tup.addRaw( string( "I am string!" ) );
 		tup.finalize();
-		REQUIRE_NO_EXCEPT( tup += 3.14 );
+		REQUIRE_NO_EXCEPT( tup.addRaw( 3.14 ) );
 
-		TypeTuple exp_type( { name_data, name_bool, name_long, name_name, name_string, name_high } );
+		std::vector<TypeElement*> attributes{ new NameElement( name_bool ), new NameElement( name_long ),
+			new NameElement( name_name ), new NameElement( name_string ), new NameElement{ name_high } };
+		TypeTuple exp_type( attributes, name_data, TypeTuple::own_attributes::yes );
 		WANT_EQ( exp_type.asName(), tup.type().asName() );
 
 		REQUIRE_EQ( 5, tup.numAttributes() );
@@ -663,10 +670,10 @@ namespace eon
 	{
 		type::Handler::init();
 		DataTuple tup;
-		tup += true;
-		tup.add( name::get( "two" ), static_cast<int_t>( -54 ) );
-		tup += name_active;
-		tup.add( name::get( "four" ), string( "I am string!" ) );
+		tup.addRaw( true );
+		tup.addRaw( eon::name( "two" ), static_cast<int_t>( -54 ) );
+		tup.addRaw( name_active );
+		tup.addRaw( eon::name( "four" ), string( "I am string!" ) );
 		tup.finalize();
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
@@ -675,57 +682,57 @@ namespace eon
 		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
 		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<long_t>( name::get( "two" ) ) );
+		WANT_EQ( -54, tup.value<long_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
-		WANT_EQ( "I am string!", tup.value<string>( name::get( "four" ) ) );
+		WANT_EQ( "I am string!", tup.value<string>( eon::name( "four" ) ) );
 	}
 	TEST( TupleTest, data_deep )
 	{
 		type::Handler::init();
 		DataTuple tup;
-		tup += "unnamed";
-		tup.add( name::get( "named" ), "Name" );
-		REQUIRE_EXCEPT( tup.addPlainTuple( name::get( "deep" ) ), type::AccessDenied );
-		auto child = tup.addDataTuple( name::get( "deep" ) );
-		auto grandchild = child->addDataTuple( name::get( "deeper" ) );
-		*grandchild += "Rock";
-		*grandchild += "bottom";
+		tup.addRaw( "unnamed" );
+		tup.addRaw( eon::name( "named" ), "Name" );
+		REQUIRE_EXCEPT( tup.addPlainTuple( eon::name( "deep" ) ), type::AccessDenied );
+		auto child = tup.addDataTuple( eon::name( "deep" ) );
+		auto grandchild = child->addDataTuple( eon::name( "deeper" ) );
+		grandchild->addRaw( "Rock" );
+		grandchild->addRaw( "bottom" );
 		grandchild->finalize();
 		child->finalize();
 		tup.finalize();
 
 		type::Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "\"unnamed\", named=\"Name\", deep:\n  deeper:\n    \"Rock\", \"bottom\"", str.output() );
+		WANT_EQ( "data(\"unnamed\", named=\"Name\", deep:\n  deeper:\n    \"Rock\", \"bottom\")", str.output() );
 	}
 	TEST( TupleTest, data_compare )
 	{
 		type::Handler::init();
 		DataTuple base, eq, ne, lt, gt;
 
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
+		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		base.addRaw( name_active );
+		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
-		eq.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		eq += name_active;
-		eq.add( name::get( "three" ), string( "Str" ) );
+		eq.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		eq.addRaw( name_active );
+		eq.addRaw( eon::name( "three" ), string( "Str" ) );
 		eq.finalize();
 
-		ne.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		ne += name_active;
-		ne.add( name::get( "two" ), string( "Str" ) );	// "two" vs. "three"
+		ne.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		ne.addRaw( name_active );
+		ne.addRaw( eon::name( "two" ), string( "Str" ) );	// "two" vs. "three"
 		ne.finalize();
 
-		lt.add( name::get( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt += name_active;
-		lt.add( name::get( "three" ), string( "Str" ) );
+		lt.addRaw( eon::name( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
+		lt.addRaw( name_active );
+		lt.addRaw( eon::name( "three" ), string( "Str" ) );
 		lt.finalize();
 
-		gt.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		gt += name_active;
-		gt.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
+		gt.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		gt.addRaw( name_active );
+		gt.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		gt.finalize();
 
 		WANT_FALSE( base < eq );
@@ -758,33 +765,33 @@ namespace eon
 		type::Handler::init();
 		DataTuple base, c1, c2, n1, n2;
 
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
+		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		base.addRaw( name_active );
+		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		// Names in different places
-		c1.add( name::get( "three" ), string( "Str" ) );
-		c1 += name_active;
-		c1.add( name::get( "one" ), static_cast<int_t>( -54 ) );
+		c1.addRaw( eon::name( "three" ), string( "Str" ) );
+		c1.addRaw( name_active );
+		c1.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
 		c1.finalize();
 
 		// Unnamed, incomplete
-		c2 += static_cast<int_t>( -54 );
-		c2 += name_active;
+		c2.addRaw( static_cast<int_t>( -54 ) );
+		c2.addRaw( name_active );
 		c2.finalize();
 
 		// Wrong type
-		n1.add( name::get( "one" ), string( "Str" ) );
-		n1 += name_active;
-		n1.add( name::get( "three" ), static_cast<int_t>( -55 ) );
+		n1.addRaw( eon::name( "one" ), string( "Str" ) );
+		n1.addRaw( name_active );
+		n1.addRaw( eon::name( "three" ), static_cast<int_t>( -55 ) );
 		n1.finalize();
 
 		// Too many attributes
-		n2.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		n2 += name_active;
-		n2.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
-		n2 += std::string( "bytes" );
+		n2.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
+		n2.addRaw( name_active );
+		n2.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
+		n2.addRaw( std::string( "bytes" ) );
 		n2.finalize();
 
 		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
@@ -793,166 +800,6 @@ namespace eon
 		WANT_FALSE( n2.type().compatibleWith( base.type() ) );
 	}
 
-	TEST( TupleTest, meta )
-	{
-		type::Handler::init();
-		MetaData tup;
-		tup += false;
-		tup += static_cast<int_t>( -54 );
-		tup += name_active;
-		tup += string( "I am string!" );
-		tup.finalize();
-		REQUIRE_NO_EXCEPT( tup += 3.14 );
-
-		TypeTuple exp_type( { name_meta, name_bool, name_long, name_name, name_string, name_high } );
-		WANT_EQ( exp_type.asName(), tup.type().asName() );
-
-		REQUIRE_EQ( 5, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_long, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
-		REQUIRE_EQ( name_high, tup[ 4 ].type().asName() );
-		WANT_FALSE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<long_t>( 1 ) );
-		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
-		WANT_EQ( "I am string!", tup.value<string>( 3 ) );
-		WANT_EQ( 3.14, tup.value<high_t>( 4 ) );
-	}
-	TEST( TupleTest, meta_named )
-	{
-		type::Handler::init();
-		MetaData tup;
-		tup += true;
-		tup.add( name::get( "two" ), static_cast<int_t>( -54 ) );
-		tup += name_active;
-		tup.add( name::get( "four" ), string( "I am string!" ) );
-		tup.finalize();
-
-		REQUIRE_EQ( 4, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_long, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
-		WANT_TRUE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<long_t>( name::get( "two" ) ) );
-		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
-		WANT_EQ( "I am string!", tup.value<string>( name::get( "four" ) ) );
-	}
-	TEST( TupleTest, meta_deep )
-	{
-		type::Handler::init();
-		MetaData tup;
-		tup += "unnamed";
-		tup.add( name::get( "named" ), "Name" );
-		REQUIRE_EXCEPT( tup.addPlainTuple( name::get( "deep" ) ), type::AccessDenied );
-		REQUIRE_EXCEPT( tup.addDataTuple( name::get( "deep" ) ), type::AccessDenied );
-		auto child = tup.addMetaData( name::get( "deep" ) );
-		auto grandchild = child->addMetaData( name::get( "deeper" ) );
-		*grandchild += "Rock";
-		*grandchild += "bottom";
-		grandchild->finalize();
-		child->finalize();
-		tup.finalize();
-
-		type::Stringifier str;
-		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "M(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.output() );
-	}
-	TEST( TupleTest, meta_compare )
-	{
-		type::Handler::init();
-		MetaData base, eq, ne, lt, gt;
-
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
-		base.finalize();
-
-		eq.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		eq += name_active;
-		eq.add( name::get( "three" ), string( "Str" ) );
-		eq.finalize();
-
-		ne.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		ne += name_active;
-		ne.add( name::get( "two" ), string( "Str" ) );	// "two" vs. "three"
-		ne.finalize();
-
-		lt.add( name::get( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt += name_active;
-		lt.add( name::get( "three" ), string( "Str" ) );
-		lt.finalize();
-
-		gt.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		gt += name_active;
-		gt.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
-		gt.finalize();
-
-		WANT_FALSE( base < eq );
-		WANT_TRUE( base <= eq );
-		WANT_FALSE( base > eq );
-		WANT_TRUE( base >= eq );
-		WANT_TRUE( base == eq );
-		WANT_FALSE( base != eq );
-
-		// NOTE: We cannot test relational differences on 'ne' since only a name is different
-		WANT_FALSE( base == ne );
-		WANT_TRUE( base != ne );
-
-		WANT_FALSE( base < lt );
-		WANT_FALSE( base <= lt );
-		WANT_TRUE( base > lt );
-		WANT_TRUE( base >= lt );
-		WANT_FALSE( base == lt );
-		WANT_TRUE( base != lt );
-
-		WANT_TRUE( base < gt );
-		WANT_TRUE( base <= gt );
-		WANT_FALSE( base > gt );
-		WANT_FALSE( base >= gt );
-		WANT_FALSE( base == gt );
-		WANT_TRUE( base != gt );
-	}
-	TEST( TupleTest, meta_compatible )
-	{
-		type::Handler::init();
-		MetaData base, c1, c2, n1, n2;
-
-		base.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		base += name_active;
-		base.add( name::get( "three" ), string( "Str" ) );
-		base.finalize();
-
-		// Names in different places
-		c1.add( name::get( "three" ), string( "Str" ) );
-		c1 += name_active;
-		c1.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		c1.finalize();
-
-		// Unnamed, incomplete
-		c2 += static_cast<int_t>( -54 );
-		c2 += name_active;
-		c2.finalize();
-
-		// Wrong type
-		n1.add( name::get( "one" ), string( "Str" ) );
-		n1 += name_active;
-		n1.add( name::get( "three" ), static_cast<int_t>( -55 ) );
-		n1.finalize();
-
-		// Too many attributes
-		n2.add( name::get( "one" ), static_cast<int_t>( -54 ) );
-		n2 += name_active;
-		n2.add( name::get( "three" ), string( "str" ) );	// "str" vs. "Str"
-		n2 += std::string( "bytes" );
-		n2.finalize();
-
-		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
-		WANT_TRUE( c2.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n1.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n2.type().compatibleWith( base.type() ) );
-	}
 
 /*
 	
@@ -983,7 +830,7 @@ namespace eon
 
 	TEST( TypesTest, instance_tuple )
 	{
-		auto name_sub = name::get( "sub" );
+		auto name_sub = eon::name( "sub" );
 		tup::varscope global;
 		instance i{ global, new eon::tuple{ global, {
 			tuple::attribute( new instance( global, true ) ),

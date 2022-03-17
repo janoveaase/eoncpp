@@ -13,6 +13,8 @@ namespace eon
 
 
 
-	type::Instance* BytesType::instantiate( const std::string& value ) const { return new BytesInstance( value ); }
-	type::Instance* BytesType::instantiate( std::string&& value ) const { return new BytesInstance( std::move( value ) ); }
+	type::Instance* BytesType::instantiate( const std::string& value ) const {
+		return new BytesInstance( value, source::Ref() ); }
+	type::Instance* BytesType::instantiate( std::string&& value ) const {
+		return new BytesInstance( std::move( value ), source::Ref() ); }
 }

@@ -10,7 +10,7 @@
 namespace eon
 {
 	//* Register type and actions in the global scope
-	void registerStringActions( scope::Global& scope );
+	void registerString( scope::Global& scope );
 
 
 	/**************************************************************************
@@ -19,12 +19,12 @@ namespace eon
 	class StringType : public type::TypeDef
 	{
 	public:
-		StringType() : TypeDef( name_string ) {}
+		StringType() : TypeDef( name_string, source::Ref() ) {}
 		~StringType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "string" ); }
 
@@ -40,18 +40,18 @@ namespace eon
 	class StringInstance : public type::Instance
 	{
 	public:
-		StringInstance() : Instance( name_string ) {}
-		StringInstance( const string& value ) : Instance( name_string ) { Value = value; }
-		StringInstance( string&& value ) : Instance( name_string ) { Value = std::move( value ); }
+		StringInstance() : Instance( name_string, source::Ref() ) {}
+		StringInstance( const string& value, source::Ref source ) : Instance( name_string, source ) { Value = value; }
+		StringInstance( string&& value, source::Ref source ) : Instance( name_string, source ) {
+			Value = std::move( value ); }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (StringType*)scope.find( name_string ) )->instantiate( Value ); }
+		inline Object* copy() override { return new StringInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( string ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "\"" + Value.escapeAll() + "\"" ); }
-		inline Instance* copy() const override { return new StringInstance( Value ); }
+		inline Instance* copy() const override { return new StringInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const StringInstance*)&other; return Value.compare( o.Value ); }
 

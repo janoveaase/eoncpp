@@ -1,14 +1,14 @@
 #include "NameActions.h"
-#include "Int.h"
+#include "Integer.h"
 
 
 namespace eon
 {
 	void registerNameActions( scope::Global& scope )
 	{
-		scope.add( name_construct, new actions::NameConstruct() );
-		scope.add( name_construct, new actions::NameCopyConstruct( scope ) );;
-		scope.add( name_cmp, new actions::NameCmp( scope ) );
+		scope.addAction( name_constructor, new actions::NameConstruct() );
+		scope.addAction( name_constructor, new actions::NameCopyConstruct() );
+		scope.addOperator( type::operators::code::cmp, new actions::NameCmp() );
 	}
 
 
@@ -21,14 +21,14 @@ namespace eon
 		type::Object* NameCopyConstruct::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<NameInstance>( scope, action_node, 0 );
-			return new NameInstance( arg1->value() );
+			return new NameInstance( arg1->value(), arg1->source() );
 		}
 
 		type::Object* NameCmp::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<NameInstance>( scope, action_node, 0 );
 			auto arg2 = _operand<NameInstance>( scope, action_node, 1 );
-			auto rval = new IntInstance();
+			auto rval = new IntegerInstance<int_t>();
 			rval->value( arg1->value() < arg2->value() ? -1 : arg2->value() < arg1->value() ? 1 : 0 );
 			return rval;
 		}

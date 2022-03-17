@@ -2,7 +2,7 @@
 #include "TypeSystem.h"
 #include "DynamicTuple.h"
 #include "Operators.h"
-#include "Node.h"
+//#include "Node.h"
 #include "Name.h"
 #include <eonscopes/Scope.h>
 
@@ -57,24 +57,14 @@ namespace eon
 		public:
 			Action() = delete;
 
-			// Construct action
-			Action( const TypeTuple& type, type::operators::code op_code, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-			Action( const TypeTuple& type, type::operators::code op_code, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-			Action( name_t type, type::operators::code op_code, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-			Action( name_t type, type::operators::code op_code, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-
-			Action( const TypeTuple& type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-			Action( const TypeTuple& type, actions::Type action_type, name_t name, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-			Action( name_t type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
-			Action( name_t type, actions::Type action_type, name_t name, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises = {} );
+			Action( const TypeTuple& instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
+				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
+			Action( const TypeTuple& instance_type, actions::Type action_type, name_t name, name_t return_type,
+				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
+			Action( name_t instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
+				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
+			Action( name_t instance_type, actions::Type action_type, name_t name, name_t return_type,
+				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
 			// TODO: Add support for tests!
 
 			virtual ~Action() = default;
@@ -84,12 +74,17 @@ namespace eon
 			void callDestructor() {}
 			inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
-			virtual type::Object* copy( scope::Scope& scope ) override {
-				throw AccessDenied( "Cannot copy action object!" ); }
+			virtual type::Object* copy() override { throw AccessDenied( "Cannot copy action object!" ); }
 			virtual void str( type::Stringifier& str ) const override {
 				str.addWord( Name ); str.addRaw( ":" ); str.newLine(); }
 			inline name_t generalType() const noexcept override { return name_action; }
+			inline const TypeTuple& instanceType() const noexcept { return InstanceType; }
 			inline actions::Type actionType() const noexcept { return ActionType; }
+
+			virtual type::Precedence inputPrecedence() const noexcept {
+				return operators::inputPrecedence( operators::code::call ); }
+			virtual type::Precedence stackPrecedence() const noexcept {
+				return operators::stackPrecedence( operators::code::call ); }
 
 			// Get the name of the action
 			inline name_t name() const noexcept { return Name; }
@@ -100,13 +95,11 @@ namespace eon
 			// Get arguments
 			inline const DynamicTuple& arguments() const noexcept { return Arguments; }
 
-			inline type::operators::code opCode() const noexcept { return OpCode; }
+			// Get number of arguments
+			virtual index_t numArguments() const noexcept { return Arguments.numAttributes(); }
 
-			inline type::Precedence inputPrecedence() const noexcept { return InputPrecedence; }
-			inline type::Precedence stackPrecedence() const noexcept { return StackPrecedence; }
-
-			inline bool rightToLeft() const noexcept { return InputPrecedence > StackPrecedence; }
-			inline bool leftToRight() const noexcept { return InputPrecedence < StackPrecedence; }
+			// Get number of arguments without default values
+			virtual index_t numArgsWithoutDefaultValue() const noexcept;
 
 			//* Execute the action
 			virtual Object* execute( scope::Scope& scope, Node& action_node ) = 0;
@@ -117,14 +110,7 @@ namespace eon
 			template<typename T>
 			T* _operand( scope::Scope& scope, Node& action_node, size_t arg_no )
 			{
-				auto& child = action_node.child( arg_no );
-				Object* value{ nullptr };
-				if( child.isAction() )
-					value = child.action().execute( scope, child );
-				else if( child.isValue() )
-					value = child.value();
-				else
-					value = ( (NameType*)scope.find( name_name ) )->instantiate( child.name() );
+				auto value = _childValue( scope, action_node, arg_no );
 
 				if( typeid( T ) != typeid( value ) )
 					throw WrongType();
@@ -139,15 +125,15 @@ namespace eon
 			**********************************************************************/
 		private:
 
-			name_t _makeSignature( actions::Type type, name_t name, name_t returntype, const DynamicTuple& arguments ) const;
+			static TypeTuple _generateType( name_t name, const TypeTuple& returntype, const DynamicTuple& arguments );
 
-			void _create( const TypeTuple& type, type::operators::code op_code, const TypeTuple& return_type, DynamicTuple arguments,
-				std::initializer_list<name_t> raises );
-			void _create( const TypeTuple& type, actions::Type action_type, name_t name, const TypeTuple& return_type,
+			void _create( const TypeTuple& instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
 				DynamicTuple arguments, std::initializer_list<name_t> raises );
 
 			void _initPrefixFirstAction();
 			void _initPrefixLastAction();
+
+			Object* _childValue( scope::Scope& scope, Node& action_node, size_t arg_no );
 
 
 
@@ -163,9 +149,6 @@ namespace eon
 			TypeTuple ReturnType;
 			DynamicTuple Arguments;
 			std::unordered_set<name_t> Raises;
-			type::operators::code OpCode{ type::operators::code::undef };
-			type::Precedence InputPrecedence{ type::Precedence::none };
-			type::Precedence StackPrecedence{ type::Precedence::none };
 		};
 	}
 }

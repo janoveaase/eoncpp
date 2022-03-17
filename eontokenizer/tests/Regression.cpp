@@ -22,6 +22,43 @@ namespace eon
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
 
+	TEST( TokenizerTest, names1 )
+	{
+		string raw{ "name 0name0 00 _0 0_ _name name_00" };
+		source::String src( "test", std::move( raw ) );
+		Tok.registerEonNameTokens();
+		auto tokens = Tok( src );
+		REQUIRE_EQ( 13, tokens.size() ) << "Wrong number of tokens";
+
+		string expected{ "name; ;0name0; ;00; ;_0; ;0_; ;_name; ;name_00" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ";";
+			actual += token.str();
+		}
+		WANT_EQ( expected.stdstr(), actual.stdstr() );
+	}
+	TEST( ReTokenizerTest, names2 )
+	{
+		string raw{ "_sum_1+=2+2num" };
+		source::String src( "test", std::move( raw ) );
+		Tok.registerEonNameTokens();
+		auto tokens = Tok( src );
+
+		string expected{ "name=_sum_1, operator=+=, digits=2, operator=+, name=2num" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ", ";
+			actual += eon::str( token.type() );
+			actual += "=" + token.str();
+		}
+		WANT_EQ( expected.stdstr(), actual.stdstr() );
+	}
+
 	TEST( TokenizerTest, special )
 	{
 		string raw{ "++(())<<>>[[]]{{}}--**//" };
@@ -96,7 +133,7 @@ namespace eon
 
 	TEST( TokenParserTest, basic )
 	{
-		string raw{ "This is a 02   \tline test\nLine #2!" };
+		string raw{ "This is a  02   \tline test\nLine #2!" };
 		source::String src( "test", std::move( raw ) );
 		auto tokens = Tok( src );
 		TokenParser parser( std::move( tokens ) );
@@ -113,7 +150,13 @@ namespace eon
 		parser.backward();
 		REQUIRE_EQ( "This", parser.current().str().stdstr() ) << "Wrong first token - again";
 
-		WANT_TRUE( parser.match( { "T*", "*", "is", "*", "*", " ", "*2" } ) ) << "Failed to match group";
+		TokenMatcher matcher;
+		REQUIRE_NO_EXCEPT( matcher = TokenMatcher(
+			"(letters 'T*') ?(space) opt((letters 'was') (letters 'is')) ?(space) (letters) opt?((letters 'x') (letters 'a')) (space '  ') (digits '*2')" ) );
+		WANT_TRUE( matcher.match( parser ) ) << "Failed to match group1";
+
+		REQUIRE_NO_EXCEPT( matcher = TokenMatcher( "!(letters 't*') (space) &(letters) !(letters 'are')" ) );
+		WANT_TRUE( matcher.match( parser ) ) << "Failed to match group2";
 
 		parser.pos( 8 );
 		REQUIRE_EQ( "\t", parser.current().str().stdstr() ) << "Wrong eigth token";
@@ -199,5 +242,29 @@ namespace eon
 			actual += "=" + token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
+	}
+	TEST( ReTokenizerTest, int_float_name )
+	{
+		string raw{ "1 1.2 1three" };
+		source::String src( "test", std::move( raw ) );
+		auto tokens = Tok( src );
+		TokenParser parser( std::move( tokens ) );
+
+		ReTokenizer retok;
+		retok.addRule( new ReTokenizer::SequenceRule( name_float, { name_digits, name_point, name_digits } ) );
+		retok.addRule( new ReTokenizer::ComboRule( name_name, { name_letters, name_digits, name_underscore },
+			regex{ R"(^\d+$)" } ) );
+		tokens = retok( parser );
+
+		string expected{ "digits=1, space= , float=1.2, space= , name=1three" };
+		string actual;
+		for( auto& token : tokens )
+		{
+			if( !actual.empty() )
+				actual += ", ";
+			actual += eon::str( token.type() );
+			actual += "=" + token.str();
+		}
+		WANT_EQ( expected, actual );
 	}
 }

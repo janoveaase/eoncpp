@@ -5,24 +5,29 @@ namespace eon
 {
 	void TypeTuple::str( type::Stringifier& str ) const
 	{
-		str.addRaw( "T(" );
-		str.noSpacing();
-		bool first = true;
-		for( auto element : Elements )
+		if( isName() )
+			str.addWord( asName() );
+		else
 		{
-			if( first )
-				first = false;
-			else
+			str.addRaw( "T(" );
+			str.noSpacing();
+			bool first = true;
+			for( auto element : Elements )
 			{
-				str.addRaw( "," );
-				str.spacingAlways();
+				if( first )
+					first = false;
+				else
+				{
+					str.addRaw( "," );
+					str.spacingAlways();
+				}
+				if( element->isNameElement() )
+					str.addWord( ( (const NameElement*)element )->Value );
+				else
+					( (const TypeTuple*)element )->str( str );
 			}
-			if( element->isNameElement() )
-				str.addWord( ( (const NameElement*)element )->Value );
-			else
-				( (const TypeTuple*)element )->str( str );
+			str.addRaw( ")" );
 		}
-		str.addRaw( ")" );
 	}
 
 
@@ -32,10 +37,10 @@ namespace eon
 	{
 		// 'other' is compatible with 'this' if:
 		//   1. They compare equal.
-		//   2. 'this' has <= attributes than 'other' and they all have the same types in the same order.
+		//   2. 'this' has <= #attributes than 'other' and they all have the same types in the same order.
 		//   3. 'this' has named attributes that match the named attributes of 'other',
 		//      while all unnamed (if any) matches as in pt. 2.
-		
+
 		if( *this == other )
 			return true;
 		if( other.Elements.size() < Elements.size() )
@@ -54,6 +59,18 @@ namespace eon
 			else
 			{
 				auto other_elm = other.Elements[ i ];
+
+				// Special case: 'this' is an empty tuple, 'other' is a non-empty tuple
+				if( my_elm->isTupleElement() && other_elm->isTupleElement() )
+				{
+					auto& my_tup = *(TypeTuple*)my_elm;
+					auto& other_tup = *(TypeTuple*)other_elm;
+					if( my_tup.TupleType != other_tup.TupleType )
+						return false;
+					if( other_tup.Elements.empty() )
+						return true;
+				}
+
 				if( !my_elm->compatibleWith( *other_elm ) )
 					return false;
 			}
@@ -67,23 +84,30 @@ namespace eon
 	void TypeTuple::_makeName()
 	{
 		auto id = _makeNameStr();
-		AsName = name::compilerGet( std::move( id ) );
+		if( !id.empty() )
+			AsName = compilerName( std::move( id ) );
 	}
 	string TypeTuple::_makeNameStr() const
 	{
+		if( isName() && ( !isTuple() || TupleType == name_plain ) )
+			return eon::str( ( (NameElement*)Elements[ 0 ] )->Value );
 		string id;
+		if( TupleType )
+			id = eon::str( TupleType ) + "(";
 		for( auto elm : Elements )
 		{
-			if( !id.empty() )
+			if( !id.empty() && *id.last() != '(' )
 				id += ",";
+			if( elm->Name )
+				id += eon::str( elm->Name ) + "=";
 			if( elm->isNameElement() )
-				id += *( (const NameElement*)elm )->Value;
+				id += eon::str( ( (const NameElement*)elm )->Value );
 			else if( elm->isEllipsisElement() )
 			{
 				auto& e = *(const EllipsisElement*)elm;
 				id += "(";
 				if( e.Type != no_name )
-					id += *e.Type + " ";
+					id += eon::str( e.Type ) + " ";
 				id += "...)";
 			}
 			else
@@ -93,6 +117,8 @@ namespace eon
 				id += ")";
 			}
 		}
+		if( TupleType )
+			id += ")";
 		return id;
 	}
 
@@ -101,7 +127,7 @@ namespace eon
 		if( element->Name != no_name )
 		{
 			if( Named.find( element->Name ) != Named.end() )
-				throw type::DuplicateName( *element->Name );
+				throw type::DuplicateName( eon::str( element->Name ) );
 			Named[ element->Name ] = Elements.size();
 		}
 		Elements.push_back( element );

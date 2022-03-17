@@ -2,6 +2,7 @@
 
 #include "Char.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -28,7 +29,8 @@ namespace eon
 		class CharConstruct : public type::Action
 		{
 		public:
-			inline CharConstruct() : Action( name_char, Type::instance, name_construct, name_char, DynamicTuple() ) {}
+			inline CharConstruct() : Action( name_char, Type::instance, name_constructor, name_char, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~CharConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -36,8 +38,8 @@ namespace eon
 		class CharCopyConstruct : public type::Action
 		{
 		public:
-			inline CharCopyConstruct( scope::Global& scope ) : Action( name_char, Type::instance, name_construct, name_char,
-				DynamicTuple( { type::Attribute( name_other, name_char ) } ), { name_memory_denied } ) {}
+			inline CharCopyConstruct() : Action( name_char, Type::instance, name_constructor, name_char, DynamicTuple( {
+				type::Attribute( name_other, name_char ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~CharCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -46,18 +48,18 @@ namespace eon
 		class CharByteConstruct : public type::Action
 		{
 		public:
-			inline CharByteConstruct( scope::Global& scope ) : Action( name_char, Type::instance, name_construct, name_char,
-				DynamicTuple( { type::Attribute( name_other, name_byte ) } ), { name_memory_denied } ) {}
+			inline CharByteConstruct() : Action( name_char, Type::instance, name_constructor, name_char, DynamicTuple( {
+				type::Attribute( name_other, name_byte ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~CharByteConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class CharCmp : public type::Action
+		class CharCmp : public OperatorAction
 		{
 		public:
-			inline CharCmp( scope::Global& scope ) : Action( name_char, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_char ) } ) ) {}
+			inline CharCmp() : OperatorAction( name_char, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_char ) } ), {}, source::Ref() ) {}
 			virtual ~CharCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

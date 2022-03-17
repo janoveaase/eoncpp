@@ -11,7 +11,7 @@
 namespace eon
 {
 	//* Register type and actions in the global scope
-	void registerStringActions( scope::Global& scope );
+	void registerRegex( scope::Global& scope );
 
 
 	/**************************************************************************
@@ -20,12 +20,12 @@ namespace eon
 	class RegexType : public type::TypeDef
 	{
 	public:
-		RegexType() : TypeDef( name_regex ) {}
+		RegexType() : TypeDef( name_regex, source::Ref() ) {}
 		~RegexType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "regex" ); }
 
@@ -41,19 +41,20 @@ namespace eon
 	class RegexInstance : public type::Instance
 	{
 	public:
-		RegexInstance() : Instance( name_regex ) {}
-		RegexInstance( const regex& value ) : Instance( name_regex ) { Value = value; }
-		RegexInstance( regex&& value ) : Instance( name_regex ) { Value = std::move( value ); }
-		RegexInstance( const string& value ) : Instance( name_regex ) { Value = regex( value.substr() ); }
+		RegexInstance() : Instance( name_regex, source::Ref() ) {}
+		RegexInstance( const regex& value, source::Ref source ) : Instance( name_regex, source ) { Value = value; }
+		RegexInstance( regex&& value, source::Ref source ) : Instance( name_regex, source ) { Value = std::move( value ); }
+		RegexInstance( const string& value, source::Ref source ) : Instance( name_regex, source ) {
+			Value = regex( value.substr() ); }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (RegexType*)scope.find( name_regex ) )->instantiate( Value ); }
+		inline Object* copy() override { return new RegexInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( regex ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
-		inline void str( type::Stringifier& str ) const override { str.addWord( Value.str() ); }
-		inline Instance* copy() const override { return new RegexInstance( Value ); }
+		inline void str( type::Stringifier& str ) const override {
+			str.addRaw( "r\"" ); str.addWord( Value.str() ); str.addRaw( "\"" ); }
+		inline Instance* copy() const override { return new RegexInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const RegexInstance*)&other; return Value.str().compare( o.Value.str() ); }
 

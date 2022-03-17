@@ -3,18 +3,25 @@ project(EonParser LANGUAGES CXX)
 message(STATUS " - EonParser")
 
 set(PARSER_HEADERS
+	RawParser.h
+	Element.h
 	Parser.h
-	RegexRule.h
+	OperatorRules.h
 	BoolLiteralRule.h
 	NamePathRule.h
+	NumericalRules.h
+	DefineRules.h
 	ParseExpression.h
 	ToolBox.h
 )
 set(PARSER_SOURCES
+	RawParser.cpp
 	Parser.cpp
-	RegexRule.cpp
+	OperatorRules.cpp
 	BoolLiteralRule.cpp
 	NamePathRule.cpp
+	NumericalRules.cpp
+	DefineRules.cpp
 	ParseExpression.cpp
 	ToolBox.cpp
 )
@@ -29,7 +36,7 @@ set_target_properties(
 set_property(TARGET EonParser PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(EonParser PUBLIC EonString
-	EonSource EonTokenizer EonRegex EonExcept EonName EonFileSys EonOF
+	EonSource EonTokenizer EonRegex EonExcept EonFileSys EonTypes
 )
 target_include_directories(EonParser PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"

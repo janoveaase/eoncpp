@@ -2,6 +2,7 @@
 
 #include "Path.h"
 #include "Action.h"
+#include "OperatorAction.h"
 #include <eonscopes/Scope.h>
 
 
@@ -25,7 +26,8 @@ namespace eon
 		class PathConstruct : public type::Action
 		{
 		public:
-			inline PathConstruct() : Action( name_path, Type::instance, name_construct, name_path, DynamicTuple() ) {}
+			inline PathConstruct() : Action( name_path, Type::instance, name_constructor, name_path, DynamicTuple(), {},
+				source::Ref() ) {}
 			virtual ~PathConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -33,8 +35,8 @@ namespace eon
 		class PathCopyConstruct : public type::Action
 		{
 		public:
-			inline PathCopyConstruct( scope::Global& scope ) : Action( name_path, Type::instance, name_construct, name_path,
-				DynamicTuple( { type::Attribute( name_other, name_path ) } ), { name_memory_denied } ) {}
+			inline PathCopyConstruct() : Action( name_path, Type::instance, name_constructor, name_path, DynamicTuple( {
+				type::Attribute( name_other, name_path ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~PathCopyConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -43,29 +45,28 @@ namespace eon
 		class PathStringConstruct : public type::Action
 		{
 		public:
-			inline PathStringConstruct( scope::Global& scope ) : Action(
-				name_path, Type::instance, name_construct, name_path,
-				DynamicTuple( { type::Attribute( name_other, name_string ) } ), { name_memory_denied } ) {}
+			inline PathStringConstruct() : Action( name_path, Type::instance, name_constructor, name_path, DynamicTuple( {
+				type::Attribute( name_other, name_string ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~PathStringConstruct() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class PathCmp : public type::Action
+		class PathCmp : public OperatorAction
 		{
 		public:
-			inline PathCmp( scope::Global& scope ) : Action( name_path, opcode::cmp, name_int, DynamicTuple(
-				{ type::Attribute( name_other, name_path ) } ) ) {}
+			inline PathCmp() : OperatorAction( name_path, opcode::cmp, name_int, DynamicTuple( {
+				type::Attribute( name_other, name_path ) } ), {}, source::Ref() ) {}
 			virtual ~PathCmp() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
 		};
 
-		class PathPlus : public type::Action
+		class PathPlus : public OperatorAction
 		{
 		public:
-			inline PathPlus( scope::Global& scope ) : Action( name_path, opcode::plus, name_path, DynamicTuple(
-				{ type::Attribute( name_other, name_path ) } ) ) {}
+			inline PathPlus() : OperatorAction( name_path, opcode::plus, name_path, DynamicTuple( {
+				type::Attribute( name_other, name_path ) } ), {}, source::Ref() ) {}
 			virtual ~PathPlus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;

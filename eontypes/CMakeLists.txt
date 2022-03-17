@@ -7,11 +7,11 @@ set(TYPES_HEADERS
 	TypeSystem.h
 	TypeHandler.h
 	Attribute.h
+	Caches.h
 	BasicTuple.h
 	BasicTupleActions.h
 	DataTuple.h
 	DynamicTuple.h
-	MetaData.h
 	TypeTuple.h
 	Tuple.h
 	Bool.h
@@ -20,18 +20,10 @@ set(TYPES_HEADERS
 	ByteActions.h
 	Char.h
 	CharActions.h
-	Int.h
-	IntActions.h
-	Short.h
-	ShortActions.h
-	Long.h
-	LongActions.h
-	Float.h
-	FloatActions.h
-	Low.h
-	LowActions.h
-	High.h
-	HighActions.h
+	Integer.h
+	IntegerActions.h
+	Floatingpt.h
+	FloatingptActions.h
 	Index.h
 	IndexActions.h
 	Name.h
@@ -39,7 +31,10 @@ set(TYPES_HEADERS
 	Handle.h
 	HandleActions.h
 	Shared.h
+	Reference.h
 	Expression.h
+	ExpressionObj.h
+	ExpressionActions.h
 	String.h
 	StringActions.h
 	Bytes.h
@@ -55,6 +50,8 @@ set(TYPES_HEADERS
 	OperatorAction.h
 	Node.h
 	Stringifier.h
+	Primitives.h
+	StandardTypes.h
 )
 set(TYPES_SOURCES
 	TypeSystem.cpp
@@ -69,18 +66,6 @@ set(TYPES_SOURCES
 	ByteActions.cpp
 	Char.cpp
 	CharActions.cpp
-	Int.cpp
-	IntActions.cpp
-	Short.cpp
-	ShortActions.cpp
-	Long.cpp
-	LongActions.cpp
-	Float.cpp
-	FloatActions.cpp
-	Low.cpp
-	LowActions.cpp
-	High.cpp
-	HighActions.cpp
 	Index.cpp
 	IndexActions.cpp
 	Name.cpp
@@ -88,6 +73,9 @@ set(TYPES_SOURCES
 	Handle.cpp
 	HandleActions.cpp
 	Shared.cpp
+	Expression.cpp
+	ExpressionObj.cpp
+	ExpressionActions.cpp
 	String.cpp
 	StringActions.cpp
 	Bytes.cpp
@@ -102,6 +90,8 @@ set(TYPES_SOURCES
 	Operators.cpp
 	OperatorAction.cpp
 	Node.cpp
+	Primitives.cpp
+	StandardTypes.cpp
 )
 
 add_library(EonTypes STATIC ${TYPES_HEADERS} ${TYPES_SOURCES})
@@ -113,7 +103,7 @@ set_target_properties(
 )
 set_property(TARGET EonTypes PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTypes PUBLIC EonString EonName EonExcept EonHex EonRegex EonScopes EonFileSys)
+target_link_libraries(EonTypes PUBLIC EonString EonExcept EonHex EonRegex EonScopes EonFileSys)
 target_include_directories(EonTypes PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
 )

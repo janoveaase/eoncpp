@@ -19,12 +19,12 @@ namespace eon
 	class HandleType : public type::TypeDef
 	{
 	public:
-		HandleType() : TypeDef( name_handle ) {}
+		HandleType() : TypeDef( name_handle, source::Ref() ) {}
 		~HandleType() = default;
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "handle" ); }
 
@@ -40,17 +40,16 @@ namespace eon
 	class HandleInstance : public type::Instance
 	{
 	public:
-		HandleInstance() : Instance( name_handle ) {}
-		HandleInstance( handle_t value ) : Instance( name_handle ) { Value = value; }
+		HandleInstance() : Instance( name_handle, source::Ref() ) {}
+		HandleInstance( handle_t value, source::Ref source ) : Instance( name_handle, source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (HandleType*)scope.find( name_handle ) )->instantiate( Value ); }
+		inline Object* copy() override { return new HandleInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( handle_t ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( type::Stringifier& str ) const override { str.addWord( string( Value ) ); }
-		inline Instance* copy() const override { return new HandleInstance( Value ); }
+		inline Instance* copy() const override { return new HandleInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const HandleInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }
 

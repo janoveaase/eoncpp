@@ -50,12 +50,20 @@ namespace eon
 		inline bool extend( source::Pos pos ) noexcept {
 			return pos > Src.end() && !Src.source().beyondEnd( pos ) ? Src.end( pos ) : false; }
 
+		//* Extend token's source to the given end position and specify a new type
+		inline bool extendType( source::Pos pos, name_t type_name ) noexcept {
+			Type = type_name; return pos > Src.end() && !Src.source().beyondEnd( pos ) ? Src.end( pos ) : false; }
+
 
 
 
 		/**********************************************************************
 		  Read-only Methods
 		**********************************************************************/
+
+		//* Check if the token contains anything
+		inline operator bool() const noexcept { return static_cast<bool>( Src ); }
+		inline bool empty() const noexcept { return Src.empty(); }
 
 		//* Access the full source reference of the token
 		inline const source::Ref& source() const noexcept { return Src; }

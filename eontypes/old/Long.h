@@ -24,7 +24,7 @@ namespace eon
 
 		void die() override {}
 		void callDestructor() override {}
-		Object* copy( scope::Scope& scope ) override { throw type::AccessDenied( "Cannot copy type object!" ); }
+		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "long" ); }
 
@@ -46,8 +46,7 @@ namespace eon
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
-		inline Object* copy( scope::Scope& scope ) override {
-			return ( (LongType*)scope.find( name_long ) )->instantiate( Value ); }
+		inline Object* copy() override { return new LongInstance( Value ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( long_t ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( type::Stringifier& str ) const override { str.addWord( string( Value ) ); }

@@ -15,30 +15,30 @@ namespace eon
 	void registerShortActions( scope::Global& scope )
 	{
 		scope.add( name_construct, new actions::ShortConstruct() );
-		scope.add( name_construct, new actions::ShortCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortBoolConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortByteConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortCharConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortIntConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortLongConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortFloatConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortLowConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortHighConstruct( scope ) );
-		scope.add( name_construct, new actions::ShortIndexConstruct( scope ) );
-		scope.add( name_cmp, new actions::ShortCmp( scope ) );
-		scope.add( name_plus, new actions::ShortPlus( scope ) );
-		scope.add( name_minus, new actions::ShortMinus( scope ) );
-		scope.add( name_multiply, new actions::ShortMultiply( scope ) );
-		scope.add( name_divide, new actions::ShortDivide( scope ) );
-		scope.add( name_element, new actions::ShortElementIndex( scope ) );
-		scope.add( name_element, new actions::ShortElementInt( scope ) );
-		scope.add( name_slice, new actions::ShortSlice( scope ) );
+		scope.add( name_construct, new actions::ShortCopyConstruct() );
+		scope.add( name_construct, new actions::ShortBoolConstruct() );
+		scope.add( name_construct, new actions::ShortByteConstruct() );
+		scope.add( name_construct, new actions::ShortCharConstruct() );
+		scope.add( name_construct, new actions::ShortIntConstruct() );
+		scope.add( name_construct, new actions::ShortLongConstruct() );
+		scope.add( name_construct, new actions::ShortFloatConstruct() );
+		scope.add( name_construct, new actions::ShortLowConstruct() );
+		scope.add( name_construct, new actions::ShortHighConstruct() );
+		scope.add( name_construct, new actions::ShortIndexConstruct() );
+		scope.add( name_cmp, new actions::ShortCmp() );
+		scope.add( name_plus, new actions::ShortPlus() );
+		scope.add( name_minus, new actions::ShortMinus() );
+		scope.add( name_multiply, new actions::ShortMultiply() );
+		scope.add( name_divide, new actions::ShortDivide() );
+		scope.add( name_element, new actions::ShortElementIndex() );
+		scope.add( name_element, new actions::ShortElementInt() );
+		scope.add( name_slice, new actions::ShortSlice() );
 		scope.add( name_bitnot, new actions::ShortBitNot() );
-		scope.add( name_bitand, new actions::ShortBitAnd( scope ) );
-		scope.add( name_bitor, new actions::ShortBitOr( scope ) );
-		scope.add( name_bitxor, new actions::ShortBitXor( scope ) );
-		scope.add( name_lshift, new actions::ShortLShift( scope ) );
-		scope.add( name_rshift, new actions::ShortRShift( scope ) );
+		scope.add( name_bitand, new actions::ShortBitAnd() );
+		scope.add( name_bitor, new actions::ShortBitOr() );
+		scope.add( name_bitxor, new actions::ShortBitXor() );
+		scope.add( name_lshift, new actions::ShortLShift() );
+		scope.add( name_rshift, new actions::ShortRShift() );
 	}
 
 

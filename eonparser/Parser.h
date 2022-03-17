@@ -6,7 +6,6 @@
 #include <eontokenizer/ReTokenizer.h>
 #include <eonfilesys/Path.h>
 #include <eonregex/RegEx.h>
-#include <eonexpression/Expression.h>
 #include "ParseExpression.h"
 #include "ToolBox.h"
 
@@ -32,15 +31,16 @@ namespace eon
 		Parser() = default;
 
 		//* Construct for parsing a string source
-		inline Parser( const string& source_name, string&& string_source, source::Reporter& reporter,
-			scope::Scope& parent_scope, scope::Frame& frame ) {
+/*		inline Parser( const string& source_name, string&& string_source, source::Reporter& reporter,
+			scope::Scope& scope ) {
 			source::String src( source_name, std::move( string_source ) );
-			Tools.init( source::Ref( src ), reporter, parent_scope, frame ); }
+			Tools = parser::ToolBox( std::vector<Element>&& elements, reporter, scope );
+			Tools = parser::ToolBox( source::Ref( src ), reporter, scope ); }
 
 		//* Construct for parsing a file source
-		inline Parser( const path& file_path, source::Reporter& reporter, scope::Scope& parent_scope, scope::Frame& frame ) {
-			source::File src( file_path.str() ); Tools.init( source::Ref( src ), reporter, parent_scope, frame ); }
-
+		inline Parser( const path& file_path, source::Reporter& reporter, scope::Scope& scope ) {
+			source::File src( file_path.str() ); Tools.init( source::Ref( src ), reporter, scope ); }
+			*/
 		virtual ~Parser() = default;
 
 

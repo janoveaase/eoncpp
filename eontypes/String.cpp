@@ -13,6 +13,8 @@ namespace eon
 
 
 
-	type::Instance* StringType::instantiate( const string& value ) const { return new StringInstance( value ); }
-	type::Instance* StringType::instantiate( string&& value ) const { return new StringInstance( std::move( value ) ); }
+	type::Instance* StringType::instantiate( const string& value ) const {
+		return new StringInstance( value, source::Ref() ); }
+	type::Instance* StringType::instantiate( string&& value ) const {
+		return new StringInstance( std::move( value ), source::Ref() ); }
 }

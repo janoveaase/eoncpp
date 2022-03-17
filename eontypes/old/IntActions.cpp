@@ -14,31 +14,31 @@ namespace eon
 {
 	void registerIntActions( scope::Global& scope )
 	{
-		scope.add( name_construct, new actions::IntConstruct() );
-		scope.add( name_construct, new actions::IntCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::IntBoolConstruct( scope ) );
-		scope.add( name_construct, new actions::IntByteConstruct( scope ) );
-		scope.add( name_construct, new actions::IntCharConstruct( scope ) );
-		scope.add( name_construct, new actions::IntShortConstruct( scope ) );
-		scope.add( name_construct, new actions::IntLongConstruct( scope ) );
-		scope.add( name_construct, new actions::IntFloatConstruct( scope ) );
-		scope.add( name_construct, new actions::IntLowConstruct( scope ) );
-		scope.add( name_construct, new actions::IntHighConstruct( scope ) );
-		scope.add( name_construct, new actions::IntIndexConstruct( scope ) );
-		scope.add( name_cmp, new actions::IntCmp( scope ) );
-		scope.add( name_plus, new actions::IntPlus( scope ) );
-		scope.add( name_minus, new actions::IntMinus( scope ) );
-		scope.add( name_multiply, new actions::IntMultiply( scope ) );
-		scope.add( name_divide, new actions::IntDivide( scope ) );
-		scope.add( name_element, new actions::IntElementIndex( scope ) );
-		scope.add( name_element, new actions::IntElementInt( scope ) );
-		scope.add( name_slice, new actions::IntSlice( scope ) );
-		scope.add( name_bitnot, new actions::IntBitNot() );
-		scope.add( name_bitand, new actions::IntBitAnd( scope ) );
-		scope.add( name_bitor, new actions::IntBitOr( scope ) );
-		scope.add( name_bitxor, new actions::IntBitXor( scope ) );
-		scope.add( name_lshift, new actions::IntLShift( scope ) );
-		scope.add( name_rshift, new actions::IntRShift( scope ) );
+		scope.addAction( name_construct, new actions::IntConstruct() );
+		scope.addAction( name_construct, new actions::IntCopyConstruct() );
+		scope.addAction( name_construct, new actions::IntBoolConstruct() );
+		scope.addAction( name_construct, new actions::IntByteConstruct() );
+		scope.addAction( name_construct, new actions::IntCharConstruct() );
+		scope.addAction( name_construct, new actions::IntShortConstruct() );
+		scope.addAction( name_construct, new actions::IntLongConstruct() );
+		scope.addAction( name_construct, new actions::IntFloatConstruct() );
+		scope.addAction( name_construct, new actions::IntLowConstruct() );
+		scope.addAction( name_construct, new actions::IntHighConstruct() );
+		scope.addAction( name_construct, new actions::IntIndexConstruct() );
+		scope.addAction( name_cmp, new actions::IntCmp() );
+		scope.addAction( name_plus, new actions::IntPlus() );
+		scope.addAction( name_minus, new actions::IntMinus() );
+		scope.addAction( name_multiply, new actions::IntMultiply() );
+		scope.addAction( name_divide, new actions::IntDivide() );
+		scope.addAction( name_element, new actions::IntElementIndex() );
+		scope.addAction( name_element, new actions::IntElementInt() );
+		scope.addAction( name_slice, new actions::IntSlice() );
+		scope.addAction( name_bitnot, new actions::IntBitNot() );
+		scope.addAction( name_bitand, new actions::IntBitAnd() );
+		scope.addAction( name_bitor, new actions::IntBitOr() );
+		scope.addAction( name_bitxor, new actions::IntBitXor() );
+		scope.addAction( name_lshift, new actions::IntLShift() );
+		scope.addAction( name_rshift, new actions::IntRShift() );
 	}
 
 

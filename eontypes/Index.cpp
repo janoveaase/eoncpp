@@ -13,5 +13,5 @@ namespace eon
 
 
 
-	type::Instance* IndexType::instantiate( index_t value ) const { return new IndexInstance( value ); }
+	type::Instance* IndexType::instantiate( index_t value ) const { return new IndexInstance( value, source::Ref() ); }
 }

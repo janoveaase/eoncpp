@@ -1,7 +1,10 @@
 #pragma once
 
-#include <eontypes/TypeSystem.h>
 #include <typeindex>
+#include <eontypes/BasicTuple.h>
+#include <eontypes/Reference.h>
+#include <eontypes/Tuple.h>
+#include <eontypes/Operators.h>
 
 
 
@@ -25,108 +28,89 @@ namespace eon
 	**************************************************************************/
 	namespace scope
 	{
-		//* Exception thrown when trying to add an item to a scope where the
-		//* name already exists!
-		EONEXCEPT( DuplicateName );
-
-		//* Exception thrown when trying to add an item to a scope were it is
-		//* not supported!
-		EONEXCEPT( Unsupported );
-
-
 		/**********************************************************************
 		  There are three types of scopes: global, action, and local.
 		  
-		  In the global scope (also named 'global'), we have groups, types,
-		  enums and actions.
+		  In the (single) global scope (also named 'global'), we have caches,
+		  groups, types, enums and actions.
 
 		  In action scopes (named for the actions they belong to), we have
-		  instances, tuples, dynamic tuples, lambdas.
-		  These are stored on the call stack.
+		  instances, tuples (all types), lambdas.
+		  These scopes are stored on the call stack.
 
-		  In local scopes (unnamed), we have instances, tuples, dynamic tuples,
-		  expressions, lambdas.
+		  In local scopes (unnamed), we have instances, tuples (all types),
+		  lambdas.
 		  These scopes are also organized as a stack within action scopes, but
 		  unlike action scopes, if an item does not exist in the current scope,
 		  the next scope on the stack will be tried, and so on.
+
+		  Note that all scopes are BasicTuple objects at heart!
 		**********************************************************************/
-		class Scope
+		class Global;
+
+		class Scope : public type::BasicTuple
 		{
 		public:
+			Scope( name_t type, source::Ref source ) : BasicTuple( type, source ) {}
 
-			//* Add an item to this scope
-			//* Throws DuplicateName if already existing!
-			//* Throws Unsupported if scope does not support the item type!
-			virtual void add( name_t name, type::Object* item ) = 0;
+			//* Direct access to the global scope
+			virtual Global& global() = 0;
+			virtual const Global& global() const = 0;
 
-			//* Get an item, from this cope only!
-			//* Returns nullptr if not found!
-			virtual type::Object* get( name_t name ) const noexcept = 0;
+			virtual Object* find( name_t name ) const noexcept { return exists( name ) ? at( name ).value() : nullptr; }
 
-			//* Find an item, search all accessible scopes!
-			//* Returns nullptr if not found!
-			virtual type::Object* find( name_t name ) const noexcept = 0;
+			inline name_t generalType() const noexcept override { return name_scope; }
+			inline type::Object* copy() override { throw type::AccessDenied( "Cannot copy scope object!" ); }
 		};
 
 		class Global : public Scope
 		{
 		public:
+			Global() : Scope( name_global, source::Ref() ) {}
+			~Global();
 
-			void add( name_t name, type::Object* item ) override;
-			inline type::Object* get( name_t name ) const noexcept override {
-				auto found = Items.find( name ); return found != Items.end() ? found->second : nullptr; }
-			inline type::Object* find( name_t name ) const noexcept override { return get( name ); }
+			inline Global& global() override { return *this; }
+			inline const Global& global() const override { return *this; }
 
-			//* Get a definition based on raw C++ type
-			//* Returns nullptr if not found!
-			template<typename T>
-			type::Definition* definition() const noexcept {
-				auto found = Definitions.find( std::type_index( typeid( T ) ) );
-				return found != Definitions.end() ? found->second : nullptr; }
+			//* Add an action
+			inline void addAction( name_t name, type::Action* action ) { Actions[ name ].push_back( action ); }
 
-			//* Get all actions with the specified name.
-			//* Returns nullptr if none!
-			inline const std::vector<type::Action*>* actions( name_t name ) const noexcept {
-				auto found = Actions.find( name ); return found != Actions.end() ? &found->second : nullptr; }
+			//* Add an operator action
+			inline void addOperator( type::operators::code op, type::Action* action ) {
+				Actions[ compilerName( "$op_" + type::operators::mapCode( op ) ) ].push_back( action ); }
+
+			//* Get all actions matching specified details
+			std::list<type::Action*> getActions( name_t name, const TypeTuple& type, const TypeTuple& args,
+				const TypeTuple& return_type ) const noexcept;
+			std::list<type::Action*> getActions( name_t name, const TypeTuple& type, const TypeTuple& args ) const noexcept;
 
 		private:
-
-			// These are the items of this scope
-			std::unordered_map<name_t, type::Object*> Items;
-
-			// Definitions are a subset of Items
-			std::unordered_map<std::type_index, type::Definition*> Definitions;
-
-			// Actions, by their name only, a subset of Items
-			std::unordered_map<name_t, std::vector<type::Action*>> Actions;
+			std::unordered_map<name_t, std::list<type::Action*>> Actions;
 		};
 
 		class _Local : public Scope
 		{
 		public:
 			_Local() = delete;
-			inline _Local( Global& global ) { Glob = &global; }
+			inline _Local( Global& global, source::Ref source ) : Scope( name_local, source ) {
+				*this += type::Attribute( new Modifiable( &global ) ); }
 
-			inline Global& global() noexcept { return *Glob; }
-			inline const Global& global() const noexcept { return *Glob; }
-
-			inline type::Object* get( name_t name ) const noexcept override {
-				auto found = Items.find( name ); return found != Items.end() ? found->second : nullptr; }
-			void add( name_t name, type::Object* item ) override;
+			const Global& global() const override { return *(Global*)at( name_global ).value(); }
+			Global& global() override { return *(Global*)at( name_global ).value(); }
 
 			virtual bool isAction() const noexcept { return false; }
-
-		private:
-			std::unordered_map<name_t, type::Object*> Items;
-			Global* Glob{ nullptr };
 		};
 
 		class Action : public _Local
 		{
 		public:
 			Action() = delete;
-			Action( Global& global, name_t name, Action* previous = nullptr ) : _Local( global ) {
-				Name = name; Prev = previous; }
+			Action( Global& global, type::TypeDef& obj, Tuple& args, name_t name, Action* previous = nullptr )
+				: _Local( global, obj.source() ) { add( name_me, new Modifiable( &obj ) ); add( name_args,
+					new Modifiable( &args ) ); Name = name; Prev = previous; }
+			Action( Global& global, type::Instance& obj, Tuple& args, name_t name, Action* previous = nullptr )
+				: _Local( global, obj.source() ) { add( name_me, new Modifiable( &obj ) ); add( name_args,
+					new Modifiable( &args ) ); Name = name; Prev = previous; }
 
 			inline name_t name() const noexcept { return Name; }
 
@@ -134,7 +118,7 @@ namespace eon
 			inline const Action* previous() const noexcept { return Prev; }
 
 			inline type::Object* find( name_t name ) const noexcept override {
-				auto found = get( name ); return found ? found : global().get( name ); }
+				auto found = Scope::find( name ); return found ? found : global().find( name ); }
 
 			inline bool isAction() const noexcept override { return true; }
 
@@ -147,12 +131,13 @@ namespace eon
 		{
 		public:
 			Local() = delete;
-			Local( Global& global, _Local& parent ) : _Local( global ) { Parent = &parent; }
+			Local( Global& global, _Local& parent, source::Ref source ) : _Local( global, source ) { Parent = &parent; }
 
 			_Local* parent() noexcept { return Parent; }
 			
 			inline type::Object* find( name_t name ) const noexcept override {
-				auto found = get( name ); return found ? found : Parent ? Parent->find( name ) : global().get( name ); }
+				auto found = Scope::find( name ); return found ? found : Parent ? Parent->find( name )
+					: global().find( name ); }
 
 		private:
 			_Local* Parent{ nullptr };

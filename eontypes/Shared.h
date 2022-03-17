@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TypeSystem.h"
-#include <eonscopes/Scope.h>
 
 
 /******************************************************************************
@@ -20,12 +19,13 @@ namespace eon
 		inline shared( shared& other ) noexcept { Refs = other.Refs; Value = other.Value; if( Refs ) _inc(); }
 		inline ~shared() { _dec(); }
 
-		inline shared& operator=( shared& other ) noexcept {
+		inline shared& operator=( const shared& other ) noexcept {
 			_dec(); Refs = other.Refs; Value = other.Value; if( Refs ) _inc(); return *this; }
 
 		inline void reset() noexcept { _dec(); Refs = nullptr; Value = nullptr; }
 
 		inline type::Object* value() noexcept { return Value; }
+		inline type::Object* operator->() noexcept { return Value; }
 		inline size_t refs() const noexcept { return Refs ? *Refs : 0; }
 
 	private:
@@ -36,5 +36,31 @@ namespace eon
 	private:
 		size_t* Refs{ nullptr };
 		type::Object* Value{ nullptr };
+	};
+
+
+
+
+	class Shared : public type::Object
+	{
+	public:
+		Shared() = delete;
+		Shared( shared value ) noexcept : type::Object( value->type(), value->source() ) { Value = value; }
+		Shared( const Shared& other ) noexcept : Object( other ) { Value = other.Value; }
+		virtual ~Shared() = default;
+
+		Shared& operator=( const Shared& other ) noexcept {
+			static_cast<Object&>( *this ) = other; Value = other.Value; return *this; }
+
+
+		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
+		inline name_t generalType() const noexcept override { return name_shared; }
+		inline void die() { Value.reset(); }
+		inline void callDestructor() override { delete this; }
+		inline Object* copy() override { return new Shared( Value ); }
+		inline void str( type::Stringifier& str ) const override { str.addWord( "str" );  }
+
+	private:
+		shared Value;
 	};
 }

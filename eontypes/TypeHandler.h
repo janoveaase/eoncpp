@@ -1,9 +1,10 @@
 #pragma once
 
-#include "TypeSystem.h"
-#include <eonscopes/Scope.h>
+//#include "TypeSystem.h"
+#include "TypeDefinitions.h"
 #include <typeinfo>
 #include <unordered_set>
+#include <eonsource/SourceRef.h>
 
 
 
@@ -12,8 +13,20 @@
 ******************************************************************************/
 namespace eon
 {
+	namespace scope
+	{
+		class Scope;
+	}
+	class TypeTuple;
+
+
+
+
 	namespace type
 	{
+		class Object;
+
+
 		class Handler
 		{
 		public:
@@ -24,13 +37,17 @@ namespace eon
 			// Construct an instance object for the specified raw C++ type
 			// Throws [eon::type::IncompatibleType] if type is not supported
 			template<typename T>
-			static Object* copyConstruct( const T& value ) { return _copyConstruct( mapType<T>(), &value, false ); }
+			static Object* copyConstruct( const T& value, source::Ref source ) {
+				return _copyConstruct( mapType<T>(), &value, false, source ); }
 			template<typename T>
-			static Object* copyConstructData( const T& value ) { return _copyConstruct( mapType<T>(), &value, true ); }
+			static Object* copyConstructData( const T& value, source::Ref source ) {
+				return _copyConstruct( mapType<T>(), &value, true, source ); }
 			template<typename T>
-			static Object* moveConstruct( T&& value ) { return _moveConstruct( mapType<T>(), &value, false ); }
+			static Object* moveConstruct( T&& value, source::Ref source ) {
+				return _moveConstruct( mapType<T>(), &value, false, source ); }
 			template<typename T>
-			static Object* moveConstructData( T&& value ) { return _moveConstruct( mapType<T>(), &value, true ); }
+			static Object* moveConstructData( T&& value, source::Ref source ) {
+				return _moveConstruct( mapType<T>(), &value, true, source ); }
 
 			// Construct an instance object for use as data tuple attribute
 			// Throws [eon::type::IncompatibleType] if type is not supported
@@ -61,12 +78,12 @@ namespace eon
 		private:
 
 			// Construct a new object for the specified type
-			static inline Object* _copyConstruct( name_t type, const void* value, bool data_tuple ) {
-				return __copyConstruct( type, data_tuple ? mapToLegalForDataTuple( type ) : type, value ); }
-			static Object* __copyConstruct( name_t type, name_t target_type, const void* value );
-			static inline Object* _moveConstruct( name_t type, const void* value, bool data_tuple ) {
-				return __moveConstruct( type, data_tuple ? mapToLegalForDataTuple( type ) : type, value ); }
-			static Object* __moveConstruct( name_t type, name_t target_type, const void* value );
+			static inline Object* _copyConstruct( name_t type, const void* value, bool data_tuple, source::Ref source ) {
+				return __copyConstruct( type, data_tuple ? mapToLegalForDataTuple( type ) : type, value, source ); }
+			static Object* __copyConstruct( name_t type, name_t target_type, const void* value, source::Ref source );
+			static inline Object* _moveConstruct( name_t type, const void* value, bool data_tuple, source::Ref source ) {
+				return __moveConstruct( type, data_tuple ? mapToLegalForDataTuple( type ) : type, value, source ); }
+			static Object* __moveConstruct( name_t type, name_t target_type, const void* value, source::Ref source );
 
 
 

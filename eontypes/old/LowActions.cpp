@@ -2,9 +2,7 @@
 #include "Bool.h"
 #include "Byte.h"
 #include "Char.h"
-#include "Int.h"
-#include "Short.h"
-#include "Long.h"
+#include "Integer.h"
 #include "Float.h"
 #include "High.h"
 #include "Index.h"
@@ -15,21 +13,21 @@ namespace eon
 	void registerLowActions( scope::Global& scope )
 	{
 		scope.add( name_construct, new actions::LowConstruct() );
-		scope.add( name_construct, new actions::LowCopyConstruct( scope ) );
-		scope.add( name_construct, new actions::LowBoolConstruct( scope ) );
-		scope.add( name_construct, new actions::LowByteConstruct( scope ) );
-		scope.add( name_construct, new actions::LowCharConstruct( scope ) );
-		scope.add( name_construct, new actions::LowIntConstruct( scope ) );
-		scope.add( name_construct, new actions::LowShortConstruct( scope ) );
-		scope.add( name_construct, new actions::LowLongConstruct( scope ) );
-		scope.add( name_construct, new actions::LowFloatConstruct( scope ) );
-		scope.add( name_construct, new actions::LowHighConstruct( scope ) );
-		scope.add( name_construct, new actions::LowIndexConstruct( scope ) );
-		scope.add( name_cmp, new actions::LowCmp( scope ) );
-		scope.add( name_plus, new actions::LowPlus( scope ) );
-		scope.add( name_minus, new actions::LowMinus( scope ) );
-		scope.add( name_multiply, new actions::LowMultiply( scope ) );
-		scope.add( name_divide, new actions::LowDivide( scope ) );
+		scope.add( name_construct, new actions::LowCopyConstruct() );
+		scope.add( name_construct, new actions::LowBoolConstruct() );
+		scope.add( name_construct, new actions::LowByteConstruct() );
+		scope.add( name_construct, new actions::LowCharConstruct() );
+		scope.add( name_construct, new actions::LowIntConstruct() );
+		scope.add( name_construct, new actions::LowShortConstruct() );
+		scope.add( name_construct, new actions::LowLongConstruct() );
+		scope.add( name_construct, new actions::LowFloatConstruct() );
+		scope.add( name_construct, new actions::LowHighConstruct() );
+		scope.add( name_construct, new actions::LowIndexConstruct() );
+		scope.add( name_cmp, new actions::LowCmp() );
+		scope.add( name_plus, new actions::LowPlus() );
+		scope.add( name_minus, new actions::LowMinus() );
+		scope.add( name_multiply, new actions::LowMultiply() );
+		scope.add( name_divide, new actions::LowDivide() );
 	}
 
 
