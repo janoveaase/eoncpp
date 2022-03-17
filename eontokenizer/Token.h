@@ -1,6 +1,6 @@
 #pragma once
 #include <eonsource/SourceRef.h>
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
 
 
 /******************************************************************************

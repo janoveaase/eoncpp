@@ -176,9 +176,9 @@ namespace eon
 #ifdef EON_APPLE
 		inline explicit string( int64_t value ) { *this = toString( value ); }
 #endif
-		inline explicit string( float value ) { *this = toString( static_cast<double>( value ) ); }
-		inline explicit string( double value ) { *this = toString( value ); }
-		inline explicit string( long double value ) { *this = toString( value ); }
+		inline explicit string( float value ) { *this = string( toString( static_cast<double>( value ) ) ).trimFloat(); }
+		inline explicit string( double value ) { *this = string( toString( value ) ).trimFloat(); }
+		inline explicit string( long double value ) { *this = string( toString( value ) ).trimFloat(); }
 
 
 		//* Default destructor
@@ -687,23 +687,23 @@ namespace eon
 				Bytes.append( sub.begin().byteData(), sub.numBytes() ); NumChars += sub.numChars(); return *this; }
 			else return *this += string( sub ); }
 
-		//* Concatename a std::string to 'this'
+		//* Concatenate a std::string to 'this'
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
 		inline string& operator+=( const std::string& stdstr ) { return *this += substring( stdstr ); }
 
-		//* Concatename a C-string to 'this'
+		//* Concatenate a C-string to 'this'
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
 		inline string& operator+=( const char* cstr ) { return *this += substring( cstr ); }
 
-		//* Concatename a codpoint to 'this'
+		//* Concatenate a codpoint to 'this'
 		//* Throws [eon::InvalidUTF8] if not a valid codepoint!
 		inline string& operator+=( char_t cp ) { return *this += string( cp ); }
 
-		//* Concatename a signed char to 'this'
+		//* Concatenate a signed char to 'this'
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
 		inline string& operator+=( char chr ) { return *this += string( chr ); }
 
-		//* Concatename an unsigned char to 'this'
+		//* Concatenate an unsigned char to 'this'
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
 		inline string& operator+=( unsigned char chr ) { return *this += string( chr ); }
 

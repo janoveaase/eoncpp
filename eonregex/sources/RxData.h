@@ -2,7 +2,7 @@
 
 #include "RxDefs.h"
 #include <map>
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
 
 
 /******************************************************************************

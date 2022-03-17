@@ -1,5 +1,5 @@
 #pragma once
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
 #include <eonstring/String.h>
 
 
@@ -30,11 +30,9 @@ namespace eon
 #define EONEXCEPT( exception_name )\
 	class exception_name : public ::eon::exception {\
 	public:\
-		exception_name() : exception( ::eon::name::get( #exception_name ) ) {}\
-		exception_name( const ::eon::string& info ) : \
-			exception( ::eon::name::get( #exception_name ), info ) {}\
-		exception_name( ::eon::string&& info ) : exception( ::eon::name::get( \
-			#exception_name ), std::move( info ) ) {}\
+		exception_name() : exception( ::eon::name( #exception_name ) ) {}\
+		exception_name( const ::eon::string& info ) : exception( ::eon::name( #exception_name ), info ) {}\
+		exception_name( ::eon::string&& info ) : exception( ::eon::name( #exception_name ), std::move( info ) ) {}\
 	}
 
 
@@ -104,10 +102,10 @@ namespace eon
 	public:
 
 		//* Get the message info
-		virtual const char* what() const noexcept override { return Info.empty() ? Name->c_str() : Info.c_str(); }
+		virtual const char* what() const noexcept override { return Info.empty() ? str( Name ).c_str() : Info.c_str(); }
 
 		//* Get combined name and info
-		virtual string details() const { return !Info.empty() ? *Name + ": " + Info : *Name; }
+		virtual string details() const { return !Info.empty() ? str( Name ) + ": " + Info : str( Name ); }
 
 		//* Get the exception name
 		const name_t name() const noexcept { return Name; }

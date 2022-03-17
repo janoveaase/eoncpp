@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <chrono>
 #include <eonstring/String.h>
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
 #include <eonterminal/Terminal.h>
 
 
@@ -417,8 +417,8 @@ namespace eontest
 		inline bool _testEq( double expected, double actual, const char* exp_expr, const char* act_expr ) {
 			return _testEq( std::to_string( expected ), std::to_string( actual ), exp_expr, act_expr ); }
 		inline bool _testEq( eon::name_t expected, eon::name_t actual, const char* exp_expr, const char* act_expr ) {
-			return _testEq( expected != eon::no_name ? expected->stdstr() : std::string(),
-				actual != eon::no_name ? actual->stdstr() : std::string(), exp_expr, act_expr ); }
+			return _testEq( expected != eon::no_name ? eon::str( expected ).stdstr() : std::string(),
+				actual != eon::no_name ? eon::str( actual ).stdstr() : std::string(), exp_expr, act_expr ); }
 		template<typename T1, typename T2>
 		bool _testEq( const T1& expected, const T2& actual, const char* exp_expr, const char* act_expr )
 		{
@@ -467,8 +467,8 @@ namespace eontest
 		inline bool _testNe( double expected, double actual, const char* exp_expr, const char* act_expr ) {
 			return _testNe( std::to_string( expected ), std::to_string( actual ), exp_expr, act_expr ); }
 		inline bool _testNe( eon::name_t expected, eon::name_t actual, const char* exp_expr, const char* act_expr ) {
-			return _testNe( expected != eon::no_name ? expected->stdstr() : std::string(),
-				actual != eon::no_name ? actual->stdstr() : std::string(), exp_expr, act_expr ); }
+			return _testNe( expected != eon::no_name ? eon::str( expected ).stdstr() : std::string(),
+				actual != eon::no_name ? eon::str( actual ).stdstr() : std::string(), exp_expr, act_expr ); }
 		template<typename T1, typename T2>
 		bool _testNe( const T1& expected, const T2& actual, const char* exp_expr, const char* act_expr )
 		{
@@ -514,8 +514,8 @@ namespace eontest
 		inline bool _testLt( double expected, double actual, const char* exp_expr, const char* act_expr ) {
 			return _testLt( std::to_string( expected ), std::to_string( actual ), exp_expr, act_expr ); }
 		inline bool _testLt( eon::name_t expected, eon::name_t actual, const char* exp_expr, const char* act_expr ) {
-			return _testLt( expected != eon::no_name ? expected->stdstr() : std::string(),
-				actual != eon::no_name ? actual->stdstr() : std::string(), exp_expr, act_expr ); }
+			return _testLt( expected != eon::no_name ? eon::str( expected ).stdstr() : std::string(),
+				actual != eon::no_name ? eon::str( actual ).stdstr() : std::string(), exp_expr, act_expr ); }
 		template<typename T1, typename T2>
 		bool _testLt( const T1& expected, const T2& actual, const char* exp_expr, const char* act_expr )
 		{
@@ -561,8 +561,8 @@ namespace eontest
 		inline bool _testLe( double expected, double actual, const char* exp_expr, const char* act_expr ) {
 			return _testLe( std::to_string( expected ), std::to_string( actual ), exp_expr, act_expr ); }
 		inline bool _testLe( eon::name_t expected, eon::name_t actual, const char* exp_expr, const char* act_expr ) {
-			return _testLe( expected != eon::no_name ? expected->stdstr() : std::string(),
-				actual != eon::no_name ? actual->stdstr() : std::string(), exp_expr, act_expr ); }
+			return _testLe( expected != eon::no_name ? eon::str( expected ).stdstr() : std::string(),
+				actual != eon::no_name ? eon::str( actual ).stdstr() : std::string(), exp_expr, act_expr ); }
 		template<typename T1, typename T2>
 		bool _testLe( const T1& expected, const T2& actual, const char* exp_expr, const char* act_expr )
 		{
@@ -608,8 +608,8 @@ namespace eontest
 		inline bool _testGt( double expected, double actual, const char* exp_expr, const char* act_expr ) {
 			return _testGt( std::to_string( expected ), std::to_string( actual ), exp_expr, act_expr ); }
 		inline bool _testGt( eon::name_t expected, eon::name_t actual, const char* exp_expr, const char* act_expr ) {
-			return _testGt( expected != eon::no_name ? expected->stdstr() : std::string(),
-				actual != eon::no_name ? actual->stdstr() : std::string(), exp_expr, act_expr ); }
+			return _testGt( expected != eon::no_name ? eon::str( expected ).stdstr() : std::string(),
+				actual != eon::no_name ? eon::str( actual ).stdstr() : std::string(), exp_expr, act_expr ); }
 		template<typename T1, typename T2>
 		bool _testGt( const T1& expected, const T2& actual, const char* exp_expr, const char* act_expr )
 		{
@@ -655,8 +655,8 @@ namespace eontest
 		inline bool _testGe( double expected, double actual, const char* exp_expr, const char* act_expr ) {
 			return _testGe( std::to_string( expected ), std::to_string( actual ), exp_expr, act_expr ); }
 		inline bool _testGe( eon::name_t expected, eon::name_t actual, const char* exp_expr, const char* act_expr ) {
-			return _testGe( expected != eon::no_name ? expected->stdstr() : std::string(),
-				actual != eon::no_name ? actual->stdstr() : std::string(), exp_expr, act_expr ); }
+			return _testGe( expected != eon::no_name ? eon::str( expected ).stdstr() : std::string(),
+				actual != eon::no_name ? eon::str( actual ).stdstr() : std::string(), exp_expr, act_expr ); }
 		template<typename T1, typename T2>
 		bool _testGe( const T1& expected, const T2& actual, const char* exp_expr, const char* act_expr )
 		{

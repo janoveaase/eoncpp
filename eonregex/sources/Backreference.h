@@ -37,7 +37,7 @@ namespace eon
 
 		private:
 			bool _match( RxData& data, size_t steps ) override;
-			inline string _strStruct() const override { return "@:<" + *Name + ">"; }
+			inline string _strStruct() const override { return "@:<" + str( Name ) + ">"; }
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return Name == dynamic_cast<const Backreference*>( &other )->Name; }
 			inline size_t _countMinCharsRemaining() noexcept override { return MinCharsRemaining = 0; }

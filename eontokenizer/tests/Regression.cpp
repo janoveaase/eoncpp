@@ -146,7 +146,7 @@ namespace eon
 		{
 			if( !actual.empty() )
 				actual += ", ";
-			actual += *token.type();
+			actual += str( token.type() );
 			actual += "=" + token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
@@ -160,8 +160,8 @@ namespace eon
 
 		ReTokenizer retok;
 		retok.addRule( new ReTokenizer::EncloseRule( name_string, name_doublequote, name_backslash ) );
-		retok.addRule( new ReTokenizer::EncloseRule( name::get( "parenthesized" ), name_open, name_close, false ) );
-		retok.addRule( new ReTokenizer::EncloseRule( name::get( "nested" ), name_open_square, name_close_square, true ) );
+		retok.addRule( new ReTokenizer::EncloseRule( name( "parenthesized" ), name_open, name_close, false ) );
+		retok.addRule( new ReTokenizer::EncloseRule( name( "nested" ), name_open_square, name_close_square, true ) );
 		retok.addRule( new ReTokenizer::RemoveRule( { name_space } ) );
 		tokens = retok( parser );
 
@@ -171,7 +171,7 @@ namespace eon
 		{
 			if( !actual.empty() )
 				actual += ", ";
-			actual += *token.type();
+			actual += str( token.type() );
 			actual += "=" + token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
@@ -195,7 +195,7 @@ namespace eon
 		{
 			if( !actual.empty() )
 				actual += ", ";
-			actual += *token.type();
+			actual += str( token.type() );
 			actual += "=" + token.str();
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );

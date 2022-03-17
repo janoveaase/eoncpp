@@ -944,4 +944,45 @@ namespace eon
 		source.erase( sub );
 		WANT_EQ( exp, source );
 	}
+
+
+
+	struct name_tt
+	{
+		std::uint32_t Value{ 0 };
+	};
+
+
+	TEST( Name, basic )
+	{
+		name_t  n1{ no_name }, n2{ name_name };
+		n1 = name( "name" );
+		WANT_EQ( n1, n2 );
+		WANT_EQ( "name", str( n2 ) );
+	}
+	TEST( Name, compiler )
+	{
+		auto n1 = compilerName( "$name" );
+		auto n2 = compilerName( "@name" );
+		auto n3 = compilerName( "#name" );
+		auto n4 = compilerName( "0$@#0" );
+		REQUIRE_FALSE( n1 == no_name );
+		REQUIRE_FALSE( n2 == no_name );
+		REQUIRE_FALSE( n3 == no_name );
+		REQUIRE_FALSE( n4 == no_name );
+		WANT_EQ( "$name", str( n1 ) );
+		WANT_EQ( "@name", str( n2 ) );
+		WANT_EQ( "#name", str( n3 ) );
+		WANT_EQ( "0$@#0", str( n4 ) );
+	}
+
+	TEST( Name, path )
+	{
+		namepath ref{ "one/two/three" };
+		WANT_EQ( "@one/two/three", ref.str() );
+		REQUIRE_EQ( 3, ref.numElms() );
+		WANT_EQ( "one", str( ref.at( 0 ) ) );
+		WANT_EQ( "two", str( ref.at( 1 ) ) );
+		WANT_EQ( "three", str( ref.at( 2 ) ) );
+	}
 }

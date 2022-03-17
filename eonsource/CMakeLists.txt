@@ -26,7 +26,7 @@ set_target_properties(
 )
 set_property(TARGET EonSource PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonSource PUBLIC EonString EonName EonExcept)
+target_link_libraries(EonSource PUBLIC EonString EonExcept)
 target_include_directories(EonSource PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonSource

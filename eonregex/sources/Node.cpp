@@ -69,7 +69,7 @@ namespace eon
 			if( !_match( data_tmp, steps ) )
 				return false;
 
-			if( Name && !name::valid( substring( data.pos(), data_tmp.pos() ) ) )
+			if( Name && !eon::validName( substring( data.pos(), data_tmp.pos() ) ) )
 				return false;
 
 			if( Next != nullptr )

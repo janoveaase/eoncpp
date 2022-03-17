@@ -7,16 +7,23 @@ set(STRING_HEADERS
 	StringIterator.h
 	Substring.h
 	UniChar.h
+	NameDefs.h
+	Name.h
+	DefaultNames.h
+	NamePath.cpp
 )
 set(STRING_SOURCES
 	String.cpp
 	StringIterator.cpp
 	Substring.cpp
 	UniChar.cpp
+	Name.cpp
+	DefaultNames.cpp
+	NamePath.cpp
 )
 
 if(WIN32)
-	set(STRING_OTHER string.natvis)
+	set(STRING_OTHER string.natvis name.natvis)
 endif()
 
 add_library(EonString STATIC ${STRING_HEADERS} ${STRING_SOURCES} ${STRING_OTHER})

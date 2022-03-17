@@ -1,6 +1,6 @@
 #pragma once
 #include <eonstring/String.h>
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
 #include <set>
 #ifdef EON_WINDOWS
 using HANDLE = void*;
@@ -136,7 +136,7 @@ namespace eon
 
 		//* Output string using current style
 		Terminal& operator<<( string data );
-		inline Terminal& operator<<( name_t name ) { return *this << *name; }
+		inline Terminal& operator<<( name_t name ) { return *this << eon::str( name ); }
 		inline Terminal& operator<<( const char* data ) { return *this << eon::string( data ); }
 		inline Terminal& operator<<( const unsigned char* data ) { return *this << eon::string( data ); }
 		inline Terminal& operator<<( const std::string& data ) { return *this << eon::string( data ); }

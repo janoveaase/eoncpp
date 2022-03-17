@@ -6,10 +6,10 @@ namespace eon
 {
 	TEST( ExceptTest, basic )
 	{
-		WANT_EXCEPT( throw exception( name::get( "Test" ) ), exception );
+		WANT_EXCEPT( throw exception( name( "Test" ) ), exception );
 		try
 		{
-			throw exception( name::get( "Test" ) );
+			throw exception( name( "Test" ) );
 		}
 		catch( exception& e )
 		{
@@ -17,7 +17,7 @@ namespace eon
 		}
 		try
 		{
-			throw exception( name::get( "Test" ), "This is just a test" );
+			throw exception( name( "Test" ), "This is just a test" );
 		}
 		catch( exception& e )
 		{

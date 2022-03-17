@@ -17,7 +17,7 @@ namespace eon
 		void prepare()
 		{
 			Tok.registerTokenChar( name_space, ' ', Tokenizer::Match::sequence );
-			Tok.registerTokenChar( name::get( "tab" ), '\t', Tokenizer::Match::sequence );
+			Tok.registerTokenChar( name( "tab" ), '\t', Tokenizer::Match::sequence );
 			Tok.registerSequenceToken( name_operator, "+" );
 			Tok.registerSequenceToken( name_operator, "-" );
 			Tok.registerSequenceToken( name_operator, "=" );

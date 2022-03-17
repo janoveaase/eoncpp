@@ -19,7 +19,7 @@ set_target_properties(
 )
 set_property(TARGET EonTest PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTest PUBLIC EonString EonName EonTerminal)
+target_link_libraries(EonTest PUBLIC EonString EonTerminal)
 install(TARGETS EonTest
 	LIBRARY DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"
 	ARCHIVE DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"

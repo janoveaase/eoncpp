@@ -25,7 +25,7 @@ set_target_properties(
 )
 set_property(TARGET EonFileSys PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonFileSys PUBLIC EonString EonName EonExcept)
+target_link_libraries(EonFileSys PUBLIC EonString EonExcept)
 target_include_directories(EonFileSys PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonFileSys

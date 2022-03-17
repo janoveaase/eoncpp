@@ -18,7 +18,7 @@ set_target_properties(
 )
 set_property(TARGET EonTerminal PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTerminal PUBLIC EonString EonName)
+target_link_libraries(EonTerminal PUBLIC EonString)
 target_include_directories(EonTerminal PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonTerminal

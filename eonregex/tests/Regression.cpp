@@ -250,10 +250,10 @@ namespace eon
 		WANT_FALSE( result = expr.match( "alpha" ) ) << "Matched alpha";
 		WANT_TRUE( result = expr.match( "pi" ) ) << "Didn't match pi";
 		if( result )
-			WANT_EQ( "pi", string( result.group( eon::name::get( "m" ) ) ).stdstr() ) << "Wrong capture for pi";
+			WANT_EQ( "pi", string( result.group( eon::name( "m" ) ) ).stdstr() ) << "Wrong capture for pi";
 		WANT_TRUE( result = expr.match( "spring" ) ) << "Didn't match spring";
 		if( result )
-			WANT_EQ( "pri", string( result.group( eon::name::get( "m" ) ) ).stdstr() ) << "Wrong capture for spring";
+			WANT_EQ( "pri", string( result.group( eon::name( "m" ) ) ).stdstr() ) << "Wrong capture for spring";
 	}
 
 	TEST( RegExTest, match_newline_tab )
@@ -362,9 +362,9 @@ namespace eon
 		WANT_TRUE( match );
 		REQUIRE_EQ( 4, match.size() ) << "Wrong number of groups";
 		WANT_EQ( str_good.stdstr(), match.all().stdstr() ) << "Wrong complete match";
-		WANT_EQ( "Eon", match.group( name::get( "one" ) ).stdstr() ) << "Wrong first group";
-		WANT_EQ( "great", match.group( name::get( "2_" ) ).stdstr() ) << "Wrong second group";
-		WANT_EQ( "!", match.group( name::get( "three" ) ).stdstr() ) << "Wrong third group";
+		WANT_EQ( "Eon", match.group( name( "one" ) ).stdstr() ) << "Wrong first group";
+		WANT_EQ( "great", match.group( name( "2_" ) ).stdstr() ) << "Wrong second group";
+		WANT_EQ( "!", match.group( name( "three" ) ).stdstr() ) << "Wrong third group";
 	}
 
 	TEST( MiscTests, utf8_match )

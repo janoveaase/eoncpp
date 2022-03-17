@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <eonexcept/Exception.h>
-#include <eonname/Name.h>
+#include <eonstring/Name.h>
 
 
 

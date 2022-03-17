@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  
+    <Type Name="::eon::name_t">
+        <DisplayString Condition="Value==0">(no_name)</DisplayString>
+        <DisplayString Condition="Value!=0">{::eon::_Name::Names[Value-1]} #{Value}</DisplayString>
+    </Type>
+  
+</AutoVisualizer>

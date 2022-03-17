@@ -477,7 +477,7 @@ namespace eon
 								+ ": Capture group starting here is missing terminating ')'" );
 							return nullptr;
 						}
-						auto _name = name::get( name );
+						auto _name = eon::name( name );
 						if( _name == no_name )
 						{
 							throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
@@ -531,7 +531,7 @@ namespace eon
 								+ ": Back-reference must name a previously defined capture group" );
 							return nullptr;
 						}
-						auto _name = name::get( name );
+						auto _name = eon::name( name );
 						if( _name == no_name )
 						{
 							throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
