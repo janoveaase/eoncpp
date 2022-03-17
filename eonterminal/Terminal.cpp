@@ -30,11 +30,7 @@ namespace eon
 		if( found == Styles.end() )
 			*this << "<<invalid style>>";
 		else
-		{
-			Foreground = found->second.first;
-			Background = found->second.second;
-			_setColors();
-		}
+			_setStyle( found->second );
 		return *this;
 	}
 
@@ -511,34 +507,116 @@ namespace eon
 		ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
 		Width = size.ws_col;
 		Height = size.ws_row;
-	}
-	void Terminal::_setColors() noexcept
-	{
-/*		static bool was_bold = false;
-		std::string format;
-		if( Bold )
+
+		FGColors[ color::normal ] = -1;
+		FGColors[ color::black ] = 30;
+		FGColors[ color::white ] = 37;
+		FGColors[ color::red ] = 31;
+		FGColors[ color::green ] = 32;
+		FGColors[ color::yellow ] = 33;
+		FGColors[ color::blue ] = 34;
+		FGColors[ color::magenta ] = 35;
+		FGColors[ color::cyan ] = 36;
+
+		BGColors[ color::normal ] = -1;
+		BGColors[ color::black ] = 40;
+		BGColors[ color::white ] = 47;
+		BGColors[ color::red ] = 41;
+		BGColors[ color::green ] = 42;
+		BGColors[ color::yellow ] = 43;
+		BGColors[ color::blue ] = 44;
+		BGColors[ color::magenta ] = 45;
+		BGColors[ color::cyan ] = 46;
+
+		Styles[ style::normal ] = StyleDetails();
+		Styles[ style::black ] = StyleDetails( color::black, intensity::dark );
+		Styles[ style::dark ] = StyleDetails( color::black, intensity::bright );
+		Styles[ style::white ] = StyleDetails( color::white, intensity::bright );
+		Styles[ style::bright ] = StyleDetails( color::white, intensity::dark );
+		Styles[ style::cyan ] = StyleDetails( color::cyan );
+
+		if( Background == intensity::bright )
 		{
-			was_bold = true;
-			format = "\033[1m";
+			Styles[ style::red ] = StyleDetails( color::red );
+			Styles[ style::green ] = StyleDetails( color::green );
+			Styles[ style::yellow ] = StyleDetails( color::yellow );
+			Styles[ style::blue ] = StyleDetails( color::blue );
+			Styles[ style::magenta ] = StyleDetails( color::magenta );
+
+			Styles[ style::strong ] = StyleDetails( color::black, intensity::dark, fontstyle::bold );
+			Styles[ style::weak ] = StyleDetails( color::white, intensity::dark );
+			Styles[ style::note ] = StyleDetails( color::black, intensity::normal, fontstyle::normal, color::white, intensity::bright );
+			Styles[ style::warning ] = StyleDetails( color::white, intensity::bright, fontstyle::normal, color::yellow, intensity::dark );
+			Styles[ style::error ] = StyleDetails( color::white, intensity::bright, fontstyle::normal, color::red );
+			Styles[ style::success ] = StyleDetails( color::white, intensity::bright, fontstyle::normal, color::green );
+			Styles[ style::quote ] = StyleDetails( color::magenta, intensity::dark, fontstyle::normal, color::white, intensity::bright );
+			Styles[ style::reference ] = StyleDetails( color::yellow, intensity::dark, fontstyle::normal, color::white, intensity::bright );
+			Styles[ style::code ] = StyleDetails( color::cyan, intensity::dark, fontstyle::normal, color::white, intensity::bright );
 		}
-		else
+		else if( Background == intensity::dark )
 		{
-			if( was_bold )
+			Styles[ style::red ] = StyleDetails( color::red, intensity::bright );
+			Styles[ style::green ] = StyleDetails( color::green, intensity::bright );
+			Styles[ style::yellow ] = StyleDetails( color::yellow, intensity::bright );
+			Styles[ style::blue ] = StyleDetails( color::blue, intensity::bright );
+			Styles[ style::magenta ] = StyleDetails( color::magenta, intensity::bright );
+
+			Styles[ style::strong ] = StyleDetails( color::white, intensity::bright, fontstyle::bold );
+			Styles[ style::weak ] = StyleDetails( color::black, intensity::bright );
+			Styles[ style::note ] = StyleDetails( color::white, intensity::normal, fontstyle::normal, color::black, intensity::normal );
+			Styles[ style::warning ] = StyleDetails( color::white, intensity::bright, fontstyle::normal, color::yellow, intensity::dark );
+			Styles[ style::error ] = StyleDetails( color::white, intensity::bright, fontstyle::normal, color::red );
+			Styles[ style::success ] = StyleDetails( color::white, intensity::bright, fontstyle::normal, color::green );
+			Styles[ style::quote ] = StyleDetails( color::magenta, intensity::bright, fontstyle::normal, color::black, intensity::normal );
+			Styles[ style::reference ] = StyleDetails( color::yellow, intensity::bright, fontstyle::normal, color::black, intensity::normal );
+			Styles[ style::code ] = StyleDetails( color::cyan, intensity::bright, fontstyle::normal, color::black, intensity::normal );
+		}
+
+		Init = true;
+	}
+#endif
+
+#ifdef EON_WINDOWS
+	void Terminal::_setStyle( const StyleDetails& details )
+	{
+	}
+#else
+	void Terminal::_setStyle( const StyleDetails& details )
+	{
+		if( details.Foreground == color::normal || details.Background == color::normal )
+			std::cout << "\033[0m";
+		static std::string format;
+		format = "\033[";
+		if( details.Foreground != color::normal )
+		{
+			if( details.FStyle == fontstyle::bold )
+				format += "1;";
+			switch( details.FGIntensity )
 			{
-				was_bold = false;
-				format = "\033[22m";
+				case intensity::bright:
+					format += std::to_string( FGColors[ details.Foreground ] + 60 );
+					break;
+				default:
+					format += std::to_string( FGColors[ details.Foreground ] );
+					break;
 			}
 		}
-		int fg = 30 + (int)Foreground.Color;
-		int bg = 40 + (int)Background.Color;
-		if( ForegroundBright )
-			fg += 60;
-		if( BackgroundBright )
-			bg += 60;
-		if( !Err )
-			std::cout << format.c_str() << "\033[" << fg << "m\033[" << bg << 'm';
-		else
-			std::cerr << format.c_str() << "\033[" << fg << "m\033[" << bg << 'm';*/
+		if( details.Background != color::normal )
+		{
+			if( format[ format.size() - 1 ] != '[' )
+				format += ";";
+			switch( details.BGIntensity )
+			{
+				case intensity::bright:
+					format += std::to_string( BGColors[ details.Background ] + 60 );
+					break;
+				default:
+					format += std::to_string( BGColors[ details.Background ] );
+					break;
+			}
+		}
+		format += "m";
+		std::cout << format;
 	}
 #endif
 }

@@ -77,6 +77,8 @@ size_t runTests( const std::string& exe, const std::string& filter, std::list<st
 		++total;
 		eon::string test_name = test.TestClass + "." + test.TestName;
 		size_t col_w = eon::term.width() < 70 ? eon::term.width() : 70;
+		if( col_w == 0 )
+			col_w = 50;
 		eon::term << eon::style::note << "-- Start " << test_name << " "
 			<< eon::string().padRight( col_w - test_name.numChars() + 9, '-' ) << eon::style::normal << "\n";
 		auto st = std::chrono::high_resolution_clock::now();

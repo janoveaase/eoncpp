@@ -6,6 +6,7 @@ namespace eon
 {
 	TEST( TerminalTest, styles )
 	{
+//		term.setBackground( Terminal::intensity::dark );
 		term << "This test requires manual inspection of the output!\n\n";
 
 		term << "normal:    " << style::normal << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";

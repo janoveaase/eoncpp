@@ -68,7 +68,16 @@ namespace eon
 		enum class color
 		{
 			normal,
-			black,					// Darkest possible color
+			black,
+			white,
+			red,
+			green,
+			yellow,
+			blue,
+			magenta,
+			cyan
+
+/*			black,					// Darkest possible color
 			dark,					// Not as dark as black
 			red_dark,				// Darkest red
 			red_bright,				// Brightest red
@@ -89,7 +98,44 @@ namespace eon
 			cyan_bright,			// Brightest cyan
 			cyan,					// Best cyan color based on background
 			bright,					// Not as bright as white
-			white					// Brightest possible color
+			white,					// Brightest possible color
+			strong,					// Strong version of normal color
+			weak					// Weak version of normal color*/
+		};
+
+		// Color intensity
+		enum class intensity
+		{
+			bright,
+			normal,
+			dark
+		};
+
+		// Font style
+		enum class fontstyle
+		{
+			normal,
+			bold
+		};
+
+		// Style details
+		struct StyleDetails
+		{
+			StyleDetails() = default;
+			StyleDetails( color foreground, intensity fg_intensity = intensity::normal, fontstyle fstyle = fontstyle::normal,
+				color background = color::normal, intensity bg_intensity = intensity::normal )
+			{
+				Foreground = foreground;
+				FGIntensity = fg_intensity;
+				FStyle = fstyle;
+				Background = background;
+				BGIntensity = bg_intensity;
+			}
+			color Foreground{ color::normal };
+			intensity FGIntensity{ intensity::normal };
+			fontstyle FStyle{ fontstyle::normal };
+			color Background{ color::normal };
+			intensity BGIntensity{ intensity::normal };
 		};
 
 
@@ -102,6 +148,11 @@ namespace eon
 
 		Terminal() = default;
 		virtual ~Terminal() = default;
+
+
+#ifdef EON_UNIX
+		void setBackground( intensity style ) { Background = style; Init = false; }
+#endif
 
 
 
@@ -160,7 +211,7 @@ namespace eon
 	private:
 
 		void _checkPlatform() noexcept;
-		void _setColors() noexcept;
+		void _setStyle( const StyleDetails& details );
 
 
 
@@ -176,11 +227,9 @@ namespace eon
 		size_t CX{ 0 }, CY{ 0 };
 		size_t Width{ 0 }, Height{ 0 };
 		size_t MaxWidth{ 0 }, MaxHeight{ 0 };
-		color Foreground{ color::normal };
-		color Background{ color::normal };
 		color FGNormal{ color::normal };
 		color BGNormal{ color::normal };
-		std::map<style, std::pair<color, color>> Styles;
+		std::map<style, StyleDetails> Styles;
 		bool Bold = false;
 		bool Err = false;
 
@@ -189,6 +238,9 @@ namespace eon
 		std::map<color, WORD> FGColors, BGColors;
 		color _fg( WORD raw, WORD& out );
 		color _bg( WORD raw, WORD& out );
+#else
+		std::map<color, int> FGColors, BGColors;
+		intensity Background{ intensity::bright };
 #endif
 	};
 
