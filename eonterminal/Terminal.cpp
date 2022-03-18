@@ -163,7 +163,7 @@ namespace eon
 		winsize size;
 		ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
 		Width = size.ws_col;
-		Height = size.ws_row;
+		Height = size.ws_row - 1;
 
 		FGColors[ color::normal ] = -1;
 		FGColors[ color::black ] = 30;

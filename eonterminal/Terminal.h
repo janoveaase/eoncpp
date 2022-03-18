@@ -76,31 +76,6 @@ namespace eon
 			blue,
 			magenta,
 			cyan
-
-/*			black,					// Darkest possible color
-			dark,					// Not as dark as black
-			red_dark,				// Darkest red
-			red_bright,				// Brightest red
-			red,					// Best red color based on background
-			green_dark,				// Darkest green
-			green_bright,			// Brightest green
-			green,					// Best green color based on background
-			yellow_dark,			// Darkest yellow
-			yellow_bright,			// Brightest yellow
-			yellow,					// Best yellow color based on background
-			blue_dark,				// Darkest blue
-			blue_bright,			// Brightest blue
-			blue,					// Best blue color based on background
-			magenta_dark,			// Darkest magenta
-			magenta_bright,			// Brightest magenta
-			magenta,				// Best magenta color based on background
-			cyan_dark,				// Darkest cyan
-			cyan_bright,			// Brightest cyan
-			cyan,					// Best cyan color based on background
-			bright,					// Not as bright as white
-			white,					// Brightest possible color
-			strong,					// Strong version of normal color
-			weak					// Weak version of normal color*/
 		};
 
 		// Color intensity
@@ -121,7 +96,7 @@ namespace eon
 		// Color
 		struct Color
 		{
-			Color() = default;
+			Color() {}
 			Color( color name, intensity intense = intensity::normal ) { Name = name; Intensity = intense; }
 			color Name{ color::normal };
 			intensity Intensity{ intensity::normal };

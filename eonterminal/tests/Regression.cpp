@@ -39,7 +39,7 @@ namespace eon
 	{
 		term << "This test requires manual inspection of the output!\n\n";
 
-		term << " " << eon::string().padRight( term.width() - 2, '-' ) << " \n";
+		term << "." << eon::string().padRight( term.width() - 2, '-' ) << ".\n";
 		term << "|" << eon::string().padRight( term.width() - 2 ) << "|\n";
 		term << "|  " << style::note << eon::string().padRight( term.width() - 6 ) << style::normal << "  |\n";
 		term << "|  " << style::note << " This frame should fill the terminal window's"
@@ -53,6 +53,6 @@ namespace eon
 		term << "|  " << style::note << eon::string().padRight( term.width() - 6 ) << style::normal << "  |\n";
 		for( size_t line = 7; line < term.height(); ++line )
 			term << "|" + eon::string().padRight( term.width() - 2 ) << "|\n";
-		term << " " << eon::string().padRight( term.width() - 2, '-' ) << " \n";
+		term << "'" << eon::string().padRight( term.width() - 2, '-' ) << "'\n";
 	}
 }
