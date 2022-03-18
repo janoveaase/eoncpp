@@ -3,7 +3,7 @@
 
 namespace eon
 {
-	struct hash_name { inline size_t operator()( const string* a ) const noexcept { return size_t( a ); } };
+	struct hash_name { inline size_t operator()( const string* a ) const noexcept { return a->hash(); } };
 	struct eq_name { inline bool operator()( const string* a, const string* b ) const noexcept { return *a == *b; } };
 #ifdef _DEBUG
 	std::vector<string*> _Name::Names;

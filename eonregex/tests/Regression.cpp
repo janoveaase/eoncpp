@@ -193,6 +193,8 @@ namespace eon
 		rx::match result;
 
 		WANT_TRUE( result = expr.match( "one: two" ) ) << "Didn't match basic";
+		auto e = result.group( name_key );
+		auto two = result.group( name_value );
 		WANT_EQ( "e", result.group( name_key ).stdstr() ) << "Wrong key for basic";
 		WANT_EQ( 2, result.group( name_key ).begin().numChar() ) << "Wrong start position for basic";
 		WANT_EQ( "two", result.group( name_value ).stdstr() ) << "Wrong value for basic";

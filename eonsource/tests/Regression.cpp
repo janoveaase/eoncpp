@@ -232,7 +232,7 @@ namespace eon
 			"   NOTE in \"test\" (2:6): five\n2|Line #2!\n |-----^--\n"
 			"   INFO in \"test\" (2:8): six\n2|Line #2!\n |-------^"
 		};
-		WANT_EQ( exp.stdstr(), act.stdstr() );
+		WANT_EQ( exp, act );
 	}
 	TEST( SourceReporter, empty )
 	{
@@ -257,6 +257,6 @@ namespace eon
 			"   NOTE in \"test\": five\n"
 			"   INFO in \"test\": six"
 		};
-		WANT_EQ( exp.stdstr(), act.stdstr() );
+		WANT_EQ( exp, act );
 	}
 }

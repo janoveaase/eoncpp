@@ -41,7 +41,6 @@ namespace eon
 	const name_t name_key = name( "key" );
 	const name_t name_value = name( "value" );
 	const name_t name_raw = name( "raw" );
-	const name_t name_meta = name( "meta" );
 	const name_t name_typetuple = name( "typetuple" );
 	const name_t name_function = name( "function" );
 	const name_t name_functions = name( "functions" );
@@ -115,8 +114,8 @@ namespace eon
 	const name_t name_bitxor = name( "bitxor" );
 	const name_t name_lshift = name( "lshift" );
 	const name_t name_rshift = name( "rshift" );
-	const name_t name_construct = name( "constructor" );
-	const name_t name_destruct = name( "destructor" );
+	const name_t name_constructor = name( "constructor" );
+	const name_t name_destructor = name( "destructor" );
 	const name_t name_other = name( "other" );
 	const name_t name_memory_denied = name( "memory_denied" );
 	const name_t name_pos = name( "pos" );

@@ -118,24 +118,28 @@ namespace eon
 			bold
 		};
 
+		// Color
+		struct Color
+		{
+			Color() = default;
+			Color( color name, intensity intense = intensity::normal ) { Name = name; Intensity = intense; }
+			color Name{ color::normal };
+			intensity Intensity{ intensity::normal };
+		};
+
 		// Style details
 		struct StyleDetails
 		{
 			StyleDetails() = default;
-			StyleDetails( color foreground, intensity fg_intensity = intensity::normal, fontstyle fstyle = fontstyle::normal,
-				color background = color::normal, intensity bg_intensity = intensity::normal )
+			StyleDetails( Color foreground, fontstyle fstyle = fontstyle::normal, Color background = Color() )
 			{
 				Foreground = foreground;
-				FGIntensity = fg_intensity;
 				FStyle = fstyle;
 				Background = background;
-				BGIntensity = bg_intensity;
 			}
-			color Foreground{ color::normal };
-			intensity FGIntensity{ intensity::normal };
+			Color Foreground;
 			fontstyle FStyle{ fontstyle::normal };
-			color Background{ color::normal };
-			intensity BGIntensity{ intensity::normal };
+			Color Background;
 		};
 
 
@@ -211,6 +215,7 @@ namespace eon
 	private:
 
 		void _checkPlatform() noexcept;
+		void _prepareStyles( intensity background );
 		void _setStyle( const StyleDetails& details );
 
 
@@ -236,8 +241,8 @@ namespace eon
 #ifdef EON_WINDOWS
 		HANDLE Console{ NULL };
 		std::map<color, WORD> FGColors, BGColors;
-		color _fg( WORD raw, WORD& out );
-		color _bg( WORD raw, WORD& out );
+		Color _fg( WORD raw );
+		Color _bg( WORD raw );
 #else
 		std::map<color, int> FGColors, BGColors;
 		intensity Background{ intensity::bright };

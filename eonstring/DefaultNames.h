@@ -50,7 +50,6 @@ namespace eon
 	extern const name_t name_key;
 	extern const name_t name_value;
 	extern const name_t name_raw;
-	extern const name_t name_meta;
 	extern const name_t name_typetuple;
 	extern const name_t name_function;
 	extern const name_t name_functions;
