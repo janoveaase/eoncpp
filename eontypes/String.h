@@ -40,9 +40,10 @@ namespace eon
 	class StringInstance : public type::Instance
 	{
 	public:
-		StringInstance() : Instance( name_string, source::Ref() ) {}
-		StringInstance( const string& value, source::Ref source ) : Instance( name_string, source ) { Value = value; }
-		StringInstance( string&& value, source::Ref source ) : Instance( name_string, source ) {
+		StringInstance() : Instance( EonType( name_string ), source::Ref() ) {}
+		StringInstance( const string& value, source::Ref source ) : Instance( EonType( name_string ), source ) {
+			Value = value; }
+		StringInstance( const EonType& type, string&& value, source::Ref source ) : Instance( type, source ) {
 			Value = std::move( value ); }
 
 		inline void die() override { delete this; }

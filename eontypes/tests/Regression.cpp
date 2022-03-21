@@ -318,27 +318,27 @@ namespace eon
 		WANT_EQ( "@one/two/three", i->value().str() );
 	}
 
+
+
 	TEST( TupleTest, plain )
 	{
 		type::Handler::init();
 		Tuple tup;
 		tup.addRaw( false );
 		tup.addRaw( static_cast<int_t>( -54 ) );
-		tup.addRaw( name_active );
+		tup.addName( name_active );
 		tup.addRaw( "I am string!" );
 		tup.finalize();
 		REQUIRE_EXCEPT( tup.addRaw( 3.14 ), type::AccessDenied );
 
-		std::vector<TypeElement*> attributes{ new NameElement( name_bool ), new NameElement( name_int ),
-			new NameElement( name_name ), new NameElement( name_string ) };
-		TypeTuple exp_type( attributes, name_plain, TypeTuple::own_attributes::yes );
-		WANT_EQ( exp_type.asName(), tup.type().asName() );
+		EonType exp_type( { EonType( name_bool ), EonType( name_int ), EonType( name_name ), EonType( name_string ) } );
+		WANT_EQ( exp_type.str(), tup.type().str() );
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_int, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
+		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
 		WANT_FALSE( tup.value<bool>( 0 ) );
 		WANT_EQ( -54, tup.value<int_t>( 1 ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
@@ -350,15 +350,15 @@ namespace eon
 		Tuple tup;
 		tup.addRaw( true );
 		tup.addRaw( eon::name( "two" ), static_cast<int_t>( -54 ) );
-		tup.addRaw( name_active );
+		tup.addName( name_active );
 		tup.addRaw( eon::name( "four" ), string( "I am string!" ) );
 		tup.finalize();
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_int, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
+		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
 		WANT_EQ( -54, tup.value<int_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
@@ -388,27 +388,27 @@ namespace eon
 		Tuple base, eq, ne, lt, gt;
 
 		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		base.addRaw( name_active );
+		base.addName( name_active );
 		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		eq.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		eq.addRaw( name_active );
+		eq.addName( name_active );
 		eq.addRaw( eon::name( "three" ), string( "Str" ) );
 		eq.finalize();
 
 		ne.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		ne.addRaw( name_active );
+		ne.addName( name_active );
 		ne.addRaw( eon::name( "two" ), string( "Str" ) );	// "two" vs. "three"
 		ne.finalize();
 
 		lt.addRaw( eon::name( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt.addRaw( name_active );
+		lt.addName( name_active );
 		lt.addRaw( eon::name( "three" ), string( "Str" ) );
 		lt.finalize();
 
 		gt.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		gt.addRaw( name_active );
+		gt.addName( name_active );
 		gt.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		gt.finalize();
 
@@ -443,38 +443,38 @@ namespace eon
 		Tuple base, c1, c2, n1, n2;
 
 		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		base.addRaw( name_active );
+		base.addName( name_active );
 		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		// Names in different places
 		c1.addRaw( eon::name( "three" ), string( "Str" ) );
-		c1.addRaw( name_active );
+		c1.addName( name_active );
 		c1.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
 		c1.finalize();
 
 		// Unnamed, incomplete
 		c2.addRaw( static_cast<int_t>( -54 ) );
-		c2.addRaw( name_active );
+		c2.addName( name_active );
 		c2.finalize();
 
 		// Wrong type
 		n1.addRaw( eon::name( "one" ), string( "Str" ) );
-		n1.addRaw( name_active );
+		n1.addName( name_active );
 		n1.addRaw( eon::name( "three" ), static_cast<int_t>( -55 ) );
 		n1.finalize();
 
 		// Too many attributes
 		n2.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		n2.addRaw( name_active );
+		n2.addName( name_active );
 		n2.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		n2.addRaw( std::string( "bytes" ) );
 		n2.finalize();
 
-		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
-		WANT_TRUE( c2.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n1.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n2.type().compatibleWith( base.type() ) );
+		WANT_TRUE( c1.compatibleWith( base ) );
+		WANT_TRUE( c2.compatibleWith( base ) );
+		WANT_FALSE( n1.compatibleWith( base ) );
+		WANT_FALSE( n2.compatibleWith( base ) );
 	}
 
 	TEST( TupleTest, dynamic )
@@ -483,22 +483,20 @@ namespace eon
 		DynamicTuple tup;
 		tup.addRaw( false );
 		tup.addRaw( static_cast<int_t>( -54 ) );
-		tup.addRaw( name_active );
+		tup.addName( name_active );
 		tup.addRaw( string( "I am string!" ) );
 		tup.finalize();
 		REQUIRE_NO_EXCEPT( tup.addRaw( 3.14 ) );
 
-		std::vector<TypeElement*> attributes{ new NameElement( name_bool ), new NameElement( name_int ),
-			new NameElement( name_name ), new NameElement( name_string ), new NameElement{ name_float } };
-		TypeTuple exp_type( attributes, name_dynamic, TypeTuple::own_attributes::yes );
-		WANT_EQ( exp_type.asName(), tup.type().asName() );
+		EonType exp_type( name_dynamic );
+		WANT_EQ( exp_type.str(), tup.type().str() );
 
 		REQUIRE_EQ( 5, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_int, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
-		REQUIRE_EQ( name_float, tup[ 4 ].type().asName() );
+		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
+		REQUIRE_EQ( name_float, tup[ 4 ].type().name() );
 		WANT_FALSE( tup.value<bool>( 0 ) );
 		WANT_EQ( -54, tup.value<int_t>( 1 ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
@@ -511,15 +509,15 @@ namespace eon
 		DynamicTuple tup;
 		tup.addRaw( true );
 		tup.addRaw( eon::name( "two" ), static_cast<int_t>( -54 ) );
-		tup.addRaw( name_active );
+		tup.addName( name_active );
 		tup.addRaw( eon::name( "four" ), string( "I am string!" ) );
 		tup.finalize();
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_int, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
+		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
 		WANT_EQ( -54, tup.value<int_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
@@ -549,27 +547,27 @@ namespace eon
 		DynamicTuple base, eq, ne, lt, gt;
 
 		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		base.addRaw( name_active );
+		base.addName( name_active );
 		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		eq.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		eq.addRaw( name_active );
+		eq.addName( name_active );
 		eq.addRaw( eon::name( "three" ), string( "Str" ) );
 		eq.finalize();
 
 		ne.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		ne.addRaw( name_active );
+		ne.addName( name_active );
 		ne.addRaw( eon::name( "two" ), string( "Str" ) );	// "two" vs. "three"
 		ne.finalize();
 
 		lt.addRaw( eon::name( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt.addRaw( name_active );
+		lt.addName( name_active );
 		lt.addRaw( eon::name( "three" ), string( "Str" ) );
 		lt.finalize();
 
 		gt.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		gt.addRaw( name_active );
+		gt.addName( name_active );
 		gt.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		gt.finalize();
 
@@ -604,38 +602,38 @@ namespace eon
 		DynamicTuple base, c1, c2, n1, n2;
 
 		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		base.addRaw( name_active );
+		base.addName( name_active );
 		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		// Names in different places
 		c1.addRaw( eon::name( "three" ), string( "Str" ) );
-		c1.addRaw( name_active );
+		c1.addName( name_active );
 		c1.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
 		c1.finalize();
 
 		// Unnamed, incomplete
 		c2.addRaw( static_cast<int_t>( -54 ) );
-		c2.addRaw( name_active );
+		c2.addName( name_active );
 		c2.finalize();
 
 		// Wrong type
 		n1.addRaw( eon::name( "one" ), string( "Str" ) );
-		n1.addRaw( name_active );
+		n1.addName( name_active );
 		n1.addRaw( eon::name( "three" ), static_cast<int_t>( -55 ) );
 		n1.finalize();
 
 		// Too many attributes
 		n2.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		n2.addRaw( name_active );
+		n2.addName( name_active );
 		n2.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		n2.addRaw( std::string( "bytes" ) );
 		n2.finalize();
 
-		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
-		WANT_TRUE( c2.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n1.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n2.type().compatibleWith( base.type() ) );
+		WANT_TRUE( c1.compatibleWith( base ) );
+		WANT_TRUE( c2.compatibleWith( base ) );
+		WANT_FALSE( n1.compatibleWith( base ) );
+		WANT_FALSE( n2.compatibleWith( base ) );
 	}
 
 	TEST( TupleTest, data )
@@ -644,22 +642,20 @@ namespace eon
 		DataTuple tup;
 		tup.addRaw( false );
 		tup.addRaw( static_cast<int_t>( -54 ) );
-		tup.addRaw( name_active );
+		tup.addName( name_active );
 		tup.addRaw( string( "I am string!" ) );
 		tup.finalize();
 		REQUIRE_NO_EXCEPT( tup.addRaw( 3.14 ) );
 
-		std::vector<TypeElement*> attributes{ new NameElement( name_bool ), new NameElement( name_long ),
-			new NameElement( name_name ), new NameElement( name_string ), new NameElement{ name_high } };
-		TypeTuple exp_type( attributes, name_data, TypeTuple::own_attributes::yes );
-		WANT_EQ( exp_type.asName(), tup.type().asName() );
+		EonType exp_type( name_data );
+		WANT_EQ( exp_type.str(), tup.type().str() );
 
 		REQUIRE_EQ( 5, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_long, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
-		REQUIRE_EQ( name_high, tup[ 4 ].type().asName() );
+		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
+		REQUIRE_EQ( name_long, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
+		REQUIRE_EQ( name_high, tup[ 4 ].type().name() );
 		WANT_FALSE( tup.value<bool>( 0 ) );
 		WANT_EQ( -54, tup.value<long_t>( 1 ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
@@ -672,15 +668,15 @@ namespace eon
 		DataTuple tup;
 		tup.addRaw( true );
 		tup.addRaw( eon::name( "two" ), static_cast<int_t>( -54 ) );
-		tup.addRaw( name_active );
+		tup.addName( name_active );
 		tup.addRaw( eon::name( "four" ), string( "I am string!" ) );
 		tup.finalize();
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
-		REQUIRE_EQ( name_bool, tup[ 0 ].type().asName() );
-		REQUIRE_EQ( name_long, tup[ 1 ].type().asName() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().asName() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().asName() );
+		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
+		REQUIRE_EQ( name_long, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
 		WANT_EQ( -54, tup.value<long_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
@@ -711,27 +707,27 @@ namespace eon
 		DataTuple base, eq, ne, lt, gt;
 
 		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		base.addRaw( name_active );
+		base.addName( name_active );
 		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		eq.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		eq.addRaw( name_active );
+		eq.addName( name_active );
 		eq.addRaw( eon::name( "three" ), string( "Str" ) );
 		eq.finalize();
 
 		ne.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		ne.addRaw( name_active );
+		ne.addName( name_active );
 		ne.addRaw( eon::name( "two" ), string( "Str" ) );	// "two" vs. "three"
 		ne.finalize();
 
 		lt.addRaw( eon::name( "one" ), static_cast<int_t>( -55 ) );	// -55 vs. -54
-		lt.addRaw( name_active );
+		lt.addName( name_active );
 		lt.addRaw( eon::name( "three" ), string( "Str" ) );
 		lt.finalize();
 
 		gt.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		gt.addRaw( name_active );
+		gt.addName( name_active );
 		gt.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		gt.finalize();
 
@@ -766,105 +762,92 @@ namespace eon
 		DataTuple base, c1, c2, n1, n2;
 
 		base.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		base.addRaw( name_active );
+		base.addName( name_active );
 		base.addRaw( eon::name( "three" ), string( "Str" ) );
 		base.finalize();
 
 		// Names in different places
 		c1.addRaw( eon::name( "three" ), string( "Str" ) );
-		c1.addRaw( name_active );
+		c1.addName( name_active );
 		c1.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
 		c1.finalize();
 
 		// Unnamed, incomplete
 		c2.addRaw( static_cast<int_t>( -54 ) );
-		c2.addRaw( name_active );
+		c2.addName( name_active );
 		c2.finalize();
 
 		// Wrong type
 		n1.addRaw( eon::name( "one" ), string( "Str" ) );
-		n1.addRaw( name_active );
+		n1.addName( name_active );
 		n1.addRaw( eon::name( "three" ), static_cast<int_t>( -55 ) );
 		n1.finalize();
 
 		// Too many attributes
 		n2.addRaw( eon::name( "one" ), static_cast<int_t>( -54 ) );
-		n2.addRaw( name_active );
+		n2.addName( name_active );
 		n2.addRaw( eon::name( "three" ), string( "str" ) );	// "str" vs. "Str"
 		n2.addRaw( std::string( "bytes" ) );
 		n2.finalize();
 
-		WANT_TRUE( c1.type().compatibleWith( base.type() ) );
-		WANT_TRUE( c2.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n1.type().compatibleWith( base.type() ) );
-		WANT_FALSE( n2.type().compatibleWith( base.type() ) );
+		WANT_TRUE( c1.compatibleWith( base ) );
+		WANT_TRUE( c2.compatibleWith( base ) );
+		WANT_FALSE( n1.compatibleWith( base ) );
+		WANT_FALSE( n2.compatibleWith( base ) );
 	}
 
 
-/*
-	
-	TEST( TypesTest, instance_array )
-	{
-		tup::varscope global;
-		instance i( global, new std::vector<instance>{
-			instance( global, name_bool ),
-			instance( global, int_t( -3333 ) ) } );
-		REQUIRE_NO_EXCEPT( i.arrayValue() );
-		REQUIRE_EXCEPT( i.float32Value(), instance::WrongType );
-		REQUIRE_EQ( 2, i.arrayValue()->size() );
-		WANT_EQ( name_bool, i.arrayValue()->at( 0 ).nameValue() );
-		WANT_EQ( -3333, i.arrayValue()->at( 1 ).intValue() );
-	}
-	TEST( TypesTest, instance_list )
-	{
-		tup::varscope global;
-		instance i( global, new std::list<instance>{
-			instance( global, name_bool ),
-			instance( global, int_t( -3333 ) ) } );
-		REQUIRE_NO_EXCEPT( i.listValue() );
-		REQUIRE_EXCEPT( i.arrayValue(), instance::WrongType );
-		REQUIRE_EQ( 2, i.listValue()->size() );
-		WANT_EQ( name_bool, i.listValue()->begin()->nameValue() );
-		WANT_EQ( -3333, i.listValue()->rbegin()->intValue() );
-	}
 
-	TEST( TypesTest, instance_tuple )
+	TEST( TypeTest, str1 )
 	{
-		auto name_sub = eon::name( "sub" );
-		tup::varscope global;
-		instance i{ global, new eon::tuple{ global, {
-			tuple::attribute( new instance( global, true ) ),
-			tuple::attribute( name_byte, new instance( global, byte_t( 'x' ) ) ),
-			tuple::attribute( name_int, new instance( global, int_t( -56 ) ) ),
-			tuple::attribute( new instance( global, -3.16 ) ),
-			tuple::attribute( name_sub, new instance( global, new eon::tuple{ global, {
-				tuple::attribute( new instance( global, name_binary ) )
-			} } ) )
-		} } };
-		REQUIRE_NO_EXCEPT( i.tupleValue() );
-		REQUIRE_EXCEPT( i.float32Value(), instance::WrongType );
-		REQUIRE_EQ( 5, i.tupleValue()->numAttributes() );
-		WANT_TRUE( i.tupleValue()->at( 0 ).boolValue() );
-		WANT_EQ( 'x', i.tupleValue()->at( 1 ).byteValue() );
-		WANT_EQ( -56, i.tupleValue()->at( 2 ).intValue() );
-		WANT_EQ( -3.16, i.tupleValue()->at( 3 ).floatValue() );
-		REQUIRE_TRUE( i.tupleValue()->at( 4 ).t()->isTuple() );
-		REQUIRE_EQ( 1, i.tupleValue()->at( 4 ).tupleValue()->numAttributes() );
-		WANT_EQ( name_binary, i.tupleValue()->at( 4 ).tupleValue()->at( 0 ).nameValue() );
-		WANT_EQ( 1, i.tupleValue()->t()->pos( name_byte ) );
-		WANT_EQ( 2, i.tupleValue()->t()->pos( name_int ) );
-		WANT_EQ( 4, i.tupleValue()->t()->pos( name_sub ) );
-	}
+		EonType t1( name_bool ), t2( name_byte, name_active );
+		EonType t3( { name_char, name_int } );
+		EonType t4( { EonType( EonType( { name_short, name_long } ), name( "one" ) ),
+			EonType( { name_float, name_low, name_high } ) } );
 
-	TEST( TypesTest, instance_reference )
+		WANT_EQ( "T(bool)", t1.str() );
+		WANT_EQ( "T(active=byte)", t2.str() );
+		WANT_EQ( "T(char, int)", t3.str() );
+		WANT_EQ( "T(one=(short, long), (float, low, high))", t4.str() );
+	}
+	TEST( TypeTest, str2 )
 	{
-		tup::varscope global;
-		auto target = new instance( global, name_bool );
-		target->addRef();
-		instance i( global, target );
-		REQUIRE_NO_EXCEPT( i.referenceValue() );
-		REQUIRE_EXCEPT( i.float32Value(), instance::WrongType );
-		WANT_EQ( name_bool, i.referenceValue()->nameValue() );
-		target->delRef();
-	}*/
+		type::Handler::init();
+		BoolInstance b1( true, source::Ref() );
+		BoolInstance b2( false, source::Ref() );
+		Tuple t1, t2;
+		t1.addRaw( name( "one" ), false );
+		t1.addRaw( static_cast<int_t>( -54 ) );
+		t1.addName( name( "three" ), name_active );
+		t1.addRaw( "I am string!" );
+		t1.finalize();
+		t2.addName( name( "three" ), name_active );
+		t2.addRaw( static_cast<int_t>( 9 ) );
+		t2.finalize();
+
+		WANT_EQ( "T(bool)", b1.type().str() );
+		WANT_EQ( "T(one=bool, int, three=name, string)", t1.type().str() );
+		WANT_EQ( "T(three=name, int)", t2.type().str() );
+	}
+	TEST( TypeTest, compare )
+	{
+		EonType t1( name_bool ), t2( name_bool ), t3( name_char );
+
+		WANT_TRUE( t1 == t2 );
+		WANT_TRUE( t2 == t1 );
+		WANT_FALSE( t1 == t3 );
+	}
+	TEST( TypeTest, compatible )
+	{
+		EonType t1( name_bool ), t2( name_bool );
+		EonType t3( { EonType( name_bool, name( "one" ) ), EonType( name_int ), EonType( name_name, name( "three" ) ),
+			EonType( name_string ) } );
+		EonType t4( { EonType( name_name, name( "three" ) ), EonType( name_int ) } );
+
+		WANT_TRUE( t1.compatibleWith( t2 ) );
+		WANT_TRUE( t2.compatibleWith( t1 ) );
+		WANT_TRUE( t1.compatibleWith( t3 ) );
+		WANT_TRUE( t4.compatibleWith( t3 ) );
+		WANT_FALSE( t3.compatibleWith( t4 ) );
+	}
 }

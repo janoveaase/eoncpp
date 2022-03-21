@@ -41,9 +41,10 @@ namespace eon
 	class NamePathInstance : public type::Instance
 	{
 	public:
-		NamePathInstance() : Instance( name_namepath, source::Ref() ) {}
-		NamePathInstance( const namepath& value, source::Ref source ) : Instance( name_namepath, source ) { Value = value; }
-		NamePathInstance( namepath&& value, source::Ref source ) : Instance( name_namepath, source ) {
+		NamePathInstance() : Instance( EonType( name_namepath ), source::Ref() ) {}
+		NamePathInstance( const namepath& value, source::Ref source ) : Instance( EonType( name_namepath ), source ) {
+			Value = value; }
+		NamePathInstance( namepath&& value, source::Ref source ) : Instance( EonType( name_namepath ), source ) {
 			Value = std::move( value ); }
 
 		inline void die() override { delete this; }

@@ -41,11 +41,12 @@ namespace eon
 	class BytesInstance : public type::Instance
 	{
 	public:
-		BytesInstance() : Instance( name_bytes, source::Ref() ) {}
-		BytesInstance( const std::string& value, source::Ref source ) : Instance( name_bytes, source ) { Value = value; }
-		BytesInstance( std::string&& value, source::Ref source ) : Instance( name_bytes, source ) {
+		BytesInstance() : Instance( EonType( name_bytes ), source::Ref() ) {}
+		BytesInstance( const std::string& value, source::Ref source ) : Instance( EonType( name_bytes ), source ) {
+			Value = value; }
+		BytesInstance( const EonType& type, std::string&& value, source::Ref source ) : Instance( type, source ) {
 			Value = std::move( value ); }
-		BytesInstance( const string& value, source::Ref source ) : Instance( name_bytes, source ) {
+		BytesInstance( const EonType& type, const string& value, source::Ref source ) : Instance( type, source ) {
 			Value = value.stdstr(); }
 
 		inline void die() override { delete this; }

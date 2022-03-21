@@ -37,7 +37,7 @@ namespace eon
 				LegalDataTupleAttributeTypes = {
 					name_bool, name_byte, name_char, name_int, name_short, name_long,
 					name_float, name_low, name_high, name_name, name_bytes, name_string,
-					name_regex, name_namepath, name_path, name_data };
+					name_regex, name_namepath, name_path, name_type, name_data };
 				RawToEonTypeMap = {
 					{ std::type_index( typeid( bool ) ), name_bool },
 					{ std::type_index( typeid( byte_t ) ), name_byte },
@@ -54,6 +54,7 @@ namespace eon
 					{ std::type_index( typeid( regex ) ), name_regex },
 					{ std::type_index( typeid( namepath ) ), name_namepath },
 					{ std::type_index( typeid( path ) ), name_path },
+					{ std::type_index( typeid( EonType ) ), name_type },
 					{ std::type_index( typeid( DataTuple ) ), name_data }
 				};
 				GenericToDataTupleAttributeTypeMap = {
@@ -72,33 +73,12 @@ namespace eon
 					{ name_regex, name_regex },
 					{ name_namepath, name_namepath },
 					{ name_path, name_path },
+					{ name_type, name_type },
 					{ name_data, name_data }
 				};
 			}
 		}
 
-
-
-
-		bool Handler::legalForDataTuple( const TypeTuple& type ) noexcept
-		{
-			if( type.isName() )
-				return LegalDataTupleAttributeTypes.find( type.asName() ) != LegalDataTupleAttributeTypes.end();
-			for( auto elm : type )
-			{
-				if( elm->isNameElement() )
-				{
-					if( LegalDataTupleAttributeTypes.find( type.asName() ) == LegalDataTupleAttributeTypes.end() )
-						return false;
-				}
-				else
-				{
-					if( !legalForDataTuple( *(const TypeTuple*)elm ) )
-						return false;
-				}
-			}
-			return true;
-		}
 
 
 

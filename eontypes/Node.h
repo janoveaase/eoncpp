@@ -79,9 +79,9 @@ namespace eon
 		public:
 
 			// The resulting type after full evaluation
-			inline TypeTuple resultType() const noexcept { return isOperator() ? opr().returnType()
-				: isAction() ? action().returnType() : isName() ? TypeTuple::name( name_name )
-				: isEllipsis() ? TypeTuple::name( name_ellipsis ) : isValue() ? value()->type() : TypeTuple(); }
+			inline EonType resultType() const noexcept { return isOperator() ? opr().returnType()
+				: isAction() ? action().returnType() : isName() ? EonType( name_name )
+				: isEllipsis() ? EonType( name_ellipsis ) : isValue() ? value()->type() : EonType(); }
 
 			inline NodeType type() const noexcept { return Type; }
 			inline bool isOperator() const noexcept { return Type == NodeType::opr; }

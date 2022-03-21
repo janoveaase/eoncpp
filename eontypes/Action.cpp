@@ -35,30 +35,11 @@ namespace eon
 	}
 	namespace type
 	{
-		Action::Action( const TypeTuple& instance_type, actions::Type action_type, name_t name,
-			const TypeTuple& return_type, DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
+		Action::Action( const EonType& instance_type, actions::Type action_type, name_t name, const EonType& return_type,
+			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
 			: Object( _generateType( name, return_type, arguments ), source )
 		{
 			_create( instance_type, action_type, name, return_type, arguments, raises );
-		}
-		Action::Action( const TypeTuple& instance_type, actions::Type action_type, name_t name, name_t return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
-			: Object( _generateType( name, TypeTuple::name( return_type ), arguments ), source )
-		{
-			_create( instance_type, action_type, name, TypeTuple::name( return_type ), arguments, raises );
-		}
-		Action::Action( name_t instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
-			: Object( _generateType( name, return_type, arguments ), source )
-		{
-			_create( TypeTuple::name( instance_type ), action_type, name, return_type, arguments, raises );
-		}
-		Action::Action( name_t instance_type, actions::Type action_type, name_t name, name_t return_type,
-			DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source )
-			: Object( _generateType( name, TypeTuple::name( return_type ), arguments ), source )
-		{
-			_create( TypeTuple::name( instance_type ), action_type, name, TypeTuple::name( return_type ), arguments,
-				raises );
 		}
 
 
@@ -78,39 +59,20 @@ namespace eon
 
 
 
-		TypeTuple Action::_generateType( name_t name, const TypeTuple& returntype, const DynamicTuple& arguments )
+		EonType Action::_generateType( name_t name, const EonType& returntype, const DynamicTuple& arguments )
 		{
-			TypeTuple type;
-			type << new NameElement( name, name_action );
-			if( returntype.isName() )
-				type << new NameElement( name_type, returntype.asName() );
-			else
-				type << new TypeTuple( TypeTuple::rename( returntype, name_type ) );
-			
-			TypeTuple args;
+			// Action types are defined as: T(name=<name>, type=<returntype>, args=(<arguments>)
+			EonType type( name, name_name );
+			type << EonType( returntype, name_type );			
+			EonType args;
 			for( auto& argument : arguments )
-			{
-				if( argument.name() )
-				{
-					if( argument.type().isName() )
-						args << new NameElement( argument.name(), argument.type().asName() );
-					else
-						args << new TypeTuple( TypeTuple::rename( argument.type(), argument.name() ) );
-				}
-				else
-				{
-					if( argument.type().isName() )
-						args << new NameElement( argument.type().asName() );
-					else
-						args << argument.type();
-				}
-			}
-			type << new TypeTuple( TypeTuple::rename( args, name_args ) );
+				args << EonType( argument.type() );
+			type << EonType( args, name_args );
 			return type;
 		}
 
-		void Action::_create( const TypeTuple& instance_type, actions::Type action_type, name_t name,
-			const TypeTuple& return_type, DynamicTuple arguments, std::initializer_list<name_t> raises )
+		void Action::_create( const EonType& instance_type, actions::Type action_type, name_t name,
+			const EonType& return_type, DynamicTuple arguments, std::initializer_list<name_t> raises )
 		{
 			InstanceType = instance_type;
 			ActionType = action_type;

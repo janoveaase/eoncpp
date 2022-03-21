@@ -39,8 +39,8 @@ namespace eon
 	class BoolInstance : public type::Instance
 	{
 	public:
-		BoolInstance() : Instance( name_bool, source::Ref() ) {}
-		BoolInstance( bool value, source::Ref source ) : Instance( name_bool, source ) { Value = value; }
+		BoolInstance() : Instance( EonType( name_bool ), source::Ref() ) {}
+		BoolInstance( bool value, source::Ref source ) : Instance( EonType( name_bool ), source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		inline void callDestructor() override {}

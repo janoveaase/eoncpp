@@ -41,9 +41,11 @@ namespace eon
 	class PathInstance : public type::Instance
 	{
 	public:
-		PathInstance() : Instance( name_path, source::Ref() ) {}
-		PathInstance( const path& value, source::Ref source ) : Instance( name_path, source ) { Value = value; }
-		PathInstance( path&& value, source::Ref source ) : Instance( name_path, source ) { Value = std::move( value ); }
+		PathInstance() : Instance( EonType( name_path ), source::Ref() ) {}
+		PathInstance( const path& value, source::Ref source ) : Instance( EonType( name_path ), source ) {
+			Value = value; }
+		PathInstance( path&& value, source::Ref source ) : Instance( EonType( name_path ), source ) {
+			Value = std::move( value ); }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}

@@ -39,8 +39,8 @@ namespace eon
 	class NameInstance : public type::Instance
 	{
 	public:
-		NameInstance() : Instance( name_name, source::Ref() ) {}
-		NameInstance( name_t value, source::Ref source ) : Instance( name_name, source ) { Value = value; }
+		NameInstance() : Instance( EonType( name_name ), source::Ref() ) {}
+		NameInstance( name_t value, source::Ref source ) : Instance( EonType( name_name ), source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}

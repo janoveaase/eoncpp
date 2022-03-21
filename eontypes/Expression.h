@@ -95,7 +95,7 @@ namespace eon
 			inline Node& value() noexcept { return Value; }
 
 			//* Get the type that this expression will produce
-			inline TypeTuple resultType() const noexcept { return Value.resultType(); }
+			inline EonType resultType() const noexcept { return Value.resultType(); }
 
 
 

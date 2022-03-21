@@ -10,9 +10,9 @@
 namespace eon
 {
 	/**************************************************************************
-	  Main Tuple Type - eon::Tuple
+	  Plain Tuple - eon::Tuple
 
-	  A meta data object is a tuple for which all attributes must be set at
+	  A plain tuple object is a tuple for which all attributes must be set at
 	  instantiation, and their number, types and names cannot change after.
 	**************************************************************************/
 	class Tuple : public type::BasicTuple

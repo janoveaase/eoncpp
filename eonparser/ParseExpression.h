@@ -81,17 +81,17 @@ namespace eon
 			bool _parseTupleAttribute( type::BasicTuple& tuple, name_t tuple_type );
 			name_t _parseAttributeQualifier( name_t tuple_type );
 			name_t _parseAttributeName( source::Ref& name_src );
-			bool _parseAttributeType( TypeTuple& output, bool have_name );
+			bool _parseAttributeType( EonType& output, bool have_name );
 			bool _parseAttributeValue( type::Expression& value );
-			bool _getTypeFromValue( TypeTuple& output, type::Object* value, source::Ref src );
-			bool _valueMatchesType( type::Object* value, const TypeTuple& type, source::Ref src );
+			bool _getTypeFromValue( EonType& output, type::Object* value, source::Ref src );
+			bool _valueMatchesType( type::Object* value, const EonType& type, source::Ref src );
 			
 			bool _parseTypeTuple();
-			bool __parseTypeTuple( TypeTuple& output, name_t name, name_t end_of_tuple );
+			bool __parseTypeTuple( EonType& output, name_t name, name_t end_of_tuple );
 			bool _endOfTypeTuple( name_t end_of_tuple );
-			bool _parseTypeTupleAttribute( TypeTuple& tuple );
-			bool _parseSubTypeTuple( TypeTuple& tuple, name_t sub_name = no_name );
-			bool _parseTypeTupleNameAndType( TypeTuple& tuple );
+			bool _parseTypeTupleAttribute( EonType& tuple );
+			bool _parseSubTypeTuple( EonType& tuple, name_t sub_name = no_name );
+			bool _parseTypeTupleNameAndType( EonType& tuple );
 
 //			type::Action* _findAction( name_t name );
 //			inline type::Action* _findOperator( type::operators::code op_code ) {
@@ -107,7 +107,7 @@ namespace eon
 
 			string _args( const type::Node& node ) const;
 			bool _checkOperator( const std::list<type::Action*>& operators, actions::OperatorAction& op,
-				string args, const TypeTuple& return_type ) const;
+				string args, const EonType& return_type ) const;
 
 
 

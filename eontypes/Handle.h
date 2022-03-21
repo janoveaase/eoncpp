@@ -40,8 +40,9 @@ namespace eon
 	class HandleInstance : public type::Instance
 	{
 	public:
-		HandleInstance() : Instance( name_handle, source::Ref() ) {}
-		HandleInstance( handle_t value, source::Ref source ) : Instance( name_handle, source ) { Value = value; }
+		HandleInstance() : Instance( EonType( name_handle ), source::Ref() ) {}
+		HandleInstance( handle_t value, source::Ref source ) : Instance( EonType( name_handle ), source ) {
+			Value = value; }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}

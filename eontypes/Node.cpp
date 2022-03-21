@@ -207,17 +207,17 @@ namespace eon
 
 		void Node::_infixInstanceStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().asName() );
+			str.addWord( action.type().str() );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixPreFirstStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().asName() );
+			str.addWord( action.type().str() );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixPreLastStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().asName() );
+			str.addWord( action.type().str() );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixGetStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
@@ -234,7 +234,7 @@ namespace eon
 		}
 		void Node::_infixTypeStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().asName() );
+			str.addWord( action.type().str() );
 			str.addRaw( "'s" ); str.resetRaw();
 			str.addWord( action.name() );
 			_infixStr( action, str, need_par );

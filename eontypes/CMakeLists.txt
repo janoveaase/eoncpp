@@ -6,13 +6,13 @@ set(TYPES_HEADERS
 	TypeDefinitions.h
 	TypeSystem.h
 	TypeHandler.h
+	EonType.h
 	Attribute.h
 	Caches.h
 	BasicTuple.h
 	BasicTupleActions.h
 	DataTuple.h
 	DynamicTuple.h
-	TypeTuple.h
 	Tuple.h
 	Bool.h
 	BoolActions.h
@@ -56,10 +56,10 @@ set(TYPES_HEADERS
 set(TYPES_SOURCES
 	TypeSystem.cpp
 	TypeHandler.cpp
+	EonType.cpp
 	Attribute.cpp
 	BasicTuple.cpp
 	BasicTupleActions.cpp
-	TypeTuple.cpp
 	Bool.cpp
 	BoolActions.cpp
 	Byte.cpp

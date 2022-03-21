@@ -2,6 +2,7 @@
 
 //#include "TypeSystem.h"
 #include "TypeDefinitions.h"
+#include "EonType.h"
 #include <typeinfo>
 #include <unordered_set>
 #include <eonsource/SourceRef.h>
@@ -17,7 +18,6 @@ namespace eon
 	{
 		class Scope;
 	}
-	class TypeTuple;
 
 
 
@@ -64,7 +64,8 @@ namespace eon
 				return found != RawToEonTypeMap.end() ? found->second : no_name; }
 
 			// Check if the specified type can be used as attribute in data tuples
-			static bool legalForDataTuple( const TypeTuple& type ) noexcept;
+			static inline bool legalForDataTuple( const EonType& type ) noexcept {
+				return LegalDataTupleAttributeTypes.find( type.name() ) != LegalDataTupleAttributeTypes.end(); }
 
 			// Given an Æon type name, get the corresponding supported type for data tuples
 			// Throws [eon::type::IncompatibleType] if no possible mapping to supported type!

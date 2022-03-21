@@ -41,10 +41,12 @@ namespace eon
 	class RegexInstance : public type::Instance
 	{
 	public:
-		RegexInstance() : Instance( name_regex, source::Ref() ) {}
-		RegexInstance( const regex& value, source::Ref source ) : Instance( name_regex, source ) { Value = value; }
-		RegexInstance( regex&& value, source::Ref source ) : Instance( name_regex, source ) { Value = std::move( value ); }
-		RegexInstance( const string& value, source::Ref source ) : Instance( name_regex, source ) {
+		RegexInstance() : Instance( EonType( name_regex ), source::Ref() ) {}
+		RegexInstance( const regex& value, source::Ref source ) : Instance( EonType( name_regex ), source ) {
+			Value = value; }
+		RegexInstance( regex&& value, source::Ref source ) : Instance( EonType( name_regex ), source ) {
+			Value = std::move( value ); }
+		RegexInstance( const string& value, source::Ref source ) : Instance( EonType( name_regex ), source ) {
 			Value = regex( value.substr() ); }
 
 		inline void die() override { delete this; }

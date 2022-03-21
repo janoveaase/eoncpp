@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TypeDefinitions.h"
-#include "TypeTuple.h"
+#include "EonType.h"
 #include "Stringifier.h"
 #include <eonsource/SourceRef.h>
 
@@ -22,8 +22,7 @@ namespace eon
 		{
 		public:
 			Object() = delete;
-			inline Object( name_t type, source::Ref source ) { Type = type; Source = source; }
-			inline Object( TypeTuple type, source::Ref source ) { Type = type; Source = source; }
+			inline Object( EonType type, source::Ref source = source::Ref() ) { Type = type; Source = source; }
 			inline Object( const Object& other ) { Type = other.Type; Source = other.Source; }
 			inline Object( Object&& other ) noexcept { Type = std::move( other.Type ); Source = std::move( other.Source ); }
 
@@ -32,7 +31,7 @@ namespace eon
 				Type = std::move( other.Type ); Source = other.Source; return *this; }
 
 			//* Get the type name
-			inline const TypeTuple& type() const noexcept { return Type; }
+			inline const EonType& type() const noexcept { return Type; }
 
 			//* Get the source
 			inline const source::Ref& source() const noexcept { return Source; }
@@ -45,6 +44,9 @@ namespace eon
 
 			//* General type of object (instance, typedef, action, tuple, etc.)
 			virtual name_t generalType() const noexcept = 0;
+
+			//* Check if 'this' object can be assigned to 'other'
+			virtual bool compatibleWith( const Object& other ) const noexcept { return Type.compatibleWith( other.type() ); }
 
 			//* Objects that should be deleted upon exiting scope should call
 			//* "delete this" in the implementation of this method. Those
@@ -68,7 +70,7 @@ namespace eon
 
 
 		protected:
-			TypeTuple Type;
+			EonType Type;
 			source::Ref Source;
 		};
 
@@ -83,7 +85,8 @@ namespace eon
 		{
 		public:
 			Definition() = delete;
-			inline Definition( name_t name, source::Ref source ) noexcept : Object( name, source ) {}
+			inline Definition( name_t name, source::Ref source = source::Ref() ) noexcept
+				: Object( EonType( name, source ), source ) {}
 
 			//* Identify this as a 'definition'
 			virtual name_t generalType() const noexcept override { return name_definition; }
@@ -103,7 +106,7 @@ namespace eon
 		{
 		public:
 			Instance() = delete;
-			inline Instance( name_t type, source::Ref source ) : Object( type, source ) {}
+			inline Instance( EonType type, source::Ref source = source::Ref() ) : Object( type, source ) {}
 
 			//* Identify this as an 'instance'
 			inline name_t generalType() const noexcept override { return name_instance; }
@@ -151,7 +154,7 @@ namespace eon
 		{
 		public:
 			TypeDef() = delete;
-			inline TypeDef( name_t name, source::Ref source ) : Definition( name, source ) {};
+			inline TypeDef( name_t name, source::Ref source = source::Ref() ) : Definition( name, source ) {};
 
 			//* Identify this as an 'instance'
 			inline name_t generalType() const noexcept override { return name_type; }
@@ -169,31 +172,12 @@ namespace eon
 
 
 
-/*		//* Base class for type definitions involving templates
-		class TemplateTypeDef : public TypeDef
-		{
-		public:
-			TemplateTypeDef() = delete;
-			inline TemplateTypeDef( name_t name, TypeID* template_types ) : TypeDef( name ) {
-				TemplateTypes = template_types; }
-			virtual ~TemplateTypeDef() { if( TemplateTypes ) delete TemplateTypes; }
-
-			// Get template types for the type - if any
-			inline const TypeID* templateTypes() const noexcept { return TemplateTypes; }
-
-		private:
-			TypeID* TemplateTypes{ nullptr };
-		};*/
-
-
-
-
 		//* Base class for enum objects
 		class Enum : public Definition
 		{
 		public:
 			Enum() = delete;
-			inline Enum( name_t name, uint8_t unit_size, source::Ref source ) : Definition( name, source ) {
+			inline Enum( name_t name, uint8_t unit_size, source::Ref source = source::Ref() ) : Definition( name, source ) {
 				UnitSize = unit_size; }
 
 			//* Identify this as an 'instance'
@@ -209,14 +193,16 @@ namespace eon
 
 
 
-		//* Wrapper for type tuple
-		class TypeTupleObject : public Object
+		//* Wrapper for EonType
+		class EonTypeObject : public Object
 		{
 		public:
-			TypeTupleObject() : Object( name_typetuple, source::Ref() ) {}
-			TypeTupleObject( TypeTuple&& value ) : Object( name_typetuple, value.source() ) {
+			EonTypeObject() : Object( EonType( name_type, source::Ref() ), source::Ref() ) {}
+			EonTypeObject( const EonType& value ) : Object( EonType( name_type, value.source() ), value.source() ) {
+				Value = value; }
+			EonTypeObject( EonType&& value ) : Object( EonType( name_type, value.source() ), value.source() ) {
 				Value = std::move( value ); }
-			virtual ~TypeTupleObject() = default;
+			virtual ~EonTypeObject() = default;
 
 			//* Get the C++ type
 			inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
@@ -232,20 +218,20 @@ namespace eon
 			//* This method must be overridden to call the object's own
 			//* destructor! For example, if the derived object type is "Item",
 			//* then "callDestructor" should call "this->~Item();".
-			inline void callDestructor() override { this->~TypeTupleObject(); }
+			inline void callDestructor() override {}
 
 			//* Create a copy of 'this'
-			Object* copy() override { return new TypeTupleObject( TypeTuple( Value ) ); }
+			Object* copy() override { return new EonTypeObject( Value ); }
 
 			//* Create a new object that consumes 'this'
 			//* For primitives, this is the same as copy
-			inline Object* consume() override { return new TypeTupleObject( std::move( Value ) ); }
+			inline Object* consume() override { return new EonTypeObject( std::move( Value ) ); }
 
 			//* Get object as string representation
 			inline void str( Stringifier& str ) const override { return Value.str( str ); }
 
 		private:
-			TypeTuple Value;
+			EonType Value;
 		};
 	}
 }

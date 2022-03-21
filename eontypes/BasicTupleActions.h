@@ -5,7 +5,7 @@
 #include "OperatorAction.h"
 #include "Integer.h"
 #include "Index.h"
-#include "TypeTuple.h"
+#include "EonType.h"
 #include <eonscopes/Scope.h>
 
 
@@ -68,9 +68,9 @@ namespace eon
 		class TuplePlus : public OperatorAction
 		{
 		public:
-			inline TuplePlus() : OperatorAction( TypeTuple::tuple( T::tupleType() ), opcode::plus,
-				TypeTuple::tuple( R::tupleType() ), DynamicTuple( { type::Attribute( name_other,
-					TypeTuple::tuple( A::tupleType() ) ) } ), {}, source::Ref() ) {}
+			inline TuplePlus() : OperatorAction( EonType( T::tupleType() ), opcode::plus,
+				EonType( R::tupleType() ), DynamicTuple( { type::Attribute( name_other,
+					EonType( A::tupleType() ) ) } ), {}, source::Ref() ) {}
 			virtual ~TuplePlus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override
@@ -89,9 +89,9 @@ namespace eon
 		class TupleMinus : public OperatorAction
 		{
 		public:
-			inline TupleMinus() : OperatorAction( TypeTuple::tuple( T::tupleType() ), opcode::plus,
-				TypeTuple::tuple( R::tupleType() ), DynamicTuple( { type::Attribute( name_other,
-					TypeTuple::tuple( A::tupleType() ) ) } ), {}, source::Ref() ) {}
+			inline TupleMinus() : OperatorAction( EonType( T::tupleType() ), opcode::plus,
+				EonType( R::tupleType() ), DynamicTuple( { type::Attribute( name_other,
+					EonType( A::tupleType() ) ) } ), {}, source::Ref() ) {}
 			virtual ~TupleMinus() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override
@@ -110,8 +110,8 @@ namespace eon
 		class TupleElementIndex : public OperatorAction
 		{
 		public:
-			inline TupleElementIndex() : OperatorAction( TypeTuple::tuple( T::tupleType() ), opcode::element,
-				TypeTuple::tuple( name_dynamic ), DynamicTuple( { type::Attribute( name_pos, name_index ) } ), {},
+			inline TupleElementIndex() : OperatorAction( EonType( T::tupleType() ), opcode::element,
+				EonType( name_dynamic ), DynamicTuple( { type::Attribute( name_pos, name_index ) } ), {},
 				source::Ref() ) {}
 			virtual ~TupleElementIndex() = default;
 			void die() override {}
@@ -127,8 +127,8 @@ namespace eon
 		class TupleElementInt : public OperatorAction
 		{
 		public:
-			inline TupleElementInt() : OperatorAction( TypeTuple::tuple( T::tupleType() ), opcode::element,
-				TypeTuple::tuple( name_dynamic ), DynamicTuple( { type::Attribute( name_pos, name_int ) } ), {},
+			inline TupleElementInt() : OperatorAction( EonType( T::tupleType() ), opcode::element,
+				EonType( name_dynamic ), DynamicTuple( { type::Attribute( name_pos, name_int ) } ), {},
 				source::Ref() ) {}
 			virtual ~TupleElementInt() = default;
 			void die() override {}
@@ -146,8 +146,8 @@ namespace eon
 		class TupleElementName : public OperatorAction
 		{
 		public:
-			inline TupleElementName() : OperatorAction( TypeTuple::tuple( T::tupleType() ), opcode::element,
-				TypeTuple::tuple( name_dynamic ), DynamicTuple( { type::Attribute( name_pos, name_name ) } ), {},
+			inline TupleElementName() : OperatorAction( EonType( T::tupleType() ), opcode::element,
+				EonType( name_dynamic ), DynamicTuple( { type::Attribute( name_pos, name_name ) } ), {},
 				source::Ref() ) {}
 			virtual ~TupleElementName() = default;
 			void die() override {}
@@ -163,8 +163,8 @@ namespace eon
 		class TupleSlice : public OperatorAction
 		{
 		public:
-			inline TupleSlice() : OperatorAction( TypeTuple::tuple( T::tupleType() ), opcode::slice,
-				TypeTuple::tuple( name_dynamic ), DynamicTuple( { type::Attribute( eon::name( "first" ), name_int ),
+			inline TupleSlice() : OperatorAction( EonType( T::tupleType() ), opcode::slice,
+				EonType( name_dynamic ), DynamicTuple( { type::Attribute( eon::name( "first" ), name_int ),
 					type::Attribute( eon::name( "last" ), name_int ) } ), {}, source::Ref() ) {}
 			virtual ~TupleSlice() = default;
 			void die() override {}

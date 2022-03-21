@@ -18,14 +18,8 @@ namespace eon
 		class OperatorAction : public type::Action
 		{
 		public:
-			OperatorAction( const TypeTuple& instance_type, type::operators::code op_code, const TypeTuple& return_type,
+			OperatorAction( const EonType& instance_type, type::operators::code op_code, const EonType& return_type,
 				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
-			OperatorAction( const TypeTuple& instance_type, type::operators::code op_code, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
-			OperatorAction( name_t instance_type, type::operators::code op_code, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
-			OperatorAction( name_t instance_type, type::operators::code op_code, name_t return_type, DynamicTuple arguments,
-				std::initializer_list<name_t> raises, source::Ref source );
 
 			OperatorAction( type::operators::code op_code, index_t num_args, source::Ref source );
 			virtual ~OperatorAction() = default;

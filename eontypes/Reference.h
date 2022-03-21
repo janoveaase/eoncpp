@@ -16,9 +16,8 @@ namespace eon
 	class Reference : public type::Object
 	{
 	public:
-		Reference( source::Ref source ) : type::Object( name_reference, source ) {}
-		Reference( name_t type, source::Ref source ) noexcept : type::Object( type, source ) {}
-		Reference( TypeTuple type, source::Ref source ) noexcept : type::Object( type, source ) {}
+		Reference( source::Ref source ) : type::Object( EonType( name_reference, source ), source ) {}
+		Reference( EonType type, source::Ref source ) noexcept : type::Object( type, source ) {}
 		Reference( type::Object* value ) noexcept : type::Object( *value ) { Value = value; }
 		Reference( const Reference& other ) noexcept : Object( other ) { Value = other.Value; }
 		virtual ~Reference() = default;
@@ -50,8 +49,7 @@ namespace eon
 	{
 	public:
 		Modifiable( source::Ref source ) : Reference( source ) {}
-		Modifiable( name_t type, source::Ref source ) noexcept : Reference( type, source ) {}
-		Modifiable( TypeTuple type, source::Ref source ) noexcept : Reference( type, source ) {}
+		Modifiable( EonType type, source::Ref source ) noexcept : Reference( type, source ) {}
 		Modifiable( type::Object* value ) noexcept : Reference( value ) {}
 		Modifiable( const Modifiable& other ) noexcept : Reference( other ) {}
 		virtual ~Modifiable() = default;

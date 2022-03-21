@@ -31,9 +31,10 @@ namespace eon
 				{ name_action, Permission::add_var | Permission::mod_var },
 				{ name_local, Permission::add_var | Permission::mod_var }
 			};
-			Perm = perm.find( tupleType() )->second;
+			Perm = perm.find( Type.name() )->second;
 
-			_generateTupleID();
+			if( Type.name() == name_plain )
+				_generateTupleID();
 			Finalized = true;
 		}
 
@@ -54,9 +55,51 @@ namespace eon
 
 
 
+
+		bool BasicTuple::compatibleWith( const Object& other ) const noexcept
+		{
+			if( other.type().name() == name_data || other.type().name() == name_dynamic )
+			{
+				auto& tuple = *(BasicTuple*)&other;
+				if( Type.name() == name_plain || Type.name() == name_data || Type.name() == name_dynamic )
+				{
+					if( Attributes.size() > tuple.Attributes.size() )
+						return false;
+					for( size_t i = 0; i < Attributes.size(); ++i )
+					{
+						if( Attributes[ i ].type().attributeName() != no_name )
+						{
+							auto& tup_attr = tuple.at( Attributes[ i ].type().attributeName() );
+							if( Attributes[ i ].value() && tup_attr.value() )
+							{
+								if( !Attributes[ i ].value()->compatibleWith( *tup_attr.value() ) )
+									return false;
+							}
+							else
+							{
+								if( !Attributes[ i ].type().compatibleWith( tup_attr.type() ) )
+									return false;
+							}
+						}
+					}
+					return true;
+				}
+				else
+				{
+					// Must match on first attribute
+					return tuple.empty() ? false : Type.compatibleWith( tuple.at( 0 ).type() );
+				}
+			}
+			else
+				return Type.compatibleWith( other.type() );
+		}
+
+
+
+
 		void BasicTuple::str( Stringifier& str ) const
 		{
-			auto ttype = tupleType();
+			auto ttype = Type.name();
 			if( ttype == name_data || ttype == name_dynamic )
 			{
 				str.spacingOnce();
@@ -83,11 +126,20 @@ namespace eon
 
 
 
-		BasicTuple* BasicTuple::addPlainTuple( name_t name )
+		BasicTuple& BasicTuple::addName( name_t name, name_t value )
+		{
+			return *this += Attribute( name, new NameInstance( value, source::Ref() ) );
+		}
+		BasicTuple& BasicTuple::addName( name_t value )
+		{
+			return *this += Attribute( new NameInstance( value, source::Ref() ) );
+		}
+
+		BasicTuple* BasicTuple::addPlainTuple( name_t name, source::Ref source )
 		{
 			if( Finalized )
 				throw AccessDenied();
-			static auto type = TypeTuple::tuple( name_plain );
+			auto type = EonType( name_plain, source );
 			_assertCanAddVar( type );
 			if( name )
 			{
@@ -99,11 +151,11 @@ namespace eon
 			Attributes.push_back( Attribute( name, tuple->type(), tuple ) );
 			return tuple;
 		}
-		BasicTuple* BasicTuple::addDynamicTuple( name_t name )
+		BasicTuple* BasicTuple::addDynamicTuple( name_t name, source::Ref source )
 		{
 			if( Finalized )
 				throw AccessDenied();
-			static auto type = TypeTuple::tuple( name_dynamic );
+			static auto type = EonType( name_dynamic, source );
 			_assertCanAddVar( type );
 			if( name )
 			{
@@ -115,11 +167,11 @@ namespace eon
 			Attributes.push_back( Attribute( name, tuple->type(), tuple ) );
 			return tuple;
 		}
-		BasicTuple* BasicTuple::addDataTuple( name_t name )
+		BasicTuple* BasicTuple::addDataTuple( name_t name, source::Ref source )
 		{
 			if( Finalized )
 				throw AccessDenied();
-			static auto type = TypeTuple::tuple( name_data );
+			static auto type = EonType( name_data, source );
 			_assertCanAddVar( type );
 			if( name )
 			{
@@ -142,8 +194,6 @@ namespace eon
 				NamedAttribs[ attribute.name() ] = Attributes.size();
 			}
 			Attributes.push_back( std::move( attribute ) );
-			if( Finalized )
-				_generateTupleID();
 			return *this;
 		}
 		BasicTuple& BasicTuple::operator+=( const BasicTuple& other )
@@ -159,8 +209,6 @@ namespace eon
 				}
 				Attributes.push_back( attribute );
 			}
-			if( Finalized )
-				_generateTupleID();
 			return *this;
 		}
 
@@ -191,8 +239,6 @@ namespace eon
 					NamedAttribs[ old[ i ].name() ] = Attributes.size();
 				Attributes.push_back( std::move( old[ i ] ) );
 			}
-			if( Finalized )
-				_generateTupleID();
 			return *this;
 		}
 
@@ -205,8 +251,6 @@ namespace eon
 				throw NotFound();
 			Attributes.erase( Attributes.begin() + found->second );
 			NamedAttribs.erase( found );
-			if( Finalized )
-				_generateTupleID();
 			return* this;
 		}
 		BasicTuple& BasicTuple::remove( size_t pos )
@@ -224,8 +268,6 @@ namespace eon
 				}
 			}
 			Attributes.erase( Attributes.begin() + pos );
-			if( Finalized )
-				_generateTupleID();
 			return *this;
 		}
 
@@ -284,93 +326,31 @@ namespace eon
 
 
 
-		TypeTuple BasicTuple::_makeTupleID( name_t tuple_type, const std::initializer_list<Object*>& values )
-		{
-			std::vector<TypeElement*> elements;
-			for( auto value : values )
-			{
-				if( !value )
-					throw NullValue();
-				auto& type = value->type();
-				if( type.isName() )
-					elements.push_back( new NameElement( type.asName() ) );
-				else
-					elements.push_back( new TypeTuple( type ) );
-			}
-			return TypeTuple::tuple( tuple_type, elements );
-		}
-		TypeTuple BasicTuple::_makeTupleID( name_t tuple_type, const std::initializer_list<Attribute>& attributes )
-		{
-			std::vector<TypeElement*> elements;
-			for( auto& attribute : attributes )
-			{
-				if( attribute.type().isName() )
-					elements.push_back( new NameElement( attribute.type().asName() ) );
-				else
-					elements.push_back( new TypeTuple( attribute.type() ) );
-			}
-			return TypeTuple::tuple( tuple_type, elements );
-		}
 		void BasicTuple::_generateTupleID()
 		{
-			std::vector<TypeElement*> elements;
 			for( auto& attribute : Attributes )
-			{
-				if( attribute.type().isName() )
-					elements.push_back( new NameElement( attribute.name(), attribute.type().asName() ) );
-				else
-					elements.push_back( new TypeTuple( TypeTuple::rename( attribute.type(), attribute.name() ) ) );
-			}
-			Type = TypeTuple::tuple( Type.tupleType(), elements );
+				Type << EonType( attribute.type() );
 		}
 
-		void BasicTuple::_assertCanAddVar( const TypeTuple& type )
+		void BasicTuple::_assertCanAddVar( const EonType& type )
 		{
 			if( !_canAddVar() )
 				throw AccessDenied();
 			
-			if( tupleType() == name_data )
+			if( Type.name() == name_data )
 			{
-				if( type.isTuple() && type.tupleType() != name_data )
-					throw AccessDenied( eon::str( type.tupleType() ).ucFirst()
-						+ " tuple is not a legal attribute type for tuple type " + eon::str( tupleType() ) + "!" );
+				if( type.name() == name_dynamic )
+					throw AccessDenied( eon::str( type.name() ).ucFirst()
+						+ " tuple is not a legal attribute type for tuple type " + eon::str( Type.name() ) + "!" );
 				if( !Handler::legalForDataTuple( type ) )
 					throw AccessDenied( type.str() + " is not a legal attribute type for tuple type "
-						+ eon::str( tupleType() ) + "!" );
-			}
-			
-			else if( tupleType() == name_lambda )
-			{
-				if( type.isName() )
-					throw AccessDenied( type.str() + " is not a legal attribute for lambda! "
-						"Only named attributes \"state\", \"args\", and \"return\" are possible!" );
-				if( type.Name != name_state && type.Name != name_args && type.Name != name_return )
-					throw AccessDenied( type.str() + " is not a legal attribute for lambda! "
-						"Only named attributes \"state\", \"args\", and \"return\" are possible!" );
-				if( type.Name == name_state )
-				{
-					if( !type.isTupleElement() )
-						throw AccessDenied( type.str() + " is not a legal attribute for lambda! "
-							"The value of \"state\" must be a tuple!" );
-				}
-				else if( type.Name == name_args )
-				{
-					if( !type.isTupleElement() )
-						throw AccessDenied( type.str() + " is not a legal attribute for lambda! "
-							"The value of \"args\" must be a tuple!" );
-				}
-				else if( type.Name == name_return )
-				{
-					if( type.asName() != name_expression )
-						throw AccessDenied( type.str() + " is not a legal attribute for lambda! "
-							"The value of \"return\" must be an expression!" );
-				}
+						+ eon::str( Type.name() ) + "!" );
 			}
 		}
 
 		void BasicTuple::_assertValidForMe( const BasicTuple& other )
 		{
-			if( tupleType() == name_data )
+			if( Type.name() == name_data )
 			{
 				for( auto& attribute : other )
 				{
@@ -399,9 +379,11 @@ namespace eon
 					str.spacingOnce();
 				}
 
-				if( element.type().isTuple() )
+				if( element.type().name() == name_plain
+					|| element.type().name() == name_data
+					|| element.type().name() == name_dynamic )
 				{
-					auto ttype = element.type().tupleType();
+					auto ttype = element.type().name();
 					if( element.name() )
 					{
 						str.addWord( element.name() );

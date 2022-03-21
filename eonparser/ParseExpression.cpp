@@ -14,7 +14,7 @@
 #include <eontypes/NamePath.h>
 #include <eontypes/OperatorAction.h>
 #include <eontypes/DataTuple.h>
-#include <eontypes/TypeTuple.h>
+#include <eontypes/EonType.h>
 #include <eontypes/DynamicTuple.h>
 
 
@@ -266,13 +266,13 @@ namespace eon
 					Tools->sync( std::move( sub ) );
 
 					auto type = value.resultType();
-					if( type.isTuple() )
+					if( type.name() == name_plain )
 					{
 						// We need to create a new assignment operation with
 						// our new variable on the left side and 'value' on
 						// the right.
 						auto operators = Tools->scope().global().getActions( compilerName( "$op_=" ), type,
-							TypeTuple::args( { type } ), type );
+							EonType( { type } ), type );
 
 						if( !_checkOperator( operators,
 							actions::OperatorAction( type::operators::code::assign, 2, source::Ref() ),
@@ -285,9 +285,9 @@ namespace eon
 						Tools->treeStack().push( std::move( assign ) );
 						return true;
 					}
-					else if( type.isName() )
+					else
 					{
-						auto type_obj = Tools->scope().find( type.asName() );
+						auto type_obj = Tools->scope().find( type.name() );
 						if( type_obj && type_obj->generalType() == name_type )
 						{
 //							auto val = ( (type::TypeDef*)type_obj )->instantiate();
@@ -297,7 +297,7 @@ namespace eon
 							// our new variable on the left side and 'value' on
 							// the right.
 							auto operators = Tools->scope().global().getActions( compilerName( "$op_=" ), type,
-								TypeTuple::args( { type } ), type );
+								EonType( { type } ), type );
 
 							if( !_checkOperator( operators,
 								actions::OperatorAction( type::operators::code::assign, 2, source::Ref() ),
@@ -569,7 +569,7 @@ namespace eon
 			source::Ref name_src;
 			auto name = _parseAttributeName( name_src );
 
-			TypeTuple type;
+			EonType type;
 			if( !_parseAttributeType( type, name != no_name ) )
 				return false;
 
@@ -607,7 +607,7 @@ namespace eon
 			// Deal with qualifiers
 			if( qualifier == name_read )
 			{
-				if( !type.isName() || ! isPrimitive( type.asName() ) )
+				if( type.name() == name_plain || !isPrimitive( type.name() ) )
 					value = new Reference( value );
 			}
 			else if( qualifier == name_modify )
@@ -663,7 +663,7 @@ namespace eon
 			Tools->forward();
 			return name;
 		}
-		bool ParseExpression::_parseAttributeType( TypeTuple& output, bool have_name )
+		bool ParseExpression::_parseAttributeType( EonType& output, bool have_name )
 		{
 			auto have_as = Tools->current().is( name_name ) && Tools->current().nameValue() == name_as;
 			if( !have_name && have_as )
@@ -717,7 +717,7 @@ namespace eon
 				return true;
 			}
 		}
-		bool ParseExpression::_getTypeFromValue( TypeTuple& output, type::Object* value, source::Ref src )
+		bool ParseExpression::_getTypeFromValue( EonType& output, type::Object* value, source::Ref src )
 		{
 			if( !value )
 			{
@@ -727,7 +727,7 @@ namespace eon
 			output = value->type();
 			return true;
 		}
-		bool ParseExpression::_valueMatchesType( type::Object* value, const TypeTuple& type, source::Ref src )
+		bool ParseExpression::_valueMatchesType( type::Object* value, const EonType& type, source::Ref src )
 		{
 			if( value->generalType() == name_action )
 			{
@@ -751,17 +751,17 @@ namespace eon
 			source::Ref source = Tools->current().source();
 			Tools->forward( 2 );
 
-			TypeTuple type;
+			EonType type;
 			if( !__parseTypeTuple( type, no_name, name_close ) )
 				return false;
 			source.end( *Tools ? Tools->current().source().start() : Tools->last().source().start() );
 			type.source( source );
-			Tools->treeStack().push( type::Node::newValue( new type::TypeTupleObject( std::move( type ) ) ) );
+			Tools->treeStack().push( type::Node::newValue( new type::EonTypeObject( std::move( type ) ) ) );
 			return true;
 		}
-		bool ParseExpression::__parseTypeTuple( TypeTuple& output, name_t name, name_t end_of_tuple )
+		bool ParseExpression::__parseTypeTuple( EonType& output, name_t name, name_t end_of_tuple )
 		{
-			TypeTuple tuple;
+			EonType tuple;
 			if( name != no_name )
 				tuple.name( name );
 			if( !_endOfTypeTuple( end_of_tuple ) )
@@ -769,7 +769,7 @@ namespace eon
 				while( Tools )
 				{
 					if( !_parseTypeTupleAttribute( tuple ) )
-						return TypeTuple();
+						return EonType();
 
 					if( Tools->current().is( name_operator ) && Tools->current().opValue() == type::operators::code::comma )
 						Tools->forward();
@@ -778,7 +778,7 @@ namespace eon
 					else
 					{
 						Tools->reporter().error( "Illegal part of type tuple!", Tools->current().source() );
-						return TypeTuple();
+						return EonType();
 					}
 				}
 			}
@@ -804,7 +804,7 @@ namespace eon
 
 			return false;
 		}
-		bool ParseExpression::_parseTypeTupleAttribute( TypeTuple& tuple )
+		bool ParseExpression::_parseTypeTupleAttribute( EonType& tuple )
 		{
 			// We accept the following constructs:
 			// 1. "("
@@ -825,7 +825,7 @@ namespace eon
 			// Must be single type name
 			else if( Tools->current().is( name_name ) )
 			{
-				tuple << new NameElement( Tools->current().nameValue() );
+				tuple = EonType( Tools->current().nameValue() );
 				Tools->forward();
 				return true;
 			}
@@ -833,15 +833,15 @@ namespace eon
 			Tools->reporter().error( "Expected an attribute name or type-tuple here!", Tools->current().source() );
 			return false;
 		}
-		bool ParseExpression::_parseSubTypeTuple( TypeTuple& tuple, name_t sub_name )
+		bool ParseExpression::_parseSubTypeTuple( EonType& tuple, name_t sub_name )
 		{
-			TypeTuple sub;
+			EonType sub;
 			if( !__parseTypeTuple( sub, sub_name, name_close ) )
 				return false;
-			tuple << sub;
+			tuple = sub;
 			return true;
 		}
-		bool ParseExpression::_parseTypeTupleNameAndType( TypeTuple& tuple )
+		bool ParseExpression::_parseTypeTupleNameAndType( EonType& tuple )
 		{
 			if( !Tools->current().is( name_name ) )
 			{
@@ -855,7 +855,7 @@ namespace eon
 			if( Tools->current().is( name_name ) )
 			{
 				Tools->forward();
-				tuple << new NameElement( name, Tools->current().nameValue() );
+				tuple = EonType( name, Tools->current().nameValue() );
 				Tools->forward();
 				return true;
 			}
@@ -870,7 +870,7 @@ namespace eon
 
 		bool ParseExpression::_popOperatorsUntil( type::operators::code op )
 		{
-			while( !Tools->opStack().empty() && Tools->opStack().top()->instanceType().isName( name_operator )
+			while( !Tools->opStack().empty() && Tools->opStack().top()->instanceType().name() == name_operator
 				&& ((actions::OperatorAction*)Tools->opStack().top())->opCode() != op )
 			{
 				if( !_popOperatorArgs() )
@@ -973,24 +973,24 @@ namespace eon
 			if( op_node.numChildren() > 0 )
 			{
 				auto& child = op_node.child( 0 );
-				TypeTuple type = child.isValue() ? child.value()->type()
+				EonType type = child.isValue() ? child.value()->type()
 					: child.isAction() ? child.action().returnType()
 					: child.isOperator() ? child.opr().returnType()
-					: child.isName() ? TypeTuple::name( name_name )
-					: child.isEllipsis() ? TypeTuple::name( name_ellipsis ) : TypeTuple();
-				TypeTuple args;
+					: child.isName() ? EonType( name_name )
+					: child.isEllipsis() ? EonType( name_ellipsis ) : EonType();
+				EonType args;
 				for( size_t i = 1; i < op_node.numChildren(); ++i )
 				{
 					if( op_node.child( i ).isValue() )
-						args << new TypeTuple( op_node.child( i ).value()->type() );
+						args = EonType( op_node.child( i ).value()->type() );
 					else if( op_node.child( i ).isOperator() )
-						args << new TypeTuple( op_node.child( i ).opr().returnType() );
+						args = EonType( op_node.child( i ).opr().returnType() );
 					else if( op_node.child( i ).isAction() )
-						args << new TypeTuple( op_node.child( i ).action().returnType() );
+						args = EonType( op_node.child( i ).action().returnType() );
 				}
 				// TODO: Find out if we can identify return type and include it below!
 				auto operators = Tools->scope().global().getActions( op_node.opr().name(), type, args );
-				if( !_checkOperator( operators, *action, _args( op_node ), TypeTuple() ) )
+				if( !_checkOperator( operators, *action, _args( op_node ), EonType() ) )
 					return false;
 				op_node.action( **operators.begin() );
 			}
@@ -1016,7 +1016,7 @@ namespace eon
 		}
 
 		bool ParseExpression::_checkOperator( const std::list<type::Action*>& operators, actions::OperatorAction& op,
-			string args, const TypeTuple& return_type ) const
+			string args, const EonType& return_type ) const
 		{
 			string rtype = return_type ? "->" + return_type.str() : "";
 			if( operators.empty() )

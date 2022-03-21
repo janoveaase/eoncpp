@@ -57,14 +57,8 @@ namespace eon
 		public:
 			Action() = delete;
 
-			Action( const TypeTuple& instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
-			Action( const TypeTuple& instance_type, actions::Type action_type, name_t name, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
-			Action( name_t instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
-			Action( name_t instance_type, actions::Type action_type, name_t name, name_t return_type,
-				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source );
+			Action( const EonType& instance_type, actions::Type action_type, name_t name, const EonType& return_type,
+				DynamicTuple arguments, std::initializer_list<name_t> raises, source::Ref source = source::Ref() );
 			// TODO: Add support for tests!
 
 			virtual ~Action() = default;
@@ -78,7 +72,7 @@ namespace eon
 			virtual void str( type::Stringifier& str ) const override {
 				str.addWord( Name ); str.addRaw( ":" ); str.newLine(); }
 			inline name_t generalType() const noexcept override { return name_action; }
-			inline const TypeTuple& instanceType() const noexcept { return InstanceType; }
+			inline const EonType& instanceType() const noexcept { return InstanceType; }
 			inline actions::Type actionType() const noexcept { return ActionType; }
 
 			virtual type::Precedence inputPrecedence() const noexcept {
@@ -90,7 +84,7 @@ namespace eon
 			inline name_t name() const noexcept { return Name; }
 
 			// Get return type
-			inline const TypeTuple& returnType() const noexcept { return ReturnType; }
+			inline const EonType& returnType() const noexcept { return ReturnType; }
 
 			// Get arguments
 			inline const DynamicTuple& arguments() const noexcept { return Arguments; }
@@ -125,9 +119,9 @@ namespace eon
 			**********************************************************************/
 		private:
 
-			static TypeTuple _generateType( name_t name, const TypeTuple& returntype, const DynamicTuple& arguments );
+			static EonType _generateType( name_t name, const EonType& returntype, const DynamicTuple& arguments );
 
-			void _create( const TypeTuple& instance_type, actions::Type action_type, name_t name, const TypeTuple& return_type,
+			void _create( const EonType& instance_type, actions::Type action_type, name_t name, const EonType& return_type,
 				DynamicTuple arguments, std::initializer_list<name_t> raises );
 
 			void _initPrefixFirstAction();
@@ -143,10 +137,10 @@ namespace eon
 			**********************************************************************/
 		protected:
 
-			TypeTuple InstanceType;
+			EonType InstanceType;
 			actions::Type ActionType{ actions::Type::undef };
 			name_t Name{ no_name };
-			TypeTuple ReturnType;
+			EonType ReturnType;
 			DynamicTuple Arguments;
 			std::unordered_set<name_t> Raises;
 		};

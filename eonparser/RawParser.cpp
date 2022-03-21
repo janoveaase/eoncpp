@@ -18,7 +18,7 @@
 #include <eontypes/NamePath.h>
 #include <eontypes/OperatorAction.h>
 #include <eontypes/DataTuple.h>
-#include <eontypes/TypeTuple.h>
+#include <eontypes/EonType.h>
 #include <eontypes/DynamicTuple.h>
 
 

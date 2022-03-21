@@ -11,8 +11,6 @@
 ******************************************************************************/
 namespace eon
 {
-//	class MetaData;
-
 	namespace type
 	{
 		class Object;
@@ -26,13 +24,11 @@ namespace eon
 		public:
 			Attribute() = default;
 			inline Attribute( Object* value ) { if( value ) Type = value->type(); assign( value ); }
-			inline Attribute( const TypeTuple& type, Object* value = nullptr ) { Type = type; assign( value ); }
+			inline Attribute( const EonType& type, Object* value = nullptr ) { Type = type; assign( value ); }
 			inline Attribute( name_t name, Object* value = nullptr ) {
-				Name = name; if( value ) Type = value->type(); assign( value ); }
-			inline Attribute( name_t name, const TypeTuple& type, Object* value = nullptr ) {
-				Name = name; Type = type; assign( value ); }
-			inline Attribute( name_t name, name_t type, Object* value = nullptr ) {
-				Name = name; Type = TypeTuple::name( type ); assign( value ); }
+				Name = name; if( value ) Type = EonType( value->type(), name ); assign( value ); }
+			inline Attribute( name_t name, const EonType& type, Object* value = nullptr ) {
+				Name = name; Type = EonType( type, name ); assign( value ); }
 
 			Attribute( const Attribute& other ) { *this = other; }
 			Attribute( Attribute&& other ) noexcept { *this = std::move( other ); }
@@ -43,7 +39,7 @@ namespace eon
 			Attribute& operator=( Attribute&& other ) noexcept;
 
 			inline name_t name() const noexcept { return Name; }
-			inline const TypeTuple& type() const noexcept { return Type; }
+			inline const EonType& type() const noexcept { return Type; }
 			inline Object* value() const noexcept { return Value; }
 
 			virtual void assign( Object* value ) { if( value ) {
@@ -52,7 +48,7 @@ namespace eon
 
 		private:
 			name_t Name{ no_name };
-			TypeTuple Type;
+			EonType Type;
 			Object* Value{ nullptr };
 		};
 	}

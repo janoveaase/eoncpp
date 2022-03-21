@@ -80,9 +80,10 @@ namespace eon
 				Actions[ compilerName( "$op_" + type::operators::mapCode( op ) ) ].push_back( action ); }
 
 			//* Get all actions matching specified details
-			std::list<type::Action*> getActions( name_t name, const TypeTuple& type, const TypeTuple& args,
-				const TypeTuple& return_type ) const noexcept;
-			std::list<type::Action*> getActions( name_t name, const TypeTuple& type, const TypeTuple& args ) const noexcept;
+			std::list<type::Action*> getActions( name_t name, const EonType& inst_type, const EonType& args,
+				const EonType& return_type ) const noexcept;
+			std::list<type::Action*> getActions( name_t name, const EonType& inst_type, const EonType& args )
+				const noexcept;
 
 		private:
 			std::unordered_map<name_t, std::list<type::Action*>> Actions;

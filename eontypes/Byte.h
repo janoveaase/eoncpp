@@ -41,8 +41,8 @@ namespace eon
 	class ByteInstance : public type::Instance
 	{
 	public:
-		ByteInstance() : Instance( name_byte, source::Ref() ) {}
-		ByteInstance( byte_t value, source::Ref source ) : Instance( name_byte, source ) { Value = value; }
+		ByteInstance() : Instance( EonType( name_byte ), source::Ref() ) {}
+		ByteInstance( byte_t value, source::Ref source ) : Instance( EonType( name_byte ), source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		inline void callDestructor() override {}

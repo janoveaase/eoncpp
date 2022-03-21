@@ -19,8 +19,8 @@ namespace eon
 
 
 
-		std::list<type::Action*> Global::getActions( name_t name, const TypeTuple& type, const TypeTuple& args,
-			const TypeTuple& return_type ) const noexcept
+		std::list<type::Action*> Global::getActions( name_t name, const EonType& inst_type, const EonType& args,
+			const EonType& return_type ) const noexcept
 		{
 			std::list<type::Action*> result;
 			auto found = Actions.find( name );
@@ -31,10 +31,7 @@ namespace eon
 				auto& action = **i;
 
 				// Step 1: Make sure object type matches
-				if(
-					( action.instanceType().isTuple() && type.isTuple()
-						&& action.instanceType().tupleType() == type.tupleType() )
-					|| action.instanceType() == type )
+				if( action.instanceType() == inst_type )
 				{
 					// Step 2: Make sure return type matches
 					if( action.returnType().compatibleWith( return_type ) )
@@ -47,7 +44,7 @@ namespace eon
 			}
 			return result;
 		}
-		std::list<type::Action*> Global::getActions( name_t name, const TypeTuple& type, const TypeTuple& args )
+		std::list<type::Action*> Global::getActions( name_t name, const EonType& inst_type, const EonType& args )
 			const noexcept
 		{
 			std::list<type::Action*> result;
@@ -58,7 +55,7 @@ namespace eon
 			{
 				auto& action = **i;
 
-				if( action.instanceType() == type )
+				if( action.instanceType() == inst_type )
 				{
 					if( args.compatibleWith( action.arguments().type() ) )
 						result.push_back( &action );

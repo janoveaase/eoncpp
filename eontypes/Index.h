@@ -41,8 +41,8 @@ namespace eon
 	class IndexInstance : public type::Instance
 	{
 	public:
-		IndexInstance() : Instance( name_index, source::Ref() ) {}
-		IndexInstance( index_t value, source::Ref source ) : Instance( name_index, source ) { Value = value; }
+		IndexInstance() : Instance( EonType( name_index ), source::Ref() ) {}
+		IndexInstance( index_t value, source::Ref source ) : Instance( EonType( name_index ), source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}

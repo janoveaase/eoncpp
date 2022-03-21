@@ -40,8 +40,8 @@ namespace eon
 	class CharInstance : public type::Instance
 	{
 	public:
-		CharInstance() : Instance( name_char, source::Ref() ) {}
-		CharInstance( char_t value, source::Ref source ) : Instance( name_char, source ) { Value = value; }
+		CharInstance() : Instance( EonType( name_char ), source::Ref() ) {}
+		CharInstance( char_t value, source::Ref source ) : Instance( EonType( name_char ), source ) { Value = value; }
 
 		inline void die() override { delete this; }
 		void callDestructor() override {}
