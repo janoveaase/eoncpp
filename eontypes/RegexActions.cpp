@@ -30,7 +30,7 @@ namespace eon
 		type::Object* RegexStringConstruct::execute( scope::Scope& scope, type::Node& action_node )
 		{
 			auto arg1 = _operand<StringInstance>( scope, action_node, 0 );
-			return new RegexInstance( string( arg1->value() ).stdstr(), arg1->source() );
+			return new RegexInstance( string( arg1->value() ), arg1->source() );
 		}
 
 		type::Object* RegexCmp::execute( scope::Scope& scope, type::Node& action_node )

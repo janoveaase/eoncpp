@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TypeDefinitions.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 #include "Bool.h"
 #include "Byte.h"
 #include "Char.h"

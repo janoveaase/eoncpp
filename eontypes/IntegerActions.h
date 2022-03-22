@@ -3,7 +3,12 @@
 #include "Integer.h"
 #include "Action.h"
 #include "OperatorAction.h"
-#include <eonscopes/Scope.h>
+#include "Bool.h"
+#include "Byte.h"
+#include "Char.h"
+#include "Floatingpt.h"
+#include "Index.h"
+#include "Scope.h"
 
 
 /******************************************************************************
@@ -11,44 +16,6 @@
 ******************************************************************************/
 namespace eon
 {
-	//* Register type and actions in the global scope
-	template<typename int_type>
-	void registerIntegerActions( scope::Global& scope ) {
-		scope.addAction( name_constructor, new actions::IntegerConstruct<int_type>() );
-		scope.addAction( name_constructor, new actions::IntegerBoolConstruct<int_type>() );
-		scope.addAction( name_constructor, new actions::IntegerByteConstruct<int_type>() );
-		scope.addAction( name_constructor, new actions::IntegerCharConstruct<int_type>() );		
-		scope.addAction( name_constructor, new actions::IntegerIntegerConstruct<int_type, int_t>() );
-		scope.addAction( name_constructor, new actions::IntegerIntegerConstruct<int_type, short_t>() );
-		scope.addAction( name_constructor, new actions::IntegerIntegerConstruct<int_type, long_t>() );
-		scope.addAction( name_constructor, new actions::IntegerFloatingptConstruct<int_type, flt_t>() );
-		scope.addAction( name_constructor, new actions::IntegerFloatingptConstruct<int_type, low_t>() );
-		scope.addAction( name_constructor, new actions::IntegerFloatingptConstruct<int_type, high_t>() );
-		scope.addAction( name_constructor, new actions::IntegerIndexConstruct<int_type>() );
-		scope.addOperator( type::operators::code::assign, new actions::IntegerAssign<int_type>() );
-		scope.addOperator( type::operators::code::plus_assign, new actions::IntegerPlusAssign<int_type>() );
-		scope.addOperator( type::operators::code::minus_assign, new actions::IntegerMinusAssign<int_type>() );
-		scope.addOperator( type::operators::code::multiply_assign, new actions::IntegerMultAssign<int_type>() );
-		scope.addOperator( type::operators::code::divide_assign, new actions::IntegerDivideAssign<int_type>() );
-		scope.addOperator( type::operators::code::cmp, new actions::IntegerCmp<int_type>() );
-		scope.addOperator( type::operators::code::plus, new actions::IntegerPlus<int_type>() );
-		scope.addOperator( type::operators::code::minus, new actions::IntegerMinus<int_type>() );
-		scope.addOperator( type::operators::code::multiply, new actions::IntegerMultiply<int_type>() );
-		scope.addOperator( type::operators::code::divide, new actions::IntegerDivide<int_type>() );
-		scope.addOperator( type::operators::code::element, new actions::IntegerElementIndex<int_type>() );
-		scope.addOperator( type::operators::code::element, new actions::IntegerElementInt<int_type>() );
-		scope.addOperator( type::operators::code::slice, new actions::IntegerSlice<int_type>() );
-		scope.addOperator( type::operators::code::bit_not, new actions::IntegerBitNot<int_type>() );
-		scope.addOperator( type::operators::code::bit_and, new actions::IntegerBitAnd<int_type>() );
-		scope.addOperator( type::operators::code::bit_or, new actions::IntegerBitOr<int_type>() );
-		scope.addOperator( type::operators::code::bit_xor, new actions::IntegerBitXor<int_type>() );
-		scope.addOperator( type::operators::code::bit_lsh, new actions::IntegerLShift<int_type>() );
-		scope.addOperator( type::operators::code::bit_rsh, new actions::IntegerRShift<int_type>() );
-	}
-
-
-
-
 	namespace actions
 	{
 		/**********************************************************************
@@ -506,5 +473,43 @@ namespace eon
 				return rval;
 			}
 		};
+	}
+
+
+
+
+	//* Register type and actions in the global scope
+	template<typename int_type>
+	void registerIntegerActions( scope::Global& scope ) {
+		scope.addAction( name_constructor, new actions::IntegerConstruct<int_type>() );
+		scope.addAction( name_constructor, new actions::IntegerBoolConstruct<int_type>() );
+		scope.addAction( name_constructor, new actions::IntegerByteConstruct<int_type>() );
+		scope.addAction( name_constructor, new actions::IntegerCharConstruct<int_type>() );		
+		scope.addAction( name_constructor, new actions::IntegerIntegerConstruct<int_type, int_t>() );
+		scope.addAction( name_constructor, new actions::IntegerIntegerConstruct<int_type, short_t>() );
+		scope.addAction( name_constructor, new actions::IntegerIntegerConstruct<int_type, long_t>() );
+		scope.addAction( name_constructor, new actions::IntegerFloatingptConstruct<int_type, flt_t>() );
+		scope.addAction( name_constructor, new actions::IntegerFloatingptConstruct<int_type, low_t>() );
+		scope.addAction( name_constructor, new actions::IntegerFloatingptConstruct<int_type, high_t>() );
+		scope.addAction( name_constructor, new actions::IntegerIndexConstruct<int_type>() );
+		scope.addOperator( type::operators::code::assign, new actions::IntegerAssign<int_type>() );
+		scope.addOperator( type::operators::code::plus_assign, new actions::IntegerPlusAssign<int_type>() );
+		scope.addOperator( type::operators::code::minus_assign, new actions::IntegerMinusAssign<int_type>() );
+		scope.addOperator( type::operators::code::multiply_assign, new actions::IntegerMultAssign<int_type>() );
+		scope.addOperator( type::operators::code::divide_assign, new actions::IntegerDivideAssign<int_type>() );
+		scope.addOperator( type::operators::code::cmp, new actions::IntegerCmp<int_type>() );
+		scope.addOperator( type::operators::code::plus, new actions::IntegerPlus<int_type>() );
+		scope.addOperator( type::operators::code::minus, new actions::IntegerMinus<int_type>() );
+		scope.addOperator( type::operators::code::multiply, new actions::IntegerMultiply<int_type>() );
+		scope.addOperator( type::operators::code::divide, new actions::IntegerDivide<int_type>() );
+		scope.addOperator( type::operators::code::element, new actions::IntegerElementIndex<int_type>() );
+		scope.addOperator( type::operators::code::element, new actions::IntegerElementInt<int_type>() );
+		scope.addOperator( type::operators::code::slice, new actions::IntegerSlice<int_type>() );
+		scope.addOperator( type::operators::code::bit_not, new actions::IntegerBitNot<int_type>() );
+		scope.addOperator( type::operators::code::bit_and, new actions::IntegerBitAnd<int_type>() );
+		scope.addOperator( type::operators::code::bit_or, new actions::IntegerBitOr<int_type>() );
+		scope.addOperator( type::operators::code::bit_xor, new actions::IntegerBitXor<int_type>() );
+		scope.addOperator( type::operators::code::bit_lsh, new actions::IntegerLShift<int_type>() );
+		scope.addOperator( type::operators::code::bit_rsh, new actions::IntegerRShift<int_type>() );
 	}
 }

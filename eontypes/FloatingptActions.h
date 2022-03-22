@@ -1,9 +1,14 @@
 #pragma once
 
-#include "Float.h"
+#include "Floatingpt.h"
 #include "Action.h"
 #include "OperatorAction.h"
-#include <eonscopes/Scope.h>
+#include "Bool.h"
+#include "Byte.h"
+#include "Char.h"
+#include "Integer.h"
+#include "Index.h"
+#include "Scope.h"
 
 
 /******************************************************************************
@@ -11,31 +16,6 @@
 ******************************************************************************/
 namespace eon
 {
-	//* Register type and actions in the global scope
-	template<typename float_type>
-	void registerFloatingptActions( scope::Global& scope )
-	{
-		scope.addAction( name_constructor, new actions::FloatingptConstruct<float_type>() );
-		scope.addAction( name_constructor, new actions::FloatingptBoolConstruct<float_type>() );
-		scope.addAction( name_constructor, new actions::FloatingptByteConstruct<float_type>() );
-		scope.addAction( name_constructor, new actions::FloatingptCharConstruct<float_type>() );
-		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, int_t>() );
-		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, short_t>() );
-		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, long_t>() );
-		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, flt_t>() );
-		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, low_t>() );
-		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, high_t>() );
-		scope.addAction( name_constructor, new actions::FloatingptIndexConstruct<float_type>() );
-		scope.addOperator( type::operators::code::cmp, new actions::FloatingptCmp<float_type>() );
-		scope.addOperator( type::operators::code::plus, new actions::FloatingptPlus<float_type>() );
-		scope.addOperator( type::operators::code::minus, new actions::FloatingptMinus<float_type>() );
-		scope.addOperator( type::operators::code::multiply, new actions::FloatingptMultiply<float_type>() );
-		scope.addOperator( type::operators::code::divide, new actions::FloatingptDivide<float_type>() );
-	}
-
-
-
-
 	namespace actions
 	{
 		/**********************************************************************
@@ -111,12 +91,12 @@ namespace eon
 		{
 		public:
 			inline FloatingptFloatingptConstruct() : Action( type::Handler::mapType<float_type>(), Type::instance,
-				name_constructor, type_name, DynamicTuple( { type::Attribute( name_other, name_float ) } ),
-				{ name_memory_denied }, source::Ref() ) {}
+				name_constructor, type::Handler::mapType<float_type>(), DynamicTuple( { type::Attribute( name_other,
+					 name_float ) } ), { name_memory_denied }, source::Ref() ) {}
 			virtual ~FloatingptFloatingptConstruct() = default;
 			void die() override {}
 			inline Object* execute( scope::Scope& scope, type::Node& action_node ) override {
-				auto arg1 = _operator<FloatingptInstance<input_type>>( scope, action_node, 0 );
+				auto arg1 = _operand<FloatingptInstance<input_type>>( scope, action_node, 0 );
 				return new FloatingptInstance<float_type>( static_cast<float_type>( arg1->value() ), arg1->source() ); }
 		};
 		template<typename float_type>
@@ -226,5 +206,30 @@ namespace eon
 				return rval;
 			}
 		};
+	}
+
+
+
+
+	//* Register type and actions in the global scope
+	template<typename float_type>
+	void registerFloatingptActions( scope::Global& scope )
+	{
+		scope.addAction( name_constructor, new actions::FloatingptConstruct<float_type>() );
+		scope.addAction( name_constructor, new actions::FloatingptBoolConstruct<float_type>() );
+		scope.addAction( name_constructor, new actions::FloatingptByteConstruct<float_type>() );
+		scope.addAction( name_constructor, new actions::FloatingptCharConstruct<float_type>() );
+		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, int_t>() );
+		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, short_t>() );
+		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, long_t>() );
+		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, flt_t>() );
+		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, low_t>() );
+		scope.addAction( name_constructor, new actions::FloatingptIntegerConstruct<float_type, high_t>() );
+		scope.addAction( name_constructor, new actions::FloatingptIndexConstruct<float_type>() );
+		scope.addOperator( type::operators::code::cmp, new actions::FloatingptCmp<float_type>() );
+		scope.addOperator( type::operators::code::plus, new actions::FloatingptPlus<float_type>() );
+		scope.addOperator( type::operators::code::minus, new actions::FloatingptMinus<float_type>() );
+		scope.addOperator( type::operators::code::multiply, new actions::FloatingptMultiply<float_type>() );
+		scope.addOperator( type::operators::code::divide, new actions::FloatingptDivide<float_type>() );
 	}
 }

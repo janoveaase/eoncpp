@@ -1,7 +1,8 @@
 #pragma once
 
 #include "TypeSystem.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
+#include <typeinfo>
 
 
 /******************************************************************************
@@ -9,12 +10,18 @@
 ******************************************************************************/
 namespace eon
 {
+	template<typename int_type> class IntegerType;
+	template<typename int_type> class IntegerInstance;
+	
+	void registerIntegerActions( scope::Global& scope, const std::type_info& type_id );
+	
+	
 	//* Register integer type and actions in the global scope
 	template<typename int_type>
 	void registerInteger( scope::Global& scope )
 	{
 		scope.add( type::Handler::mapType<int_type>(), new IntegerType<int_type>() );
-		registerIntegerActions<int_type>( scope );
+		registerIntegerActions( scope, typeid( int_type ) );
 	}
 
 

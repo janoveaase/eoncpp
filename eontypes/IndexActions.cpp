@@ -29,10 +29,10 @@ namespace eon
 		scope.addOperator( type::operators::code::element, new actions::IndexElementIndex() );
 		scope.addOperator( type::operators::code::element, new actions::IndexElementInt() );
 		scope.addOperator( type::operators::code::slice, new actions::IndexSlice() );
-		scope.addOperator( type::operators::code::not, new actions::IndexBitNot() );
-		scope.addOperator( type::operators::code::and, new actions::IndexBitAnd() );
-		scope.addOperator( type::operators::code::or, new actions::IndexBitOr() );
-		scope.addOperator( type::operators::code::xor, new actions::IndexBitXor() );
+		scope.addOperator( type::operators::code::bit_not, new actions::IndexBitNot() );
+		scope.addOperator( type::operators::code::bit_and, new actions::IndexBitAnd() );
+		scope.addOperator( type::operators::code::bit_or, new actions::IndexBitOr() );
+		scope.addOperator( type::operators::code::bit_xor, new actions::IndexBitXor() );
 		scope.addOperator( type::operators::code::bit_lsh, new actions::IndexLShift() );
 		scope.addOperator( type::operators::code::bit_rsh, new actions::IndexRShift() );
 	}

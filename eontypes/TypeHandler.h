@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "TypeSystem.h"
 #include "TypeDefinitions.h"
 #include "EonType.h"
 #include <typeinfo>

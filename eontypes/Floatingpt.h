@@ -1,7 +1,8 @@
 #pragma once
 
 #include "TypeSystem.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
+#include <typeinfo>
 
 
 /******************************************************************************
@@ -9,12 +10,18 @@
 ******************************************************************************/
 namespace eon
 {
+	template<typename float_type> class FloatingptType;
+	template<typename float_type> class FloatingptInstance;
+	
+	void registerFloatingptActions( scope::Global& scope, const std::type_info& type_id );
+	
+	
 	//* Register type and actions in the global scope
 	template<typename float_type>
 	void registerFloatintpt( scope::Global& scope )
 	{
 		scope.add( type::Handler::mapType<float_type>(), new FloatingptType<float_type>() );
-		registerFloatingptActions<float_type>( scope );
+		registerFloatingptActions( scope, typeid( float_type ) );
 	}
 
 

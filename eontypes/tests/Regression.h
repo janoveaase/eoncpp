@@ -28,4 +28,6 @@ namespace eon
 	class TupleTest : public eontest::EonTest {};
 
 	class TypeTest : public eontest::EonTest {};
+	
+	class GlobalTest : public eontest::EonTest {};
 }

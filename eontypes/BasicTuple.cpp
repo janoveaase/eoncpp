@@ -87,7 +87,7 @@ namespace eon
 				else
 				{
 					// Must match on first attribute
-					return tuple.empty() ? false : Type.compatibleWith( tuple.at( 0 ).type() );
+					return tuple.empty() ? false : Type.compatibleWith( tuple.at( static_cast<index_t>( 0 ) ).type() );
 				}
 			}
 			else

@@ -3,7 +3,7 @@
 #include "ExpressionObj.h"
 #include "Action.h"
 #include "OperatorAction.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 
 
 /******************************************************************************

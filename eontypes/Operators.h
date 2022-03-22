@@ -79,10 +79,10 @@ namespace eon
 				find,				// find a in b
 
 				unary_minus,		// -a
-				not,				// not a
-				and,				// a and b
-				or,					// a or b
-				xor,				// a xor b
+				log_not,			// not a
+				log_and,			// a and b
+				log_or,				// a or b
+				log_xor,			// a xor b
 				bit_not,			// ~a
 				bit_and,			// a & b
 				bit_or,				// a | b

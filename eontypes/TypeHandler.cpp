@@ -2,7 +2,7 @@
 #include "Name.h"
 #include <eonregex/RegEx.h>
 #include <eonfilesys/Path.h>
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 #include "Bool.h"
 #include "Byte.h"
 #include "Char.h"

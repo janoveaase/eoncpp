@@ -2,9 +2,8 @@
 #include "TypeSystem.h"
 #include "DynamicTuple.h"
 #include "Operators.h"
-//#include "Node.h"
 #include "Name.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 
 
 /******************************************************************************
