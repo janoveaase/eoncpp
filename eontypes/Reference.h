@@ -32,7 +32,7 @@ namespace eon
 
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 		virtual name_t generalType() const noexcept override { return name_reference; }
-		inline void die() { Value = nullptr; }
+		inline void die() override { Value = nullptr; }
 		inline void callDestructor() override { delete this; }
 		inline Object* copy() override { return new Reference( Value ); }
 		inline void str( type::Stringifier& str ) const override { str.addWord( "str" );  }
@@ -57,7 +57,7 @@ namespace eon
 		Object* operator=( const Reference& other ) noexcept { static_cast<Reference&>( *this ) = other; return this; }
 
 
-		virtual inline bool canModify() const noexcept { return true; }
+		virtual inline bool canModify() const noexcept override { return true; }
 		Object* value() noexcept { return Value; }
 
 

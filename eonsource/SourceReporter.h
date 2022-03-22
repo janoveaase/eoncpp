@@ -78,6 +78,8 @@ namespace eon
 			inline MessageTarget( severity filter_high, severity filter_low = severity::note ) noexcept {
 				FilterHigh = filter_high; FilterLow = filter_low; }
 
+			virtual ~MessageTarget() = default;
+
 
 			//* This method is called whenever a message at or more severe than
 			//* the filter level
@@ -195,7 +197,7 @@ namespace eon
 				Target( MessageTarget* trg, bool owned ) { Trg = trg; Owned = owned; }
 				Target( const Target& ) = delete;
 				Target( Target&& other ) noexcept { *this = std::move( other ); }
-				~Target() { if( Trg && Owned ) delete Trg; }
+				virtual ~Target() { if( Trg && Owned ) delete Trg; }
 
 				Target& operator=( const Target& ) = delete;
 				inline Target& operator=( Target&& other ) noexcept {

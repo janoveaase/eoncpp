@@ -208,7 +208,7 @@ namespace eon
 			inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
 			//* General type of object (instance, typedef, action, tuple, etc.)
-			inline name_t generalType() const noexcept { return name_typetuple; }
+			inline name_t generalType() const noexcept override { return name_typetuple; }
 
 			//* Objects that should be deleted upon exiting scope should call
 			//* "delete this" in the implementation of this method. Those

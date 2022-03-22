@@ -97,6 +97,7 @@ namespace eon
 		struct Element
 		{
 			Element() { Chars = &Characters::get(); }
+			virtual ~Element() = default;
 
 			Element& operator=( const Element& other ) noexcept {
 				Optional = other.Optional; Advance = other.Advance; Negate = other.Negate; return *this; }

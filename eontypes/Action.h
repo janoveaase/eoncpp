@@ -64,7 +64,7 @@ namespace eon
 
 
 			// Not required for actions
-			void callDestructor() {}
+			void callDestructor() override {}
 			inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
 			virtual type::Object* copy() override { throw AccessDenied( "Cannot copy action object!" ); }

@@ -149,7 +149,7 @@ namespace eon
 		WANT_EQ( "beta/", dir.dpath().name().stdstr() )
 			<< "Wrong name after rename";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after rename";
-		REQUIRE_FALSE( directory( testdir + "alpha" ).exists() )
+		REQUIRE_FALSE( directory( testdir.dpath() + "alpha" ).exists() )
 			<< "Pre-rename dir still exists";
 	}
 	TEST( FileSysTest, dir_iterate )
