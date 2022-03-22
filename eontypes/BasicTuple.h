@@ -215,7 +215,7 @@ namespace eon
 					else if( object->generalType() == name_tuple )
 					{
 						auto tuple = (BasicTuple*)object;
-						if( tuple->type().name() == name_plain && std::type_info( typeid( T ) ) == tupleType() )
+						if( tuple->type().name() == name_plain && std::type_index( typeid( T ) ) == tupleType() )
 							return *(const T*)object;
 						else if( tuple->type().name() == name_dynamic && isDynamicTuple( typeid( T ) ) )
 							return *(const T*)object;
@@ -261,7 +261,7 @@ namespace eon
 					else if( object->generalType() == name_tuple )
 					{
 						auto tuple = (BasicTuple*)object;
-						if( tuple->isPlain() && std::type_info( typeid( T ) ) == tupleType() )
+						if( tuple->isPlain() && std::type_index( typeid( T ) ) == tupleType() )
 							return *(T*)object;
 						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
 							return *(T*)object;
