@@ -365,6 +365,11 @@ namespace eon
 			return ( (const NameInstance*)Attributes[ pos ].value() )->value();
 		}
 
+		std::type_index BasicTuple::tupleType() const noexcept
+		{
+			return typeid( Tuple );
+		}
+
 		void BasicTuple::_str( type::Stringifier& str ) const
 		{
 			bool first = true;

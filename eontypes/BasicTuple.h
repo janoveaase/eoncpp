@@ -11,12 +11,7 @@
   The 'eon' namespace encloses all public functionality
 ******************************************************************************/
 namespace eon
-{
-	class Tuple;
-	
-	
-	
-	
+{	
 	/**************************************************************************
 	  The 'eon::type' namespace encloses all hidden type functionality
 	**************************************************************************/
@@ -220,7 +215,7 @@ namespace eon
 					else if( object->generalType() == name_tuple )
 					{
 						auto tuple = (BasicTuple*)object;
-						if( tuple->type().name() == name_plain && typeid( T ) == typeid( Tuple ) )
+						if( tuple->type().name() == name_plain && typeid( T ) == tupleType() )
 							return *(const T*)object;
 						else if( tuple->type().name() == name_dynamic && isDynamicTuple( typeid( T ) ) )
 							return *(const T*)object;
@@ -266,7 +261,7 @@ namespace eon
 					else if( object->generalType() == name_tuple )
 					{
 						auto tuple = (BasicTuple*)object;
-						if( tuple->isPlain() && typeid( T ) == typeid( Tuple ) )
+						if( tuple->isPlain() && typeid( T ) == tupleType() )
 							return *(T*)object;
 						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
 							return *(T*)object;
@@ -451,6 +446,9 @@ namespace eon
 			// Get type based on position.
 			// Assumes 'pos' is < NumAttributes!
 			inline EonType _type( index_t pos ) const noexcept { return Attributes[ pos ].type(); }
+
+			// Get the C++ type of eon::Tuple
+			std::type_index tupleType() const noexcept;
 
 			void _str( type::Stringifier& str ) const;
 
