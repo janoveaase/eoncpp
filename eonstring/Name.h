@@ -4,6 +4,7 @@
 #include "DefaultNames.h"
 #include <set>
 #include <mutex>
+#include <unordered_map>
 
 
 /******************************************************************************
