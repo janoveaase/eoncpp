@@ -1,5 +1,5 @@
 #include "Scope.h"
-#include <eontypes/Action.h>
+#include "Action.h"
 
 
 namespace eon

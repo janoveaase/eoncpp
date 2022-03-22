@@ -22,10 +22,10 @@ namespace eon
 		scope.addAction( name_constructor, new actions::BoolHighConstruct() );
 		scope.addAction( name_constructor, new actions::BoolIndexConstruct() );
 		scope.addOperator( type::operators::code::cmp, new actions::BoolCmp() );
-		scope.addOperator( type::operators::code::not, new actions::BoolNot() );
-		scope.addOperator( type::operators::code::and, new actions::BoolAnd() );
-		scope.addOperator( type::operators::code::or, new actions::BoolOr() );
-		scope.addOperator( type::operators::code::xor, new actions::BoolXor() );
+		scope.addOperator( type::operators::code::log_not, new actions::BoolNot() );
+		scope.addOperator( type::operators::code::log_and, new actions::BoolAnd() );
+		scope.addOperator( type::operators::code::log_or, new actions::BoolOr() );
+		scope.addOperator( type::operators::code::log_xor, new actions::BoolXor() );
 	}
 
 

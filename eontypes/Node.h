@@ -3,7 +3,7 @@
 #include "TypeSystem.h"
 #include "Stringifier.h"
 #include "OperatorAction.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 
 
 

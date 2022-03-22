@@ -3,7 +3,7 @@
 #include "Bool.h"
 #include "Action.h"
 #include "OperatorAction.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 
 
 /******************************************************************************
@@ -134,7 +134,7 @@ namespace eon
 		class BoolNot : public OperatorAction
 		{
 		public:
-			inline BoolNot() : OperatorAction( name_bool, opcode::not, name_bool, DynamicTuple(), {}, source::Ref() ) {}
+			inline BoolNot() : OperatorAction( name_bool, opcode::log_not, name_bool, DynamicTuple(), {}, source::Ref() ) {}
 			virtual ~BoolNot() = default;
 			void die() override {}
 			Object* execute( scope::Scope& scope, type::Node& action_node ) override;
@@ -142,7 +142,7 @@ namespace eon
 		class BoolAnd : public OperatorAction
 		{
 		public:
-			inline BoolAnd() : OperatorAction( name_bool, opcode::and, name_bool,
+			inline BoolAnd() : OperatorAction( name_bool, opcode::log_and, name_bool,
 				DynamicTuple( { type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolAnd() = default;
 			void die() override {}
@@ -151,7 +151,7 @@ namespace eon
 		class BoolOr : public OperatorAction
 		{
 		public:
-			inline BoolOr() : OperatorAction( name_bool, opcode::or, name_bool, DynamicTuple( {
+			inline BoolOr() : OperatorAction( name_bool, opcode::log_or, name_bool, DynamicTuple( {
 				type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolOr() = default;
 			void die() override {}
@@ -160,7 +160,7 @@ namespace eon
 		class BoolXor : public OperatorAction
 		{
 		public:
-			inline BoolXor() : OperatorAction( name_bool, opcode::xor, name_bool, DynamicTuple( {
+			inline BoolXor() : OperatorAction( name_bool, opcode::log_xor, name_bool, DynamicTuple( {
 				type::Attribute( name_other, name_bool ) } ), {}, source::Ref() ) {}
 			virtual ~BoolXor() = default;
 			void die() override {}

@@ -52,6 +52,7 @@ set(TYPES_HEADERS
 	Stringifier.h
 	Primitives.h
 	StandardTypes.h
+	Scope.h
 )
 set(TYPES_SOURCES
 	TypeSystem.cpp
@@ -66,6 +67,8 @@ set(TYPES_SOURCES
 	ByteActions.cpp
 	Char.cpp
 	CharActions.cpp
+	Integer.cpp
+	Floatingpt.cpp
 	Index.cpp
 	IndexActions.cpp
 	Name.cpp
@@ -92,6 +95,7 @@ set(TYPES_SOURCES
 	Node.cpp
 	Primitives.cpp
 	StandardTypes.cpp
+	Scope.cpp
 )
 
 add_library(EonTypes STATIC ${TYPES_HEADERS} ${TYPES_SOURCES})
@@ -103,7 +107,7 @@ set_target_properties(
 )
 set_property(TARGET EonTypes PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTypes PUBLIC EonString EonExcept EonHex EonRegex EonScopes EonFileSys)
+target_link_libraries(EonTypes PUBLIC EonString EonExcept EonHex EonRegex EonSource EonFileSys)
 target_include_directories(EonTypes PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
 )

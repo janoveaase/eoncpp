@@ -6,7 +6,7 @@
 #include "Bool.h"
 #include "Char.h"
 #include "Integer.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 
 
 /******************************************************************************

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <typeindex>
-#include <eontypes/BasicTuple.h>
-#include <eontypes/Reference.h>
-#include <eontypes/Tuple.h>
-#include <eontypes/Operators.h>
+#include "BasicTuple.h"
+#include "Reference.h"
+#include "Tuple.h"
+#include "Operators.h"
 
 
 

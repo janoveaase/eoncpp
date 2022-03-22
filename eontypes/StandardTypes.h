@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TypeDefinitions.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 #include "Bytes.h"
 #include "String.h"
 #include "ExpressionObj.h"

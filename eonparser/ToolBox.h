@@ -5,7 +5,7 @@
 #include <eonsource/SourceReporter.h>
 #include <eonfilesys/Path.h>
 #include <eonregex/RegEx.h>
-#include <eonscopes/Scope.h>
+#include <eontypes/Scope.h>
 #include <eontypes/Node.h>
 #include <eontypes/Operators.h>
 #include <eontypes/Tuple.h>

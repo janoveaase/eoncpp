@@ -2,7 +2,7 @@
 
 #include "String.h"
 #include "Action.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 
 
 /******************************************************************************

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TypeSystem.h"
-#include <eonscopes/Scope.h>
+#include "Scope.h"
 #include <eonfilesys/Path.h>
 
 

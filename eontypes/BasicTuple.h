@@ -12,6 +12,11 @@
 ******************************************************************************/
 namespace eon
 {
+	class Tuple;
+	
+	
+	
+	
 	/**************************************************************************
 	  The 'eon::type' namespace encloses all hidden type functionality
 	**************************************************************************/
@@ -162,7 +167,7 @@ namespace eon
 
 			//* Get type of attribute at position
 			//* Throws [eon::type::NotFound] if invalid position
-			inline const EonType& attributeType( index_t pos ) const {
+			inline EonType attributeType( index_t pos ) const {
 				if( pos < numAttributes() ) return _type( pos ); throw type::NotFound(); }
 
 			//* Check if attribute exists
@@ -201,7 +206,7 @@ namespace eon
 			const T& value( index_t pos ) const
 			{
 				auto& attribute = at( pos );
-				if( attribute.type().isName( name_syntax ) ) {
+				if( attribute.type().name() == name_syntax ) {
 					if( typeid( T ) == typeid( name_t ) ) return *(T*)&_nameValue( pos ); else throw type::WrongType(); }
 				auto object = (const Object*)attribute.value();
 				if( object )
@@ -215,13 +220,13 @@ namespace eon
 					else if( object->generalType() == name_tuple )
 					{
 						auto tuple = (BasicTuple*)object;
-						if( tuple->isPlain() && typeid( T ) == typeid( Tuple ) )
+						if( tuple->type().name() == name_plain && typeid( T ) == typeid( Tuple ) )
 							return *(const T*)object;
-						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
+						else if( tuple->type().name() == name_dynamic && isDynamicTuple( typeid( T ) ) )
 							return *(const T*)object;
-						else if( tuple->isData() && isDataTuple( typeid( T ) ) )
+						else if( tuple->type().name() == name_data && isDataTuple( typeid( T ) ) )
 							return *(const T*)object;
-						else if( tuple->isLambda() && isLambda( typeid( T ) ) )
+						else if( tuple->type().name() == name_lambda && isLambda( typeid( T ) ) )
 							return *(const T*)object;
 					}
 				}
