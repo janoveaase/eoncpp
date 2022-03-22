@@ -207,7 +207,7 @@ namespace eon
 		WANT_EQ( "beta", f.fpath().name().stdstr() )
 			<< "Wrong name after rename";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after rename";
-		REQUIRE_FALSE( file( testdir + "alpha" ).exists() )
+		REQUIRE_FALSE( file( testdir.dpath() + "alpha" ).exists() )
 			<< "Pre-rename file still exists";
 	}
 	TEST( FileSysTest, file_iterate )
