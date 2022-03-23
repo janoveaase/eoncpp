@@ -211,13 +211,13 @@ namespace eon
 
 			Styles[ style::strong ] = StyleDetails( Color( color::black, intensity::dark ), fontstyle::bold );
 			Styles[ style::weak ] = StyleDetails( Color( color::white, intensity::dark ) );
-			Styles[ style::note ] = StyleDetails( Color( color::black, intensity::normal ), fontstyle::normal, Color( color::white, intensity::bright ) );
+			Styles[ style::note ] = StyleDetails( Color( color::white, intensity::bright ), fontstyle::normal, Color( color::black, intensity::bright ) );
 			Styles[ style::warning ] = StyleDetails( Color( color::white, intensity::bright ), fontstyle::normal, Color( color::yellow, intensity::dark ) );
 			Styles[ style::error ] = StyleDetails( Color( color::white, intensity::bright ), fontstyle::normal, Color( color::red ) );
 			Styles[ style::success ] = StyleDetails( Color( color::white, intensity::bright ), fontstyle::normal, Color( color::green ) );
-			Styles[ style::quote ] = StyleDetails( Color( color::magenta, intensity::dark ), fontstyle::normal, Color( color::white, intensity::bright ) );
-			Styles[ style::reference ] = StyleDetails( Color( color::yellow, intensity::dark ), fontstyle::normal, Color( color::white, intensity::bright ) );
-			Styles[ style::code ] = StyleDetails( Color( color::cyan, intensity::dark ), fontstyle::normal, Color( color::white, intensity::bright ) );
+			Styles[ style::quote ] = StyleDetails( Color( color::blue, intensity::dark ), fontstyle::normal, Color( color::white, intensity::dark ) );
+			Styles[ style::reference ] = StyleDetails( Color( color::black, intensity::dark ), fontstyle::normal, Color( color::white, intensity::dark ) );
+			Styles[ style::code ] = StyleDetails( Color( color::magenta, intensity::dark ), fontstyle::normal, Color( color::white, intensity::dark ) );
 		}
 		else if( background == intensity::dark )
 		{
