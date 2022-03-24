@@ -39,7 +39,6 @@ namespace eon
 		reference,      // dark yellow  default
 		code            // dark red     light gray
 	};
-	extern string mapStyle( style s );
 
 
 
