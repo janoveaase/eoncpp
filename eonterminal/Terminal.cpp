@@ -9,6 +9,58 @@
 
 namespace eon
 {
+	string mapStyle( style s )
+	{
+		switch( s )
+		{
+			case style::normal:
+				return "normal";
+			case style::strong:
+				return "strong";
+			case style::weak:
+				return "weak";
+			case style::black:
+				return "black";
+			case style::dark:
+				return "dark";
+			case style::bright:
+				return "bright";
+			case style::white:
+				return "white";
+			case style::red:
+				return "red";
+			case style::green:
+				return "green";
+			case style::yellow:
+				return "yellow";
+			case style::blue:
+				return "blue";
+			case style::magenta:
+				return "magenta";
+			case style::cyan:
+				return "cyan";
+			case style::note:
+				return "note";
+			case style::warning:
+				return "warning";
+			case style::error:
+				return "error";
+			case style::success:
+				return "success";
+			case style::quote:
+				return "quote";
+			case style::reference:
+				return "reference";
+			case style::code:
+				return "code";
+			default:
+				return "???";
+		}
+	}
+
+
+
+
 	Terminal term;
 
 
@@ -28,7 +80,7 @@ namespace eon
 			_checkPlatform();
 		auto found = Styles.find( term_style );
 		if( found == Styles.end() )
-			*this << "<<invalid style>>";
+			*this << "<" + mapStyle( term_style ) + ">";
 		else
 			_setStyle( found->second );
 		return *this;
