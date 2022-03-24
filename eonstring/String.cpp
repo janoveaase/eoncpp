@@ -9,6 +9,29 @@ namespace eon
 	const string string::Empty;
 
 
+	string::string( const char* buffer, size_t size, string substitute_for_bad_utf8 ) noexcept
+	{
+		eon::char_t codepoint{ 0 }, state{ 0 };
+		unsigned char bytes[ 4 ]{ 0, 0, 0, 0 };
+		auto c = buffer, end = buffer + size;
+		while( c < end )
+		{
+			int i = 0;
+			for( ; i < 4 && c < end; ++i, ++c )
+			{
+				if( !eon::string_iterator::utf8Decode( state, codepoint, static_cast<unsigned char>( *c ) ) )
+					goto valid;
+				bytes[ i ] = static_cast<unsigned char>( *c );
+			}
+			*this += substitute_for_bad_utf8;
+			continue;
+		valid:
+			*this += codepoint;
+			++c;
+		}
+	}
+
+
 	string& string::assign( const char_t* codepoints, size_t size )
 	{
 		clear();

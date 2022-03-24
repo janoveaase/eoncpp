@@ -39,6 +39,13 @@ namespace eon
 		WANT_FALSE( eon::string::isLetter( '_' ) );
 	}
 
+	TEST( String, invalid_utf8 )
+	{
+		std::string invalid{ "ab\xB6" };
+		eon::string valid( invalid.c_str(), invalid.size(), "X" );
+		WANT_EQ( "abX", valid );
+	}
+
 	TEST( String, find )
 	{
 		eon::string str{ "123454321" };

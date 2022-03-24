@@ -103,6 +103,10 @@ namespace eon
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
 		inline string( const char* buffer, size_t size ) { *this = std::string( buffer, size ); }
 
+		//* Construct as a copy of a character buffer of a specified size
+		//* Will not throw exception on invalid UTF-8 but substitute it with the specified string
+		string( const char* buffer, size_t size, string substitute_for_bad_utf8 ) noexcept;
+
 
 		//* Construct from a single [[eon::char_t][Unicode codepoint]]
 		//* Throws [eon::InvalidUTF8] if not a valid codepoint!
