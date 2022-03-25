@@ -91,8 +91,7 @@ namespace eon
 		}
 		Handle = ::open( Path.c_str(), flags, perm );
 		if( Handle == -1 )
-			throw filesys::OpenError( "File: " + Path + "\nError: "
-				+ errnoMessage().stdstr() );
+			throw filesys::OpenError( "File: " + Path.str() + "\nError: " + errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];
 		BufferSize = 0;
 		BufPos = 0;
