@@ -3,10 +3,10 @@
 
 namespace eon
 {
-	path& path::operator+=( const path& other )
+	path& path::operator/=( const path& other )
 	{
 		if( other.absolute() )
-			throw filesys::BadPath( "Cannot append an absolute path" );
+			throw filesys::BadPath( "Cannot append absolute path" );
 		if( isFilePath() )
 			return _parse( Full + "/" + other.Full );
 		else
@@ -18,8 +18,7 @@ namespace eon
 	path& path::ext( const substring& part )
 	{
 		if( isDirPath() )
-			throw filesys::BadPath(
-				"Cannot set extension on a directory path" );
+			throw filesys::BadPath( "Cannot set extension on a directory path" );
 		if( part.count( PointChr ) > 0 )
 			return _parse( Full + "." + part );
 		else
@@ -28,11 +27,9 @@ namespace eon
 			if( Base )
 				Base = Full.substr( Base.begin(), Full.end() );
 			else
-				Base = Full.substr( Full.last() - part.numChars(),
-					Full.end() );
+				Base = Full.substr( Full.last() - part.numChars(), Full.end() );
 			if( Ext )
-				Ext = Full.substr( Ext.begin(),
-					Ext.begin() + part.numChars() );
+				Ext = Full.substr( Ext.begin(), Ext.begin() + part.numChars() );
 			else
 				Ext = Full.substr( Full.last() - part.numChars(), Full.end() );
 			Name = Full.substr( Base.begin(), Ext.begin() - 1 );
@@ -103,14 +100,12 @@ namespace eon
 		Full = string().join<std::list<string>>( elms );
 		if( _isRoot( *elms.begin() ) )
 		{
-			if( elms.size() == 1
-				&& !elms.begin()->endsWith( ForwSlashChr ) )
+			if( elms.size() == 1 && !elms.begin()->endsWith( ForwSlashChr ) )
 			{
 				Full += "/";
 				*elms.begin() += "/";
 			}
-			Root = Full.substr( Full.begin(),
-				Full.begin() + elms.begin()->numChars() );
+			Root = Full.substr( Full.begin(), Full.begin() + elms.begin()->numChars() );
 		}
 		if( Root && Root.numChars() == Full.numChars() )
 		{
@@ -119,8 +114,7 @@ namespace eon
 		}
 		if( Full.endsWith( ForwSlashChr ) )	// Directory
 		{
-			auto slash = Full.findLast( ForwSlashChr,
-				Full.substr( Full.begin(), Full.last() ) );
+			auto slash = Full.findLast( ForwSlashChr, Full.substr( Full.begin(), Full.last() ) );
 			if( !Root && !slash )
 				slash = Full.substr( Full.begin(), Full.begin() );
 			Base = Full.substr( slash.end(), Full.end() );
@@ -169,51 +163,39 @@ namespace eon
 		if( other.Root )
 			Root = substring(
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Root.begin().numByte() ),
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Root.begin().numByte() ),
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Root.end().numByte() ) );
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Root.end().numByte() ) );
 		if( other.Dirs )
 			Dirs = substring(
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Dirs.begin().numByte() ),
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Dirs.begin().numByte() ),
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Dirs.end().numByte() ) );
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Dirs.end().numByte() ) );
 		if( other.Parent )
 			Parent = substring(
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Parent.begin().numByte() ),
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Parent.begin().numByte() ),
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Parent.end().numByte() ) );
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Parent.end().numByte() ) );
 		if( other.Base )
 			Base = substring(
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Base.begin().numByte() ),
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Base.begin().numByte() ),
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Base.end().numByte() ) );
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Base.end().numByte() ) );
 		if( other.Name )
 			Name = substring(
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Name.begin().numByte() ),
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Name.begin().numByte() ),
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Name.end().numByte() ) );
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Name.end().numByte() ) );
 		if( other.Ext )
 			Ext = substring(
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Ext.begin().numByte() ),
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Ext.begin().numByte() ),
 				string_iterator(
-					Full.c_str(), Full.numBytes(), Full.numChars(),
-					Full.c_str() + other.Ext.end().numByte() ) );
+					Full.c_str(), Full.numBytes(), Full.numChars(), Full.c_str() + other.Ext.end().numByte() ) );
 		return *this;
 	}
 
@@ -222,13 +204,11 @@ namespace eon
 		if( str == "/" || str.startsWith( "//" ) )	// Unix root or UNC path
 			return true;
 		if( str.numChars() == 2						// Windows drive
-			&& Characters::get().isAsciiLetter( *str.begin() )
-			&& *str.last() == ColonChr )
+			&& Characters::get().isAsciiLetter( *str.begin() ) && *str.last() == ColonChr )
 			return true;
 		if( str.numChars() == 3
 			&& Characters::get().isAsciiLetter( *str.begin() )
-			&& *( str.begin() + 1 ) == ColonChr
-			&& *str.last() == ForwSlashChr )
+			&& *( str.begin() + 1 ) == ColonChr && *str.last() == ForwSlashChr )
 			return true;
 		return false;
 	}

@@ -23,7 +23,7 @@ namespace eon
 		try
 		{
 			if( !std::filesystem::create_directory( Path.stdpath() ) )
-				throw filesys::Failure( "Failed to create directory \"" + Path + "\"" );
+				throw filesys::Failure( "Failed to create directory \"" + Path.str() + "\"" );
 		}
 		catch( std::exception& e )
 		{
@@ -38,7 +38,7 @@ namespace eon
 			throw filesys::Failure( "Trying to rename unnamed directory" );
 		if( !exists() )
 			throw filesys::Failure( "Trying to rename nonexisting directory \"" + Path.str() + "\"" );
-		directory target{ Path.hasParent() ? Path.parent() + eon::path( new_name ) : eon::path( new_name ) };
+		directory target{ Path.hasParent() ? Path.parent() / eon::path( new_name ) : eon::path( new_name ) };
 		if( target.exists() )
 			throw filesys::Failure( "Cannot rename directory \"" + Path.str()
 				+ "\" to target \"" + new_name + "\": Target exists" );
@@ -58,7 +58,7 @@ namespace eon
 			throw filesys::Failure( "Trying to rename unnamed directory" );
 		if( !exists() )
 			throw filesys::Failure( "Trying to rename nonexisting directory \"" + Path.str() + "\"" );
-		directory target{ Path.hasParent() ? Path.parent() + eon::path( new_name ) : eon::path( new_name ) };
+		directory target{ Path.hasParent() ? Path.parent() / eon::path( new_name ) : eon::path( new_name ) };
 		try
 		{
 			if( target.exists() )
@@ -78,7 +78,7 @@ namespace eon
 			throw filesys::Failure( "Trying to move unnamed directory" );
 		if( !exists() )
 			throw filesys::Failure( "Trying to move nonexisting directory \"" + Path.str() + "\"" );
-		directory target{ new_parent_dir + Path.base() };
+		directory target{ new_parent_dir.Path / Path.base() };
 		if( target.exists() )
 			throw filesys::Failure( "Cannot move \"" + Path.str()
 				+ "\" to target \"" + target.dpath().str() + "\": Target exists" );
@@ -98,7 +98,7 @@ namespace eon
 			throw filesys::Failure( "Trying to move unnamed directory" );
 		if( !exists() )
 			throw filesys::Failure( "Trying to move nonexisting directory \"" + Path.str() + "\"" );
-		directory target{ new_parent_dir + Path.base() };
+		directory target{ new_parent_dir.Path / Path.base() };
 		try
 		{
 			if( target.exists() )

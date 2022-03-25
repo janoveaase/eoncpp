@@ -67,7 +67,7 @@ namespace eon
 		}
 		auto error = _sopen_s( &Handle, Path.c_str(), mode, sharing, perm );
 		if( error != 0 )
-			throw filesys::OpenError( "File: " + Path + "\nError: "
+			throw filesys::OpenError( "File: " + Path.str() + "\nError: "
 				+ errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];
 		BufferSize = 0;

@@ -47,7 +47,7 @@ namespace eon
 		{
 			auto arg1 = _operand<PathInstance>( scope, action_node, 0 );
 			auto arg2 = _operand<PathInstance>( scope, action_node, 1 );
-			auto rval = new PathInstance( arg1->value() + arg2->value(), source::Ref() );
+			auto rval = new PathInstance( arg1->value() / arg2->value(), source::Ref() );
 			return rval;
 		}
 	}

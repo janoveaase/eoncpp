@@ -87,32 +87,58 @@ namespace eon
 		  WARNING: Will throw eon::filesys::BadPath if illegal path is
 		           attempted constructed.
 
+		  Use the '/' and '/=' operators to concatenate whole elements to the
+		  path!
+
 		  NOTE: If a path to a file is concatenated to, the element that was a
 		        file name will become a directory name!
 		**********************************************************************/
 	public:
 
-		path& operator+=( const path& other );
-		inline path& operator+=( const string& raw_path ) { return *this += path( raw_path ); }
-		inline path& operator+=( const substring& raw_path ) { return *this += path( raw_path ); }
-		inline path& operator+=( const std::filesystem::path& std_path ) { return *this += path( std_path ); }
-		inline path& operator+=( const std::string& raw_path ) { return *this += path( raw_path ); }
-		inline path& operator+=( const char* raw_path ) { return *this += path( raw_path ); }
-		inline path& operator+=( char_t chr ) { return *this += Full + chr; }
+		path& operator/=( const path& other );
+		inline path& operator/=( const string& raw_path ) { return *this /= path( raw_path ); }
+		inline path& operator/=( const substring& raw_path ) { return *this /= path( raw_path ); }
+		inline path& operator/=( const std::filesystem::path& std_path ) { return *this /= path( std_path ); }
+		inline path& operator/=( const std::string& raw_path ) { return *this /= path( raw_path ); }
+		inline path& operator/=( const char* raw_path ) { return *this /= path( raw_path ); }
+		inline path& operator/=( char_t chr ) { return *this /= Full + chr; }
 
-		friend inline path operator+( const path& a, const path& b ) { return path( a ) += b; }
-		friend inline path operator+( const path& a, const string& b ) { return path( a ) += b; }
-		friend inline path operator+( const string& a, const path& b ) { return path( a ) += b; }
-		friend inline path operator+( const path& a, const substring& b ) { return path( a ) += b; }
-		friend inline path operator+( const substring& a, const path& b ) { return path( a ) += b; }
-		friend inline path operator+( const path& a, const std::filesystem::path& b ) { return path( a ) += b; }
-		friend inline path operator+( const std::filesystem::path& a, const path& b ) { return path( a ) += b; }
-		friend inline path operator+( const path& a, const std::string& b ) { return path( a ) += b; }
-		friend inline path operator+( const std::string& a, const path& b ) { return path( a ) += b; }
-		friend inline path operator+( const path& a, const char* b ) { return path( a ) += b; }
-		friend inline path operator+( const char* a, const path& b ) { return path( a ) += b; }
-		friend inline path operator+( const path& a, char_t b ) { return path( a ) += b; }
-		friend inline path operator+( char_t a, const path& b ) { return path( a ) += b; }
+		friend inline path operator/( const path& a, const path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const path& a, const string& b ) { return path( a ) /= b; }
+		friend inline path operator/( const string& a, const path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const path& a, const substring& b ) { return path( a ) /= b; }
+		friend inline path operator/( const substring& a, const path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const path& a, const std::filesystem::path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const std::filesystem::path& a, const path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const path& a, const std::string& b ) { return path( a ) /= b; }
+		friend inline path operator/( const std::string& a, const path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const path& a, const char* b ) { return path( a ) /= b; }
+		friend inline path operator/( const char* a, const path& b ) { return path( a ) /= b; }
+		friend inline path operator/( const path& a, char_t b ) { return path( a ) /= b; }
+		friend inline path operator/( char_t a, const path& b ) { return path( a ) /= b; }
+
+		//* Make all + and += operators illegal
+		path& operator+=( const path& other ) = delete;
+		path& operator+=( const string& raw_path ) = delete;
+		path& operator+=( const substring& raw_path ) = delete;
+		path& operator+=( const std::filesystem::path& std_path ) = delete;
+		path& operator+=( const std::string& raw_path ) = delete;
+		path& operator+=( const char* raw_path ) = delete;
+		path& operator+=( char_t chr ) = delete;
+
+		friend path operator+( const path& a, const path& b ) = delete;
+		friend path operator+( const path& a, const string& b ) = delete;
+		friend path operator+( const string& a, const path& b ) = delete;
+		friend path operator+( const path& a, const substring& b ) = delete;
+		friend path operator+( const substring& a, const path& b ) = delete;
+		friend path operator+( const path& a, const std::filesystem::path& b ) = delete;
+		friend path operator+( const std::filesystem::path& a, const path& b ) = delete;
+		friend path operator+( const path& a, const std::string& b ) = delete;
+		friend path operator+( const std::string& a, const path& b ) = delete;
+		friend path operator+( const path& a, const char* b ) = delete;
+		friend path operator+( const char* a, const path& b ) = delete;
+		friend path operator+( const path& a, char_t b ) = delete;
+		friend path operator+( char_t a, const path& b ) = delete;
 
 
 
@@ -129,8 +155,8 @@ namespace eon
 		inline operator bool() const noexcept { return !Name.empty(); }
 
 		//* Check if the path is a directory or file path
-		inline bool isDirPath() const noexcept { return Name.endsWith( ForwSlashChr ); }
-		inline bool isFilePath() const noexcept { return !Name.endsWith( ForwSlashChr ); }
+		inline bool isDirPath() const noexcept { return Name.empty() || Name.endsWith( ForwSlashChr ); }
+		inline bool isFilePath() const noexcept { return !Name.empty() && !Name.endsWith( ForwSlashChr ); }
 
 		//* Check if the path is absolute or relative
 		inline bool absolute() const noexcept { return !Root.empty(); }
@@ -144,6 +170,7 @@ namespace eon
 		inline bool isFile() const { return !isDir(); }
 
 		//* Check if parts/elements are present
+		inline bool isRoot() const noexcept { return Root && !( Dirs || Base ); }
 		inline bool hasRoot() const noexcept { return Root; }
 		inline bool hasDirs() const noexcept { return Dirs; }
 		inline bool hasParent() const noexcept { return Parent; }
@@ -161,9 +188,9 @@ namespace eon
 
 		//* String conversion
 		inline const string& str() const noexcept { return Full; }
-		inline operator const string&() const noexcept { return Full; }
+//		inline operator const string&() const noexcept { return Full; }
 		inline const std::string& stdstr() const noexcept { return Full.stdstr(); }
-		inline operator const std::string&() const noexcept { return Full.stdstr(); }
+//		inline operator const std::string&() const noexcept { return Full.stdstr(); }
 		inline const char* c_str() const noexcept { return Full.c_str(); }
 
 		//* Std path

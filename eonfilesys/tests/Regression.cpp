@@ -14,12 +14,9 @@ namespace eon
 		WANT_NO_EXCEPT( path p{ "//somehost" } ) << "UNC root";
 		WANT_NO_EXCEPT( path p{ "a/relative/path" } ) << "Relative";
 		WANT_NO_EXCEPT( path p{ "//some/absolute/path" } ) << "Absolute";
-		WANT_NO_EXCEPT( path p{ "//some/../any/./absolute/path" } )
-			<< "Dirty absolute";
-		WANT_NO_EXCEPT( path p{ "some/../any/./relative/path" } )
-			<< "Dirty relative";
-		WANT_NO_EXCEPT( path p{ "C:\\some\\windows\\path" } )
-			<< "Back-slashes";
+		WANT_NO_EXCEPT( path p{ "//some/../any/./absolute/path" } ) << "Dirty absolute";
+		WANT_NO_EXCEPT( path p{ "some/../any/./relative/path" } ) << "Dirty relative";
+		WANT_NO_EXCEPT( path p{ "C:\\some\\windows\\path" } ) << "Back-slashes";
 	}
 	TEST( PathTest, basic2 )
 	{
@@ -29,16 +26,25 @@ namespace eon
 		WANT_EQ( "C:/", path{ "C:" }.stdstr() ) << "Windows root, short";
 		WANT_EQ( "C:/", path{ "C:/" }.stdstr() ) << "Windows root, long";
 		WANT_EQ( "//somehost/", path{ "//somehost" }.stdstr() ) << "UNC root";
-		WANT_EQ( "a/relative/path", path{ "a/relative/path" }.stdstr() )
-			<< "Relative";
-		WANT_EQ( "//some/absolute/path",
-			path{ "//some/absolute/path" }.stdstr() ) << "Absolute";
-		WANT_EQ( "//some/any/absolute/path",
-			path{ "//some/../any/./absolute/path" }.stdstr() ) << "Dirty";
-		WANT_EQ( "any/relative/path",
-			path{ "some/../any/./relative/path" }.stdstr() ) << "Dirty";
-		WANT_EQ( "C:/some/windows/path",
-			path{ "C:\\some\\windows\\path" }.stdstr() ) << "Back-slashes";
+		WANT_EQ( "a/relative/path", path{ "a/relative/path" }.stdstr() ) << "Relative";
+		WANT_EQ( "//some/absolute/path", path{ "//some/absolute/path" }.stdstr() ) << "Absolute";
+		WANT_EQ( "//some/any/absolute/path", path{ "//some/../any/./absolute/path" }.stdstr() ) << "Dirty";
+		WANT_EQ( "any/relative/path", path{ "some/../any/./relative/path" }.stdstr() ) << "Dirty";
+		WANT_EQ( "C:/some/windows/path", path{ "C:\\some\\windows\\path" }.stdstr() ) << "Back-slashes";
+	}
+	TEST( PathTest, concatenate1 )
+	{
+		path p1{ "/" };
+		path p2{ "C:/" };
+		path p3{ "a" };
+		path p4{ "path" };
+		path p5{ "here" };
+		WANT_EQ( "/a", ( p1 / p3 ).str() );
+		WANT_EQ( "C:/a", ( p2 / p3 ).str() );
+		WANT_EQ( "/a/path", ( p1 / p3 / p4 ).str() );
+		WANT_EQ( "/a/path/here", ( p1 / p3 / p4 / p5 ).str() );
+		WANT_EXCEPT( p1 / "/some/path", filesys::BadPath );
+		WANT_EXCEPT( p2 / "/some/path", filesys::BadPath );
 	}
 	TEST( PathTest, disect )
 	{
@@ -139,29 +145,25 @@ namespace eon
 	}
 	TEST( FileSysTest, dir_rename)
 	{
-		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
-			<< "Failed to create test dir";
+		REQUIRE_NO_EXCEPT( testdir.ensureExists() ) << "Failed to create test dir";
 
-		directory dir = testdir.dpath() + "alpha/";
+		directory dir = testdir.dpath() / "alpha/";
 		REQUIRE_NO_EXCEPT( dir.ensureExists() ) << "Failed to create dir";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after create";
 		REQUIRE_NO_EXCEPT( dir.rename( "beta" ) ) << "Failed to rename dir";
-		WANT_EQ( "beta/", dir.dpath().name().stdstr() )
-			<< "Wrong name after rename";
+		WANT_EQ( "beta/", dir.dpath().name().stdstr() ) << "Wrong name after rename";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after rename";
-		REQUIRE_FALSE( directory( testdir.dpath() + "alpha" ).exists() )
-			<< "Pre-rename dir still exists";
+		REQUIRE_FALSE( directory( testdir.dpath() / "alpha" ).exists() ) << "Pre-rename dir still exists";
 	}
 	TEST( FileSysTest, dir_iterate )
 	{
-		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
-			<< "Failed to create test dir";
+		REQUIRE_NO_EXCEPT( testdir.ensureExists() ) << "Failed to create test dir";
 
-		directory alpha = testdir.dpath() + "alpha";
-		directory beta = testdir.dpath() + "beta";
-		directory gamma = testdir.dpath() + "gamma";
-		file f1 = testdir.dpath() + "f1";
-		file f2 = testdir.dpath() + "f2";
+		directory alpha = testdir.dpath() / "alpha";
+		directory beta = testdir.dpath() / "beta";
+		directory gamma = testdir.dpath() / "gamma";
+		file f1 = testdir.dpath() / "f1";
+		file f2 = testdir.dpath() / "f2";
 
 		REQUIRE_NO_EXCEPT( alpha.ensureExists() );
 		REQUIRE_NO_EXCEPT( beta.ensureExists() );
@@ -185,10 +187,9 @@ namespace eon
 
 	TEST( FileSysTest, file_basic )
 	{
-		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
-			<< "Failed to create test dir";
+		REQUIRE_NO_EXCEPT( testdir.ensureExists() ) << "Failed to create test dir";
 
-		file testfile{ testdir.dpath() + "test1" };
+		file testfile{ testdir.dpath() / "test1" };
 		REQUIRE_FALSE( testfile.exists() ) << "File exists before create";
 		REQUIRE_NO_EXCEPT( testfile.touch() ) << "Failed to create file";
 		REQUIRE_TRUE( testfile.exists() ) << "File doesn't exist after create";
@@ -197,25 +198,21 @@ namespace eon
 	}
 	TEST( FileSysTest, file_rename )
 	{
-		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
-			<< "Failed to create test dir";
+		REQUIRE_NO_EXCEPT( testdir.ensureExists() ) << "Failed to create test dir";
 
-		file f = testdir.dpath() + "alpha";
+		file f = testdir.dpath() / "alpha";
 		REQUIRE_NO_EXCEPT( f.touch() ) << "Failed to create file";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after create";
 		REQUIRE_NO_EXCEPT( f.rename( "beta" ) ) << "Failed to rename file";
-		WANT_EQ( "beta", f.fpath().name().stdstr() )
-			<< "Wrong name after rename";
+		WANT_EQ( "beta", f.fpath().name().stdstr() ) << "Wrong name after rename";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after rename";
-		REQUIRE_FALSE( file( testdir.dpath() + "alpha" ).exists() )
-			<< "Pre-rename file still exists";
+		REQUIRE_FALSE( file( testdir.dpath() / "alpha" ).exists() ) << "Pre-rename file still exists";
 	}
 	TEST( FileSysTest, file_iterate )
 	{
-		REQUIRE_NO_EXCEPT( testdir.ensureExists() )
-			<< "Failed to create test dir";
+		REQUIRE_NO_EXCEPT( testdir.ensureExists() ) << "Failed to create test dir";
 
-		file f = testdir.dpath() + "alpha";
+		file f = testdir.dpath() / "alpha";
 		REQUIRE_NO_EXCEPT( f.save( string( "Line 1\nSecond line\nThird" ) ) );
 		std::list<string> lines;
 		try
