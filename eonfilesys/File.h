@@ -71,6 +71,23 @@ namespace eon
 		std::uintmax_t size() const { return std::filesystem::file_size( Path.stdpath() ); }
 
 
+		// Disallow concatenation
+		file& operator+=( const file& other ) = delete;
+		file& operator+=( const path& other ) = delete;
+		file& operator+=( const string& other ) = delete;
+		file& operator+=( const std::string& other ) = delete;
+		file& operator+=( const char* other ) = delete;
+		friend file operator+( const file& a, const file& b ) = delete;
+		friend file operator+( const file& a, const path& b ) = delete;
+		friend file operator+( const path& a, const file& b ) = delete;
+		friend file operator+( const file& a, const string& b ) = delete;
+		friend file operator+( const string& a, const file& b ) = delete;
+		friend file operator+( const file& a, const std::string& b ) = delete;
+		friend file operator+( const std::string& a, const file& b ) = delete;
+		friend file operator+( const file & a, const char* b ) = delete;
+		friend file operator+( const char* a, const file& b ) = delete;
+
+
 
 
 		/******************************************************************

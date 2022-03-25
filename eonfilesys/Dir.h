@@ -70,6 +70,23 @@ namespace eon
 		inline operator bool() const noexcept { return Path.exists(); }
 
 
+		// Disallow concatenation
+		directory& operator+=( const directory& other ) = delete;
+		directory& operator+=( const path& other ) = delete;
+		directory& operator+=( const string& other ) = delete;
+		directory& operator+=( const std::string& other ) = delete;
+		directory& operator+=( const char* other ) = delete;
+		friend directory operator+( const directory& a, const directory& b ) = delete;
+		friend directory operator+( const directory& a, const path& b ) = delete;
+		friend directory operator+( const path& a, const directory& b ) = delete;
+		friend directory operator+( const directory& a, const string& b ) = delete;
+		friend directory operator+( const string& a, const directory& b ) = delete;
+		friend directory operator+( const directory& a, const std::string& b ) = delete;
+		friend directory operator+( const std::string& a, const directory& b ) = delete;
+		friend directory operator+( const directory& a, const char* b ) = delete;
+		friend directory operator+( const char* a, const directory& b ) = delete;
+
+
 
 
 		/******************************************************************
