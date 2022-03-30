@@ -427,8 +427,8 @@ namespace eontest
 				Failed = true;
 				eon::term << "Expected expression: " << exp_expr << "\n";
 				eon::term << "  Actual expression: " << act_expr << "\n";
-				eon::term << "Expected value: \"" << expected << "\"\n";
-				eon::term << "  Actual value: \"" << actual << "\"\n";
+				eon::term << "Expected value: \"" << std::to_string( expected ) << "\"\n";
+				eon::term << "  Actual value: \"" << std::to_string( actual ) << "\"\n";
 				eon::term << "Expected value should be equal to actual!\n";
 				return false;
 			}
@@ -477,8 +477,8 @@ namespace eontest
 			Failed = true;
 			eon::term << "Expected expression: " << exp_expr << "\n";
 			eon::term << "  Actual expression: " << act_expr << "\n";
-			eon::term << "Expected value: \"" << expected << "\"\n";
-			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value: \"" << std::to_string( expected ) << "\"\n";
+			eon::term << "  Actual value: \"" << std::to_string( actual ) << "\"\n";
 			eon::term << "Expected value should not be equal to actual!\n";
 			return false;
 		}
@@ -524,8 +524,8 @@ namespace eontest
 			Failed = true;
 			eon::term << "Expected expression: " << exp_expr << "\n";
 			eon::term << "  Actual expression: " << act_expr << "\n";
-			eon::term << "Expected value: \"" << expected << "\"\n";
-			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value: \"" << std::to_string( expected ) << "\"\n";
+			eon::term << "  Actual value: \"" << std::to_string( actual ) << "\"\n";
 			eon::term << "Expected value should be less than actual!\n";
 			return false;
 		}
@@ -571,8 +571,8 @@ namespace eontest
 			Failed = true;
 			eon::term << "Expected expression: " << exp_expr << "\n";
 			eon::term << "  Actual expression: " << act_expr << "\n";
-			eon::term << "Expected value: \"" << expected << "\"\n";
-			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value: \"" << std::to_string( expected ) << "\"\n";
+			eon::term << "  Actual value: \"" << std::to_string( actual ) << "\"\n";
 			eon::term << "Expected value should be less than or equal to actual!\n";
 			return false;
 		}
@@ -618,8 +618,8 @@ namespace eontest
 			Failed = true;
 			eon::term << "Expected expression: " << exp_expr << "\n";
 			eon::term << "  Actual expression: " << act_expr << "\n";
-			eon::term << "Expected value: \"" << expected << "\"\n";
-			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value: \"" << std::to_string( expected ) << "\"\n";
+			eon::term << "  Actual value: \"" << std::to_string( actual ) << "\"\n";
 			eon::term << "Expected value should be greater than actual!\n";
 			return false;
 		}
@@ -665,8 +665,8 @@ namespace eontest
 			Failed = true;
 			eon::term << "Expected expression: " << exp_expr << "\n";
 			eon::term << "  Actual expression: " << act_expr << "\n";
-			eon::term << "Expected value: \"" << expected << "\"\n";
-			eon::term << "  Actual value: \"" << actual << "\"\n";
+			eon::term << "Expected value: \"" << std::to_string( expected ) << "\"\n";
+			eon::term << "  Actual value: \"" << std::to_string( actual ) << "\"\n";
 			eon::term << "Expected value should be greater than or equal to actual!\n";
 			return false;
 		}

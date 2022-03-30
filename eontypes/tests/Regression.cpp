@@ -226,14 +226,14 @@ namespace eon
 		tt t;
 		std::shared_ptr<ti> i;
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate() ) ) );
-		WANT_EQ( no_handle, i->value() );
+		WANT_EQ( (uint64_t)no_handle, (uint64_t)i->value() );
 
 		handle_t h1 = no_handle, h2 = (handle_t)199;
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( h1 ) ) ) );
-		WANT_EQ( h1, i->value() );
+		WANT_EQ( (uint64_t)h1, (uint64_t)i->value() );
 
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( h2 ) ) ) );
-		WANT_EQ( h2, i->value() );
+		WANT_EQ( (uint64_t)h2, (uint64_t)i->value() );
 	}
 
 	TEST( BytesTest, instance )
