@@ -82,7 +82,7 @@ namespace eontest
 		void test_body() override;\
 	};\
 	bool test_class##_##test_name##_test_dummy{\
-		::eontest::EonTest::registerTest( #test_class, #test_name, TEST_LINE,\
+		::eontest::EonTest::_registerEonTest_( #test_class, #test_name, TEST_LINE,\
 		new ::eontest::TestFactory<TEST_NAME( test_class, test_name )>() ) };\
 	void TEST_NAME( test_class, test_name )::test_body()
 
@@ -263,7 +263,7 @@ namespace eontest
 		virtual ~EonTest() = default;
 
 
-		void runTest( const std::string& exe )
+		void _runEonTest_( const std::string& exe )
 		{
 			_TestExe = exe;
 			try { prepare(); }
@@ -323,15 +323,15 @@ namespace eontest
 			inline TestRef( const std::string& test_class, const std::string& test_name, FactoryMain* factory ) {
 				TestClass = test_class; TestName = test_name; Factory = factory; }
 		};
-		static std::list<TestRef>* Tests;
-		static std::list<std::string>* Classes;
+		static std::list<TestRef>* _EonTests_;
+		static std::list<std::string>* _EonClasses_;
 
 		// Register a new test
-		static bool registerTest( const std::string& test_class, const std::string& test_name, const std::string& line,
+		static bool _registerEonTest_( const std::string& test_class, const std::string& test_name, const std::string& line,
 			FactoryMain* test );
 
 		// Reset everything
-		static void reset() noexcept;
+		static void _resetEon_() noexcept;
 
 	public:
 		struct Report
@@ -353,7 +353,7 @@ namespace eontest
 				auto str = ss.str();
 				if( !str.empty() )
 					eon::term << str << "\n";
-				Test->_reportLocation( File, Line );
+				Test->_reportEonLocation_( File, Line );
 				if( Fatal )
 					throw std::string( "" );
 				return *this;
@@ -361,8 +361,8 @@ namespace eontest
 		};
 
 	public:
-		inline void _reportLocation( const char* file, int line ) { eon::term << "In " << file << ":" << line << "\n"; }
-		std::string encode( const std::string& str, size_t& diffpos );
+		inline void _reportEonLocation_( const char* file, int line ) { eon::term << "In " << file << ":" << line << "\n"; }
+		std::string _encodeEon_( const std::string& str, size_t& diffpos );
 
 		bool _testTrue( bool value, const char* expression )
 		{

@@ -3,38 +3,38 @@
 
 namespace eontest
 {
-	std::list<EonTest::TestRef>* EonTest::Tests{ nullptr };
-	std::list<std::string>* EonTest::Classes{ nullptr };
+	std::list<EonTest::TestRef>* EonTest::_EonTests_{ nullptr };
+	std::list<std::string>* EonTest::_EonClasses_{ nullptr };
 
 
-	bool EonTest::registerTest( const std::string& test_class, const std::string& test_name, const std::string& line,
+	bool EonTest::_registerEonTest_( const std::string& test_class, const std::string& test_name, const std::string& line,
 		FactoryMain* test )
 	{
-		if( Tests == nullptr )
+		if( _EonTests_ == nullptr )
 		{
-			Tests = new std::list<TestRef>();
-			Classes = new std::list<std::string>();
+			_EonTests_ = new std::list<TestRef>();
+			_EonClasses_ = new std::list<std::string>();
 		}
-		if( std::find( Classes->begin(), Classes->end(), test_class ) == Classes->end() )
-			Classes->push_back( test_class );
-		Tests->push_back( TestRef( test_class, test_name, test ) );
+		if( std::find( _EonClasses_->begin(), _EonClasses_->end(), test_class ) == _EonClasses_->end() )
+			_EonClasses_->push_back( test_class );
+		_EonTests_->push_back( TestRef( test_class, test_name, test ) );
 		return true;
 	}
 
-	void EonTest::reset() noexcept
+	void EonTest::_resetEon_() noexcept
 	{
-		if( Tests )
+		if( _EonTests_ )
 		{
-			for( auto& cls : *Tests )
+			for( auto& cls : *_EonTests_ )
 				delete cls.Factory;
-			delete Tests;
-			delete Classes;
-			Tests = nullptr;
-			Classes = nullptr;
+			delete _EonTests_;
+			delete _EonClasses_;
+			_EonTests_ = nullptr;
+			_EonClasses_ = nullptr;
 		}
 	}
 
-	std::string EonTest::encode( const std::string& str, size_t& diffpos )
+	std::string EonTest::_encodeEon_( const std::string& str, size_t& diffpos )
 	{
 		auto start = diffpos;
 		std::string encoded;
@@ -102,8 +102,8 @@ namespace eontest
 		Failed = true;
 		size_t start_pos{ 0 };
 		size_t dummy1{ SIZE_MAX }, dummy2{ SIZE_MAX };
-		auto exp_lines = _splitLines( encode( expected, dummy1 ) );
-		auto act_lines = _splitLines( encode( actual, dummy2 ) );
+		auto exp_lines = _splitLines( _encodeEon_( expected, dummy1 ) );
+		auto act_lines = _splitLines( _encodeEon_( actual, dummy2 ) );
 		auto diff_line = _findFirstDiffLine( exp_lines, act_lines );
 		eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr << eon::style::normal
 			<< "\n";

@@ -42,7 +42,7 @@ Args processArgs( int argc, const char* argv[] )
 bool runTest( const std::string& exe, eontest::EonTest::TestRef& test )
 {
 	auto test_obj = test.Factory->createTest( test.TestClass, test.TestName );
-	test_obj->runTest( exe );
+	test_obj->_runEonTest_( exe );
 	auto failed = test_obj->Failed;
 	delete test_obj;
 	return !failed;
@@ -64,13 +64,13 @@ eon::string duration( std::chrono::high_resolution_clock::time_point start,
 size_t runTests( const std::string& exe, const std::string& filter, std::list<std::string>& failed )
 {
 	using namespace eontest;
-	if( !EonTest::Tests )
+	if( !EonTest::_EonTests_ )
 		return 0 ;
 
 	std::regex pattern( filter );
 	auto start = std::chrono::high_resolution_clock::now();
 	size_t total = 0;
-	for( auto& test : *EonTest::Tests )
+	for( auto& test : *EonTest::_EonTests_ )
 	{
 		if( !filter.empty() && !std::regex_match( test.TestClass + "." + test.TestName, pattern ) )
 			continue;
@@ -136,7 +136,7 @@ int main( int argc, const char* argv[] )
 	std::list<std::string> failed;
 	auto total = runTests( args.Exe, args.Filter, failed );
 
-	eontest::EonTest::reset();
+	eontest::EonTest::_resetEon_();
 
 	if( total == 0 )
 	{
