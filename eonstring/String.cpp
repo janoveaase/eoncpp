@@ -42,7 +42,7 @@ namespace eon
 	}
 	string& string::assign( const char* chars, size_t size )
 	{
-		iterator i( chars, size );
+		iterator i( chars, size );	// Using iterator to scan the raw string for us!
 		if( !i.validUTF8() )
 			throw InvalidUTF8();
 		NumChars = i.numChars();

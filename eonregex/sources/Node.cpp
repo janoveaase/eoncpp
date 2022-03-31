@@ -5,15 +5,6 @@ namespace eon
 {
 	namespace rx
 	{
-		Node::~Node()
-		{
-			if( Next != nullptr )
-				delete Next;
-		}
-
-
-
-
 		Node& Node::operator=( const Node& other )
 		{
 			Type = other.Type;
@@ -40,16 +31,15 @@ namespace eon
 
 		bool Node::match( RxData& data, size_t steps )
 		{
-			// If there are fewer characters remaining than the minimum
-			// required characters remaining of the pattern, we can report
-			// failure right now!
+			// If there are fewer characters remaining than the minimum required by the
+			// pattern, we can report failure right now!
 			if( data.remaining() < MinCharsRemaining )
 				return false;
 
 			// Cases:
 			// 1 single match
 			// 2 zero or one
-			// 3 range gredy
+			// 3 range greedy
 			// 4 range non-greedy
 
 			if( Quant.min() == 1 && Quant.max() == 1 )

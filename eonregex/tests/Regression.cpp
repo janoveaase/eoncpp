@@ -560,14 +560,10 @@ namespace eon
 			for( auto& details : s_text )
 			{
 				bool match = false;
-				REQUIRE_NO_EXCEPT( match = static_cast<bool>(
-					std::regex_match( details.first, srx ) ) )
-					<< "Std failed match on round #"
-					<< string::toString( i + 1 ) << ", text \""
-					<< details.first << "\"";
+				REQUIRE_NO_EXCEPT( match = static_cast<bool>( std::regex_match( details.first, srx ) ) )
+					<< "Std failed match on round #" << string::toString( i + 1 ) << ", text \"" << details.first << "\"";
 				WANT_TRUE( match == details.second )
-					<< "Std bad match on round #" << string::toString( i + 1 )
-					<< ", text \"" << details.first + "\"";
+					<< "Std bad match on round #" << string::toString( i + 1 ) << ", text \"" << details.first + "\"";
 				if( match == details.second )
 					++s_successes;
 			}

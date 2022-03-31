@@ -16,7 +16,7 @@ namespace eon
 	**************************************************************************/
 	namespace rx
 	{
-		using captures_t = std::map<name_t, substring>;
+		using captures_t = std::unordered_map<name_t, substring>;
 
 		class RxData
 		{
@@ -27,14 +27,13 @@ namespace eon
 				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; }
 			inline RxData( RxData&& other ) noexcept { *this = std::move( other ); }
 			inline RxData( const substring& source ) noexcept { Src = source; Pos = Src.begin(); }
-			inline RxData( const substring& source, Flag flags ) {
-				Src = source; CmpFlags = flags; Pos = Src.begin(); }
+			inline RxData( const substring& source, Flag flags ) { Src = source; CmpFlags = flags; Pos = Src.begin(); }
 			virtual ~RxData() { reset(); }
 
 			inline void reset() noexcept { if( Captures ) { delete Captures; Captures = nullptr; } }
 
-			inline RxData& operator=( const RxData& other ) { reset();
-				if( other.Captures ) { Captures = new captures_t( *other.Captures ); }
+			inline RxData& operator=( const RxData& other ) {
+				reset(); if( other.Captures ) { Captures = new captures_t( *other.Captures ); }
 				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; return *this; }
 			inline RxData& operator=( RxData&& other ) noexcept {
 				reset(); if( other.Captures ) { Captures = other.Captures; other.Captures = nullptr; }

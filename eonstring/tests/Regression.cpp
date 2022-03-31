@@ -31,8 +31,8 @@ namespace eon
 
 	TEST( StaticString, toString )
 	{
-		WANT_EQ( "1234", eon::string::toString( 1234 ).stdstr() );
-		WANT_EQ( "-1.23", eon::string::toString( -1.230 ).stdstr() );
+		WANT_EQ( "1234", eon::string::toString( 1234 ) );
+		WANT_EQ( "-1.23", eon::string::toString( -1.230 ) );
 	}
 	TEST( StaticString, isLetter )
 	{
@@ -64,7 +64,7 @@ namespace eon
 		auto e = exp.begin();
 		for( ; a != elms.end(); ++a, ++e )
 		{
-			WANT_EQ( e->stdstr(), eon::string( *a ).stdstr() );
+			WANT_EQ( *e, eon::string( *a ) );
 		}
 	}
 	TEST( String, join )
@@ -72,7 +72,7 @@ namespace eon
 		std::set<eon::string> elms{ "alpha", "beta", "gamma", "delta" };
 		auto act = eon::string( "--" ).join( elms.begin(), elms.end() );
 		auto exp = "alpha--beta--delta--gamma";
-		WANT_EQ( exp, act.stdstr() );
+		WANT_EQ( exp, act );
 	}
 
 
@@ -80,32 +80,32 @@ namespace eon
 	{
 		eon::string str{ "john doe" };
 		str = eon::string( std::move( str ) ).ucWords();
-		WANT_EQ( "John Doe", str.stdstr() );
+		WANT_EQ( "John Doe", str );
 	}
 	TEST( String, bool )
 	{
 		eon::string ok( true );
 		eon::string bad( false );
-		WANT_EQ( "true", ok.stdstr() );
-		WANT_EQ( "false", bad.stdstr() );
+		WANT_EQ( "true", ok );
+		WANT_EQ( "false", bad );
 
 		ok = false;
 		bad = true;
-		WANT_EQ( "false", ok.stdstr() );
-		WANT_EQ( "true", bad.stdstr() );
+		WANT_EQ( "false", ok );
+		WANT_EQ( "true", bad );
 	}
 
 	TEST( String, char )
 	{
 		eon::string a{ 'a' };
 		eon::string b{ 'B' };
-		WANT_EQ( "a", a.stdstr() );
-		WANT_EQ( "B", b.stdstr() );
+		WANT_EQ( "a", a );
+		WANT_EQ( "B", b );
 
 		a = 'B';
 		b = 'a';
-		WANT_EQ( "B", a.stdstr() );
-		WANT_EQ( "a", b.stdstr() );
+		WANT_EQ( "B", a );
+		WANT_EQ( "a", b );
 	}
 
 	TEST( String, numeralsOnly )
@@ -156,10 +156,8 @@ namespace eon
 		WANT_FALSE( ineg.isFloat() ) << "Failed: ineg";
 		WANT_FALSE( invalid1.isFloat() ) << "Failed: invalid1";
 		WANT_FALSE( invalid2.isFloat() ) << "Failed: invalid2";
-		WANT_TRUE( eon::substring( sub.begin(), sub.begin() + 4 ).isFloat() )
-			<< "Failed: sub #1";
-		WANT_TRUE( eon::substring( sub.begin() + 5, sub.end() ).isFloat() )
-			<< "Failed: sub #2";
+		WANT_TRUE( eon::substring( sub.begin(), sub.begin() + 4 ).isFloat() ) << "Failed: sub #1";
+		WANT_TRUE( eon::substring( sub.begin() + 5, sub.end() ).isFloat() ) << "Failed: sub #2";
 	}
 	TEST( String, isInt )
 	{
@@ -185,10 +183,8 @@ namespace eon
 		WANT_TRUE( ineg.isInt() ) << "Failed: ineg";
 		WANT_FALSE( invalid1.isInt() ) << "Failed: invalid1";
 		WANT_FALSE( invalid2.isInt() ) << "Failed: invalid2";
-		WANT_TRUE( eon::substring( sub.begin(), sub.begin() + 4 ).isInt() )
-			<< "Failed: sub #1";
-		WANT_TRUE( eon::substring( sub.begin() + 5, sub.end() ).isInt() )
-			<< "Failed: sub #2";
+		WANT_TRUE( eon::substring( sub.begin(), sub.begin() + 4 ).isInt() ) << "Failed: sub #1";
+		WANT_TRUE( eon::substring( sub.begin() + 5, sub.end() ).isInt() ) << "Failed: sub #2";
 	}
 	TEST( String, isUInt )
 	{
@@ -214,12 +210,9 @@ namespace eon
 		WANT_FALSE( ineg.isUInt() ) << "Failed: ineg";
 		WANT_FALSE( invalid1.isUInt() ) << "Failed: invalid1";
 		WANT_FALSE( invalid2.isUInt() ) << "Failed: invalid2";
-		WANT_TRUE( eon::substring( sub.begin(), sub.begin() + 3 ).isUInt() )
-			<< "Failed: sub #1";
-		WANT_TRUE( eon::substring( sub.begin() + 5, sub.end() ).isUInt() )
-			<< "Failed: sub #2";
-		WANT_FALSE( eon::substring( sub.begin() + 4, sub.end() ).isUInt() )
-			<< "Failed: sub #3";
+		WANT_TRUE( eon::substring( sub.begin(), sub.begin() + 3 ).isUInt() ) << "Failed: sub #1";
+		WANT_TRUE( eon::substring( sub.begin() + 5, sub.end() ).isUInt() ) << "Failed: sub #2";
+		WANT_FALSE( eon::substring( sub.begin() + 4, sub.end() ).isUInt() ) << "Failed: sub #3";
 	}
 
 	TEST( String, toNumber )
@@ -230,12 +223,9 @@ namespace eon
 		uint64_t ui64 = 1234567890123456LL;
 		double dbl = -1234.5;
 		WANT_EQ( i32, eon::string( "-1234" ).toInt32() ) << "Wrong int32_t";
-		WANT_EQ( ui32, eon::string( "1234567890" ).toUInt32() )
-			<< "Wrong uint32_t";
-		WANT_EQ( i64, eon::string( "-123456789012" ).toInt64() )
-			<< "Wrong int64_t";
-		WANT_EQ( ui64, eon::string( "1234567890123456" ).toUInt64() )
-			<< "Wrong uint64_t";
+		WANT_EQ( ui32, eon::string( "1234567890" ).toUInt32() ) << "Wrong uint32_t";
+		WANT_EQ( i64, eon::string( "-123456789012" ).toInt64() ) << "Wrong int64_t";
+		WANT_EQ( ui64, eon::string( "1234567890123456" ).toUInt64() ) << "Wrong uint64_t";
 		WANT_EQ( dbl, eon::string( "-1234.5" ).toDouble() ) << "Wrong double";
 	}
 
@@ -247,16 +237,12 @@ namespace eon
 		uint64_t ui64 = 1234567890123456LL;
 		size_t sz = 9988;
 		double dbl = -1234.5;
-		WANT_EQ( i32, eon::string( static_cast<int32_t>( i32 ) ).toInt32() )
-			<< "Wrong int32_t";
-		WANT_EQ( ui32,
-			eon::string( static_cast<uint32_t>( ui32 ) ).toUInt32() )
-			<< "Wrong uint32_t";
+		WANT_EQ( i32, eon::string( static_cast<int32_t>( i32 ) ).toInt32() ) << "Wrong int32_t";
+		WANT_EQ( ui32, eon::string( static_cast<uint32_t>( ui32 ) ).toUInt32() ) << "Wrong uint32_t";
 		WANT_EQ( i64, eon::string( i64 ).toInt64() ) << "Wrong int64_t";
 		WANT_EQ( ui64, eon::string( ui64 ).toUInt64() ) << "Wrong uint64_t";
 		WANT_EQ( dbl, eon::string( dbl ).toDouble() ) << "Wrong double";
-		WANT_EQ( sz, eon::string( static_cast<size_t>( sz ) ).toUInt32() )
-			<< "Wrong size_t";
+		WANT_EQ( sz, eon::string( static_cast<size_t>( sz ) ).toUInt32() ) << "Wrong size_t";
 	}
 
 
@@ -265,32 +251,23 @@ namespace eon
 		eon::string str;
 
 		str = "no trim";
-		WANT_EQ( "no trim", str.trim().stdstr() )
-			<< "Clean string was trimmed";
+		WANT_EQ( "no trim", str.trim().stdstr() ) << "Clean string was trimmed";
 		str = " \t\nleft trim";
-		WANT_EQ( "left trim", str.trim().stdstr() )
-			<< "Left string was not trimmed";
+		WANT_EQ( "left trim", str.trim().stdstr() ) << "Left string was not trimmed";
 		str = " \t\nleft trim";
-		WANT_EQ( "left trim", str.trimLeading().stdstr() )
-			<< "Left string was not left trimmed";
+		WANT_EQ( "left trim", str.trimLeading().stdstr() ) << "Left string was not left trimmed";
 		str = " \t\nleft trim";
-		WANT_EQ( " \t\nleft trim", str.trimTrailing().stdstr() )
-			<< "Left string was right trimmed";
+		WANT_EQ( " \t\nleft trim", str.trimTrailing().stdstr() ) << "Left string was right trimmed";
 		str = "right trim\b ";
-		WANT_EQ( "right trim", str.trim().stdstr() )
-			<< "Right string was not trimmed";
+		WANT_EQ( "right trim", str.trim().stdstr() ) << "Right string was not trimmed";
 		str = "right trim\b ";
-		WANT_EQ( "right trim\b ", str.trimLeading().stdstr() )
-			<< "Right string was left trimmed";
+		WANT_EQ( "right trim\b ", str.trimLeading().stdstr() ) << "Right string was left trimmed";
 		str = "right trim\b ";
-		WANT_EQ( "right trim", str.trimTrailing().stdstr() )
-			<< "Right string was not right trimmed";
+		WANT_EQ( "right trim", str.trimTrailing().stdstr() ) << "Right string was not right trimmed";
 		str = " left and right trim ";
-		WANT_EQ( "left and right trim", str.trim().stdstr() )
-			<< "Both string was not trimmed";
+		WANT_EQ( "left and right trim", str.trim().stdstr() ) << "Both string was not trimmed";
 		str = "\n";
-		WANT_EQ( "", str.trim().stdstr() )
-			<< "Whitespace string was not trimmed";
+		WANT_EQ( "", str.trim().stdstr() ) << "Whitespace string was not trimmed";
 	}
 
 	TEST( String, trimNumber )
@@ -306,24 +283,23 @@ namespace eon
 		eon::string invalid( "1.2.3" );
 
 		auto str = eon::string( basic.trimNumber() );
-		WANT_EQ( "123.456", str.stdstr() ) << "Wrong basic";
+		WANT_EQ( "123.456", str ) << "Wrong basic";
 		str = leading.trimNumber();
-		WANT_EQ( "123.456", str.stdstr() ) << "Wrong leading";
+		WANT_EQ( "123.456", str ) << "Wrong leading";
 		str = trailing.trimNumber();
-		WANT_EQ( "123.456", str.stdstr() ) << "Wrong trailing";
+		WANT_EQ( "123.456", str ) << "Wrong trailing";
 		str = positive.trimNumber();
-		WANT_EQ( "+00123.456", str.stdstr() ) << "Wrong positive";
+		WANT_EQ( "+00123.456", str ) << "Wrong positive";
 		str = negative.trimNumber();
-		WANT_EQ( "-00123.456", str.stdstr() ) << "Wrong negative";
+		WANT_EQ( "-00123.456", str ) << "Wrong negative";
 		str = shortflt.trimNumber();
-		WANT_EQ( "1.9", str.stdstr() ) << "Wrong shortflt";
+		WANT_EQ( "1.9", str ) << "Wrong shortflt";
 		str = allzero1.trimNumber();
-		WANT_EQ( "0", str.stdstr() ) << "Wrong allzero1";
+		WANT_EQ( "0", str ) << "Wrong allzero1";
 		str = allzero2.trimNumber();
-		WANT_EQ( "0", str.stdstr() ) << "Wrong allzero2";
+		WANT_EQ( "0", str ) << "Wrong allzero2";
 		str = invalid.trimNumber();
-		WANT_EQ( "1.2.3", str.stdstr() )
-			<< "Invalid number string was trimmed";
+		WANT_EQ( "1.2.3", str ) << "Invalid number string was trimmed";
 	}
 
 	TEST( String, separateThousands )
@@ -334,13 +310,13 @@ namespace eon
 		eon::string large( "12345678901.2345" );
 
 		auto str = trivial.separateThousands();
-		WANT_EQ( "12", str.stdstr() ) << "Wrong trivial";
+		WANT_EQ( "12", str ) << "Wrong trivial";
 		str = basic.separateThousands();
-		WANT_EQ( "123.456", str.stdstr() ) << "Wrong basic";
+		WANT_EQ( "123.456", str ) << "Wrong basic";
 		str = medium.separateThousands();
-		WANT_EQ( "123,456.78", str.stdstr() ) << "Wrong medium";
+		WANT_EQ( "123,456.78", str ) << "Wrong medium";
 		str = large.separateThousands( ' ' );
-		WANT_EQ( "12 345 678 901.2345", str.stdstr() ) << "Wrong large";
+		WANT_EQ( "12 345 678 901.2345", str ) << "Wrong large";
 	}
 
 	TEST( String, roundNumber )
@@ -349,115 +325,98 @@ namespace eon
 
 		num = "123";
 		str = num.roundNumber();
-		WANT_EQ( "123", str.stdstr() );
+		WANT_EQ( "123", str );
 		num = "123";
 		str = num.roundNumber( 2 );
-		WANT_EQ( "123", str.stdstr() );
+		WANT_EQ( "123", str );
 
 		num = "123.456";
 		str = num.roundNumber();
-		WANT_EQ( "123", str.stdstr() );
+		WANT_EQ( "123", str );
 		num = "123.543";
 		str = num.roundNumber();
-		WANT_EQ( "124", str.stdstr() );
+		WANT_EQ( "124", str );
 		num = "123.456";
 		str = num.roundNumber( 2 );
-		WANT_EQ( "123.46", str.stdstr() );
+		WANT_EQ( "123.46", str );
 		num = "0.456";
 		str = num.roundNumber( 2 );
-		WANT_EQ( "0.46", str.stdstr() );
+		WANT_EQ( "0.46", str );
 	}
 
 	TEST( String, lower )
 	{
 		eon::string str{ "Hello WORLD and hello OpeniT!" };
-		WANT_EQ( "hello world and hello openit!", str.lower().stdstr() )
-			<< "Wrong lower";
+		WANT_EQ( "hello world and hello openit!", str.lower() ) << "Wrong lower";
 		str = "HELLO WORLD AND HELLO OPENIT!";
-		WANT_EQ( "Hello world and hello openiT!",
-			str.lower( eon::substring(
-				str.begin() + 1, str.end() - 2 ) ).stdstr() )
+		WANT_EQ( "Hello world and hello openiT!", str.lower( eon::substring( str.begin() + 1, str.end() - 2 ) ) )
 			<< "Wrong lower limited";
 	}
 	TEST( String, upper )
 	{
 		eon::string str;
 		str = "hello WORLD and hello Openit!";
-		WANT_EQ( "HELLO WORLD AND HELLO OPENIT!", str.upper().stdstr() )
-			<< "Wrong upper";
+		WANT_EQ( "HELLO WORLD AND HELLO OPENIT!", str.upper() ) << "Wrong upper";
 		str = "hello WORLD and hello Openit!";
-		WANT_EQ( "hELLO WORLD AND HELLO OPENIt!",
-			str.upper( eon::substring(
-				str.begin() + 1, str.end() - 2 ) ).stdstr() )
+		WANT_EQ( "hELLO WORLD AND HELLO OPENIt!", str.upper( eon::substring( str.begin() + 1, str.end() - 2 ) ) )
 			<< "Wrong upper limited";
 	}
 	TEST( String, ucFirst )
 	{
 		eon::string str;
 		str = "hello WORLD and hello OpeniT! this is a test. TEST ENDS.";
-		WANT_EQ( "Hello WORLD and hello OpeniT! this is a test. TEST ENDS.",
-			str.ucFirst().stdstr() );
+		WANT_EQ( "Hello WORLD and hello OpeniT! this is a test. TEST ENDS.", str.ucFirst() );
 		WANT_EQ( "hello WORLD and hello OpeniT! This is a test. TEST ENDS.",
-			str.ucFirst( eon::substring(
-				str.begin() + 30, str.end() ) ).stdstr() );
+			str.ucFirst( eon::substring( str.begin() + 30, str.end() ) ) );
 	}
 	TEST( String, ucWords )
 	{
 		eon::string str;
 		str = "hello WORLD and hello OpeniT! this is a test. TEST ENDS.";
-		WANT_EQ( "Hello WORLD And Hello OpeniT! This Is A Test. TEST ENDS.",
-			str.ucWords().stdstr() );
+		WANT_EQ( "Hello WORLD And Hello OpeniT! This Is A Test. TEST ENDS.", str.ucWords() );
 		WANT_EQ( "hello WORLD and hello OpeniT! This Is A Test. TEST ENDS.",
-			str.ucWords( eon::substring(
-				str.begin() + 30, str.end() ) ).stdstr() );
+			str.ucWords( eon::substring( str.begin() + 30, str.end() ) ) );
 	}
 	TEST( String, ucSentences )
 	{
 		eon::string str;
 		str = "hello.WORLD and hello OpeniT! this is a test.  tEST ENDS.";
-		WANT_EQ( "Hello.WORLD and hello OpeniT! This is a test.  TEST ENDS.",
-			str.ucSentences().stdstr() );
+		WANT_EQ( "Hello.WORLD and hello OpeniT! This is a test.  TEST ENDS.", str.ucSentences() );
 		WANT_EQ( "hello.WORLD and hello OpeniT! This is a test.  TEST ENDS.",
-			str.ucSentences( eon::substring(
-				str.begin() + 30, str.end() ) ).stdstr() );
+			str.ucSentences( eon::substring( str.begin() + 30, str.end() ) ) );
 		WANT_EQ( "Hello.WORLD and hello OpeniT! this is a test.  tEST ENDS.",
-			str.ucSentences( eon::substring(
-				str.begin(), str.begin() + 30 ) ).stdstr() );
+			str.ucSentences( eon::substring( str.begin(), str.begin() + 30 ) ) );
 	}
 
 	TEST( String, substr )
 	{
 		eon::string str{ "Hello World!" };
-		WANT_EQ( "ello World", eon::string( str.substr(
-			str.begin() + 1, str.last() ) ).stdstr() );
+		WANT_EQ( "ello World", eon::string( str.substr( str.begin() + 1, str.last() ) ) );
 	}
 	TEST( String, slice )
 	{
 		eon::string str{ "Hello World!" };
-		WANT_EQ( "ello World", eon::string( str.slice( 1, -2 ) ).stdstr() );
-		WANT_EQ( "olle", eon::string( str.slice( 4, 1 ) ).stdstr() );
+		WANT_EQ( "ello World", eon::string( str.slice( 1, -2 ) ) );
+		WANT_EQ( "olle", eon::string( str.slice( 4, 1 ) ) );
 	}
 
 	TEST( String, count )
 	{
 		eon::string str{ "abacad" };
 		WANT_EQ( 3, str.count( char_t( 'a' ) ) ) << "Wrong char count";
-		WANT_EQ( 1, str.count( char_t( 'a' ),
-			eon::substring( str.begin() + 1, str.begin() + 3 ) ) )
+		WANT_EQ( 1, str.count( char_t( 'a' ), eon::substring( str.begin() + 1, str.begin() + 3 ) ) )
 			<< "Wrong limited char count";
 
 		str = "alpha beta alpha gamma alpha delta";
 		WANT_EQ( 3, str.count( "alpha" ) ) << "Wrong string count";
-		WANT_EQ( 1, str.count( "alpha",
-			eon::substring( str.begin() + 1, str.begin() + 27 ) ) )
+		WANT_EQ( 1, str.count( "alpha", eon::substring( str.begin() + 1, str.begin() + 27 ) ) )
 			<< "Wrong limited string count";
 	}
 
 	TEST( String, hash )
 	{
 		std::string str( "Hello World!" );
-		size_t expected = sizeof( size_t ) == 4
-			? 2984921202 : 10092224619179044402llu;
+		size_t expected = sizeof( size_t ) == 4 ? 2984921202 : 10092224619179044402llu;
 		WANT_EQ( expected, eon::string( str ).hash() ) << "Wrong hash value";
 	}
 	TEST( String, hash_speed )
@@ -508,54 +467,38 @@ namespace eon
 
 		auto e_time = e_end - e_start;
 		auto s_time = s_end - s_start;
-		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			e_time );
-		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			s_time );
+		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
 
-		eon::term << "Eon string (" << e_sum << "): " << string::toString( e_ms.count() )
-			<< "ms\n";
-		eon::term << "Std string (" << s_sum << "): " << string::toString( s_ms.count() )
-			<< "ms\n";
+		eon::term << "Eon string (" << e_sum << "): " << string::toString( e_ms.count() ) << "ms\n";
+		eon::term << "Std string (" << s_sum << "): " << string::toString( s_ms.count() ) << "ms\n";
 	}
 
 	TEST( String, replace )
 	{
-		WANT_EQ( "elphe bete gemme",
-			eon::string( "alpha beta gamma" ).replace( 'a', 'e' ).stdstr() )
-			<< "Wrong char";
+		WANT_EQ( "elphe bete gemme", eon::string( "alpha beta gamma" ).replace( 'a', 'e' ) ) << "Wrong char";
 		eon::string str{ "alpha beta gamma" };
-		WANT_EQ( "alphe bete gemma",
-			str.replace( 'a', 'e', eon::substring(
-				str.begin() + 1, str.begin() + 14 ) ).stdstr() )
+		WANT_EQ( "alphe bete gemma", str.replace( 'a', 'e', eon::substring( str.begin() + 1, str.begin() + 14 ) ) )
 			<< "Wrong char limited";
 
-		WANT_EQ( "a and b and c",
-			eon::string( "a or b or c" ).replace( "or", "and" ).stdstr() )
-			<< "Wrong string";
+		WANT_EQ( "a and b and c", eon::string( "a or b or c" ).replace( "or", "and" ) ) << "Wrong string";
 		str = "a or b or c";
-		WANT_EQ( "a or b and c",
-			str.replace( "or", "and", eon::substring(
-				str.begin() + 3, str.end() ) ).stdstr() )
+		WANT_EQ( "a or b and c", str.replace( "or", "and", eon::substring( str.begin() + 3, str.end() ) ) )
 			<< "Wrong string limited";
 		str = "one to one";
-		WANT_EQ( "many to many", str.replace( "one", "many" ).stdstr() )
-			<< "Wrong string limited";
+		WANT_EQ( "many to many", str.replace( "one", "many" ) ) << "Wrong string limited";
 	}
 	TEST( String, replace2 )
 	{
-		WANT_EQ( "a--b", eon::string( "a,,b" ).replace( ',', '-' ).stdstr() );
-		WANT_EQ( "a--b",
-			eon::string( "a::::b" ).replace( "::", "-" ).stdstr() );
+		WANT_EQ( "a--b", eon::string( "a,,b" ).replace( ',', '-' ) );
+		WANT_EQ( "a--b", eon::string( "a::::b" ).replace( "::", "-" ) );
 	}
 	TEST( String, replace_speed )
 	{
-		eon::string base{ "one one-thousand two one-thousand three one-"
-			"thousand four one-thousand five one-thousand size one-thousand "
-			"seven one-thousand eight one-thousand nine one-thousand" };
-		eon::string exp{ "two two-thousand two two-thousand three two-thousand"
-			" four two-thousand five two-thousand size two-thousand seven two-"
-			"thousand eight two-thousand nine two-thousand" };
+		eon::string base{ "one one-thousand two one-thousand three one-thousand four one-thousand five one-thousand size one-"
+			"thousand seven one-thousand eight one-thousand nine one-thousand" };
+		eon::string exp{ "two two-thousand two two-thousand three two-thousand four two-thousand five two-thousand size two-"
+			"thousand seven two-thousand eight two-thousand nine two-thousand" };
 		auto start = std::chrono::high_resolution_clock::now();
 #ifdef _DEBUG
 		size_t max = 10000;
@@ -565,33 +508,23 @@ namespace eon
 		eon::term << "Running " << max << " iterations ...\n";
 		for( size_t i = 0; i < max; ++i )
 		{
-			WANT_EQ( exp.stdstr(), base.replace( "one", "two" ).stdstr() )
-				<< "Wrong value in iteration " + std::to_string( i );
+			WANT_EQ( exp, base.replace( "one", "two" ) ) << "Wrong value in iteration " + std::to_string( i );
 		}
 		auto end = std::chrono::high_resolution_clock::now();
-		eon::term << "Replace took "
-			<< std::chrono::duration_cast<std::chrono::milliseconds>(
-				end - start ).count()
+		eon::term << "Replace took " << std::chrono::duration_cast<std::chrono::milliseconds>( end - start ).count()
 			<< " msec\n";
 	}
 
 	TEST( String, remove )
 	{
-		WANT_EQ( "lph bet gmm",
-			eon::string( "alpha beta gamma" ).remove( 'a' ).stdstr() )
-			<< "Wrong char";
+		WANT_EQ( "lph bet gmm", eon::string( "alpha beta gamma" ).remove( 'a' ) ) << "Wrong char";
 		eon::string str{ "alpha beta gamma" };
-		WANT_EQ( "alph bet gmma", str.remove( 'a',
-			eon::substring( str.begin() + 1, str.begin() + 14 ) ).stdstr() )
+		WANT_EQ( "alph bet gmma", str.remove( 'a', eon::substring( str.begin() + 1, str.begin() + 14 ) ) )
 			<< "Wrong char limited";
 
-		WANT_EQ( "a  b  c",
-			eon::string( "a and b and c" ).remove( "and" ).stdstr() )
-			<< "Wrong string";
+		WANT_EQ( "a  b  c", eon::string( "a and b and c" ).remove( "and" ) ) << "Wrong string";
 		str = "a and b and c";
-		WANT_EQ( "a and b  c",
-			str.remove( "and", eon::substring(
-				str.begin() + 3, str.end() ) ).stdstr() )
+		WANT_EQ( "a and b  c", str.remove( "and", eon::substring( str.begin() + 3, str.end() ) ) )
 			<< "Wrong string limited";
 	}
 
@@ -599,82 +532,50 @@ namespace eon
 	{
 		eon::string str{ "Hello World!" };
 
-		WANT_EQ( "\"Hello World!\"", str.doubleQuote().stdstr() )
-			<< "Failed to quote";
-		WANT_EQ( "He\"llo Wor\"ld!",
-			str.doubleQuote( eon::substring(
-				str.begin() + 2, str.begin() + 9 ) ).stdstr() )
+		WANT_EQ( "\"Hello World!\"", str.doubleQuote() ) << "Failed to quote";
+		WANT_EQ( "He\"llo Wor\"ld!", str.doubleQuote( eon::substring( str.begin() + 2, str.begin() + 9 ) ) )
 			<< "Failed to quote limited";
 
-		WANT_EQ( "'Hello World!'", str.singleQuote().stdstr() )
-			<< "Failed to quote";
-		WANT_EQ( "He'llo Wor'ld!",
-			str.singleQuote( eon::substring(
-				str.begin() + 2, str.begin() + 9 ) ).stdstr() )
+		WANT_EQ( "'Hello World!'", str.singleQuote() ) << "Failed to quote";
+		WANT_EQ( "He'llo Wor'ld!", str.singleQuote( eon::substring( str.begin() + 2, str.begin() + 9 ) ) )
 			<< "Failed to quote limited";
 	}
 	TEST( String, unquote )
 	{
-		WANT_EQ( "Hello World!",
-			eon::string( "\"Hello World!\"" ).unQuote().stdstr() )
-			<< "Failed to unquote";
+		WANT_EQ( "Hello World!", eon::string( "\"Hello World!\"" ).unQuote() ) << "Failed to unquote";
 		eon::string str{ "He\"llo Wor\"ld!" };
-		WANT_EQ( "Hello World!",
-			str.unQuote( eon::substring(
-				str.begin() + 2, str.begin() + 11 ) ).stdstr() )
+		WANT_EQ( "Hello World!", str.unQuote( eon::substring( str.begin() + 2, str.begin() + 11 ) ) )
 			<< "Failed to unquote limited";
 
-		WANT_EQ( "Hello World!",
-			eon::string( "'Hello World!'" ).unQuote().stdstr() )
-			<< "Failed to unquote";
+		WANT_EQ( "Hello World!", eon::string( "'Hello World!'" ).unQuote() ) << "Failed to unquote";
 		str = "He'llo Wor'ld!";
-		WANT_EQ( "Hello World!",
-			str.unQuote( eon::substring(
-				str.begin() + 2, str.begin() + 11 ) ).stdstr() )
+		WANT_EQ( "Hello World!", str.unQuote( eon::substring( str.begin() + 2, str.begin() + 11 ) ) )
 			<< "Failed to unquote limited";
 	}
 
 	TEST( String, reverse )
 	{
 		eon::string str{ "abcdefgh" };
-		WANT_EQ( "hgfedcba", str.reverse().stdstr() ) << "Wrong reverse";
-		WANT_EQ( "abfedcgh",
-			str.reverse( eon::substring(
-				str.begin() + 2, str.end() - 2 ) ).stdstr() )
-			<< "Wrong reverse limited";
+		WANT_EQ( "hgfedcba", str.reverse() ) << "Wrong reverse";
+		WANT_EQ( "abfedcgh", str.reverse( eon::substring( str.begin() + 2, str.end() - 2 ) ) ) << "Wrong reverse limited";
 	}
 
 	TEST( String, pad )
 	{
-		WANT_EQ( "   pad", eon::string( "pad" ).padLeft( 6 ).stdstr() )
-			<< "Wrong left pad";
-		WANT_EQ( "___pad", eon::string( "pad" ).padLeft( 6, '_' ).stdstr() )
-			<< "Wrong left pad char";
-		WANT_EQ( "pad   ", eon::string( "pad" ).padRight( 6 ).stdstr() )
-			<< "Wrong right pad";
-		WANT_EQ( "pad___", eon::string( "pad" ).padRight( 6, '_' ).stdstr() )
-			<< "Wrong right pad char";
-		WANT_EQ( "  pad   ",
-			eon::string( "pad" ).padLeftAndRight( 8 ).stdstr() )
-			<< "Wrong left-right pad";
-		WANT_EQ( "___pad___",
-			eon::string( "pad" ).padLeftAndRight( 9, '_' ).stdstr() )
-			<< "Wrong left-right pad char";
-		WANT_EQ( "___pad____",
-			eon::string( "pad" ).padLeftAndRight( 10, '_' ).stdstr() )
-			<< "Wrong left-right uneven pad char";
+		WANT_EQ( "   pad", eon::string( "pad" ).padLeft( 6 ) ) << "Wrong left pad";
+		WANT_EQ( "___pad", eon::string( "pad" ).padLeft( 6, '_' ) ) << "Wrong left pad char";
+		WANT_EQ( "pad   ", eon::string( "pad" ).padRight( 6 ) ) << "Wrong right pad";
+		WANT_EQ( "pad___", eon::string( "pad" ).padRight( 6, '_' ) ) << "Wrong right pad char";
+		WANT_EQ( "  pad   ", eon::string( "pad" ).padLeftAndRight( 8 ) ) << "Wrong left-right pad";
+		WANT_EQ( "___pad___", eon::string( "pad" ).padLeftAndRight( 9, '_' ) ) << "Wrong left-right pad char";
+		WANT_EQ( "___pad____", eon::string( "pad" ).padLeftAndRight( 10, '_' ) ) << "Wrong left-right uneven pad char";
 	}
 	TEST( String, indentLines )
 	{
-		WANT_EQ( "  line1\n  line2",
-			eon::string( "line1\nline2" ).indentLines(
-				2, eon::SpaceChr ).stdstr() ) << "Wrong indent 1";
-		WANT_EQ( "  line1\n\n   line2",
-			eon::string( "  line1\n\n line2" ).indentLines(
-				2, eon::SpaceChr ).stdstr() ) << "Wrong indent 2";
-		WANT_EQ( "\n line1\n line2",
-			eon::string( "\nline1\nline2" ).indentLines(
-				1, eon::SpaceChr ).stdstr() ) << "Wrong indent 2";
+		WANT_EQ( "  line1\n  line2", eon::string( "line1\nline2" ).indentLines( 2, eon::SpaceChr ) ) << "Wrong indent 1";
+		WANT_EQ( "  line1\n\n   line2", eon::string( "  line1\n\n line2" ).indentLines( 2, eon::SpaceChr ) )
+			<< "Wrong indent 2";
+		WANT_EQ( "\n line1\n line2", eon::string( "\nline1\nline2" ).indentLines( 1, eon::SpaceChr ) ) << "Wrong indent 2";
 	}
 
 	TEST( String, findFirst )
@@ -682,170 +583,112 @@ namespace eon
 		eon::string str( "34312345334" );
 		WANT_TRUE( str.begin() == str.findFirst( '3' ).begin() );
 		WANT_TRUE( str.begin() == str.findFirst( "34" ).begin() );
-		WANT_TRUE( str.begin() + 5 == str.findFirst(
-			'3', eon::substring( str.begin() + 3, str.end() ) ).begin() );
-		WANT_TRUE( str.begin() + 5 == str.findFirst(
-			"34", eon::substring( str.begin() + 2, str.end() ) ).begin() );
+		WANT_TRUE( str.begin() + 5 == str.findFirst( '3', eon::substring( str.begin() + 3, str.end() ) ).begin() );
+		WANT_TRUE( str.begin() + 5 == str.findFirst( "34", eon::substring( str.begin() + 2, str.end() ) ).begin() );
 
-		WANT_FALSE( str.findFirst( '1',
-			eon::substring( str.begin() + 4, str.end() ) ) );
-		WANT_FALSE( str.findFirst( "34",
-			eon::substring( str.begin() + 1, str.begin() + 6 ) ) );
+		WANT_FALSE( str.findFirst( '1', eon::substring( str.begin() + 4, str.end() ) ) );
+		WANT_FALSE( str.findFirst( "34", eon::substring( str.begin() + 1, str.begin() + 6 ) ) );
 	}
 
 	TEST( String, findFirstNotQuoted )
 	{
 		eon::string str{ "abc\"xyz\"efg" };
-		WANT_FALSE( str.findFirstNotDoubleQuoted( 'x' ) )
-			<< "Found char which was not in the unquoted part of the string";
+		WANT_FALSE( str.findFirstNotDoubleQuoted( 'x' ) ) << "Found char which was not in the unquoted part of the string";
 		str = "\"x\"\"x\"xy";
 		WANT_TRUE( str.begin() + 6 == str.findFirstNotDoubleQuoted( 'x' ) )
 			<< "Didn't find char which was outside of quotes";
 		str = "\"x\"\"x\"zyx";
-		WANT_FALSE(
-			eon::substring( str.begin(),
-				str.begin() + 8 ).findFirstIgnoreSections( 'x', '"' ) )
+		WANT_FALSE( eon::substring( str.begin(), str.begin() + 8 ).findFirstIgnoreSections( 'x', '"' ) )
 			<< "Found char not in the unquoted limited part of the string";
 		str = "xyz\"xyz\"zyx";
-		WANT_TRUE(
-			str.begin() + 10 == eon::substring( str.begin() + 1,
-				str.end() ).findFirstIgnoreSections( 'x', '"' ) )
+		WANT_TRUE( str.begin() + 10 == eon::substring( str.begin() + 1, str.end() ).findFirstIgnoreSections( 'x', '"' ) )
 			<< "Didn't find char limited which was outside of quotes";
 
-		WANT_FALSE( eon::string(
-			"abc\"TESTyz\"efg" ).findFirstNotDoubleQuoted( "TEST" ) )
+		WANT_FALSE( eon::string( "abc\"TESTyz\"efg" ).findFirstNotDoubleQuoted( "TEST" ) )
 			<< "Found string which was not in the unquoted part of the string";
 		str = "\"TEST\"\"TEST\"TESTy";
 		WANT_TRUE( str.begin() + 12 == str.findFirstNotDoubleQuoted( "TEST" ) )
 			<< "Didn't find string which was outside of quotes";
 		str = "\"TEST\"\"TEST\"zyTEST";
-		WANT_FALSE( eon::substring( str.begin(),
-			str.begin() + 7 ).findFirstIgnoreSections( eon::substring(
-				"TEST" ), '"' ) )
-			<< "Found string which was not in the unquoted limited part of the"
-				" string";
+		WANT_FALSE( eon::substring( str.begin(), str.begin() + 7 ).findFirstIgnoreSections(
+			eon::substring( "TEST" ), '"' ) ) << "Found string which was not in the unquoted limited part of the string";
 		str = "TESTyz\"TESTyz\"zyTEST";
-		WANT_TRUE( str.begin() + 16 == eon::substring(
-			str.begin() + 1, str.end() ).findFirstIgnoreSections(
-				eon::substring( "TEST" ), '"' ) )
-			<< "Didn't find string limited which was outside of quotes";
+		WANT_TRUE( str.begin() + 16 == eon::substring( str.begin() + 1, str.end() ).findFirstIgnoreSections(
+			eon::substring( "TEST" ), '"' ) ) << "Didn't find string limited which was outside of quotes";
 	}
 
 	TEST( String, compare_diffpos )
 	{
-		WANT_EQ( 0, eon::string( "alpha beta" ).compare(
-			"alpha beta", eon::CompareType::diff_pos ) )
+		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
 			<< "Failed to compare equal";
 		eon::string str{ "alpha beta" };
-		WANT_EQ( 6, str.compare( "alpha", eon::CompareType::diff_pos ) )
-			<< "Failed to compare substring from start";
+		WANT_EQ( 6, str.compare( "alpha", eon::CompareType::diff_pos ) ) << "Failed to compare substring from start";
 		str = "alpha beta";
-		WANT_EQ( 0,
-			eon::substring( str.begin(), str.begin() + 5 ).compare(
-				eon::substring( "alpha" ), eon::CompareType::diff_pos ) )
-			<< "Failed to compare shorter left";
-		WANT_EQ( 0,
-			eon::substring( str.begin() + 6, str.end() ).compare(
-				eon::substring( "beta" ), eon::CompareType::diff_pos ) )
-			<< "Failed to compare shorter right";
-		WANT_EQ( -10,
-			eon::string( "alpha betA" ).compare(
-				"alpha beta", eon::CompareType::diff_pos ) )
+		WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare(
+			eon::substring( "alpha" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter left";
+		WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare(
+				eon::substring( "beta" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter right";
+		WANT_EQ( -10, eon::string( "alpha betA" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
 			<< "Failed to compare lesser";
-		WANT_EQ( 10,
-			eon::string( "alpha beta" ).compare(
-				"alpha betA", eon::CompareType::diff_pos ) )
+		WANT_EQ( 10, eon::string( "alpha beta" ).compare( "alpha betA", eon::CompareType::diff_pos ) )
 			<< "Failed to compare greater";
 
-		WANT_EQ( 0,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-				eon::substring( "pha be" ), eon::CompareType::diff_pos ) )
-			<< "Failed to compare limited equal";
+		WANT_EQ( 0, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
+			eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited equal";
 		str = "alpha bEta";
-		WANT_EQ( -6,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-				eon::substring( "pha be" ), eon::CompareType::diff_pos ) )
-			<< "Failed to compare limited lesser";
+		WANT_EQ( -6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
+			eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited lesser";
 		str = "alpha beta";
-		WANT_EQ( 6,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-				eon::substring( "pha bE" ), eon::CompareType::diff_pos ) )
-			<< "Failed to compare limited greater";
+		WANT_EQ( 6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
+			eon::substring( "pha bE" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited greater";
 
 		str = "Hello Big World!";
 		eon::string str2{ "Big and bad" };
-		WANT_EQ( 0,
-			eon::substring( str.begin() + 6, str.begin() + 10 ).compare(
-				eon::substring( str2.begin(), str2.begin() + 4 ),
-				eon::CompareType::diff_pos ) )
-			<< "Failed to compare big and bad";
+		WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare( eon::substring( str2.begin(),
+			str2.begin() + 4 ), eon::CompareType::diff_pos ) ) << "Failed to compare big and bad";
 
 		str = "";
 		str2 = "Someting";
-		WANT_EQ( -1, str.compare( str2, eon::CompareType::diff_pos ) )
-			<< "Failed to compare empty";
+		WANT_EQ( -1, str.compare( str2, eon::CompareType::diff_pos ) ) << "Failed to compare empty";
 
-		WANT_EQ( -5,
-			eon::string( "beta" ).compare(
-				"beta/gamma", eon::CompareType::diff_pos ) )
-			<< "Failed to compare correctly when rhs is identical to lhs but "
-				"longer";
+		WANT_EQ( -5, eon::string( "beta" ).compare( "beta/gamma", eon::CompareType::diff_pos ) )
+			<< "Failed to compare correctly when rhs is identical to lhs but longer";
 	}
 #ifndef __GNUC__
 	TEST( String, compare_faster )
 	{
-		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta" ) )
-			<< "Failed to compare equal";
+		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta" ) ) << "Failed to compare equal";
 		eon::string str{ "alpha beta" };
-		WANT_EQ( 1, str.compare( "alpha" ) )
-			<< "Failed to compare substring from start";
+		WANT_EQ( 1, str.compare( "alpha" ) ) << "Failed to compare substring from start";
 		str = "alpha beta";
-		WANT_EQ( 0,
-			eon::substring( str.begin(), str.begin() + 5 ).compare(
-				eon::substring( "alpha" ) ) )
+		WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare( eon::substring( "alpha" ) ) )
 			<< "Failed to compare shorter left";
-		WANT_EQ( 0,
-			eon::substring( str.begin() + 6, str.end() ).compare(
-				eon::substring( "beta" ) ) )
+		WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare( eon::substring( "beta" ) ) )
 			<< "Failed to compare shorter right";
-		WANT_EQ( -1,
-			eon::string( "alpha betA" ).compare( "alpha beta" ) )
-			<< "Failed to compare lesser";
-		WANT_EQ( 1,
-			eon::string( "alpha beta" ).compare( "alpha betA" ) )
-			<< "Failed to compare greater";
+		WANT_EQ( -1, eon::string( "alpha betA" ).compare( "alpha beta" ) ) << "Failed to compare lesser";
+		WANT_EQ( 1, eon::string( "alpha beta" ).compare( "alpha betA" ) ) << "Failed to compare greater";
 
 		WANT_EQ( 0,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-				eon::substring( "pha be" ) ) )
+			eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) )
 			<< "Failed to compare limited equal";
 		str = "alpha bEta";
-		WANT_EQ( -1,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-				eon::substring( "pha be" ) ) )
+		WANT_EQ( -1, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) )
 			<< "Failed to compare limited lesser";
 		str = "alpha beta";
-		WANT_EQ( 1,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-				eon::substring( "pha bE" ) ) )
+		WANT_EQ( 1, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha bE" ) ) )
 			<< "Failed to compare limited greater";
 
 		str = "Hello Big World!";
 		eon::string str2{ "Big and bad" };
-		WANT_EQ( 0,
-			eon::substring( str.begin() + 6, str.begin() + 10 ).compare(
-				eon::substring( str2.begin(), str2.begin() + 4 ) ) )
-			<< "Failed to compare big and bad";
+		WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare(
+			eon::substring( str2.begin(), str2.begin() + 4 ) ) ) << "Failed to compare big and bad";
 
 		str = "";
 		str2 = "Someting";
-		WANT_EQ( -1,
-			str.compare( str2 ) ) << "Failed to compare empty";
+		WANT_EQ( -1, str.compare( str2 ) ) << "Failed to compare empty";
 
-		WANT_EQ( -1,
-			eon::string( "beta" ).compare( "beta/gamma" ) )
-			<< "Failed to compare correctly when rhs is identical to lhs but "
-				"longer";
+		WANT_EQ( -1, eon::string( "beta" ).compare( "beta/gamma" ) )
+			<< "Failed to compare correctly when rhs is identical to lhs but longer";
 	}
 #endif
 	TEST( String, iCompare )
@@ -857,25 +700,17 @@ namespace eon
 
 	TEST( String, escape )
 	{
-		WANT_EQ( "a	b\\nc\\\\", eon::string( "a\tb\nc\\" ).escape().stdstr() )
-			<< "Failed to escape";
-		WANT_EQ( "a\\tb\\nc\\\\",
-			eon::string( "a\tb\nc\\" ).escapeAll().stdstr() )
-			<< "Failed to escape";
-		WANT_EQ( "a\tb\nc\\",
-			eon::string( "a\\tb\\nc\\\\" ).unescape().stdstr() )
-			<< "Failed to unescape";
+		WANT_EQ( "a	b\\nc\\\\", eon::string( "a\tb\nc\\" ).escape() ) << "Failed to escape";
+		WANT_EQ( "a\\tb\\nc\\\\", eon::string( "a\tb\nc\\" ).escapeAll() ) << "Failed to escape";
+		WANT_EQ( "a\tb\nc\\", eon::string( "a\\tb\\nc\\\\" ).unescape() ) << "Failed to unescape";
 		auto esc = eon::string( "C:\\\\flex\\log \\n\\ntest" ).unescape();
-		WANT_EQ( "C:\\flex\\log \n\ntest", esc.stdstr() )
-			<< "Failed to properly unescape";
+		WANT_EQ( "C:\\flex\\log \n\ntest", esc ) << "Failed to properly unescape";
 
 		string uexp{ char_t( 128522 ) };	// Smileyface
-		WANT_TRUE( string( "\\U1F60A" ).unescape() == uexp )
-			<< "Failed to unescape unicode";
+		WANT_TRUE( string( "\\U1F60A" ).unescape() == uexp ) << "Failed to unescape unicode";
 		
 		string hexexp{ "0Az" };
-		WANT_TRUE( string( "\\x30\\x41\\x7A" ).unescape() == hexexp )
-			<< "Failed to unescape hex";
+		WANT_TRUE( string( "\\x30\\x41\\x7A" ).unescape() == hexexp ) << "Failed to unescape hex";
 
 		string octexp{ "0Az" };
 		octexp += char_t( 277 );	// e with breve
@@ -889,10 +724,9 @@ namespace eon
 		base += char_t( 128522 );	// Smileyface
 //		base += u8"😊";
 		auto esc = base.escapeNonPrintable();
-		WANT_EQ( "&#0;&#11;&#13;&#128522;", esc.stdstr() )
-			<< "Failed to escape";
+		WANT_EQ( "&#0;&#11;&#13;&#128522;", esc ) << "Failed to escape";
 		auto unesc = esc.unescapeNonPrintable();
-		WANT_EQ( base.stdstr(), unesc.stdstr() ) << "Failed to unescape";
+		WANT_EQ( base, unesc ) << "Failed to unescape";
 	}
 
 	TEST( String, utf8 )
@@ -907,17 +741,14 @@ namespace eon
 		eon::string str;
 		for( auto i : codepoints )
 		{
-			REQUIRE_NO_EXCEPT( str += char_t( i ) )
-				<< "Failed to add unicode character &#" << std::to_string( i );
+			REQUIRE_NO_EXCEPT( str += char_t( i ) ) << "Failed to add unicode character &#" << std::to_string( i );
 		}
 		REQUIRE_EQ( codepoints.size(), str.numChars() ) << "Wrong size";
 
 		size_t i = 0;
 		for( auto char_t : str )
 		{
-			if( char_t != codepoints[ i ] )
-				ADD_FAILURE() << "Wrong code point at index "
-					<< std::to_string( i );
+			if( char_t != codepoints[ i ] ) ADD_FAILURE() << "Wrong code point at index " << std::to_string( i );
 			++i;
 		}
 	}
@@ -927,18 +758,12 @@ namespace eon
 		int64_t i64_1{ 1 }, i64_2{ -56746754767LL };
 		uint64_t ui64{ 9034658634325425ULL };
 		double dbl_1{ 1.23 }, dbl_2{ -3546346.02341435536 };
-		WANT_EQ( "1", string::toString( i64_1 ).stdstr() )
-			<< "Wrong int64_t value";
-		WANT_EQ( "-56746754767", string::toString( i64_2 ).stdstr() )
-			<< "Wrong int64_t value";
-		WANT_EQ( "9034658634325425", string::toString( ui64 ).stdstr() )
-			<< "Wrong uint64_t value";
-		WANT_EQ( "1.23", string::toString( dbl_1 ).stdstr() )
-			<< "Wrong double value";
-		WANT_EQ( "-3546346.02341436", string::toString( dbl_2 ).stdstr() )
-			<< "Wrong double value";
-		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() )
-			<< "Wrong double max";
+		WANT_EQ( "1", string::toString( i64_1 ) ) << "Wrong int64_t value";
+		WANT_EQ( "-56746754767", string::toString( i64_2 ) ) << "Wrong int64_t value";
+		WANT_EQ( "9034658634325425", string::toString( ui64 ) ) << "Wrong uint64_t value";
+		WANT_EQ( "1.23", string::toString( dbl_1 ) ) << "Wrong double value";
+		WANT_EQ( "-3546346.02341436", string::toString( dbl_2 ) ) << "Wrong double value";
+		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
 	}
 
 	TEST( String, real_issue_seen1 )
@@ -950,6 +775,53 @@ namespace eon
 		sub.end() = eon::string_iterator( source.c_str(), 103, source.numChars(), source.c_str() + 103, 103 );
 		source.erase( sub );
 		WANT_EQ( exp, source );
+	}
+
+	TEST( String, speed_test )
+	{
+		// Create and destroy a different string a large number of times,
+		// access the 10'th and the last character of each and add their integer
+		// values to a sum..
+
+		size_t num_strings = 2000000;
+#ifdef _DEBUG
+		num_strings /= 10;
+#endif
+		std::chrono::steady_clock clock;
+
+		// eon
+		size_t e_sum = 0;
+		auto e_start = clock.now();
+		{
+			for( size_t i = 0; i < num_strings; ++i )
+			{
+				eon::string str = "This is something else #" + eon::string( i );
+				e_sum += static_cast<size_t>( *( str.begin() + 10 ) + *str.last() );
+				str.clear();
+			}
+		}
+		auto e_end = clock.now();
+
+		// std
+		size_t s_sum = 0;
+		auto s_start = clock.now();
+		{
+			for( size_t i = 0; i < num_strings; ++i )
+			{
+				std::string str = "This is something else #" + std::to_string( i );
+				s_sum += static_cast<size_t>( str[ 10 ] + str[ str.size() - 1 ] );
+				str.clear();
+			}
+		}
+		auto s_end = clock.now();
+
+		auto e_time = e_end - e_start;
+		auto s_time = s_end - s_start;
+		auto e_ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+		auto s_ms = std::chrono::duration_cast<std::chrono::milliseconds>( s_time );
+
+		eon::term << "Eon string (" << e_sum << "): " << string::toString( e_ms.count() ) << "ms\n";
+		eon::term << "Std string (" << s_sum << "): " << string::toString( s_ms.count() ) << "ms\n";
 	}
 
 

@@ -17,9 +17,9 @@ namespace eon
 	**************************************************************************/
 	namespace rx
 	{
-		/*
+		/**
 		* Super-class for all operators, locations and values
-		*/
+		**/
 		class Node
 		{
 		protected:
@@ -28,7 +28,7 @@ namespace eon
 			inline Node( const substring& source ) { Source = source; }
 			inline Node( const Node& other ) { *this = other; }
 			inline Node( Node&& other ) noexcept { *this = std::move( other ); }
-			virtual ~Node();
+			virtual ~Node() { if( Next != nullptr ) delete Next; }
 
 			Node& operator=( const Node& other );
 			Node& operator=( Node&& other ) noexcept;

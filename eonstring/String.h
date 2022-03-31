@@ -189,6 +189,14 @@ namespace eon
 		virtual ~string() = default;
 
 
+	private:
+
+		// Constructor for internal use, where we know the input string is
+		// ASCII only. (Faster!)
+		inline string( std::string&& value, bool identifier ) noexcept {
+			Bytes = std::move( value ); NumChars = Bytes.size(); }
+
+
 
 
 		/**********************************************************************
@@ -1445,7 +1453,7 @@ namespace eon
 		//* This method is limited to whatever is supported by
 		//* 'std::to_string'!
 		template<typename T>
-		static inline string toString( T value ) { return string( std::to_string( value ) ); }
+		static inline string toString( T value ) { return string( std::to_string( value ), true ); }
 
 		//* Convert 'double' into string (specifically).
 		//* (We want greater precision and to remove trailing decimal zeros!)
@@ -1461,7 +1469,7 @@ namespace eon
 			for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.';
 				--size )
 				;
-			return string( digits, size );
+			return string( std::string( digits, size ), true );
 		}
 		
 		//* Convert an [eon::string_iterator] into a string format (for

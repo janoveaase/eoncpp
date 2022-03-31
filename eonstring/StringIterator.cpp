@@ -189,8 +189,7 @@ namespace eon
 		size_t num = 0;
 		for( auto c = start; size > 0; ++c, --size )
 		{
-			if( !_utf8Decode( state, cp,
-				static_cast<unsigned char>( *c ) ) )
+			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
 				return c + 1 - start;
 		}
 		return 0;
@@ -244,8 +243,7 @@ namespace eon
 		size_t num = 0;
 		for( auto c = str, end_c = str + size; c != end_c; ++c )
 		{
-			if( !_utf8Decode( state, cp,
-				static_cast<unsigned char>( *c ) ) )
+			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
 				++num;
 		}
 		if( state != UTF8_ACCEPT )
