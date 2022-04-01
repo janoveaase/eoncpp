@@ -20,6 +20,7 @@ namespace eon
 	};
 
 
+
 	/**************************************************************************
 	  Eon Path Class - eon::path
 
@@ -188,9 +189,7 @@ namespace eon
 
 		//* String conversion
 		inline const string& str() const noexcept { return Full; }
-//		inline operator const string&() const noexcept { return Full; }
 		inline const std::string& stdstr() const noexcept { return Full.stdstr(); }
-//		inline operator const std::string&() const noexcept { return Full.stdstr(); }
 		inline const char* c_str() const noexcept { return Full.c_str(); }
 
 		//* Std path

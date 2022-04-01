@@ -125,12 +125,12 @@ namespace eon
 		directory& forceRename( const string& new_name );
 
 
-		//* Move the directory to another parent directory
+		//* Move the directory to another parent directory (same base-name)
 		//* Will fail if a directory with the same name exists in the target
 		//* directory!
 		directory& move( const directory& new_parent_dir );
 
-		//* Move the directory to another parent directory
+		//* Move the directory to another parent directory (same base-name)
 		//* If a directory with the same name exists in the target directory,
 		//* it will be replaced
 		directory& forceMove( const directory& new_parent_dir );

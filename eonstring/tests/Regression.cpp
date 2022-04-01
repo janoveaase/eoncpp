@@ -54,6 +54,16 @@ namespace eon
 		WANT_EQ( 2, first.begin().numChar() ) << "Wrong first";
 		WANT_EQ( 6, last.begin().numChar() ) << "Wrong last";
 	}
+	TEST( String, find_in_sub )
+	{
+		eon::string str{ "one two three four five six seven eight nine" };
+		auto sub1 = str.substr( str.begin() + 4, str.begin() + 23 );
+		auto sub2 = str.substr( str.begin() + 14 );
+		auto bad = sub1.findFirst( eon::string( "six" ).substr() );
+		auto good = sub2.findFirst( eon::string( "six" ).substr() );
+		WANT_FALSE( static_cast<bool>( bad ) );
+		WANT_TRUE( static_cast<bool>( good ) );
+	}
 	TEST( String, split )
 	{
 		eon::string str{ "alpha beta gamma delta" };

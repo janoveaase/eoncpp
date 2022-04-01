@@ -127,12 +127,12 @@ namespace eon
 		file& forceRename( const string& new_name );
 
 
-		//* Move the file to another directory
+		//* Move the file to another directory (same base-name)
 		//* Will fail if a file with the same name exists in the target
 		//* directory!
 		file& move( const eon::path& target_dir );
 
-		//* Move the file to another directory
+		//* Move the file to another directory (same base-name)
 		//* If a file with the same name exists in the target directory, it
 		//* will be replaced
 		file& forceMove( const eon::path& target_dir );
@@ -180,8 +180,7 @@ namespace eon
 			iterator() = default;
 			iterator( const file& f );
 
-			inline operator bool() const noexcept {
-				return !Buffer.filePath().empty(); }
+			inline operator bool() const noexcept { return !Buffer.filePath().empty(); }
 
 			inline const string& operator*() const noexcept { return Line; }
 			inline const string* operator->() const noexcept { return &Line; }

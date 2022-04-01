@@ -40,8 +40,8 @@ namespace eon
 			throw filesys::Failure( "Trying to rename nonexisting directory \"" + Path.str() + "\"" );
 		directory target{ Path.hasParent() ? Path.parent() / eon::path( new_name ) : eon::path( new_name ) };
 		if( target.exists() )
-			throw filesys::Failure( "Cannot rename directory \"" + Path.str()
-				+ "\" to target \"" + new_name + "\": Target exists" );
+			throw filesys::Failure( "Cannot rename directory \"" + Path.str() + "\" to target \"" + new_name
+				+ "\": Target exists" );
 		try
 		{
 			std::filesystem::rename( Path.stdpath(), target.dpath().stdpath() );
@@ -80,8 +80,8 @@ namespace eon
 			throw filesys::Failure( "Trying to move nonexisting directory \"" + Path.str() + "\"" );
 		directory target{ new_parent_dir.Path / Path.base() };
 		if( target.exists() )
-			throw filesys::Failure( "Cannot move \"" + Path.str()
-				+ "\" to target \"" + target.dpath().str() + "\": Target exists" );
+			throw filesys::Failure( "Cannot move \"" + Path.str() + "\" to target \"" + target.dpath().str()
+				+ "\": Target exists" );
 		try
 		{
 			std::filesystem::rename( Path.stdpath(), target.dpath().stdpath() );
@@ -119,12 +119,11 @@ namespace eon
 		if( !exists() )
 			throw filesys::Failure( "Trying to copy nonexisting directory \"" + Path.str() + "\"" );
 		if( target.exists() )
-			throw filesys::Failure( "Cannot copy \"" + Path.str()
-				+ "\" to target \"" + target.dpath().str() + "\": Target exists" );
+			throw filesys::Failure( "Cannot copy \"" + Path.str() + "\" to target \"" + target.dpath().str()
+				+ "\": Target exists" );
 		try
 		{
-			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(),
-				std::filesystem::copy_options::skip_existing );
+			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(), std::filesystem::copy_options::skip_existing );
 		}
 		catch( std::exception& e )
 		{
@@ -141,8 +140,7 @@ namespace eon
 		{
 			if( target.exists() )
 				target.remove();
-			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(),
-				std::filesystem::copy_options::recursive );
+			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(), std::filesystem::copy_options::recursive );
 		}
 		catch( std::exception& e )
 		{
@@ -157,8 +155,7 @@ namespace eon
 			throw filesys::Failure( "Trying to copy nonexisting directory \"" + Path.str() + "\"" );
 		try
 		{
-			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(),
-				std::filesystem::copy_options::recursive );
+			std::filesystem::copy( Path.stdpath(), target.dpath().stdpath(), std::filesystem::copy_options::recursive );
 		}
 		catch( std::exception& e )
 		{

@@ -27,6 +27,8 @@ namespace eon
 		EONEXCEPT( RWError );
 	}
 
+
+
 	/**************************************************************************
 	  Eon File Buffer Class - eon::filebuffer
 
@@ -43,11 +45,9 @@ namespace eon
 	public:
 		filebuffer() = default;
 		inline filebuffer( const filebuffer& ) = delete;
-		inline filebuffer( filebuffer&& other ) noexcept {
-			*this = std::move( other ); }
+		inline filebuffer( filebuffer&& other ) noexcept { *this = std::move( other ); }
 
-		inline filebuffer( const path& file_path,
-			filesys::mode mode, int buffer_size = 4096 ) {
+		inline filebuffer( const path& file_path, filesys::mode mode, int buffer_size = 4096 ) {
 			Path = file_path; Mode = mode; BufferCapacity = buffer_size; }
 
 		~filebuffer() { close(); }

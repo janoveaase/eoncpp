@@ -67,8 +67,7 @@ namespace eon
 		}
 		auto error = _sopen_s( &Handle, Path.c_str(), mode, sharing, perm );
 		if( error != 0 )
-			throw filesys::OpenError( "File: " + Path.str() + "\nError: "
-				+ errnoMessage().stdstr() );
+			throw filesys::OpenError( "File: " + Path.str() + "\nError: " + errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];
 		BufferSize = 0;
 		BufPos = 0;
@@ -147,8 +146,7 @@ namespace eon
 			size_t size;
 			while( true )
 			{
-				size = string_iterator::bytesToUnicode(
-					Buffer + BufPos, Buffer + BufferSize, chr );
+				size = string_iterator::bytesToUnicode( Buffer + BufPos, Buffer + BufferSize, chr );
 				BufPos += size;
 				break;
 			}
@@ -182,8 +180,7 @@ namespace eon
 			return;
 		auto bytes = _write( Handle, Buffer, static_cast<int>( BufPos ) );
 		if( bytes < 0 )
-			throw filesys::RWError( "File: " + Path.stdstr()
-				+ "\nError: " + errnoMessage().stdstr() );
+			throw filesys::RWError( "File: " + Path.stdstr() + "\nError: " + errnoMessage().stdstr() );
 		BufPos = 0;
 	}
 
@@ -196,8 +193,7 @@ namespace eon
 		if( bytes >= 0 )
 			BufferSize = bytes;
 		else
-			throw filesys::RWError( "File: " + Path.stdstr() + "\nError: "
-				+ errnoMessage().stdstr() );
+			throw filesys::RWError( "File: " + Path.stdstr() + "\nError: " + errnoMessage().stdstr() );
 		BufPos = 0;
 	}
 }

@@ -31,8 +31,8 @@ namespace eon
 			throw filesys::Failure( "Trying to rename nonexisting file \"" + Path.str() + "\"" );
 		file target{ Path.hasParent() ? Path.parent() / eon::path( new_name ) : eon::path( new_name ) };
 		if( target.exists() )
-			throw filesys::Failure( "Cannot rename file \"" + Path.str()
-				+ "\" to target \"" + new_name + "\": Target exists" );
+			throw filesys::Failure( "Cannot rename file \"" + Path.str() + "\" to target \"" + new_name
+				+ "\": Target exists" );
 		try
 		{
 			std::filesystem::rename( Path.stdpath(), target.fpath().stdpath() );
@@ -69,8 +69,8 @@ namespace eon
 			throw filesys::Failure( "Trying to move nonexisting file \"" + Path.str() + "\"" );
 		file target{ target_dir / Path.base() };
 		if( target.exists() )
-			throw filesys::Failure( "Cannot move \"" + Path.str()
-				+ "\" to target \"" + target.fpath().str() + "\": Target exists" );
+			throw filesys::Failure( "Cannot move \"" + Path.str() + "\" to target \"" + target.fpath().str()
+				+ "\": Target exists" );
 		try
 		{
 			std::filesystem::rename( Path.stdpath(), target.fpath().stdpath() );
@@ -106,12 +106,11 @@ namespace eon
 		if( !exists() )
 			throw filesys::Failure( "Trying to copy nonexisting file \"" + Path.str() + "\"" );
 		if( target.exists() )
-			throw filesys::Failure( "Cannot copy \"" + Path.str()
-				+ "\" to target \"" + target.fpath().str() + "\": Target exists" );
+			throw filesys::Failure( "Cannot copy \"" + Path.str() + "\" to target \"" + target.fpath().str()
+				+ "\": Target exists" );
 		try
 		{
-			std::filesystem::copy( Path.stdpath(), target.fpath().stdpath(),
-				std::filesystem::copy_options::skip_existing );
+			std::filesystem::copy( Path.stdpath(), target.fpath().stdpath(), std::filesystem::copy_options::skip_existing );
 		}
 		catch( std::exception& e )
 		{
