@@ -206,8 +206,7 @@ namespace eontest
 	}
 
 
-	EonTestSandbox::EonTestSandbox( std::filesystem::path test_class, std::filesystem::path test_name,
-		std::filesystem::path sandbox_root )
+	EonTestSandbox::EonTestSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root )
 	{
 		_prepSandbox( test_class, test_name, sandbox_root );
 		_createSandbox();
@@ -217,10 +216,19 @@ namespace eontest
 		_removeSandbox();
 	}
 
-	void EonTestSandbox::_prepSandbox( std::filesystem::path test_class, std::filesystem::path test_name,
-		std::filesystem::path sandbox_root )
+	void EonTestSandbox::_prepSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root )
 	{
-		if( sandbox_root.empty() )
+#ifdef EON_WINDOWS
+		test_class = test_class.replace( "/", "\\" );
+		test_name = test_name.replace( "/", "\\" );
+		sandbox_root = sandbox_root.replace( "/", "\\" );
+#else
+		test_class = test_class.replace( "\\", "/" );
+		test_name = test_name.replace( "\\", "/" );
+		sandbox_root = sandbox_root.replace( "\\", "/" );
+#endif
+		std::filesystem::path root{ sandbox_root };
+		if( root.empty() )
 		{
 #ifdef EON_WINDOWS
 			char* buffer{ nullptr };
@@ -228,21 +236,21 @@ namespace eontest
 			auto error = _dupenv_s( &buffer, &bufsize, "TMP" );
 			if( error == 0 )
 			{
-				sandbox_root = buffer;
+				root = buffer;
 				free( buffer );
 			}
 			else
-				sandbox_root = "C:\temp";
+				root = "C:\temp";
 #else
 			root = "/tmp";
 #endif
-			sandbox_root /= "eon_sandbox";
+			root /= "eon_sandbox";
 		}
 		Sandbox = sandbox_root;
 		if( !test_class.empty() )
-			Sandbox /= test_class;
+			Sandbox /= std::filesystem::path( test_class );
 		if( !test_name.empty() )
-			Sandbox /= test_name;
+			Sandbox /= std::filesystem::path( test_name );
 	}
 	bool EonTestSandbox::_createSandbox() noexcept
 	{

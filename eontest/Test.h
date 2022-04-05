@@ -690,15 +690,13 @@ namespace eontest
 	{
 	public:
 		EonTestSandbox() = delete;
-		EonTestSandbox( std::filesystem::path test_class, std::filesystem::path test_name,
-			std::filesystem::path sandbox_root = std::filesystem::path() );
+		EonTestSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root = "" );
 		virtual ~EonTestSandbox();
 
 		const std::filesystem::path sandbox() const noexcept { return Sandbox; }
 
 	private:
-		void _prepSandbox( std::filesystem::path test_class, std::filesystem::path test_name,
-			std::filesystem::path sandbox_root );
+		void _prepSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root );
 		bool _createSandbox() noexcept;
 		bool _removeSandbox() noexcept;
 
