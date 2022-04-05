@@ -3,25 +3,11 @@
 
 namespace eontest
 {
-	std::list<EonTest::TestRef>* EonTest::_EonTests_{ nullptr };
-	std::list<std::string>* EonTest::_EonClasses_{ nullptr };
+	std::list<_EonTest::TestRef>* _EonTest::_EonTests_{ nullptr };
+	std::list<std::string>* _EonTest::_EonClasses_{ nullptr };
 
 
-	bool EonTest::createSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept
-	{
-		if( !removeSandboxDir( target, error ) )
-			return false;
-		return std::filesystem::create_directories( target, error );
-	}
-	bool EonTest::removeSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept
-	{
-		if( std::filesystem::exists( target ) )
-			return std::filesystem::remove_all( target, error );
-		return true;
-	}
-
-
-	bool EonTest::_registerEonTest_( const std::string& test_class, const std::string& test_name, const std::string& line,
+	bool _EonTest::_registerEonTest_( const std::string& test_class, const std::string& test_name, const std::string& line,
 		FactoryMain* test )
 	{
 		if( _EonTests_ == nullptr )
@@ -35,7 +21,7 @@ namespace eontest
 		return true;
 	}
 
-	void EonTest::_resetEon_() noexcept
+	void _EonTest::_resetEon_() noexcept
 	{
 		if( _EonTests_ )
 		{
@@ -48,7 +34,7 @@ namespace eontest
 		}
 	}
 
-	std::string EonTest::_encodeEon_( const std::string& str, size_t& diffpos )
+	std::string _EonTest::_encodeEon_( const std::string& str, size_t& diffpos )
 	{
 		auto start = diffpos;
 		std::string encoded;
@@ -110,7 +96,7 @@ namespace eontest
 
 
 
-	bool EonTest::_reportDiff( const std::string& expected, const std::string& actual,
+	bool _EonTest::_reportDiff( const std::string& expected, const std::string& actual,
 		const char* exp_expr, const char* act_expr )
 	{
 		Failed = true;
@@ -158,7 +144,7 @@ namespace eontest
 
 
 
-	std::vector<std::string> EonTest::_splitLines( const std::string& str ) const
+	std::vector<std::string> _EonTest::_splitLines( const std::string& str ) const
 	{
 		std::vector<std::string> lines{ std::string() };
 		for( auto c : str )
@@ -170,7 +156,7 @@ namespace eontest
 		}
 		return lines;
 	}
-	size_t EonTest::_findFirstDiffLine( const std::vector<std::string>& expected, const std::vector<std::string>& actual )
+	size_t _EonTest::_findFirstDiffLine( const std::vector<std::string>& expected, const std::vector<std::string>& actual )
 		const
 	{
 		size_t diff_line = expected.size() < actual.size() ? expected.size() : actual.size();
@@ -184,7 +170,7 @@ namespace eontest
 		}
 		return diff_line;
 	}
-	size_t EonTest::_findFirstDiffPos( const std::string& expected, const std::string& actual ) const
+	size_t _EonTest::_findFirstDiffPos( const std::string& expected, const std::string& actual ) const
 	{
 		for( size_t i = 0; i < expected.size() && i < actual.size(); ++i )
 		{
@@ -193,7 +179,7 @@ namespace eontest
 		}
 		return expected.size() < actual.size() ? expected.size() : actual.size();
 	}
-	std::string EonTest::_extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
+	std::string _EonTest::_extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
 		const
 	{
 		size_t start{ 0 }, end{ 0 };
@@ -217,5 +203,73 @@ namespace eontest
 		if( end < line.size() )
 			result += "...";
 		return result;
+	}
+
+
+	EonTestSandbox::EonTestSandbox( std::string test_class, std::string test_name, std::filesystem::path sandbox_root )
+	{
+		_prepSandbox( test_class, test_name, sandbox_root );
+		_createSandbox();
+	}
+	EonTestSandbox::~EonTestSandbox()
+	{
+		_removeSandbox();
+	}
+
+	void EonTestSandbox::_prepSandbox( std::string test_class, std::string test_name, std::filesystem::path sandbox_root )
+	{
+		if( sandbox_root.empty() )
+		{
+#ifdef EON_WINDOWS
+			char* buffer{ nullptr };
+			size_t bufsize{ 0 };
+			auto error = _dupenv_s( &buffer, &bufsize, "TMP" );
+			if( error == 0 )
+			{
+				sandbox_root = buffer;
+				free( buffer );
+			}
+			else
+				sandbox_root = "C:\temp";
+#else
+			root = "/tmp";
+#endif
+			sandbox_root /= "eon_sandbox";
+		}
+		Sandbox = sandbox_root;
+		if( !test_class.empty() )
+			Sandbox /= test_class;
+		if( !test_name.empty() )
+			Sandbox /= test_name;
+	}
+	bool EonTestSandbox::_createSandbox() noexcept
+	{
+		if( Sandbox.empty() )
+			return false;
+		if( !_removeSandbox() )
+			return false;
+		std::error_code error;
+		if( std::filesystem::create_directories( Sandbox, error ) )
+			return true;
+		else
+		{
+			FAIL() << "Failed to create sandbox directory \"" + Sandbox.string() + "\": " + error.message();
+			return false;
+		}
+	}
+	bool EonTestSandbox::_removeSandbox() noexcept
+	{
+		if( Sandbox.empty() )
+			return false;
+		if( !std::filesystem::exists( Sandbox ) )
+			return true;
+		std::error_code error;
+		if( std::filesystem::remove_all( Sandbox, error ) )
+			return true;
+		else
+		{
+			FAIL() << "Failed to remove sandbox directory \"" + Sandbox.string() + "\": " + error.message();
+			return false;
+		}
 	}
 }

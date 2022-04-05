@@ -135,33 +135,33 @@ namespace eon
 		WANT_EQ( "ex", p8.ext().stdstr() );
 	}
 
-	TEST( FileSysTest, dir_basic )
+	TEST( DirTest, basic )
 	{
-		directory testdir = path( path( sandbox_dir ) ) / "basic/";
+		directory testdir = path( path( sandbox() ) ) / "basic/";
 		REQUIRE_FALSE( testdir.exists() ) << "Dir exists before create";
 		REQUIRE_NO_EXCEPT( testdir.ensureExists() ) << "Failed to create dir";
 		REQUIRE_TRUE( testdir.exists() ) << "Dir doesn't exist after create";
 		REQUIRE_NO_EXCEPT( testdir.remove() ) << "Failed to remove dir";
 		REQUIRE_FALSE( testdir.exists() ) << "Dir exists after remove";
 	}
-	TEST( FileSysTest, dir_rename)
+	TEST( DirTest, rename)
 	{
-		directory dir = path( path( sandbox_dir ) ) / "alpha/";
+		directory dir = path( path( sandbox() ) ) / "alpha/";
 		REQUIRE_NO_EXCEPT( dir.ensureExists() ) << "Failed to create dir";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after create";
 		REQUIRE_NO_EXCEPT( dir.rename( "beta" ) ) << "Failed to rename dir";
 		WANT_EQ( "beta/", dir.dpath().name().stdstr() ) << "Wrong name after rename";
 		REQUIRE_TRUE( dir.exists() ) << "Dir doesn't exist after rename";
-		REQUIRE_FALSE( directory( path( path( sandbox_dir ) ) / "alpha" ).exists() ) << "Pre-rename dir still exists";
+		REQUIRE_FALSE( directory( path( path( sandbox() ) ) / "alpha" ).exists() ) << "Pre-rename dir still exists";
 	}
-	TEST( FileSysTest, dir_iterate )
+	TEST( DirTest, iterate )
 	{
-		directory root = path( sandbox_dir );
-		directory alpha = path( sandbox_dir ) / "alpha";
-		directory beta = path( sandbox_dir ) / "beta";
-		directory gamma = path( sandbox_dir ) / "gamma";
-		file f1 = path( sandbox_dir ) / "f1";
-		file f2 = path( sandbox_dir ) / "f2";
+		directory root = path( sandbox() );
+		directory alpha = path( sandbox() ) / "alpha";
+		directory beta = path( sandbox() ) / "beta";
+		directory gamma = path( sandbox() ) / "gamma";
+		file f1 = path( sandbox() ) / "f1";
+		file f2 = path( sandbox() ) / "f2";
 
 		REQUIRE_NO_EXCEPT( alpha.ensureExists() );
 		REQUIRE_NO_EXCEPT( beta.ensureExists() );
@@ -183,28 +183,28 @@ namespace eon
 		WANT_EQ( "alpha/;beta/;f1;f2;gamma/", str.stdstr() );
 	}
 
-	TEST( FileSysTest, file_basic )
+	TEST( FileTest, basic )
 	{
-		file testfile{ path( sandbox_dir ) / "test1" };
+		file testfile{ path( sandbox() ) / "test1" };
 		REQUIRE_FALSE( testfile.exists() ) << "File exists before create";
 		REQUIRE_NO_EXCEPT( testfile.touch() ) << "Failed to create file";
 		REQUIRE_TRUE( testfile.exists() ) << "File doesn't exist after create";
 		REQUIRE_NO_EXCEPT( testfile.remove() ) << "Failed to remove file";
 		REQUIRE_FALSE( testfile.exists() ) << "File exists after remove";
 	}
-	TEST( FileSysTest, file_rename )
+	TEST( FileTest, rename )
 	{
-		file f = path( sandbox_dir ) / "alpha";
+		file f = path( sandbox() ) / "alpha";
 		REQUIRE_NO_EXCEPT( f.touch() ) << "Failed to create file";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after create";
 		REQUIRE_NO_EXCEPT( f.rename( "beta" ) ) << "Failed to rename file";
 		WANT_EQ( "beta", f.fpath().name().stdstr() ) << "Wrong name after rename";
 		REQUIRE_TRUE( f.exists() ) << "File doesn't exist after rename";
-		REQUIRE_FALSE( file( path( sandbox_dir ) / "alpha" ).exists() ) << "Pre-rename file still exists";
+		REQUIRE_FALSE( file( path( sandbox() ) / "alpha" ).exists() ) << "Pre-rename file still exists";
 	}
-	TEST( FileSysTest, file_iterate )
+	TEST( FileTest, iterate )
 	{
-		file f = path( sandbox_dir ) / "alpha";
+		file f = path( sandbox() ) / "alpha";
 		REQUIRE_NO_EXCEPT( f.save( string( "Line 1\nSecond line\nThird" ) ) );
 		std::list<string> lines;
 		try

@@ -83,14 +83,14 @@ namespace eontest
 		void test_body() override;\
 	};\
 	bool test_class##_##test_name##_test_dummy{\
-		::eontest::EonTest::_registerEonTest_( #test_class, #test_name, TEST_LINE,\
+		::eontest::_EonTest::_registerEonTest_( #test_class, #test_name, TEST_LINE,\
 		new ::eontest::TestFactory<TEST_NAME( test_class, test_name )>() ) };\
 	void TEST_NAME( test_class, test_name )::test_body()
 
 
 
 #define EON_MESSAGE_LOCATION( file, line, fatal )\
-	::eontest::EonTest::Report( *this, file, line, fatal ) = ::eontest::_stringstream()
+	::eontest::_EonTest::Report( *this, file, line, fatal ) = ::eontest::_stringstream()
 
 #define FAILURE_MESSAGE_( fatal ) \
 	EON_MESSAGE_LOCATION( __FILE__, __LINE__, fatal )
@@ -213,7 +213,7 @@ namespace eontest
 	if( _testGe( (expected), (actual), #expected, #actual ) ); else FATAL_MESSAGE
 
 
-	class EonTest;
+	class _EonTest;
 
 	// Factory class for creating test object
 	class FactoryMain
@@ -221,14 +221,14 @@ namespace eontest
 	public:
 		FactoryMain() = default;
 		virtual ~FactoryMain() = default;
-		virtual EonTest* createTest( const std::string& test_class, const std::string& test_name ) = 0;
+		virtual _EonTest* createTest( const std::string& test_class, const std::string& test_name ) = 0;
 	};
 	template<typename T>
 	class TestFactory : public FactoryMain
 	{
 	public:
 		TestFactory() = default;
-		EonTest* createTest( const std::string& test_class, const std::string& test_name ) override {
+		_EonTest* createTest( const std::string& test_class, const std::string& test_name ) override {
 			auto t = new T(); t->_TestID = test_class + "." + test_name; return t; }
 	};
 
@@ -252,7 +252,7 @@ namespace eontest
 
 
 	// Super-class for tests
-	class EonTest
+	class _EonTest
 	{
 	public:
 		std::string _TestExe;
@@ -260,8 +260,9 @@ namespace eontest
 		bool Failed{ false };
 
 	public:
-		EonTest() = default;
-		virtual ~EonTest() = default;
+		_EonTest() = default;
+
+		virtual ~_EonTest() = default;
 
 
 		void _runEonTest_( const std::string& exe )
@@ -315,10 +316,6 @@ namespace eontest
 		virtual void cleanup() {}
 
 	public:
-		bool createSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept;
-		bool removeSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept;
-
-	public:
 		struct TestRef
 		{
 			std::string TestClass;
@@ -341,11 +338,11 @@ namespace eontest
 	public:
 		struct Report
 		{
-			EonTest* Test{ nullptr };
+			_EonTest* Test{ nullptr };
 			bool Fatal{ false };
 			const char* File{ nullptr };
 			int Line{ 0 };
-			Report( EonTest& test, const char* file, int line, bool fatal )
+			Report( _EonTest& test, const char* file, int line, bool fatal )
 			{
 				Test = &test;
 				Test->Failed = true;
@@ -682,5 +679,29 @@ namespace eontest
 		size_t _findFirstDiffPos( const std::string& expected, const std::string& actual ) const;
 		std::string _extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
 			const;
+	};
+
+
+	// Test without sandbox
+	class EonTest : public _EonTest {};
+
+	// Test with sandbox
+	class EonTestSandbox : public _EonTest
+	{
+	public:
+		EonTestSandbox() = delete;
+		EonTestSandbox( std::string test_class, std::string test_name,
+			std::filesystem::path sandbox_root = std::filesystem::path() );
+		virtual ~EonTestSandbox();
+
+		const std::filesystem::path sandbox() const noexcept { return Sandbox; }
+
+	private:
+		void _prepSandbox( std::string test_class, std::string test_name, std::filesystem::path sandbox_root );
+		bool _createSandbox() noexcept;
+		bool _removeSandbox() noexcept;
+
+	private:
+		std::filesystem::path Sandbox;
 	};
 }
