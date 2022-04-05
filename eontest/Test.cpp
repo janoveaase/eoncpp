@@ -206,7 +206,8 @@ namespace eontest
 	}
 
 
-	EonTestSandbox::EonTestSandbox( std::string test_class, std::string test_name, std::filesystem::path sandbox_root )
+	EonTestSandbox::EonTestSandbox( std::filesystem::path test_class, std::filesystem::path test_name,
+		std::filesystem::path sandbox_root )
 	{
 		_prepSandbox( test_class, test_name, sandbox_root );
 		_createSandbox();
@@ -216,7 +217,8 @@ namespace eontest
 		_removeSandbox();
 	}
 
-	void EonTestSandbox::_prepSandbox( std::string test_class, std::string test_name, std::filesystem::path sandbox_root )
+	void EonTestSandbox::_prepSandbox( std::filesystem::path test_class, std::filesystem::path test_name,
+		std::filesystem::path sandbox_root )
 	{
 		if( sandbox_root.empty() )
 		{
