@@ -7,6 +7,20 @@ namespace eontest
 	std::list<std::string>* EonTest::_EonClasses_{ nullptr };
 
 
+	bool EonTest::createSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept
+	{
+		if( !removeSandboxDir( target, error ) )
+			return false;
+		return std::filesystem::create_directories( target, error );
+	}
+	bool EonTest::removeSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept
+	{
+		if( std::filesystem::exists( target ) )
+			return std::filesystem::remove_all( target, error );
+		return true;
+	}
+
+
 	bool EonTest::_registerEonTest_( const std::string& test_class, const std::string& test_name, const std::string& line,
 		FactoryMain* test )
 	{

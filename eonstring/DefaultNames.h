@@ -33,7 +33,9 @@ namespace eon
 	extern const name_t name_basic;
 	extern const name_t name_plain;
 	extern const name_t name_dynamic;
+	extern const name_t name_bits;
 	extern const name_t name_bytes;
+	extern const name_t name_chars;
 	extern const name_t name_string;
 	extern const name_t name_binary;
 	extern const name_t name_regex;

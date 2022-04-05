@@ -19,7 +19,7 @@ namespace eon
 
 
 
-	size_t substring::numBytes() const noexcept
+	index_t substring::numBytes() const noexcept
 	{
 		if( Beg.atREnd() )
 		{
@@ -36,14 +36,14 @@ namespace eon
 			return Beg.numByte() - End.numByte();
 	}
 
-	byte_t substring::byte( size_t pos ) const noexcept
+	byte_t substring::byte( index_t pos ) const noexcept
 	{
 		if( empty() )
 			return 0;
 		if( Beg < End )
-			return pos < static_cast<size_t>( End.Source - Beg.Source ) ? *( Beg.Source + pos ) : 0;
+			return pos < static_cast<index_t>( End.Source - Beg.Source ) ? *( Beg.Source + pos ) : 0;
 		else
-			return pos < static_cast<size_t>( Beg.Source - End.Source ) ? *( End.Source + pos ) : 0;
+			return pos < static_cast<index_t>( Beg.Source - End.Source ) ? *( End.Source + pos ) : 0;
 	}
 
 	bool substring::blank() const noexcept
@@ -57,7 +57,7 @@ namespace eon
 		return true;
 	}
 
-	string_iterator substring::iterator( size_t num_char ) const noexcept
+	string_iterator substring::iterator( index_t num_char ) const noexcept
 	{
 		auto num_chars = end().numChar() - begin().numChar();
 		if( num_char > num_chars )
@@ -79,9 +79,9 @@ namespace eon
 		return begin() + num_char;
 	}
 
-	size_t substring::indentationLevel( char_t indentation_char ) const noexcept
+	index_t substring::indentationLevel( char_t indentation_char ) const noexcept
 	{
-		size_t level = 0;
+		index_t level = 0;
 		for( auto cp : *this )
 		{
 			if( cp != indentation_char )
@@ -184,7 +184,7 @@ namespace eon
 		return sep > 0;
 	}
 
-	int64_t substring::toInt64() const
+	long_t substring::toLong() const
 	{
 		int64_t num = 0;
 		if( empty() )
@@ -202,60 +202,8 @@ namespace eon
 		}
 		return sign ? num * sign : num;
 	}
-	int64_t substring::toUInt64() const
-	{
-		int64_t num = 0;
-		if( empty() )
-			return num;
-		for( auto chr : *this )
-		{
-			if( !isDigit( chr ) )
-				break;
-			num *= 10;
-			num += ( chr - ZeroChr );
-		}
-		return num;
-	}
-	double substring::toDouble( char_t decimal_separator ) const
-	{
-		if( empty() )
-			return 0.0;
-		double num = 0.0, dec = 0.0, dec_pow = 1.0;
-		int point = 0;
-		auto i = begin();
-		double sign = *i == '+' ? 1.0 : *i == '-' ? -1.0 : 0.0;
-		if( sign != 0.0 )
-			++i;
-		for( ; i != end(); ++i )
-		{
-			if( *i == decimal_separator )
-			{
-				if( ++point > 1 )
-					break;
-			}
-			else
-			{
-				if( !isDigit( *i ) )
-					break;
-				if( point == 0 )
-				{
-					num *= 10.0;
-					num += ( *i - ZeroChr );
-				}
-				else
-				{
-					dec *= 10.0;
-					dec += ( *i - ZeroChr );
-					dec_pow *= 10.0;
-				}
-			}
-		}
-		if( sign )
-			return sign * ( num + ( dec / dec_pow ) );
-		else
-			return num + ( dec / dec_pow );
-	}
-	long double substring::toLongDouble( char_t decimal_separator ) const
+
+	high_t substring::toHigh( char_t decimal_separator ) const
 	{
 		if( empty() )
 			return 0.0;
@@ -293,6 +241,21 @@ namespace eon
 			return sign * ( num + ( dec / dec_pow ) );
 		else
 			return num + ( dec / dec_pow );
+	}
+
+	index_t substring::toIndex() const
+	{
+		int64_t num = 0;
+		if( empty() )
+			return num;
+		for( auto chr : *this )
+		{
+			if( !isDigit( chr ) )
+				break;
+			num *= 10;
+			num += ( chr - ZeroChr );
+		}
+		return num;
 	}
 
 	substring substring::trimNumber( char_t decimal_separator ) const
@@ -764,9 +727,9 @@ namespace eon
 
 
 
-	size_t substring::count( char_t to_count ) const noexcept
+	index_t substring::count( char_t to_count ) const noexcept
 	{
-		size_t cnt = 0;
+		index_t cnt = 0;
 		for( auto i = begin(); i != end(); ++i )
 		{
 			if( *i == to_count )
@@ -774,12 +737,12 @@ namespace eon
 		}
 		return cnt;
 	}
-	size_t substring::count( const substring& to_count ) const noexcept
+	index_t substring::count( const substring& to_count ) const noexcept
 	{
-		if( numBytes() > 0 && static_cast<size_t>( numBytes() ) < to_count.numChars() )
+		if( numBytes() > 0 && numBytes() < to_count.numChars() )
 			return 0;
 
-		size_t cnt = 0;
+		index_t cnt = 0;
 		auto found = findFirst( to_count );
 		while( found )
 		{
@@ -842,7 +805,7 @@ namespace eon
 
 
 
-	const char* substring::_findFirst( const char* source, size_t source_size, const char* substr, size_t substr_size )
+	const char* substring::_findFirst( const char* source, index_t source_size, const char* substr, index_t substr_size )
 		const noexcept
 	{
 		const char* end = source + source_size - ( substr_size - 1 );
@@ -855,7 +818,7 @@ namespace eon
 		}
 		return nullptr;
 	}
-	const char* substring::_findLast( const char* str, size_t str_size, char chr ) noexcept
+	const char* substring::_findLast( const char* str, index_t str_size, char chr ) noexcept
 	{
 		for( auto c = str, end = str - str_size; c != end; --c )
 		{
@@ -864,7 +827,7 @@ namespace eon
 		}
 		return nullptr;
 	}
-	const char* substring::_findLast( const char* source, size_t source_size, const char* substr, size_t substr_size )
+	const char* substring::_findLast( const char* source, index_t source_size, const char* substr, index_t substr_size )
 		const noexcept
 	{
 		const char* last = source + source_size - substr_size;
@@ -886,7 +849,7 @@ namespace eon
 		uint32_t bytes{ 0 };
 		for( auto i = begin(); i != end(); --i )
 		{
-			size_t size = string_iterator::unicodeToBytes( *i, bytes );
+			index_t size = string_iterator::unicodeToBytes( *i, bytes );
 			revs += std::string( (const char*)&bytes, size );
 		}
 		return revs;

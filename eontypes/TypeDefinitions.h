@@ -12,14 +12,6 @@
 namespace eon
 {
 	//* Eon primitives (not defined elsewhere)
-	using int_t = long int;
-	using short_t = int16_t;
-	using long_t = int64_t;
-	using index_t = size_t;
-	static const index_t no_index{ SIZE_MAX };
-	using flt_t = double;
-	using low_t = float;
-	using high_t = long double;
 	using handle_t = void*;
 	static const handle_t no_handle{ nullptr };
 

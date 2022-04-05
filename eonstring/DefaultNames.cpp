@@ -24,7 +24,9 @@ namespace eon
 	const name_t name_basic = name( "basic" );
 	const name_t name_plain = name( "plain" );
 	const name_t name_dynamic = name( "dynamic" );
+	const name_t name_bits = name( "bits" );
 	const name_t name_bytes = name( "bytes" );
+	const name_t name_chars = name( "chars" );
 	const name_t name_string = name( "string" );
 	const name_t name_binary = name( "binary" );
 	const name_t name_regex = name( "regex" );

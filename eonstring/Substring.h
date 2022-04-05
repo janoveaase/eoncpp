@@ -132,10 +132,10 @@ namespace eon
 		inline bool empty() const noexcept { return numChars() == 0; }
 
 		//* Get number of characters in substring
-		inline size_t numChars() const noexcept { return static_cast<size_t>( End >= Beg ? End - Beg : Beg - End ); }
+		inline index_t numChars() const noexcept { return static_cast<index_t>( End >= Beg ? End - Beg : Beg - End ); }
 
 		//* Get number of bytes in substring
-		size_t numBytes() const noexcept;
+		index_t numBytes() const noexcept;
 
 
 		//* Get std::string from substring (bytes)
@@ -148,7 +148,7 @@ namespace eon
 		//* Access a byte inside the substring
 		//* Returns zero if the substring is invalid or position is out of
 		//* bounds!
-		byte_t byte( size_t pos ) const noexcept;
+		byte_t byte( index_t pos ) const noexcept;
 
 
 		//* Check if the substring is enclosed by a specific pair of characters
@@ -168,12 +168,12 @@ namespace eon
 		//* character number.
 		//* NOTE: The character number is relative to the substring, not the
 		//*       source string!
-		string_iterator iterator( size_t num_char ) const noexcept;
+		string_iterator iterator( index_t num_char ) const noexcept;
 
 
 		//* Get number of indentations for the first (possibly only) line of
 		//* text in the string
-		size_t indentationLevel( char_t indentation_char = TabChr ) const noexcept;
+		index_t indentationLevel( char_t indentation_char = TabChr ) const noexcept;
 
 
 		//* Get characters as a vector of codepoint elements
@@ -215,13 +215,25 @@ namespace eon
 		//* Convert String to number
 		//* Non-numbers (including non-ASCII numerals) will be returned as
 		//* zero!
-		inline int32_t toInt32() const { return static_cast<int32_t>( toInt64() ); }
-		int64_t toInt64() const;
-		inline uint32_t toUInt32() const { return static_cast<uint32_t>( toUInt64() ); }
-		int64_t toUInt64() const;
-		inline size_t toSize() const { return (size_t)toUInt64(); }
-		double toDouble( char_t decimal_separator = PointChr ) const;
-		long double toLongDouble( char_t decimal_separator = PointChr ) const;
+		inline int_t toInt() const { return static_cast<int_t>( toInt64() ); }
+		inline short_t toShort() const { return static_cast<short_t>( toInt64() ); }
+		long_t toLong() const;
+		inline flt_t toFloat( char_t decimal_separator = PointChr ) const {
+			return static_cast<flt_t>( toHigh( decimal_separator ) ); }
+		inline low_t toLow( char_t decimal_separator = PointChr ) const {
+			return static_cast<low_t>( toHigh( decimal_separator ) ); }
+		high_t toHigh( char_t decimal_separator = PointChr ) const;
+		index_t toIndex() const;
+
+		inline int32_t toInt32() const { return static_cast<int32_t>( toInt() ); }
+		inline int64_t toInt64() const { return static_cast<int64_t>( toLong() ); }
+		inline uint32_t toUInt32() const { return static_cast<uint32_t>( toIndex() ); }
+		inline int64_t toUInt64() const { return static_cast<uint64_t>( toIndex() ); }
+		inline size_t toSize() const { return static_cast<size_t>( toIndex() ); }
+		inline double toDouble( char_t decimal_separator = PointChr ) const {
+			return static_cast<double>( toFloat( decimal_separator ) ); }
+		long double toLongDouble( char_t decimal_separator = PointChr ) const {
+			return static_cast<long double>( toHigh( decimal_separator ) ); }
 
 
 		//* Assuming the entire substring is a number, get a reduced substring
@@ -444,12 +456,12 @@ namespace eon
 
 		//* Count occurrences of a character
 		//* The substring must be 'low-to-high'!
-		size_t count( char_t to_count ) const noexcept;
+		index_t count( char_t to_count ) const noexcept;
 
 		//* Count occurrences of a sub-string
 		// NOTE: All occurrences are counted, even overlaps!
 		// Both substrings must be 'low-to-high'!
-		size_t count( const substring& to_count ) const noexcept;
+		index_t count( const substring& to_count ) const noexcept;
 
 
 
@@ -465,7 +477,7 @@ namespace eon
 		//* If a max number of elements is specified, the last element will
 		//* reference the unsplit remainder.
 		template<typename container_t>
-		container_t splitSequential( const substring& delimiter, size_t max_elements = SIZE_MAX ) const
+		container_t splitSequential( const substring& delimiter, index_t max_elements = SIZE_MAX ) const
 		{
 			container_t elms;
 			auto start = begin();
@@ -481,7 +493,7 @@ namespace eon
 			return elms;
 		}
 		template<typename container_t>
-		container_t splitSequential( char_t delimiter, size_t max_elements = SIZE_MAX ) const
+		container_t splitSequential( char_t delimiter, index_t max_elements = SIZE_MAX ) const
 		{
 			container_t elms;
 			auto start = begin();
@@ -591,13 +603,13 @@ namespace eon
 		// Helpers
 		//
 	private:
-		static inline const char* _findFirst( const char* str, size_t str_size, char c ) noexcept {
+		static inline const char* _findFirst( const char* str, index_t str_size, char c ) noexcept {
 			return (char*)memchr( str, c, str_size ); }
-		const char* _findFirst( const char* source, size_t source_size, const char* substr, size_t substr_size )
+		const char* _findFirst( const char* source, index_t source_size, const char* substr, index_t substr_size )
 			const noexcept;
 		
-		static const char* _findLast( const char* str, size_t str_size, char chr ) noexcept;
-		const char* _findLast( const char* source, size_t source_size, const char* substr, size_t substr_size )
+		static const char* _findLast( const char* str, index_t str_size, char chr ) noexcept;
+		const char* _findLast( const char* source, index_t source_size, const char* substr, index_t substr_size )
 			const noexcept;
 
 		std::string _getReverse() const;

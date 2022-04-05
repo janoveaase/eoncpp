@@ -9,7 +9,7 @@ namespace eon
 	const string string::Empty;
 
 
-	string::string( const char* buffer, size_t size, string substitute_for_bad_utf8 ) noexcept
+	string::string( const char* buffer, index_t size, string substitute_for_bad_utf8 ) noexcept
 	{
 		eon::char_t codepoint{ 0 }, state{ 0 };
 		unsigned char bytes[ 4 ]{ 0, 0, 0, 0 };
@@ -32,15 +32,15 @@ namespace eon
 	}
 
 
-	string& string::assign( const char_t* codepoints, size_t size )
+	string& string::assign( const char_t* codepoints, index_t size )
 	{
 		clear();
 		reserve( size );
-		for( size_t i = 0; i < size; ++i )
+		for( index_t i = 0; i < size; ++i )
 			*this += codepoints[ i ];
 		return *this;
 	}
-	string& string::assign( const char* chars, size_t size )
+	string& string::assign( const char* chars, index_t size )
 	{
 		iterator i( chars, size );	// Using iterator to scan the raw string for us!
 		if( !i.validUTF8() )
@@ -50,23 +50,23 @@ namespace eon
 		return *this;
 	}
 
-	string& string::assign( size_t copies, char_t cp )
+	string& string::assign( index_t copies, char_t cp )
 	{
 		uint32_t bytes;
 		auto size = iterator::unicodeToBytes( cp, bytes );
 		Bytes.reserve( size * copies );
-		for( size_t i = 0; i < copies; ++i )
+		for( index_t i = 0; i < copies; ++i )
 			Bytes.append( (const char*)&bytes, size );
 		NumChars = copies;
 		return *this;
 	}
-	string& string::assign( size_t copies, const string& other )
+	string& string::assign( index_t copies, const string& other )
 	{
 		// Make sure 'other' and 'this' are not the same!
 		if( &other.Bytes != &Bytes )
 		{
 			Bytes.reserve( other.numBytes() * copies );
-			for( size_t i = 0; i < copies; ++i )
+			for( index_t i = 0; i < copies; ++i )
 				Bytes.append( other.Bytes );
 			NumChars = other.NumChars * copies;
 			return *this;
@@ -74,7 +74,7 @@ namespace eon
 		else
 			return assign( copies, string( other ) );
 	}
-	string& string::assign( size_t copies, const std::string& stdstr )
+	string& string::assign( index_t copies, const std::string& stdstr )
 	{
 		// Make sure 'other' is not our own buffer!
 		if( &stdstr != &Bytes )
@@ -83,7 +83,7 @@ namespace eon
 			if( !i.validUTF8() )
 				throw InvalidUTF8();
 			Bytes.reserve( stdstr.size() * copies );
-			for( size_t i = 0; i < copies; ++i )
+			for( index_t i = 0; i < copies; ++i )
 				Bytes.append( stdstr );
 			NumChars = i.numChar() * copies;
 			return *this;
@@ -91,7 +91,7 @@ namespace eon
 		else
 			return assign( copies, std::string( stdstr ) );
 	}
-	string& string::assign( size_t copies, const substring& sub )
+	string& string::assign( index_t copies, const substring& sub )
 	{
 		// Make sure 'sub' is not from 'this'!
 		if( !sub.sameBuffer( Bytes.c_str() ) )
@@ -100,7 +100,7 @@ namespace eon
 				throw InvalidUTF8();
 			clear();
 			Bytes.reserve( sub.toSize() * copies );
-			for( size_t i = 0; i < copies; ++i )
+			for( index_t i = 0; i < copies; ++i )
 				*this += sub;
 			return *this;
 		}
@@ -203,7 +203,7 @@ namespace eon
 
 
 
-	string::iterator string::bytePos( size_t pos, iterator start ) const
+	string::iterator string::bytePos( index_t pos, iterator start ) const
 	{
 		if( start )
 			start.assertSameBuffer( Bytes.c_str() );
@@ -396,8 +396,8 @@ namespace eon
 
 	substring string::slice( int64_t start, int64_t end ) const
 	{
-		auto s = static_cast<size_t>( start >= 0 ? start : NumChars + start );
-		auto e = static_cast<size_t>( end >= 0 ? end : NumChars + end );
+		auto s = static_cast<index_t>( start >= 0 ? start : NumChars + start );
+		auto e = static_cast<index_t>( end >= 0 ? end : NumChars + end );
 		if( s <= e )
 			++e;
 		else
@@ -487,7 +487,7 @@ namespace eon
 				result += BackSlashChr;
 				result += "U";
 				auto end = c + 1;
-				for( size_t i = 0; i < end.numByte(); ++i )
+				for( index_t i = 0; i < end.numByte(); ++i )
 					result += byteToHex( *( c.byteData() + i ) );
 			}
 
@@ -710,7 +710,7 @@ namespace eon
 		return result;
 	}
 
-	string string::padLeftAndRight( size_t target_size, char_t fill ) const
+	string string::padLeftAndRight( index_t target_size, char_t fill ) const
 	{
 		if( numChars() >= target_size )
 			return *this;
@@ -719,7 +719,7 @@ namespace eon
 		return string( half, fill ) + *this + string( diff - half, fill );
 	}
 
-	string string::indentLines( size_t indentation_level, char_t indentation_char ) const
+	string string::indentLines( index_t indentation_level, char_t indentation_char ) const
 	{
 		auto lines = splitSequential<std::list<substring>>( NewlineChr );
 		string result;
@@ -773,7 +773,7 @@ namespace eon
 		formatted += substr( sep.begin() );
 		return formatted;
 	}
-	string string::roundNumber( size_t max_decimals, char_t decimal_separator ) const
+	string string::roundNumber( index_t max_decimals, char_t decimal_separator ) const
 	{
 		if( !isFloat() && !isUInt() && !isInt() )
 			return *this;
@@ -869,9 +869,9 @@ namespace eon
 
 
 
-	size_t string::_findDecimalSeparator( std::vector<char_t>& digits, char_t decimal_separator ) noexcept
+	index_t string::_findDecimalSeparator( std::vector<char_t>& digits, char_t decimal_separator ) noexcept
 	{
-		for( size_t i = 0; i < digits.size(); ++i )
+		for( index_t i = 0; i < digits.size(); ++i )
 		{
 			if( digits[ i ] == decimal_separator )
 				return i;
@@ -879,7 +879,7 @@ namespace eon
 		return digits.size();
 	}
 
-	void string::_roundUp( std::vector<char_t>& digits, size_t i ) noexcept
+	void string::_roundUp( std::vector<char_t>& digits, index_t i ) noexcept
 	{
 		// The digit at i + 1 is greater than 5, so we have to round up.
 		if( digits[ i ] == PointChr )

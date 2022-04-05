@@ -1,4 +1,5 @@
 #pragma once
+#include <eontypes/DataTuple.h>
 #include <eonsource/String.h>
 #include <eonsource/File.h>
 #include <eonsource/SourceReporter.h>
@@ -14,54 +15,46 @@
 namespace eon
 {
 	/**************************************************************************
-	  Eon Parser Class - eon::Parser
+	  Eon Data Tuple Class - eon::edt
 
-	  Parse Æon code, Æon Dynamic Tuple Format (DTF), and/or Æon expression.
+	  Load, save, and serialize DataTuple objects in EDT format + validate.
 	**************************************************************************/
-	class Edt
+	class edt
 	{
 		/**********************************************************************
 		  Construction
 		**********************************************************************/
 	public:
 
-		//* Construct a place-holder object
-		Edt() = default;
-
-		//* Construct for parsing a string source
-/*		inline Parser( const string& source_name, string&& string_source, source::Reporter& reporter,
-			scope::Scope& scope ) {
-			source::String src( source_name, std::move( string_source ) );
-			Tools = parser::ToolBox( std::vector<Element>&& elements, reporter, scope );
-			Tools = parser::ToolBox( source::Ref( src ), reporter, scope ); }
-
-		//* Construct for parsing a file source
-		inline Parser( const path& file_path, source::Reporter& reporter, scope::Scope& scope ) {
-			source::File src( file_path.str() ); Tools.init( source::Ref( src ), reporter, scope ); }
-			*/
-		virtual ~Edt() = default;
+		edt() = default;
+		virtual ~edt() = default;
 
 
 
 
 		/**********************************************************************
-		  Preparations
+		  Operations
 		**********************************************************************/
 	public:
 
-		//* Parse the source from current position as Æon code, don't stop
-		//* until end of source (or fatal error)
+		//* Save a data tuple to file
+		void save( const DataTuple& tuple, const path& file );
 
-		//* Parse the source from current position as Æon Dynamic Tuple Format,
-		//* stop at end of EDT (or fatal error)
+		//* Load a data tuple from file
+		DataTuple load( const path& file );
 
-		//* Parse the source from current position as Æon expression, stop at
-		//* end of expression
-		//* Can only occur in the following contexts: args, test, body, lambda,
-		//* switcher, trait
-		//* Returns true if parsed, false if not an expression or the
-		//*         expression has errors. (Errors are reported!)
-//		inline bool parseExpression( expression& result ) { return ParseExpression()( Tools, result ); }
+		//* Serialize a date tuple (convert it into a string and back again)
+		void toStr( const DataTuple& tuple, std::string& str );
+		DataTuple fromStr( const std::string& str );
+
+
+		//* Run validation on a data tuple
+		//* Parameters:
+		//*   target : Data tuple to validate
+		//*   source : Validation tuple
+		//*   issues : Data tuple in which to store issues when validation fails
+		//* Returns true if valid and false if not.
+		bool validate( const DataTuple& target, const DataTuple& source, DataTuple* issues );
 
 
 
@@ -82,6 +75,5 @@ namespace eon
 		// Attributes
 		//
 	private:
-
 	};
 };

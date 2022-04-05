@@ -24,9 +24,11 @@ namespace eon
 	// A reference to a codepoint in a string
 	struct Utf8CharRef
 	{
-		size_t BytePos{ 0 };	// Position in bytes
-		size_t CharPos{ 0 };	// Position in utf8chars
+		index_t BytePos{ 0 };	// Position in bytes
+		index_t CharPos{ 0 };	// Position in utf8chars
 	};
+
+
 
 
 	/**************************************************************************
@@ -101,11 +103,11 @@ namespace eon
 
 		//* Construct as a copy of a character buffer of a specified size
 		//* Throws [eon::InvalidUTF8] if not a valid UTF-8!
-		inline string( const char* buffer, size_t size ) { *this = std::string( buffer, size ); }
+		inline string( const char* buffer, index_t size ) { *this = std::string( buffer, size ); }
 
 		//* Construct as a copy of a character buffer of a specified size
 		//* Will not throw exception on invalid UTF-8 but substitute it with the specified string
-		string( const char* buffer, size_t size, string substitute_for_bad_utf8 ) noexcept;
+		string( const char* buffer, index_t size, string substitute_for_bad_utf8 ) noexcept;
 
 
 		//* Construct from a single [[eon::char_t][Unicode codepoint]]
@@ -141,18 +143,18 @@ namespace eon
 
 		//* Construct as a number of copies of the specified codepoint
 		//* Throws [eon::InvalidUTF8] if not a valid codepoint
-		inline string( size_t copies, char_t cp ) { assign( copies, cp ); }
+		inline string( index_t copies, char_t cp ) { assign( copies, cp ); }
 
 		//* Construct as a number of copies of another string
-		inline string( size_t copies, const string& other ) { assign( copies, other ); }
+		inline string( index_t copies, const string& other ) { assign( copies, other ); }
 
 		//* Construct as a number of copies of the specified std::string
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
-		inline string( size_t copies, const std::string& stdstr ) { assign( copies, stdstr ); }
+		inline string( index_t copies, const std::string& stdstr ) { assign( copies, stdstr ); }
 
 		//* Construct as a number of copies of the specified [eon::substring]
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
-		inline string( size_t copies, const substring& other ) { assign( copies, other ); }
+		inline string( index_t copies, const substring& other ) { assign( copies, other ); }
 
 
 		//* Construct as "true" or "false" based on boolean input value
@@ -208,32 +210,31 @@ namespace eon
 
 		//* Assign from array of codepoints
 		//* Throws [eon::InvalidUTF8] if not valid codepoints
-		string& assign( const char_t* cp_array, size_t cp_array_size );
+		string& assign( const char_t* cp_array, index_t cp_array_size );
 
 		//* Assign from array of characters
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
-		string& assign( const char* chr_array, size_t chr_array_size );
+		string& assign( const char* chr_array, index_t chr_array_size );
 
 
 		//* Assign the specified number of copies of the codepoint
 		//* Throws [eon::InvalidUTF8] if not valid codepoint
-		string& assign( size_t copies, char_t cp );
+		string& assign( index_t copies, char_t cp );
 
 		//* Assign the specified number of copies of the character
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
-		inline string& assign( size_t copies, char chr ) {
-			return assign( copies, static_cast<char_t>( chr ) ); }
+		inline string& assign( index_t copies, char chr ) { return assign( copies, static_cast<char_t>( chr ) ); }
 
 		//* Assign the specified number of copies of the other string
-		string& assign( size_t copies, const string& other );
+		string& assign( index_t copies, const string& other );
 
 		//* Assign the specified number of copies of the std::string
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
-		string& assign( size_t copies, const std::string& stdstr );
+		string& assign( index_t copies, const std::string& stdstr );
 
 		//* Assign the specified number of copies of the substring
 		//* Throws [eon::InvalidUTF8] if not valid UTF-8
-		string& assign( size_t copies, const substring& sub );
+		string& assign( index_t copies, const substring& sub );
 
 
 		/** Assignment Operator **/
@@ -306,14 +307,14 @@ namespace eon
 	public:
 
 		//* Get number of unicode codepoints in string
-		inline size_t numChars() const noexcept { return NumChars; }
-		inline size_t length() const noexcept { return NumChars; }
+		inline index_t numChars() const noexcept { return NumChars; }
+		inline index_t length() const noexcept { return NumChars; }
 
 		//* Get number of bytes in string
-		inline size_t numBytes() const noexcept { return Bytes.size(); }
+		inline index_t numBytes() const noexcept { return Bytes.size(); }
 
 		//* Get buffer size (capacity) in number of bytes
-		inline size_t bufferSize() const noexcept { return Bytes.capacity(); }
+		inline index_t bufferSize() const noexcept { return Bytes.capacity(); }
 
 		//* Check if the string is empty
 		inline bool empty() const noexcept { return NumChars == 0; }
@@ -325,7 +326,7 @@ namespace eon
 		inline const char* c_str() const noexcept { return Bytes.c_str(); }
 
 		//* Access an individual immutable byte
-		inline char byte( size_t pos ) const { return Bytes[ pos ]; }
+		inline char byte( index_t pos ) const { return Bytes[ pos ]; }
 
 
 		//* Check if the string is surrounded by double quotation marks
@@ -348,7 +349,7 @@ namespace eon
 
 		//* Get number of indentations for the first (and possibly only) line
 		//* of text in the string
-		inline size_t indentationLevel( char_t indentation_char = TabChr ) const noexcept {
+		inline index_t indentationLevel( char_t indentation_char = TabChr ) const noexcept {
 			return substr().indentationLevel(); }
 
 
@@ -397,7 +398,7 @@ namespace eon
 		//* The counting can start from a known position if it is assumed to be
 		//* closer than [begin()].
 		// Returns [end()] if out of scope!
-		iterator bytePos( size_t pos, iterator start = iterator() ) const;
+		iterator bytePos( index_t pos, iterator start = iterator() ) const;
 
 
 		//* Given an iterator for another string (typically the original, where
@@ -652,21 +653,21 @@ namespace eon
 	public:
 
 		//* Count number of occurrences of the specified codepoint
-		inline size_t count( char_t to_count ) const noexcept { return substr().count( to_count ); }
+		inline index_t count( char_t to_count ) const noexcept { return substr().count( to_count ); }
 
 		//* Count number of occurrences of the specified codepoint, limit the
 		//* counting to the specified 'sub' [eon::substring].
-		inline size_t count( char_t to_count, const substring& sub ) const noexcept {
+		inline index_t count( char_t to_count, const substring& sub ) const noexcept {
 			sub.assertSameBuffer( Bytes.c_str() ); return sub.count( to_count ); }
 
 		//* Count number of occurrences of the specified string
 		//* NOTE: All occurrences are counted, even overlaps!
-		inline size_t count( const string& to_count ) const noexcept { return substr().count( to_count.substr() ); }
+		inline index_t count( const string& to_count ) const noexcept { return substr().count( to_count.substr() ); }
 
 		//* Count number of occurrences of the specified string, limit the
 		//* counting to the specified 'sub' [eon::substring].
 		//* NOTE: All occurrences are counted, even overlaps!
-		inline size_t count( const string& to_count, const substring& sub ) const noexcept {
+		inline index_t count( const string& to_count, const substring& sub ) const noexcept {
 			sub.assertSameBuffer( Bytes.c_str() ); return sub.count( to_count.substr() ); }
 
 
@@ -685,7 +686,7 @@ namespace eon
 		//* Reserve memory in order to reduce the number of times the
 		//* underlying string buffer may have to grow.
 		//* Does nothing if the buffer size is already >= 'byte_size'.
-		inline void reserve( size_t byte_size ) { Bytes.reserve( byte_size ); }
+		inline void reserve( index_t byte_size ) { Bytes.reserve( byte_size ); }
 
 
 		/** Concatenation Assignments **/
@@ -821,7 +822,7 @@ namespace eon
 		//* Get [eon::substring] based on character position and count
 		//* NOTE: This involves counting characters, but is optimized to count
 		//*       from the end if that is closer.
-		inline substring substr( size_t start, size_t size ) const {
+		inline substring substr( index_t start, index_t size ) const {
 			auto sub = substr(); return substring( sub.iterator( start ), sub.iterator( start + size ) ); }
 
 
@@ -1042,7 +1043,7 @@ namespace eon
 		//*       template type as such!
 		//*       Example: splitSequential<std::list<eon::substring>>( ...
 		template<typename container_t>
-		container_t splitSequential( const string& delimiter, size_t max_elements = SIZE_MAX ) const {
+		container_t splitSequential( const string& delimiter, index_t max_elements = SIZE_MAX ) const {
 			return substr().splitSequential<container_t>( delimiter.substr(), max_elements ); }
 
 		//* Split string on every occurrence of 'delimiter' (delimiter char
@@ -1054,7 +1055,7 @@ namespace eon
 		//*       template type as such!
 		//*       Example: splitSequential<std::list<eon::substring>>( ...
 		template<typename container_t>
-		container_t splitSequential( char_t delimiter, size_t max_elements = SIZE_MAX ) const {
+		container_t splitSequential( char_t delimiter, index_t max_elements = SIZE_MAX ) const {
 			return substr().splitSequential<container_t>( delimiter, max_elements ); }
 
 		//* Split string on every occurrence of 'delimiter' (delimiter string
@@ -1115,20 +1116,20 @@ namespace eon
 		//* Get a copy of the string, if it is shorter than 'target_size', add
 		//* enough copies of the the 'fill' codepoint on the left side to make
 		//* it that long
-		inline string padLeft( size_t target_size, char_t fill = SpaceChr ) const {
+		inline string padLeft( index_t target_size, char_t fill = SpaceChr ) const {
 			return NumChars < target_size ? string( target_size - NumChars, fill ) += *this : *this; }
 
 		//* Get a copy of the string, if it is shorter than 'target_size', add
 		//* enough copies of the the 'fill' codepoint on the right side to make
 		//* it that long
-		inline string padRight( size_t target_size, char_t fill = SpaceChr ) const {
+		inline string padRight( index_t target_size, char_t fill = SpaceChr ) const {
 			return NumChars < target_size ? *this + string( target_size - NumChars, fill ) : *this; }
 
 		//* Get a copy of the string, if it is shorter than 'target_size', add
 		//* enough copies of the the 'fill' codepoint on the left and right
 		//* side to make it that long
 		//* (Centers the string)
-		string padLeftAndRight( size_t target_size, char_t fill = SpaceChr ) const;
+		string padLeftAndRight( index_t target_size, char_t fill = SpaceChr ) const;
 
 
 		//* Get a copy of the string with all lines 'indented'
@@ -1137,7 +1138,7 @@ namespace eon
 		// NOTE: Subsequent lines will be indented fully regardless of existing
 		//       indentation!
 		// NOTE: Empty lines will not be indented!
-		string indentLines( size_t indentation_level, char_t indentation_char = TabChr ) const;
+		string indentLines( index_t indentation_level, char_t indentation_char = TabChr ) const;
 
 
 		/** Concatenation **/
@@ -1202,6 +1203,14 @@ namespace eon
 
 
 		/* Convert String to Number */
+		inline int_t toInt() const { return substr().toInt(); }
+		inline short_t toShort() const { return substr().toShort(); }
+		inline long_t toLong() const { return substr().toLong(); }
+		inline flt_t toFloat() const { return substr().toFloat(); }
+		inline low_t toLow() const { return substr().toLow(); }
+		inline high_t toHigh() const { return substr().toHigh(); }
+		inline index_t toIndex() const { return substr().toIndex(); }
+
 		inline int32_t toInt32() const { return substr().toInt32(); }
 		inline int32_t toInt32( const substring& area ) const {
 			area.assertSameBuffer( Bytes.c_str() ); return area.toInt32(); }
@@ -1260,7 +1269,7 @@ namespace eon
 		//* decimals, an unaltered copy is returned.
 		//* Zero decimals will result in removal of the fractional part and
 		//* possibly an increase of the integer part (if rounding up).
-		string roundNumber( size_t max_decimals = 0, char_t decimal_separator = PointChr ) const;
+		string roundNumber( index_t max_decimals = 0, char_t decimal_separator = PointChr ) const;
 
 
 
@@ -1560,7 +1569,7 @@ namespace eon
 		//
 	private:
 
-		static size_t _findDecimalSeparator( std::vector<char_t>& digits, char_t decimal_separator = PointChr ) noexcept;
+		static index_t _findDecimalSeparator( std::vector<char_t>& digits, char_t decimal_separator = PointChr ) noexcept;
 
 		// Given an iterator, round up all the digits in the string all the way
 		// up to adding a new '1' in the front if all digits are rounded up.
@@ -1569,7 +1578,7 @@ namespace eon
 		// NOTE: This method assumes (without checking) that all characters
 		// from and including 'i' and to and including 'begin()' are digites or
 		// a point!
-		static void _roundUp( std::vector<char_t>& digits, size_t i ) noexcept;
+		static void _roundUp( std::vector<char_t>& digits, index_t i ) noexcept;
 
 
 		// Byte operations:
@@ -1587,7 +1596,7 @@ namespace eon
 
 	private:
 		std::string Bytes;
-		size_t NumChars{ 0 };	// Number of code points
+		index_t NumChars{ 0 };	// Number of code points
 
 	public:
 		static const string Empty;

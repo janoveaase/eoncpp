@@ -874,4 +874,208 @@ namespace eon
 		WANT_EQ( "two", str( ref.at( 1 ) ) );
 		WANT_EQ( "three", str( ref.at( 2 ) ) );
 	}
+
+
+
+	TEST( HexTest, toHex )
+	{
+		WANT_EQ( "00", hex::toHex( 0 ).stdstr() );
+		WANT_EQ( "30", hex::toHex( '0' ).stdstr() );
+		WANT_EQ( "41", hex::toHex( 'A' ).stdstr() );
+		WANT_EQ( "FF", hex::toHex( 255 ).stdstr() );
+	}
+	TEST( HexTest, toByte )
+	{
+		WANT_EQ( 0, hex::toByte( hex::digits( '0', '0' ) ) );
+		WANT_EQ( '0', hex::toByte( hex::digits( '3', '0' ) ) );
+		WANT_EQ( 'A', hex::toByte( hex::digits( '4', '1' ) ) );
+		WANT_EQ( 255, hex::toByte( hex::digits( 'F', 'F' ) ) );
+	}
+
+	TEST( HexTest, binary1 )
+	{
+		std::string bin{ "This is binary!" };
+		bin += '\0'; bin += static_cast<char>( 0xC6 );
+		hex h( bin );
+		WANT_EQ( "546869732069732062696E6172792100C6", h.value() );
+		WANT_EQ( bin, h.binary() );
+	}
+	TEST( HexTest, binary2 )
+	{
+		std::string hx{ "546869732069732062696E6172792100C6" };
+		std::string bin{ "This is binary!" };
+		bin += '\0'; bin += static_cast<char>( 0xC6 );
+		hex h;
+		REQUIRE_NO_EXCEPT( h.setHex( hx ) );
+		WANT_EQ( "546869732069732062696E6172792100C6", h.value() );
+		WANT_EQ( bin, h.binary() );
+	}
+	TEST( HexTest, binary3 )
+	{
+		std::string hx1{ "546869732069732062696E6172792100C" };
+		std::string hx2{ "546869732069732062696E6172792100Ct" };
+		hex h;
+		WANT_EXCEPT( h.setHex( hx1 ), hex::Invalid )
+			<< "Failed to detect odd number of digits";
+		WANT_EXCEPT( h.setHex( hx2 ), hex::Invalid )
+			<< "Failed to detect invalid digit";
+	}
+
+
+
+	TEST( ByteSerializerTest, basic )
+	{
+		byteserializer ser;
+		ser << "Hello World!" << 3.14 << -99 << 'A';
+
+		std::string bytes;
+		flt_t flt{ 0.0 };
+		int_t intg{ 0 };
+		byte_t byte{ '\0' };
+		byteserializer dser{ ser.bytes() };
+		dser >> bytes >> flt >> intg >> byte;
+		
+		WANT_EQ( "Hello World!", bytes );
+		WANT_EQ( 3.14, flt );
+		WANT_EQ( -99, intg );
+		WANT_EQ( 'A', byte );
+	}
+	TEST( ByteSerializerTest, complete )
+	{
+		bool bool1{ true }, bool2{ false };
+		byte_t byte1{ 'A' }, byte2{ 130 }, byte3{ 0 };
+		char_t char1{ 'A' }, char2{ 128522 }, char3{ 0 };
+		int_t int1{ INT32_MIN }, int2{ 0 }, int3{ INT32_MAX };
+		short_t short1{ INT16_MIN }, short2{ 0 }, short3{ INT16_MAX };
+		long_t long1{ INT64_MIN }, long2{ 0 }, long3{ INT64_MAX };
+		flt_t float1{ -9999999.999 }, float2{ 0.0 }, float3{ 9999999.999 };
+		low_t low1{ -FLT_MAX }, low2{ 0.0 }, low3{ FLT_MAX };
+		high_t high1{ -99999999999.999999 }, high2{ 0.0 }, high3{ 99999999999.999999 };
+		index_t idx1{ 0 }, idx2{ UINT64_MAX };
+		name_t name1{ name_action }, name2{ no_name };
+		// bits bits1 ...
+		std::string bytes1{ "ABC" }, bytes2{ "" };
+		string str1{ "ABβ" }, str2{ "" };
+		// chars chars1 ...
+
+		byteserializer ser;
+		ser << bool1 << bool2;
+		ser << byte1 << byte2 << byte3;
+		ser << char1 << char2 << char3;
+		ser << int1 << int2 << int3;
+		ser << short1 << short2 << short3;
+		ser << long1 << long2 << long3;
+		ser << float1 << float2 << float3;
+		ser << low1 << low2 << low3;
+		ser << high1 << high2 << high3;
+		ser << idx1 << idx2;
+		ser << name1 << name2;
+		// ser << bits1;
+		ser << bytes1 << bytes2;
+		ser << str1 << str2;
+		// ser << chars1;
+
+		bool boolv{ false };
+		byte_t bytev{ 0 };
+		char_t charv{ 0 };
+		int_t intv{ 0 };
+		short_t shortv{ 0 };
+		long_t longv{ 0 };
+		flt_t floatv{ 0 };
+		low_t lowv{ 0 };
+		high_t highv{ 0 };
+		index_t idxv{ 0 };
+		name_t namev{ no_name };
+		// bits bitsv;
+		std::string bytesv;
+		string strv;
+		// chars charsv;
+
+		byteserializer dser{ ser.bytes() };
+
+		dser >> boolv;
+		WANT_TRUE( boolv );
+		dser >> boolv;
+		WANT_FALSE( boolv );
+
+		dser >> bytev;
+		WANT_EQ( byte1, bytev );
+		dser >> bytev;
+		WANT_EQ( byte2, bytev );
+		dser >> bytev;
+		WANT_EQ( byte3, bytev );
+
+		dser >> charv;
+		WANT_EQ( char1, charv );
+		dser >> charv;
+		WANT_EQ( char2, charv );
+		dser >> charv;
+		WANT_EQ( char3, charv );
+
+		dser >> intv;
+		WANT_EQ( int1, intv );
+		dser >> intv;
+		WANT_EQ( int2, intv );
+		dser >> intv;
+		WANT_EQ( int3, intv );
+
+		dser >> shortv;
+		WANT_EQ( short1, shortv );
+		dser >> shortv;
+		WANT_EQ( short2, shortv );
+		dser >> shortv;
+		WANT_EQ( short3, shortv );
+
+		dser >> longv;
+		WANT_EQ( long1, longv );
+		dser >> longv;
+		WANT_EQ( long2, longv );
+		dser >> longv;
+		WANT_EQ( long3, longv );
+
+		dser >> floatv;
+		WANT_EQ( float1, floatv );
+		dser >> floatv;
+		WANT_EQ( float2, floatv );
+		dser >> floatv;
+		WANT_EQ( float3, floatv );
+
+		dser >> lowv;
+		WANT_EQ( low1, lowv );
+		dser >> lowv;
+		WANT_EQ( low2, lowv );
+		dser >> lowv;
+		WANT_EQ( low3, lowv );
+
+		dser >> highv;
+		WANT_EQ( high1, highv );
+		dser >> highv;
+		WANT_EQ( high2, highv );
+		dser >> highv;
+		WANT_EQ( high3, highv );
+
+		dser >> idxv;
+		WANT_EQ( idx1, idxv );
+		dser >> idxv;
+		WANT_EQ( idx2, idxv );
+
+		dser >> namev;
+		WANT_EQ( name1, namev );
+		dser >> namev;
+		WANT_EQ( name2, namev );
+
+		// bits
+
+		dser >> bytesv;
+		WANT_EQ( bytes1, bytesv );
+		dser >> bytesv;
+		WANT_EQ( bytes2, bytesv );
+
+		dser >> strv;
+		WANT_EQ( str1, strv );
+		dser >> strv;
+		WANT_EQ( str2, strv );
+
+		// chars
+	}
 }

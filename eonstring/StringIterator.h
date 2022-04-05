@@ -104,7 +104,7 @@ namespace eon
 		//* position
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
-		inline string_iterator( const std::string& stdstr, size_t pos ) noexcept {
+		inline string_iterator( const std::string& stdstr, index_t pos ) noexcept {
 			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() + pos ); }
 
 
@@ -122,7 +122,7 @@ namespace eon
 		//* Construct for a 'C-string', but set to a specific byte length
 		//* NOTE: If the string contains invalid UTF-8 characters, it will be
 		//*       treated as a pure C string with byte characters only!
-		inline string_iterator( const char* cstr, size_t size ) noexcept { _prep( cstr, cstr + size, cstr ); }
+		inline string_iterator( const char* cstr, index_t size ) noexcept { _prep( cstr, cstr + size, cstr ); }
 
 
 		//* Construct from already known details, position at start of source
@@ -133,7 +133,7 @@ namespace eon
 		//*   - begin     : Start of source string
 		//*   - num_bytes : Total number of bytes in source string
 		//*   - num_chars : Total number of UTF-8 characters in source string
-		inline string_iterator( const char* begin, size_t num_bytes, size_t num_chars ) noexcept {
+		inline string_iterator( const char* begin, index_t num_bytes, index_t num_chars ) noexcept {
 			NumChars = num_chars; _prep( begin, begin + num_bytes, begin ); }
 		
 		//* Construct from already known details, position specified
@@ -144,7 +144,7 @@ namespace eon
 		//*   - begin     : Start of source string
 		//*   - num_bytes : Total number of bytes in source string
 		//*   - pos       : Iterator position in source string
-		inline string_iterator( const char* begin, size_t num_bytes, const char* pos ) noexcept {
+		inline string_iterator( const char* begin, index_t num_bytes, const char* pos ) noexcept {
 			_prep( begin, begin + num_bytes, pos ); }
 
 		//* Construct from already known details, position specified
@@ -157,7 +157,7 @@ namespace eon
 		//*   - num_bytes : Total number of bytes in source string
 		//*   - num_chars : Total number of UTF-8 characters in source string
 		//*   - pos       : Iterator position in source string
-		inline string_iterator( const char* begin, size_t num_bytes, size_t num_chars, const char* pos ) noexcept {
+		inline string_iterator( const char* begin, index_t num_bytes, index_t num_chars, const char* pos ) noexcept {
 			NumChars = num_chars; _prep( begin, begin + num_bytes, pos ); }
 
 		//* Construct from already known details, position specified
@@ -170,8 +170,8 @@ namespace eon
 		//*   - num_chars : Total number of UTF-8 characters in source string
 		//*   - pos       : Iterator position in source string
 		//*   - num_char  : UTF-8 character number of iterator position
-		inline string_iterator( const char* begin, size_t num_bytes, size_t num_chars,
-			const char* pos, size_t num_char ) noexcept {
+		inline string_iterator( const char* begin, index_t num_bytes, index_t num_chars,
+			const char* pos, index_t num_char ) noexcept {
 			NumChars = num_chars; NumChar = num_char; _prep( begin, begin + num_bytes, pos ); }
 
 		//* Construct using another 'string_iterator' as 'source', but set a
@@ -183,7 +183,7 @@ namespace eon
 		//*   - source   : 'string_iterator' to copy source details from
 		//*   - pos      : New iterator position
 		//*   - num_char : UTF-8 character number of new iterator position
-		string_iterator( const string_iterator& source, const char* pos, size_t num_char ) noexcept;
+		string_iterator( const string_iterator& source, const char* pos, index_t num_char ) noexcept;
 
 
 		//* Default destructor
@@ -254,13 +254,13 @@ namespace eon
 		//* Get character position in source string
 		//* For UTF-8 strings, this will be the number of UTF-8 characters.
 		//* For plain strings, the number of bytes.
-		inline size_t numChar() const noexcept { return NumChar; }
+		inline index_t numChar() const noexcept { return NumChar; }
 
 		//* Get byte position in source string
-		inline size_t numByte() const noexcept { return Pos - Source; }
+		inline index_t numByte() const noexcept { return Pos - Source; }
 
 		//* Get the number of bytes making up the code point
-		inline size_t codepointSize() const noexcept { return CodepointSize; }
+		inline index_t codepointSize() const noexcept { return CodepointSize; }
 
 
 		//* Check if the entire string is byte characters only
@@ -277,7 +277,7 @@ namespace eon
 		inline const char* byteData() const noexcept { return Pos; }
 
 		//* Get total number of (UTF-8 or byte-sized) characters in string
-		inline size_t numChars() const noexcept { return NumChars; }
+		inline index_t numChars() const noexcept { return NumChars; }
 
 		//* Get a copy of the iterator, but reset to end
 		inline string_iterator getEnd() const noexcept {
@@ -308,23 +308,23 @@ namespace eon
 
 
 		//* Move forward a number of characters
-		inline string_iterator& operator+=( size_t chars ) noexcept {
+		inline string_iterator& operator+=( index_t chars ) noexcept {
 			if( bytesOnly() ) _advanceBytes( chars );
-				else { for( size_t i = 0; i < chars && *this; ++i, ++ * this ); } return *this; }
+				else { for( index_t i = 0; i < chars && *this; ++i, ++ * this ); } return *this; }
 
 		//* Move backward a number of characaters
-		string_iterator& operator-=( size_t chars ) noexcept;
+		string_iterator& operator-=( index_t chars ) noexcept;
 
 		
 		//* Move forward (positive) or backward (negative)
 		inline string_iterator& operator+=( int64_t chars ) noexcept {
-			return chars >= 0 ? *this += static_cast<size_t>( chars ) : *this -= static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this += static_cast<index_t>( chars ) : *this -= static_cast<index_t>( -chars ); }
 		inline string_iterator& operator+=( int chars ) noexcept {
-			return chars >= 0 ? *this += static_cast<size_t>( chars ) : *this -= static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this += static_cast<index_t>( chars ) : *this -= static_cast<index_t>( -chars ); }
 		inline string_iterator& operator-=( int64_t chars ) noexcept {
-			return chars >= 0 ? *this -= static_cast<size_t>( chars ) : *this += static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this -= static_cast<index_t>( chars ) : *this += static_cast<index_t>( -chars ); }
 		inline string_iterator& operator-=( int chars ) noexcept {
-			return chars >= 0 ? *this -= static_cast<size_t>( chars ) : *this += static_cast<size_t>( -chars ); }
+			return chars >= 0 ? *this -= static_cast<index_t>( chars ) : *this += static_cast<index_t>( -chars ); }
 
 		//* Get number of characters in difference between two iterators
 		//* Throws [eon::WrongSource] if incompatible iterators.
@@ -332,13 +332,13 @@ namespace eon
 
 		//* Get a copy of 'itr', moved forwards or backwards by 'num'
 		//* characters
-		inline friend string_iterator operator+( const string_iterator& itr, size_t num ) noexcept {
+		inline friend string_iterator operator+( const string_iterator& itr, index_t num ) noexcept {
 			return string_iterator( itr ) += num; }
 		inline friend string_iterator operator+( const string_iterator& itr, int64_t num ) noexcept {
 			return string_iterator( itr ) += num; }
 		inline friend string_iterator operator+( const string_iterator& itr, int num ) noexcept {
 			return string_iterator( itr ) += num; }
-		inline friend string_iterator operator-( const string_iterator& itr, size_t num ) noexcept {
+		inline friend string_iterator operator-( const string_iterator& itr, index_t num ) noexcept {
 			return string_iterator( itr ) -= num; }
 		inline friend string_iterator operator-( const string_iterator& itr, int64_t num ) noexcept {
 			return string_iterator( itr ) -= num; }
@@ -376,13 +376,13 @@ namespace eon
 		//* Given a raw byte string with a 'start' and an 'end' position, set
 		//* 'cp' to the next codepoint and return the number of bytes it
 		//* occupies (zero if not a valid unicode code point)
-		static size_t bytesToUnicode( const char* start, const char* end, char_t& cp );
+		static index_t bytesToUnicode( const char* start, const char* end, char_t& cp );
 
 		//* Given a codepoint, convert it into bytes
 		//* The bytes are stored in the 'bytes' uint32_t, up to 4 of them
 		//* Returns the number of bytes used
 		//* Throws [eon::InvalidUTF8] if not a valid code point
-		static size_t unicodeToBytes( char_t cp, uint32_t& bytes );
+		static index_t unicodeToBytes( char_t cp, uint32_t& bytes );
 
 		//* Run as part of a UTF-8 decoding algorithm
 		//* WARNING: Only use this if you really know what you are doing!
@@ -392,7 +392,7 @@ namespace eon
 
 		//* Count the number of UTF-8 characters in the given string
 		//* Throws [eon::InvalidUTF8] if not valid!
-		static size_t countUtf8Chars( const char* str, size_t size );
+		static index_t countUtf8Chars( const char* str, index_t size );
 
 
 
@@ -408,8 +408,8 @@ namespace eon
 
 		void _translateCodepoint() noexcept;
 
-		void _advanceBytes( size_t bytes ) noexcept;
-		void _retreatBytes( size_t bytes ) noexcept;
+		void _advanceBytes( index_t bytes ) noexcept;
+		void _retreatBytes( index_t bytes ) noexcept;
 
 
 
@@ -423,8 +423,8 @@ namespace eon
 		const char* SourceEnd{ nullptr };	// End of source string
 		char_t Codepoint{ nochar };			// Translated code point
 		charsize_t CodepointSize{ 0 };		// Number of bytes in code point
-		size_t NumChar{ 0 };				// Character position from start
-		size_t NumChars{ 0 };				// Total number of characters
+		index_t NumChar{ 0 };				// Character position from start
+		index_t NumChars{ 0 };				// Total number of characters
 		bool ValidUTF8{ true };				// All valid UTF-8 characters?
 
 

@@ -32,7 +32,7 @@ namespace eon
 
 
 
-	string_iterator::string_iterator( const string_iterator& source, const char* pos, size_t num_char ) noexcept
+	string_iterator::string_iterator( const string_iterator& source, const char* pos, index_t num_char ) noexcept
 	{
 		Source = source.Source;
 		SourceEnd = source.SourceEnd;
@@ -102,8 +102,8 @@ namespace eon
 		// Get the code point
 		char32_t state = 0;
 		CodepointSize = 1;			// Always at least 1 byte long
-		size_t max_char_len = ( SourceEnd - Pos ) < 4 ? ( SourceEnd - Pos ) : 4;
-		for( size_t i = 0; i < max_char_len; ++i, ++CodepointSize )
+		index_t max_char_len = ( SourceEnd - Pos ) < 4 ? ( SourceEnd - Pos ) : 4;
+		for( index_t i = 0; i < max_char_len; ++i, ++CodepointSize )
 		{
 			if( !_utf8Decode( state, Codepoint, static_cast<unsigned char>( *( Pos + i ) ) ) )
 				break;
@@ -112,7 +112,7 @@ namespace eon
 		return *this;
 	}
 
-	string_iterator& string_iterator::operator-=( size_t chars ) noexcept
+	string_iterator& string_iterator::operator-=( index_t chars ) noexcept
 	{
 		// Cannot subtract if at the beginning
 		if( CodepointSize == 0 && Pos == Source )
@@ -179,14 +179,14 @@ namespace eon
 
 
 
-	size_t string_iterator::bytesToUnicode( const char* start, const char* end, char_t& cp )
+	index_t string_iterator::bytesToUnicode( const char* start, const char* end, char_t& cp )
 	{
 		auto size = end - start;
 		if( size > 4 )
 			size = 4;
 		cp = 0;
 		char32_t state = 0;
-		size_t num = 0;
+		index_t num = 0;
 		for( auto c = start; size > 0; ++c, --size )
 		{
 			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
@@ -194,7 +194,7 @@ namespace eon
 		}
 		return 0;
 	}
-	size_t string_iterator::unicodeToBytes( char_t cp, uint32_t& bytes )
+	index_t string_iterator::unicodeToBytes( char_t cp, uint32_t& bytes )
 	{
 		if( !isValidCodepoint( cp ) )
 			throw InvalidUTF8();
@@ -236,11 +236,11 @@ namespace eon
 		return _utf8Decode( state, codep, byte );
 	}
 
-	size_t string_iterator::countUtf8Chars( const char* str, size_t size )
+	index_t string_iterator::countUtf8Chars( const char* str, index_t size )
 	{
 		char32_t cp{ 0 };
 		char32_t state{ 0 };
-		size_t num = 0;
+		index_t num = 0;
 		for( auto c = str, end_c = str + size; c != end_c; ++c )
 		{
 			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
@@ -298,18 +298,18 @@ namespace eon
 		}
 
 		char32_t state = 0;
-		size_t max_char_len = ( SourceEnd - Pos ) < 4 ? ( SourceEnd - Pos ) : 4;
+		index_t max_char_len = ( SourceEnd - Pos ) < 4 ? ( SourceEnd - Pos ) : 4;
 		CodepointSize = 1;
-		for( size_t i = 0; i < max_char_len; ++i, ++CodepointSize )
+		for( index_t i = 0; i < max_char_len; ++i, ++CodepointSize )
 		{
 			if( !_utf8Decode( state, Codepoint, static_cast<unsigned char>( *( Pos + i ) ) ) )
 				return;
 		}
 	}
 
-	void string_iterator::_advanceBytes( size_t bytes ) noexcept
+	void string_iterator::_advanceBytes( index_t bytes ) noexcept
 	{
-		if( bytes < static_cast<size_t>( SourceEnd - Pos ) )
+		if( bytes < static_cast<index_t>( SourceEnd - Pos ) )
 		{
 			if( !atREnd() )
 				Pos += bytes;
@@ -325,9 +325,9 @@ namespace eon
 			NumChar = NumChars;
 		}
 	}
-	void string_iterator::_retreatBytes( size_t bytes ) noexcept
+	void string_iterator::_retreatBytes( index_t bytes ) noexcept
 	{
-		if( bytes < static_cast<size_t>( Pos - Source ) )
+		if( bytes < static_cast<index_t>( Pos - Source ) )
 		{
 			Pos -= bytes;
 			CodepointSize = 1;

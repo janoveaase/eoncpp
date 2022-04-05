@@ -10,7 +10,10 @@ set(STRING_HEADERS
 	NameDefs.h
 	Name.h
 	DefaultNames.h
-	NamePath.cpp
+	NamePath.h
+	Hex.h
+	Serializer.h
+	ByteSerializer.h
 )
 set(STRING_SOURCES
 	String.cpp
@@ -20,6 +23,8 @@ set(STRING_SOURCES
 	Name.cpp
 	DefaultNames.cpp
 	NamePath.cpp
+	Hex.cpp
+	Serializer.cpp
 )
 
 if(WIN32)
@@ -34,6 +39,9 @@ set_target_properties(
 		OUTPUT_NAME_RELEASE eon_string
 )
 set_property(TARGET EonString PROPERTY CXX_STANDARD 17)
+
+target_link_libraries(EonString PUBLIC EonExcept)
+target_include_directories(EonString PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 
 install(TARGETS EonString
 	LIBRARY DESTINATION "${EON_INSTALL_DIR}/${EON_LIBRARY_DIR}"

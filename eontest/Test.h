@@ -8,6 +8,7 @@
 #include <regex>
 #include <iomanip>
 #include <chrono>
+#include <filesystem>
 #include <eonstring/String.h>
 #include <eonstring/Name.h>
 #include <eonterminal/Terminal.h>
@@ -312,6 +313,10 @@ namespace eontest
 
 		virtual void prepare() {}
 		virtual void cleanup() {}
+
+	public:
+		bool createSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept;
+		bool removeSandboxDir( const std::filesystem::path& target, std::error_code& error ) noexcept;
 
 	public:
 		struct TestRef
