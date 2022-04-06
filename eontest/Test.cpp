@@ -246,11 +246,11 @@ namespace eontest
 #endif
 			root /= "eon_sandbox";
 		}
-		Sandbox = sandbox_root;
+		Sandbox = sandbox_root.stdstr();
 		if( !test_class.empty() )
-			Sandbox /= std::filesystem::path( test_class );
+			Sandbox /= std::filesystem::path( test_class.stdstr() );
 		if( !test_name.empty() )
-			Sandbox /= std::filesystem::path( test_name );
+			Sandbox /= std::filesystem::path( test_name.stdstr() );
 	}
 	bool EonTestSandbox::_createSandbox() noexcept
 	{
