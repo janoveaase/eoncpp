@@ -31,11 +31,7 @@ namespace eon
 	using byte_t = unsigned char;
 
 	// Definition of other types
-#ifdef EON_WINDOWS
-	using int_t = long int;
-#else
-	using int_t = int32_t;
-#endif
+	using int_t = int;
 	using short_t = int16_t;
 	using long_t = int64_t;
 	using index_t = size_t;

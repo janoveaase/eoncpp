@@ -45,7 +45,6 @@ namespace eon
 			return instantiate( static_cast<int_type>( 0 ) ); }
 		inline type::Instance* instantiate( int_type value ) const {
 			return new IntegerInstance<int_type>( value, source::Ref() ); }
-		inline type::Instance* instantiate( int value ) const { return instantiate( static_cast<int_type>( value ) ); }
 	};
 
 

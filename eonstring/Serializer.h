@@ -59,7 +59,6 @@ namespace eon
 		inline serializer& operator<<( char value ) { _encode( static_cast<byte_t>( value ), _byteStore() ); return *this; }
 		inline serializer& operator<<( char_t value ) { _encode( value, _byteStore() ); return *this; }
 		inline serializer& operator<<( int value ) { _encode( static_cast<int_t>( value ), _byteStore() ); return *this; }
-		inline serializer& operator<<( int_t value ) { _encode( value, _byteStore() ); return *this; }
 		inline serializer& operator<<( short_t value ) { _encode( value, _byteStore() ); return *this; }
 		inline serializer& operator<<( long_t value ) { _encode( value, _byteStore() ); return *this; }
 		inline serializer& operator<<( flt_t value ) { _encode( value, _byteStore() ); return *this; }
@@ -88,7 +87,6 @@ namespace eon
 		inline serializer& operator>>( byte_t& value ) { value = _decodeByte( _bytePos(), _byteStore().end() ); return *this; }
 		inline serializer& operator>>( char& value ) { value = _decodeByte( _bytePos(), _byteStore().end() ); return *this; }
 		inline serializer& operator>>( char_t& value ) { value = _decodeChar( _bytePos(), _byteStore().end() ); return *this; }
-		inline serializer& operator>>( int& value ) { value = _decodeInt( _bytePos(), _byteStore().end() ); return *this; }
 		inline serializer& operator>>( int_t& value ) { value = _decodeInt( _bytePos(), _byteStore().end() ); return *this; }
 		inline serializer& operator>>( short_t& value ) { value = _decodeShort( _bytePos(), _byteStore().end() ); return *this; }
 		inline serializer& operator>>( long_t& value ) { value = _decodeLong( _bytePos(), _byteStore().end() ); return *this; }

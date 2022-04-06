@@ -102,10 +102,10 @@ namespace eon
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate() ) ) );
 		WANT_EQ( 0, i->value() );
 
-		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( 0 ) ) ) );
+		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( static_cast<short_t>( 0 ) ) ) ) );
 		WANT_EQ( 0, i->value() );
 
-		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( -56 ) ) ) );
+		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( static_cast<short_t>( -56 ) ) ) ) );
 		WANT_EQ( -56, i->value() );
 	}
 
@@ -120,10 +120,10 @@ namespace eon
 		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate() ) ) );
 		WANT_EQ( 0, i->value() );
 
-		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( 0 ) ) ) );
+		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( static_cast<long_t>( 0 ) ) ) ) );
 		WANT_EQ( 0, i->value() );
 
-		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( -56 ) ) ) );
+		REQUIRE_NO_EXCEPT( i = std::shared_ptr<ti>( dynamic_cast<ti*>( t.instantiate( static_cast<long_t>( -56 ) ) ) ) );
 		WANT_EQ( -56, i->value() );
 	}
 
