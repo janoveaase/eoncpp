@@ -6,15 +6,6 @@
 #include <cstdlib>
 
 
-// Detect platform
-#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )
-#	define EON_WINDOWS
-#elif defined( __APPLE__ ) || defined( __MACH__ )
-#	define EON_APPLE
-#elif defined( __unix ) || defined( __unix__ )
-#	define EON_UNIX
-#endif
-
 
 /******************************************************************************
   The 'eon' namespace encloses all public functionality

@@ -7,6 +7,17 @@
 #include <locale>
 
 
+// Detect platform
+#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ )
+#	define EON_WINDOWS
+#elif defined( __APPLE__ ) || defined( __MACH__ )
+#	define EON_APPLE
+#elif defined( __unix ) || defined( __unix__ )
+#	define EON_UNIX
+#endif
+
+
+
 /******************************************************************************
   The 'eon' namespace encloses all public functionality
 ******************************************************************************/
@@ -20,7 +31,11 @@ namespace eon
 	using byte_t = unsigned char;
 
 	// Definition of other types
+#ifdef EON_WINDOWS
 	using int_t = long int;
+#else
+	using int_t = int32_t;
+#endif
 	using short_t = int16_t;
 	using long_t = int64_t;
 	using index_t = size_t;

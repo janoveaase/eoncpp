@@ -227,7 +227,7 @@ namespace eontest
 		test_name = test_name.replace( "\\", "/" );
 		sandbox_root = sandbox_root.replace( "\\", "/" );
 #endif
-		std::filesystem::path root{ sandbox_root };
+		std::filesystem::path root{ sandbox_root.stdstr() };
 		if( root.empty() )
 		{
 #ifdef EON_WINDOWS
