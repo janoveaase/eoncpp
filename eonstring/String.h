@@ -680,6 +680,17 @@ namespace eon
 		inline void reserve( index_t byte_size ) { Bytes.reserve( byte_size ); }
 
 
+		// Concatenate by Serializing
+		// NOTE: It is more efficient to do: str << a << b << c ...
+		//                       than to do: str += a + b + b ...
+		inline string& operator<<( const string& other ) { return *this += other; }
+		inline string& operator<<( const substring& sub ) { return *this += sub; }
+		inline string& operator<<( const std::string& stdstr ) { return *this += stdstr; }
+		inline string& operator<<( const char* cstr ) { return *this += cstr; }
+		template<typename T>
+		inline string& operator<<( const T& value ) { return *this += string( value ); }
+
+
 		/** Concatenation Assignments **/
 
 		//* Concatenate another string to 'this'

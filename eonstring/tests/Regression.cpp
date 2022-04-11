@@ -739,6 +739,14 @@ namespace eon
 		WANT_EQ( base, unesc ) << "Failed to unescape";
 	}
 
+	TEST( String, serialize )
+	{
+		eon::string base, str{ "eon::string" };
+		std::string stdstr{ "std::string" };
+		base << str << stdstr << "cstr" << 9.999 << -99;
+		WANT_EQ( "eon::stringstd::stringcstr9.999-99", base );
+	}
+
 	TEST( String, utf8 )
 	{
 		std::vector<char32_t> codepoints;
