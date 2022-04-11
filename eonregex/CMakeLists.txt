@@ -4,14 +4,14 @@ message(STATUS " - EonRegex")
 
 set(REGEX_HEADERS
 	RegEx.h
-	sources/RxDefs.h
-	sources/Graph.h
-	sources/Node.h
-	sources/NodeGroup.h
-	sources/Quantifier.h
-	sources/RxData.h
-	sources/CharGroup.h
-	sources/OpOr.h
+	RxDefs.h
+	Graph.h
+	Node.h
+	NodeGroup.h
+	Quantifier.h
+	RxData.h
+	CharGroup.h
+	OpOr.h
 	sources/LocStart.h
 	sources/LocEnd.h
 	sources/OpNot.h
@@ -24,7 +24,7 @@ set(REGEX_HEADERS
 	sources/Digit.h
 	sources/Any.h
 	sources/CaptureGroup.h
-	sources/Match.h
+	Match.h
 )
 set(REGEX_SOURCES
 	RegEx.cpp
