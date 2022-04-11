@@ -18,7 +18,7 @@ set_target_properties(
 )
 set_property(TARGET EonTokenizerTests PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTokenizerTests PUBLIC EonTokenizer EonTest)
+target_link_libraries(EonTokenizerTests PUBLIC EonTokenizer EonTest EonRegex)
 	
 install(TARGETS EonTokenizerTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"

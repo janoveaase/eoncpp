@@ -95,6 +95,60 @@ namespace eontest
 	}
 
 
+	bool _EonTest::_testMatch( const eon::string& expected, const eon::string& actual,
+		const char* exp_expr, const char* act_expr )
+	{
+		bool matches{ true };
+		auto exp_lines = expected.splitSequential<std::vector<eon::string>>( '\n' );
+		auto act_lines = actual.splitSequential<std::vector<eon::string>>( '\n' );
+		size_t lno = 0;
+		for( ; lno < exp_lines.size() && lno < act_lines.size(); ++lno )
+		{
+			eon::regex exp( exp_lines[ lno ] );
+			if( !exp.match( act_lines[ lno ] ) )
+			{
+				matches = false;
+				eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
+					<< eon::style::normal << "\n";
+				eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
+					<< eon::style::normal << "\n";
+				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << " regex: " << eon::style::green
+					<< exp_lines[ lno ] << eon::style::normal << "\n";
+				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::red
+					<< act_lines[ lno ] << eon::style::normal << "\n";
+			}
+		}
+		auto missing_act = exp_lines.size() - lno;
+		auto superfluous_act = act_lines.size() - lno;
+		if( missing_act > 0 || superfluous_act > 0 )
+		{
+			matches = false;
+			eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
+				<< eon::style::normal << "\n";
+			eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
+				<< eon::style::normal << "\n";
+		}
+		if( missing_act > 0 )
+		{
+			if( missing_act == 1 )
+				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::red
+				<< "No actual line!" << eon::style::normal << "\n";
+			else
+				eon::term << eon::style::strong << "Expected lines #" << ( lno + 1 ) << "-" << exp_lines.size()
+				<< ": " << eon::style::red << "No actual lines!" << eon::style::normal << "\n";
+		}
+		else if( superfluous_act > 0 )
+		{
+			if( superfluous_act == 1 )
+				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << ": " << eon::style::red
+				<< "Extra line not in expected!" << eon::style::normal << "\n";
+			else
+				eon::term << eon::style::strong << "  Actual lines #" << ( lno + 1 ) << "-" << act_lines.size() << ": "
+				<< eon::style::red << "Extra lines not in expected!" << eon::style::normal << "\n";
+		}
+		return matches;
+	}
+
 
 	bool _EonTest::_reportDiff( const std::string& expected, const std::string& actual,
 		const char* exp_expr, const char* act_expr )

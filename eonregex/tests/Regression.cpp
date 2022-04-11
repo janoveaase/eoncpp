@@ -639,4 +639,36 @@ namespace eon
 		eon::term << "Eon regex (" << string::toString( successes )
 			<< "): " << string::toString( ms.count() ) << "ms\n";
 	}
+
+	/* The "bad" tests will always fail so only use for testing of WANT_MATCH/REQUIRE_MATCH!
+	TEST( TestRegex, lines_good )
+	{
+		eon::string exp{ "\\d+\n\\w+" };
+		eon::string act{ "1234\nabcd" };
+		WANT_MATCH( exp, act );
+	}
+	TEST( TestRegex, lines_bad1 )
+	{
+		eon::string exp{ "\\d+\n\\d\\w+" };
+		eon::string act{ "1234\nabcd" };
+		WANT_MATCH( exp, act );
+	}
+	TEST( TestRegex, lines_bad2 )
+	{
+		eon::string exp{ "\\d+\n\\w+\n\\w\\d" };
+		eon::string act{ "1234\nabcd" };
+		WANT_MATCH( exp, act );
+	}
+	TEST( TestRegex, lines_bad3 )
+	{
+		eon::string exp{ "\\d+\n\\d\\w+" };
+		eon::string act{ "1234\nabcd\na8" };
+		WANT_MATCH( exp, act );
+	}
+	TEST( TestRegex, lines_bad4 )
+	{
+		eon::string exp{ "\\d+\n\\d\\w+" };
+		eon::string act{ "1234\nabcd\na8\n:::" };
+		WANT_MATCH( exp, act );
+	}	//*/
 }

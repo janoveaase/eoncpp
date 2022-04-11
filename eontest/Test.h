@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <eonstring/String.h>
 #include <eonstring/Name.h>
+#include <eonregex/RegEx.h>
 #include <eonterminal/Terminal.h>
 
 
@@ -173,6 +174,14 @@ namespace eontest
 	_EXCEPT( expression, exception_name ); if( Failed ) NONFATAL_MESSAGE
 #define REQUIRE_EXCEPT( expression, exception_name )\
 	_EXCEPT( expression, exception_name ); if( Failed ) FATAL_MESSAGE
+
+	// Test that a string matches on every line vs. an expected regex
+#define WANT_MATCH( exepcted_regex_strlines, actual_string_lines )\
+	EON_AMBIGUOUS_ELSE_BLOCKER\
+	if( _testMatch( (exepcted_regex_strlines), (actual_string_lines), #exepcted_regex_strlines, #actual_string_lines ) ); else NONFATAL_MESSAGE
+#define REQUIRE_MATCH( exepcted_regex_strlines, actual_string_lines )\
+	EON_AMBIGUOUS_ELSE_BLOCKER\
+	if( _testMatch( (exepcted_regex_strlines), (actual_string_lines), #exepcted_regex_strlines, #actual_string_lines ) ); else FATAL_MESSAGE
 
 	// Test that something is equal to something else
 #define WANT_EQ( expected, actual )\
@@ -387,6 +396,18 @@ namespace eontest
 
 		bool _reportDiff( const std::string& expected, const std::string& actual,
 			const char* exp_expr, const char* act_expr );
+
+		bool _testMatch( const eon::string& expected, const eon::string& actual, const char* exp_expr, const char* act_expr );
+		inline bool _testMatch( const char* expected, const char* actual, const char* exp_expr, const char* act_expr ) {
+			return _testMatch( eon::string( expected ), eon::string( actual ), exp_expr, act_expr ); }
+		inline bool _testMatch( const char* expected, const eon::string& actual, const char* exp_expr, const char* act_expr ) {
+			return _testMatch( eon::string( expected ), actual, exp_expr, act_expr ); }
+		inline bool _testMatch( const std::string& expected, const char* actual, const char* exp_expr, const char* act_expr ) {
+			return _testMatch( eon::string( expected ), eon::string( actual ), exp_expr, act_expr ); }
+		inline bool _testMatch( const char* expected, const std::string& actual, const char* exp_expr, const char* act_expr ) {
+			return _testMatch( eon::string( expected ), eon::string( actual ), exp_expr, act_expr ); }
+		inline bool _testMatch( const std::string& expected, const std::string& actual, const char* exp_expr, const char* act_expr ) {
+			return _testMatch( eon::string( expected ), eon::string( actual ), exp_expr, act_expr ); }
 
 		inline bool _testEq( const eon::string& expected, const char* actual, const char* exp_expr, const char* act_expr ) {
 			return _testEq( expected.stdstr(), std::string( actual ), exp_expr, act_expr ); }

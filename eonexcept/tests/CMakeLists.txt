@@ -18,7 +18,7 @@ set_target_properties(
 )
 set_property(TARGET EonExceptTests PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonExceptTests PUBLIC EonString EonTest)
+target_link_libraries(EonExceptTests PUBLIC EonString EonTest EonRegex)
 	
 install(TARGETS EonExceptTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"

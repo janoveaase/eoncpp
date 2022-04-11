@@ -17,7 +17,7 @@ set_target_properties(
 		OUTPUT_NAME_RELEASE eon_filesys_tests
 )
 
-target_link_libraries(EonFileSysTests PUBLIC EonFileSys EonTest)
+target_link_libraries(EonFileSysTests PUBLIC EonFileSys EonTest EonRegex)
 	
 install(TARGETS EonFileSysTests
 	RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"

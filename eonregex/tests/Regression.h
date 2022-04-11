@@ -11,4 +11,5 @@ namespace eon
 	class MiscTests : public eontest::EonTest {};
 	class OptimizeTests : public eontest::EonTest {};
 	class SpeedCmp : public eontest::EonTest {};
+	class TestRegex : public eontest::EonTest {};
 }
