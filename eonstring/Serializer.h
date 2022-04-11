@@ -41,7 +41,7 @@ namespace eon
 		virtual ~serializer() = default;
 
 
-		inline serializer& operator=( const serializer& other ) noexcept{ IsStoring = other.IsStoring; }
+		inline serializer& operator=( const serializer& other ) noexcept{ IsStoring = other.IsStoring; return *this; }
 
 
 
