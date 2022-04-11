@@ -104,6 +104,24 @@ namespace eontest
 		size_t lno = 0;
 		for( ; lno < exp_lines.size() && lno < act_lines.size(); ++lno )
 		{
+			if( exp_lines[ lno ].empty() )
+			{
+				if( act_lines[ lno ].empty() )
+					continue;
+				else
+				{
+					matches = false;
+					eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
+						<< eon::style::normal << "\n";
+					eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
+						<< eon::style::normal << "\n";
+					eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::green
+						<< "<empty>" << eon::style::normal << "\n";
+					eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::red
+						<< act_lines[ lno ] << eon::style::normal << "\n";
+					continue;
+				}
+			}
 			eon::regex exp( exp_lines[ lno ] );
 			if( !exp.match( act_lines[ lno ] ) )
 			{
