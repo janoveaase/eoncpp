@@ -6,24 +6,27 @@
 #include <eontokenizer/Tokenizer.h>
 #include <eontokenizer/ReTokenizer.h>
 #include <eonfilesys/Path.h>
+#include <eonfilesys/File.h>
 #include <eonregex/RegEx.h>
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+//  The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  Eon Data Tuple Class - eon::edt
-
-	  Load, save, and serialize DataTuple objects in EDT format + validate.
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	// Eon Data Tuple Class - eon::edt
+	//
+	// Load, save, and serialize DataTuple objects in EDT format + validate.
+	//
 	class edt
 	{
-		/**********************************************************************
-		  Construction
-		**********************************************************************/
+		//////////////////////////////////////////////////////////////////////
+		//
+		// Construction
+		//
 	public:
 
 		edt() = default;
@@ -32,28 +35,32 @@ namespace eon
 
 
 
-		/**********************************************************************
-		  Operations
-		**********************************************************************/
+		//////////////////////////////////////////////////////////////////////
+		//
+		// Operations
+		//
 	public:
 
-		//* Save a data tuple to file
-		void save( const DataTuple& tuple, const path& file );
+		// Save a data tuple as EDT to file
+		inline void save( const DataTuple& tuple, const path& file ) {
+			string str; toStr( tuple, str ); eon::file target( file ); target.save( str ); }
 
-		//* Load a data tuple from file
-		DataTuple load( const path& file );
+		// Load EDT from file into data tuple
+		inline DataTuple load( const path& file ) { eon::file source( file ); return fromStr( source.loadText() ); }
 
-		//* Serialize a date tuple (convert it into a string and back again)
-		void toStr( const DataTuple& tuple, std::string& str );
-		DataTuple fromStr( const std::string& str );
+		// "Save" data tuple as EDT to string
+		inline void toStr( const DataTuple& tuple, string& str ) { _toStr( tuple, str, 0, false ); }
+
+		// "Load" EDT from string into data tuple
+		DataTuple fromStr( const string& str );
 
 
-		//* Run validation on a data tuple
-		//* Parameters:
-		//*   target : Data tuple to validate
-		//*   source : Validation tuple
-		//*   issues : Data tuple in which to store issues when validation fails
-		//* Returns true if valid and false if not.
+		// Run validation on a data tuple
+		// Parameters:
+		//   target : Data tuple to validate
+		//   source : Validation tuple
+		//   issues : Data tuple in which to store issues when validation fails
+		// Returns true if valid and false if not.
 		bool validate( const DataTuple& target, const DataTuple& source, DataTuple* issues );
 
 
@@ -65,7 +72,7 @@ namespace eon
 		//
 	private:
 
-		// Do the actual parsing
+		void _toStr( const DataTuple& tuple, string& str, int_t indentation_level, bool unnamed_tuple );
 
 
 

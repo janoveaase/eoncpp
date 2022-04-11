@@ -343,8 +343,8 @@ namespace eon
 					throw AccessDenied( eon::str( type.name() ).ucFirst()
 						+ " tuple is not a legal attribute type for tuple type " + eon::str( Type.name() ) + "!" );
 				if( !Handler::legalForDataTuple( type ) )
-					throw AccessDenied( type.str() + " is not a legal attribute type for tuple type "
-						+ eon::str( Type.name() ) + "!" );
+					throw AccessDenied( type.str() + " is not a legal attribute type for tuple type \""
+						+ eon::str( Type.name() ) + "\"!" );
 			}
 		}
 

@@ -4,27 +4,29 @@
 
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+//////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  DataTuple class - eon::DataTuple
-
-	  Data tuples can store the following types (only):
-		bool, byte, char, long, high, name,
-		string, bytes, regex, namepath, path,
-		metadata, array, set, data
-	
-	  int and short will be automatically converted into long, and float and
-	  low into high when added to the data tuple.
-	**************************************************************************/
+	//////////////////////////////////////////////////////////////////////////
+	// DataTuple class - eon::DataTuple
+	//
+	// Data tuples can store the following types (only):
+	//   bool, byte, char, long, high, name,
+	//   string, bytes, regex, namepath, path,
+	//   metadata, array, set, data
+	//
+	// int and short will be automatically converted into long, and float and
+	// low into high when added to the data tuple.
+	//
 	class DataTuple : public type::BasicTuple
 	{
-		/**********************************************************************
-		  Construction
-		**********************************************************************/
+		//////////////////////////////////////////////////////////////////////
+		//
+		// Construction
+		//
 	public:
 
 		// Construct an empty tuple
@@ -43,8 +45,7 @@ namespace eon
 
 		// Take ownership of other tuple
 		inline DataTuple( DataTuple&& other ) noexcept : type::BasicTuple( std::move( other ) ) {}
-		inline DataTuple( type::BasicTuple&& other ) : type::BasicTuple( std::move( other ) ) {
-			finalize(); }
+		inline DataTuple( type::BasicTuple&& other ) : type::BasicTuple( std::move( other ) ) { finalize(); }
 
 		// Destruct tuple
 		virtual ~DataTuple() = default;
@@ -69,9 +70,10 @@ namespace eon
 
 
 
-		/**********************************************************************
-		  Basic Access
-		**********************************************************************/
+		//////////////////////////////////////////////////////////////////////
+		//
+		// Basic Access
+		//
 	public:
 
 		//* Get the C++ type

@@ -1,7 +1,7 @@
 #pragma once
-#include "sources/Graph.h"
-#include "sources/Match.h"
-#include "sources/RxData.h"
+#include "Graph.h"
+#include "Match.h"
+#include "RxData.h"
 #include <eonexcept/Exception.h>
 
 

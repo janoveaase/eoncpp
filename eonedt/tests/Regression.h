@@ -9,5 +9,13 @@
 
 namespace eon
 {
-	class EdtTest : public eontest::EonTest {};
+	class EdtTest : public eontest::EonTest
+	{
+	public:
+
+		void prepare() override
+		{
+			type::Handler::init();
+		}
+	};
 }

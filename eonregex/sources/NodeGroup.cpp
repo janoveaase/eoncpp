@@ -1,4 +1,4 @@
-#include "NodeGroup.h"
+#include "../NodeGroup.h"
 
 
 namespace eon

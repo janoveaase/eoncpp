@@ -1,4 +1,4 @@
-#include "CharGroup.h"
+#include "../CharGroup.h"
 
 
 namespace eon
