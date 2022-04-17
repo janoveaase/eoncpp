@@ -58,7 +58,7 @@ namespace eon
 
 
 
-		void Node::infixStr( type::Stringifier& str ) const
+		void Node::infixStr( Stringifier& str ) const
 		{
 			if( isValue() )
 			{
@@ -66,9 +66,8 @@ namespace eon
 				return;
 			}
 
-			str.spacingAlways();
 			if( isName() )
-				str.addWord( Name );
+				str.pushWord( eon::str( Name ) );
 			else if( isOperator() )
 			{
 				std::vector<bool> need_par = _operandsNeedingParenthesis( opr() );
@@ -186,7 +185,7 @@ namespace eon
 			return need;
 		}
 
-/*		void Node::_postfixStr( type::Stringifier& str ) const
+/*		void Node::_postfixStr( Stringifier& str ) const
 		{
 			if( isValue() )
 			{
@@ -196,7 +195,7 @@ namespace eon
 
 			str.spacingAlways();
 			if( isName() )
-				str.addWord( Name );
+				str.pushWord( Name );
 			else
 			{
 				for( auto& child : Children )
@@ -207,17 +206,17 @@ namespace eon
 
 		void Node::_infixInstanceStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().str() );
+			str.pushWord( action.type().str() );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixPreFirstStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().str() );
+			str.pushWord( action.type().str() );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixPreLastStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().str() );
+			str.pushWord( action.type().str() );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixGetStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
@@ -234,9 +233,7 @@ namespace eon
 		}
 		void Node::_infixTypeStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
-			str.addWord( action.type().str() );
-			str.addRaw( "'s" ); str.resetRaw();
-			str.addWord( action.name() );
+			str.pushWord( action.type().str() ).pushAppend( "'s" ).pushWord( eon::str( action.name() ) );
 			_infixStr( action, str, need_par );
 		}
 		void Node::_infixStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const
@@ -245,37 +242,31 @@ namespace eon
 			for( size_t arg_no = 0; arg_no < Children.size(); ++arg_no )
 			{
 				if( need_par[ arg_no ] )
-				{
-					str.addWord( "(" );
-					str.markRaw();
-				}
+					str.pushOpen( "(" );
 
 				auto& arg = action.arguments().at( arg_no );
 
 				if( arg.value() )
 				{
 					if( arg.value()->generalType() == name_modify )
-						str.addWord( "modify" );
+						str.pushWord( "modify" );
 					else if( arg.value()->generalType() != name_reference )
-						str.addWord( "consume" );
+						str.pushWord( "consume" );
 				}
 
 				auto& val = Children[ arg_no ];
 				if( val.isName() )
-					str.addWord( val.name() );
+					str.pushWord( eon::str( val.name() ) );
 				else
 				{
 					if( val.name() )
-					{
-						str.addWord( val.name() );
-						str.addRaw( "=" );
-					}
+						str.pushWord( eon::str( val.name() ) ).pushSpecialOp( "=" );
 
 					val.infixStr( str );
 				}
 
 				if( need_par[ arg_no ] )
-					str.addRaw( ")" );
+					str.pushClose( ")" );
 			}
 		}
 
@@ -288,76 +279,73 @@ namespace eon
 			{
 				case 1:
 					for( ; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					if( Children[ 0 ].Define )
-						str.addWord( "define" );
+						str.pushWord( "define" );
 					Children[ 0 ].infixStr( str );
 					for( ; op != end; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					break;
 				case 2:
 					for( ; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					if( Children[ 0 ].Define )
-						str.addWord( "define" );
+						str.pushWord( "define" );
 					_infixOpArgStr( 0, str, need_par );
-					str.addWord( operators::mapCode( op->Op ) );
+					str.pushWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					_infixOpArgStr( 1, str, need_par );
 					for( ; op != end; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					break;
 				case 3:
 					for( ; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					if( Children[ 0 ].Define )
-						str.addWord( "define" );
+						str.pushWord( "define" );
 					_infixOpArgStr( 0, str, need_par );
-					str.addWord( operators::mapCode( op->Op ) );
+					str.pushWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					_infixOpArgStr( 1, str, need_par );
-					str.addWord( operators::mapCode( op->Op ) );
+					str.pushWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					_infixOpArgStr( 2, str, need_par );
 					for( ; op != end; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					break;
 				case 4:
 					for( ; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					if( Children[ 0 ].Define )
-						str.addWord( "define" );
+						str.pushWord( "define" );
 					_infixOpArgStr( 0, str, need_par );
-					str.addWord( operators::mapCode( op->Op ) );
+					str.pushWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					_infixOpArgStr( 1, str, need_par );
-					str.addWord( operators::mapCode( op->Op ) );
+					str.pushWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					_infixOpArgStr( 2, str, need_par );
-					str.addWord( operators::mapCode( op->Op ) );
+					str.pushWord( operators::mapCode( op->Op ) );
 					for( ++op; op != end && op->Prefix; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					_infixOpArgStr( 3, str, need_par );
 					for( ; op != end; ++op )
-						str.addWord( operators::mapCode( op->Op ) );
+						str.pushWord( operators::mapCode( op->Op ) );
 					break;
 			}
 		}
 		void Node::_infixOpArgStr( size_t arg_no, Stringifier& str, const std::vector<bool>& need_par ) const
 		{
 			if( need_par[ arg_no ] )
-			{
-				str.addWord( "(" );
-				str.markRaw();
-			}
+				str.pushOpen( "(" );
 			Children[ arg_no ].infixStr( str );
 			if( need_par[ arg_no ] )
-				str.addRaw( ")" );
+				str.pushClose( ")" );
 		}
 	}
 }

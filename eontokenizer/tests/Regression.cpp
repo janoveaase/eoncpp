@@ -40,7 +40,7 @@ namespace eon
 		}
 		WANT_EQ( expected.stdstr(), actual.stdstr() );
 	}
-	TEST( ReTokenizerTest, names2 )
+	TEST( TokenizerTest, names2 )
 	{
 		string raw{ "_sum_1+=2+2num" };
 		source::String src( "test", std::move( raw ) );

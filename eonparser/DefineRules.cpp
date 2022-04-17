@@ -8,7 +8,7 @@ namespace eon
 		bool DefineVarRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 		{
 			// We must match the name "define" + variable name for there to be any matches here!
-			if( !parser.current().is( name_name ) || parser.current().str() != "define"
+			if( !parser || !parser.current().is( name_name ) || parser.current().str() != "define"
 				|| !parser.exists( 2 ) || !parser.ahead( 2 ).is( name_name ) || !parser.exists( 3 ) )
 				return false;
 

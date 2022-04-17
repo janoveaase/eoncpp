@@ -3,11 +3,22 @@
 
 namespace eon
 {
+	string path::systemStr( name_t system_name )
+	{
+		if( system_name == name_windows )
+			return str().replace( ForwSlashChr, BackSlashChr );
+		else
+			return str();
+	}
+
+
+
+
 	path& path::operator/=( const path& other )
 	{
 		if( other.absolute() )
 			throw filesys::BadPath( "Cannot append absolute path" );
-		if( isFilePath() )
+		if( file() )
 			return _parse( Full + "/" + other.Full );
 		else
 			return _parse( Full + other.Full );
@@ -15,9 +26,10 @@ namespace eon
 
 
 
+
 	path& path::ext( const substring& part )
 	{
-		if( isDirPath() )
+		if( dir() )
 			throw filesys::BadPath( "Cannot set extension on a directory path" );
 		if( part.count( PointChr ) > 0 )
 			return _parse( Full + "." + part );
@@ -39,79 +51,187 @@ namespace eon
 
 
 
+
 	path& path::_parse( const substring& full )
 	{
-		Root.clear();
-		Dirs.clear();
-		Parent.clear();
-		Base.clear();
-		Name.clear();
-		Ext.clear();
+		// This will normalize the path!
 
+		clear();
 		if( full.empty() )
 			return *this;
 
-		std::list<string> elms;
+		// Split path into raw elements first and normalize
+		auto raw_elements = _rawSplit( full );
+		if( !_normalize( raw_elements ) )
+			throw filesys::BadPath( "Not a valid path: \"" + string( full ) + "\"!" );
+
+		// Reconstruct into full path again
+		if( !_reconstruct( raw_elements ) )
+			throw filesys::BadPath( "Not a valid path: \"" + string( full ) + "\"!" );
+
+		return *this;
+	}
+	std::list<string> path::_rawSplit( const substring& full ) const
+	{
+		// Very simply split the path into elements consisting of separators
+		// and non-separators only
+		std::list<string> raw_elements;
 		string elm;
 		for( auto c : full )
 		{
 			if( c == ForwSlashChr || c == BackSlashChr )
 			{
-				if( elm.empty() && elms.size() == 1 && *elms.begin() == "/" )
-				{
-					elm = "//";
-					elms.clear();
-					continue;
-				}
-				if( elm.startsWith( "//" && elms.empty() ) )
-					elms.push_back( std::move( elm ) );
-				if( elm != "/" || elms.size() == 0 )
-					elm += "/";
-				if( !elm.empty() )
-					elms.push_back( std::move( elm ) );
-			}
-			else
-				elm += c;
-		}
-		if( !elm.empty() )
-			elms.push_back( std::move( elm ) );
-
-		auto probe = elms.begin();
-		while( probe != elms.end() )
-		{
-			if( *probe == "./" )
-				probe = elms.erase( probe );
-			else if( *probe == "../" )
-			{
-				if( probe == elms.begin() )
-					probe = elms.erase( probe );
+				if( elm.empty() || elm.startsWith( ForwSlashChr ) )
+					elm += c;
 				else
 				{
-					auto prev = probe; --prev;
-					if( prev != elms.begin() || !_isRoot( *prev ) )
-						probe = elms.erase( prev );
-					probe = elms.erase( probe );
+					raw_elements.push_back( std::move( elm ) );
+					elm = ForwSlashChr;
 				}
 			}
 			else
-				++probe;
+			{
+				if( elm.empty() || !elm.startsWith( ForwSlashChr ) )
+					elm += c;
+				else
+				{
+					raw_elements.push_back( std::move( elm ) );
+					elm = c;
+				}
+			}
+		}
+		if( !elm.empty() )
+			raw_elements.push_back( std::move( elm ) );
+		return raw_elements;
+	}
+	bool path::_normalize( std::list<string>& elements ) const
+	{
+		if( elements.empty() )
+			return true;
+		auto elm = elements.begin();
+		if( *elm == "/" )
+			++elm;
+		else if( *elm == "//" )
+		{
+			++elm;
+			if( elm != elements.end() )
+				++elm;
+		}
+		else if( elm->startsWith( ForwSlashChr ) )
+			return false;
+		for( ; elm != elements.end(); )
+		{
+			// Single separator!
+			if( elm->numChars() > 1 && elm->startsWith( ForwSlashChr ) )
+				*elm = ForwSlashChr;
+
+			// Remove "./" elements
+			else if( *elm == PointChr )
+			{
+				auto next = elm;
+				if( ++next != elements.end() && *next == "/" )
+				{
+					elm = elements.erase( elm );
+					elm = elements.erase( elm );
+					continue;
+				}
+			}
+
+			// Remove "<non-dot-dot-element>../"
+			else if( !elm->startsWith( ForwSlashChr ) && !elm->startsWith( PointChr ) )
+			{
+				auto next = elm;
+				if( ++next != elements.end() && *next == "/" )
+				{
+					if( ++next != elements.end() && *next == ".." )
+					{
+						if( ++next != elements.end() && *next == "/" )
+						{
+							elm = elements.erase( elm );
+							elm = elements.erase( elm );
+							elm = elements.erase( elm );
+							elm = elements.erase( elm );
+							continue;
+						}
+					}
+				}
+			}
+
+			// Remove all remaining "../" elements
+			else if( *elm == ".." )
+			{
+				auto next = elm;
+				if( ++next != elements.end() && *next == "/" )
+				{
+					elm = elements.erase( elm );
+					elm = elements.erase( elm );
+					continue;
+				}
+			}
+
+			++elm;
 		}
 
-		Full = string().join<std::list<string>>( elms );
-		if( _isRoot( *elms.begin() ) )
+		return true;
+	}
+
+	bool path::_reconstruct( std::list<string>& elements )
+	{
+		Full = string().join<std::list<string>>( elements );
+		auto elm = elements.begin(), next = elm;
+		++next;
+		if( *elm == "/" )
 		{
-			if( elms.size() == 1 && !elms.begin()->endsWith( ForwSlashChr ) )
+			Root = Full.substr( Full.begin(), Full.begin() + 1 );
+			elm = next;
+			if( next != elements.end() )
+				++next;
+		}
+		else if( *elm == "//" )
+		{
+			if( next == elements.end() )		// UNC name
+				return false;
+			auto next2 = next;
+			if( ++next2 == elements.end() )		// End of UNC name
 			{
 				Full += "/";
-				*elms.begin() += "/";
+				Root = Full.substr();
+				elm = next2;
+				next = next2;
 			}
-			Root = Full.substr( Full.begin(), Full.begin() + elms.begin()->numChars() );
+			else
+			{
+				Root = Full.substr( Full.begin(), Full.begin() + 2 + next->numChars() + next2->numChars() );
+				elm = next2;
+				next = next2;
+				++next;
+			}
 		}
-		if( Root && Root.numChars() == Full.numChars() )
+		else if( elm->numChars() == 2
+			&& ( ( *elm->begin() >= 'A' && *elm->begin() <= 'Z' ) || ( *elm->begin() >= 'a' && *elm->begin() <= 'z' ) )
+			&& *elm->last() == ColonChr )
+		{
+			if( next == elements.end() )
+			{
+				Full += "/";
+				Root = Full.substr();
+				elm = next;
+			}
+			else
+			{
+				Root = Full.substr( Full.begin(), Full.begin() + elm->numChars() + next->numChars() );
+				elm = ++next;
+				if( next != elements.end() )
+					++next;
+			}
+		}
+
+		if( elm == elements.end() )
 		{
 			Parent = Root;
-			return *this;
+			return true;
 		}
+
 		if( Full.endsWith( ForwSlashChr ) )	// Directory
 		{
 			auto slash = Full.findLast( ForwSlashChr, Full.substr( Full.begin(), Full.last() ) );
@@ -148,8 +268,7 @@ namespace eon
 			else
 				Name = Base;
 		}
-
-		return *this;
+		return true;
 	}
 	path& path::_parse( const path& other ) noexcept
 	{

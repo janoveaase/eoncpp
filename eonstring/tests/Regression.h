@@ -6,7 +6,7 @@
 #include <eonstring/NamePath.h>
 #include <eonstring/Hex.h>
 #include <eonstring/ByteSerializer.h>
-#include <chrono>
+#include <eonstring/Stringifier.h>
 
 
 namespace eon
@@ -17,4 +17,5 @@ namespace eon
 	class Name : public eontest::EonTest {};
 	class HexTest : public eontest::EonTest {};
 	class ByteSerializerTest : public eontest::EonTest {};
+	class StringifierTest : public eontest::EonTest {};
 }

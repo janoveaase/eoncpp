@@ -28,6 +28,7 @@ namespace eon
 		WANT_EQ( "//somehost/", path{ "//somehost" }.stdstr() ) << "UNC root";
 		WANT_EQ( "a/relative/path", path{ "a/relative/path" }.stdstr() ) << "Relative";
 		WANT_EQ( "//some/absolute/path", path{ "//some/absolute/path" }.stdstr() ) << "Absolute";
+		WANT_EQ( "//some/absolute/path", path{ "//some//absolute///path" }.stdstr() ) << "Dirty";
 		WANT_EQ( "//some/any/absolute/path", path{ "//some/../any/./absolute/path" }.stdstr() ) << "Dirty";
 		WANT_EQ( "any/relative/path", path{ "some/../any/./relative/path" }.stdstr() ) << "Dirty";
 		WANT_EQ( "C:/some/windows/path", path{ "C:\\some\\windows\\path" }.stdstr() ) << "Back-slashes";

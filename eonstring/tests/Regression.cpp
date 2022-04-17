@@ -771,17 +771,20 @@ namespace eon
 		}
 	}
 
-	TEST( String, toString_int )
+	TEST( String, toString_number )
 	{
 		int64_t i64_1{ 1 }, i64_2{ -56746754767LL };
 		uint64_t ui64{ 9034658634325425ULL };
-		double dbl_1{ 1.23 }, dbl_2{ -3546346.02341435536 };
+		double dbl_1{ 1.23 }, dbl_2{ -3546346.023414 };
+		long double ldbl_1{ 123456789.0112345666 }, ldbl_2{ -98765432109.8765411377 };
 		WANT_EQ( "1", string::toString( i64_1 ) ) << "Wrong int64_t value";
 		WANT_EQ( "-56746754767", string::toString( i64_2 ) ) << "Wrong int64_t value";
 		WANT_EQ( "9034658634325425", string::toString( ui64 ) ) << "Wrong uint64_t value";
 		WANT_EQ( "1.23", string::toString( dbl_1 ) ) << "Wrong double value";
-		WANT_EQ( "-3546346.02341436", string::toString( dbl_2 ) ) << "Wrong double value";
-		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
+		WANT_EQ( "-3546346.023414", string::toString( dbl_2 ) ) << "Wrong double value";
+		WANT_EQ( 309, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
+		WANT_EQ( "123456789.0112345666", string::toString( ldbl_1 ) ) << "Wrong long double value";
+		WANT_EQ( "-98765432109.8765411377", string::toString( ldbl_2 ) ) << "Wrong long double value";
 	}
 
 	TEST( String, real_issue_seen1 )
@@ -1085,5 +1088,60 @@ namespace eon
 		WANT_EQ( str2, strv );
 
 		// chars
+	}
+
+
+
+	TEST( StringifierTest, basic )
+	{
+		Stringifier str;
+		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" );
+		WANT_EQ( "Hello World!", str.str() );
+	}
+	TEST( StringifierTest, append_prefix )
+	{
+		Stringifier str;
+		str.pushWord( "Hello" ).pushAppend( "World" ).pushPrefix( "T" ).pushOpen( "(" ).pushClose( ")" ).pushStop( "!" );
+		WANT_EQ( "HelloWorld T()!", str.str() );
+	}
+	TEST( StringifierTest, multiline )
+	{
+		Stringifier str;
+		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).endLine();
+		str.pushOpen( "(" ).pushWord( "9" ).pushOperator( "+" ).pushWord( "55" ).pushClose( ")" );
+		WANT_EQ( "Hello World!\n(9 + 55)", str.str() );
+	}
+	TEST( StringifierTest, multiline_indented )
+	{
+		Stringifier str( 16 );
+		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).endLine();
+		str.pushOpen( "(" ).pushWord( "999999" ).pushOperator( "+" ).pushWord( "55555" );
+		str.pushOperator( "-" ).pushWord( "6" ).pushClose( ")" );
+		WANT_EQ( "Hello World!\n(999999 + 55555\n  - 6)", str.str() );
+	}
+	TEST( StringifierTest, multiline_colon )
+	{
+		Stringifier str;
+		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).pushStartBlock( ":" );
+		str.pushOpen( "(" ).pushWord( "9" ).pushOperator( "+" ).pushWord( "55" );
+		str.pushOperator( "-" ).pushWord( "6" ).pushClose( ")" ).pushEndBlock();
+		WANT_EQ( "Hello World!:\n  (9 + 55 - 6)\n", str.str() );
+	}
+	TEST( StringifierTest, multiline_parenthesis_colon )
+	{
+		Stringifier str;
+		str.pushOpen( "(" ).pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).pushStartBlock( ":" );
+		str.pushWord( "One" ).pushWord( "Two" ).pushClose( ")" ).pushEndBlock();
+		WANT_EQ( "(Hello World!:\n  One Two)\n", str.str() );
+	}
+	TEST( StringifierTest, very_long_line )
+	{
+		Stringifier str( 20 );
+		str.pushPrefix( "\"" ).pushWord( "Hello World!" ).pushAppend( "\"" ).pushStop( "," );
+		str.pushWord( "One" ).pushStop( "," ).pushWord( "Two" ).pushStop( "," ).pushWord( "Three" ).pushStop( "," );
+		str.pushWord( "Four" ).pushStop( "," ).pushPrefix( "\"" );
+		str.pushWord( "A long string value with many words inside it, more than will fit on a line." ).pushAppend( "\"" );
+		WANT_EQ( "\"Hello World!\", One,\n  Two, Three, Four,\n  "
+			"\"A long string value with many words inside it, more than will fit on a line.\"", str.str() );
 	}
 }

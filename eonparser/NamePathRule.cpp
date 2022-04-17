@@ -8,7 +8,7 @@ namespace eon
 		bool NamePathRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 		{
 			// Basic format: "@<name>[/<name>/.../<name>]"
-			if( parser.current().is( name_at ) )
+			if( parser && parser.current().is( name_at ) )
 			{
 				auto initial = parser.pos();
 				parser.forward();
@@ -20,7 +20,7 @@ namespace eon
 					// Accept sequence of alternating slashes and names
 					while( true )
 					{
-						if( !parser || !parser.current().is( name_operator ) || parser.current().str() != "/" )
+						if( !parser || !parser.current().is( name_slash ) )
 						{
 							output.push_back( std::move( matched ) );
 							return true;

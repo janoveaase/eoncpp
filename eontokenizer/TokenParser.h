@@ -81,6 +81,9 @@ namespace eon
 		//* Set position of (new) current [eon::Token]
 		inline void pos( size_t pos ) noexcept { Cur = pos; }
 
+		//* Access the source
+		inline source::Ref& currentSource() { return Tokens[ Cur ].source(); }
+
 
 
 

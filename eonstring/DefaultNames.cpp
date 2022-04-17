@@ -131,11 +131,15 @@ namespace eon
 	const name_t name_close_curly = name( "close_curly" );
 	const name_t name_open_angle = name( "open_angle" );
 	const name_t name_close_angle = name( "close_angle" );
+	const name_t name_slash = name( "slash" );
 	const name_t name_backslash = name( "backslash" );
+	const name_t name_assign = name( "assign" );
 	const name_t name_member = name( "member" );
 	const name_t name_doublequote = name( "doublequote" );
 	const name_t name_singlequote = name( "singlequote" );
 	const name_t name_point = name( "point" );
+	const name_t name_colon = name( "colon" );
+	const name_t name_comma = name( "comma" );
 	const name_t name_symbol = name( "symbol" );
 	const name_t name_questionmark = name( "questionmark" );
 	const name_t name_hash = name( "hash" );
@@ -191,4 +195,7 @@ namespace eon
 	const name_t name_literal = name( "literal" );
 	const name_t name_scope = name( "scope" );
 	const name_t name_defvar = name( "defvar" );
+	const name_t name_comment = name( "comment" );
+	const name_t name_windows = name( "windows" );
+	const name_t name_posix = name( "posix" );
 }

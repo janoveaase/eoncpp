@@ -8,6 +8,7 @@
 #include <eonfilesys/Path.h>
 #include <eonfilesys/File.h>
 #include <eonregex/RegEx.h>
+#include <eonstring/Stringifier.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,8 +30,17 @@ namespace eon
 		//
 	public:
 
-		edt() = default;
-		virtual ~edt() = default;
+		// Constructor for saving data tuple as EDT
+		// User str() to save to string and save() to save to file
+		inline edt( const DataTuple& tuple_to_save ) { ToSave = &tuple_to_save; }
+
+		// Constructor for loading data tuple from EDT
+		// Use load method to do the actual load
+		inline edt( string source_name, string&& source ) {
+			ToLoad = new source::String( source_name, std::move( source ) ); }
+		inline edt( path source_path ) { ToLoad = new source::File( source_path.str() ); }
+
+		virtual ~edt() { if( ToLoad ) delete ToLoad; };
 
 
 
@@ -41,18 +51,16 @@ namespace eon
 		//
 	public:
 
-		// Save a data tuple as EDT to file
-		inline void save( const DataTuple& tuple, const path& file ) {
-			string str; toStr( tuple, str ); eon::file target( file ); target.save( str ); }
+		// Save to string
+		inline string str() { return ToSave ? _toStr( *ToSave ) : ""; }
 
-		// Load EDT from file into data tuple
-		inline DataTuple load( const path& file ) { eon::file source( file ); return fromStr( source.loadText() ); }
+		// Save to file
+		inline void save( const path& target_file ) { file trg( target_file ); trg.save( str() ); }
 
-		// "Save" data tuple as EDT to string
-		inline void toStr( const DataTuple& tuple, string& str ) { _toStr( tuple, str, 0, false ); }
-
-		// "Load" EDT from string into data tuple
-		DataTuple fromStr( const string& str );
+		// Load data tuple
+		// Optionally provide a reporter object to store issues that might be found in the source
+		DataTuple load( source::Reporter& issues );
+		inline DataTuple load() { source::Reporter issues; return load( issues ); }
 
 
 		// Run validation on a data tuple
@@ -72,7 +80,29 @@ namespace eon
 		//
 	private:
 
-		void _toStr( const DataTuple& tuple, string& str, int_t indentation_level, bool unnamed_tuple );
+		inline string _toStr( const DataTuple& tuple ) {
+			Stringifier str; _toStr( tuple, str, false ); return str.str(); }
+		void _toStr( const DataTuple& tuple, Stringifier& str, bool comma_sep );
+
+		void _load( source::Ref source, DataTuple& tuple, source::Reporter& reporter );
+
+		void _loadTuple( DataTuple& tuple, TokenParser& parser, index_t indentation, bool end_by_close );
+		void _loadAssignedChild( DataTuple& tuple, name_t child_name, TokenParser& parser );
+		void _loadIndentedChild( DataTuple& tuple, name_t child_name, TokenParser& parser );
+		void _loadFreeChild( DataTuple& tuple, TokenParser& parser );
+		type::Object* _loadValue( TokenParser& parser );
+		type::Object* _loadNegativeNumber( TokenParser& parser );
+		type::Object* _loadTypeTuple( TokenParser& parser );
+		type::Object* _loadTupleValue( TokenParser& parser );
+		void _loadTypeTuple( EonType& tuple, TokenParser& parser );
+		void _loadTypeTupleChild( EonType& tuple, name_t child_name, TokenParser& parser );
+
+		index_t _indentation( TokenParser& parser );
+		void _skipComments( TokenParser& parser );
+		void _skipNewlines( TokenParser& parser );
+		
+		Tokenizer& _tokenizer();
+		ReTokenizer& _retokenize();
 
 
 
@@ -82,5 +112,10 @@ namespace eon
 		// Attributes
 		//
 	private:
+
+		const DataTuple* ToSave{ nullptr };
+		source::Raw* ToLoad{ nullptr };
+
+		source::Reporter* Reporter{ nullptr };
 	};
 };

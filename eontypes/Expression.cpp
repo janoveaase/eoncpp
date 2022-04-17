@@ -5,19 +5,13 @@ namespace eon
 {
 	namespace type
 	{
-		void Expression::str( type::Stringifier& str ) const
+		void Expression::str( Stringifier& str ) const
 		{
 			if( Variable )
-			{
-				str.addWord( "e(" );
-				str.markRaw();
-			}
+				str.pushWord( "e" ).pushOpen( "(" );
 			Value.infixStr( str );
 			if( Variable )
-			{
-				str.addRaw( ")" );
-				str.resetRaw();
-			}
+				str.pushClose( ")" );
 		}
 	}
 }

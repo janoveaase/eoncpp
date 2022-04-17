@@ -14,6 +14,7 @@ set(STRING_HEADERS
 	Hex.h
 	Serializer.h
 	ByteSerializer.h
+	Stringifier.h
 )
 set(STRING_SOURCES
 	String.cpp
@@ -25,6 +26,7 @@ set(STRING_SOURCES
 	NamePath.cpp
 	Hex.cpp
 	Serializer.cpp
+	Stringifier.cpp
 )
 
 if(WIN32)

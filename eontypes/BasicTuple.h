@@ -139,7 +139,7 @@ namespace eon
 			virtual type::Object* copy() override { return new BasicTuple( *this ); }
 
 			//* Get object as string representation
-			virtual void str( type::Stringifier& str ) const override;
+			virtual void str( Stringifier& str ) const override;
 
 
 
@@ -458,15 +458,15 @@ namespace eon
 			// Get the C++ type of eon::Tuple
 			std::type_index tupleType() const noexcept;
 
-			void _str( type::Stringifier& str ) const;
+			void _str( Stringifier& str ) const;
 
 			// Output standard parenthesized prefix and posfix for tuple
-			virtual void standardPrefix( type::Stringifier& str ) const {}
-			virtual void standardPostfix( type::Stringifier& str ) const {}
+			virtual void standardPrefix( Stringifier& str ) const {}
+			virtual void standardPostfix( Stringifier& str ) const {}
 
 			// Output explicit parenthesized prefix and postfix for tuple
-			virtual void explicitPrefix( type::Stringifier& str ) const { str.addWord( "(" ); }
-			virtual void explicitPostfix( type::Stringifier& str ) const { str.addWord( ")" ); }
+			virtual void explicitPrefix( Stringifier& str ) const { str.pushOpen( "(" ); }
+			virtual void explicitPostfix( Stringifier& str ) const { str.pushClose( ")" ); }
 
 			// Check if the specified typeid matches
 			bool isDynamicTuple( const std::type_info& type ) const;

@@ -5,7 +5,7 @@ namespace eon
 {
 	file& file::operator=( eon::path&& file_path )
 	{
-		if( !file_path.isFilePath() )
+		if( !file_path.file() )
 			throw filesys::BadPath( "Cannot assign a non-file path to a file object" );
 		Path = std::move( file_path );
 		return *this;

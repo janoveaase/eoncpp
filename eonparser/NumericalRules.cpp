@@ -7,15 +7,13 @@ namespace eon
 	{
 		bool ShortRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 		{
-			// Match digits followed by 'S'
-			if( parser.current().is( name_digits )
-				&& parser.exists() && parser.ahead().is( name_name ) && parser.ahead().str() == "S" )
+			static regex pattern{ R"(^\d+S$)" };
+			if( parser && parser.current().is( name_name ) && pattern.match( parser.current().str() ) )
 			{
-				auto matched = Token( parser.current().source(), Name );
+				auto source = parser.current().source();
+				source.pullEnd();
+				output.push_back( Token( source, Name ) );
 				parser.forward();
-				matched.extend( parser.current().source().end() );
-				parser.forward();
-				output.push_back( std::move( matched ) );
 				return true;
 			}
 			else
@@ -23,15 +21,13 @@ namespace eon
 		}
 		bool LongRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 		{
-			// Match digits followed by 'L'
-			if( parser.current().is( name_digits )
-				&& parser.exists() && parser.ahead().is( name_name ) && parser.ahead().str() == "L" )
+			static regex pattern{ R"(^\d+L$)" };
+			if( parser && parser.current().is( name_name ) && pattern.match( parser.current().str() ) )
 			{
-				auto matched = Token( parser.current().source(), Name );
+				auto source = parser.current().source();
+				source.pullEnd();
+				output.push_back( Token( source, Name ) );
 				parser.forward();
-				matched.extend( parser.current().source().end() );
-				parser.forward();
-				output.push_back( std::move( matched ) );
 				return true;
 			}
 			else
@@ -40,15 +36,17 @@ namespace eon
 
 		bool LowRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 		{
-			// Match digits followed by '.' followed by digits followed by 'L'
+			static regex pattern{ R"(^\d+L$)" };
+
+			// Match digits followed by '.' followed by name where all are digits except the last which is 'L'
 			if( parser.current().is( name_digits )
 				&& parser.exists() && parser.ahead().is( name_point )
-				&& parser.exists( 2 ) && parser.ahead( 2 ).is( name_digits )
-				&& parser.exists( 3 ) && parser.ahead( 3 ).is( name_name ) && parser.ahead( 3 ).str() == "L" )
+				&& parser.exists( 2 ) && parser.ahead( 2 ).is( name_name ) && pattern.match( parser.ahead( 2 ).str() ) )
 			{
 				auto matched = Token( parser.current().source(), Name );
-				parser.forward();
+				parser.forward( 2 );
 				matched.extend( parser.current().source().end() );
+				matched.source().pullEnd();
 				parser.forward();
 				output.push_back( std::move( matched ) );
 				return true;
@@ -58,15 +56,17 @@ namespace eon
 		}
 		bool HighRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 		{
-			// Match digits followed by '.' followed by digits followed by 'H'
+			static regex pattern{ R"(^\d+H$)" };
+
+			// Match digits followed by '.' followed by name where all are digits except the last which is 'H'
 			if( parser.current().is( name_digits )
 				&& parser.exists() && parser.ahead().is( name_point )
-				&& parser.exists( 2 ) && parser.ahead( 2 ).is( name_digits )
-				&& parser.exists( 3 ) && parser.ahead( 3 ).is( name_name ) && parser.ahead( 3 ).str() == "H" )
+				&& parser.exists( 2 ) && parser.ahead( 2 ).is( name_name ) && pattern.match( parser.ahead( 2 ).str() ) )
 			{
 				auto matched = Token( parser.current().source(), Name );
-				parser.forward();
+				parser.forward( 2 );
 				matched.extend( parser.current().source().end() );
+				matched.source().pullEnd();
 				parser.forward();
 				output.push_back( std::move( matched ) );
 				return true;

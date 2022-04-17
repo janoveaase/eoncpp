@@ -50,20 +50,14 @@ namespace eon
 
 
 
-	void EonType::str( type::Stringifier& str ) const
+	void EonType::str( Stringifier& str ) const
 	{
-		str.addWord( "T(" );
-		str.noSpacing();
+		str.pushPrefix( "T" ).pushOpen( "(" );
 		if( Name != name_plain )
 		{
 			if( AttributeName != no_name )
-			{
-				str.addWord( AttributeName );
-				str.noSpacing();
-				str.addWord( "=" );
-				str.noSpacing();
-			}
-			str.addWord( Name );
+				str.pushWord( eon::str( AttributeName ) ).pushSpecialOp( "=" );
+			str.pushAppend( eon::str( Name ) );
 		}
 		else
 		{
@@ -73,14 +67,11 @@ namespace eon
 				if( first )
 					first = false;
 				else
-				{
-					str.addRaw( "," );
-					str.spacingAlways();
-				}
+					str.pushStop( "," );
 				attribute._toStr( str );
 			}
 		}
-		str.addRaw( ")" );
+		str.pushClose( ")" );
 	}
 
 
@@ -115,34 +106,25 @@ namespace eon
 
 
 
-	void EonType::_toStr( type::Stringifier& str ) const
+	void EonType::_toStr( Stringifier& str ) const
 	{
 		if( AttributeName != no_name )
-		{
-			str.addWord( AttributeName );
-			str.noSpacing();
-			str.addWord( "=" );
-			str.noSpacing();
-		}
+			str.pushWord( eon::str( AttributeName ) ).pushSpecialOp( "=" );
 		if( Name != name_plain )
-			str.addWord( Name );
+			str.pushAppend( eon::str( Name ) );
 		else
 		{
-			str.addWord( "(" );
-			str.noSpacing();
+			str.pushOpen( "(" );
 			bool first = true;
 			for( auto& attribute : Attributes )
 			{
 				if( first )
 					first = false;
 				else
-				{
-					str.addRaw( "," );
-					str.spacingAlways();
-				}
+					str.pushStop( "," );
 				attribute._toStr( str );
 			}
-			str.addRaw( ")" );
+			str.pushClose( ")" );
 		}
 	}
 

@@ -81,7 +81,7 @@ namespace eon
 			inline type::Object* copy() override { return new Expression( Value ); }
 
 			//* Get object as string representation
-			void str( type::Stringifier& str ) const override;
+			void str( Stringifier& str ) const override;
 
 			//* Check if the expression is empty or not
 			inline bool empty() const noexcept { return Value.type() == NodeType::undef; }

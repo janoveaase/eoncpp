@@ -381,9 +381,9 @@ namespace eon
 		child->finalize();
 		tup.finalize();
 
-		type::Stringifier str;
+		Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "p(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.output() );
+		WANT_EQ( "p(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.str() );
 	}
 	TEST( TupleTest, plain_compare )
 	{
@@ -540,9 +540,9 @@ namespace eon
 		child->finalize();
 		tup.finalize();
 
-		type::Stringifier str;
+		Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "dynamic(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.output() );
+		WANT_EQ( "dynamic(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.str() );
 	}
 	TEST( TupleTest, dynamic_compare )
 	{
@@ -700,9 +700,9 @@ namespace eon
 		child->finalize();
 		tup.finalize();
 
-		type::Stringifier str;
+		Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "data(\"unnamed\", named=\"Name\", deep:\n  deeper:\n    \"Rock\", \"bottom\")", str.output() );
+		WANT_EQ( "data(\"unnamed\", named=\"Name\", deep:\n  deeper:\n    \"Rock\", \"bottom\")\n", str.str() );
 	}
 	TEST( TupleTest, data_compare )
 	{

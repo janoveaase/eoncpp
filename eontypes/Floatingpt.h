@@ -39,7 +39,8 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( type::Stringifier& str ) const override { str.addWord( type::Handler::mapType<float_type>() ); }
+		inline void str( Stringifier& str ) const override {
+			str.pushWord( eon::str( type::Handler::mapType<float_type>() ) ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override {
 			return instantiate( static_cast<float_type>( 0.0 ) ); }
@@ -65,7 +66,9 @@ namespace eon
 		inline Object* copy() override { return new FloatingptInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( float_type ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
-		inline void str( type::Stringifier& str ) const override { str.addWord( string( Value ) ); }
+		inline void str( Stringifier& str ) const override {
+			str.pushWord( string( Value ) ); if( rawType() == typeid( low_t ) ) str.pushAppend( "L" ); else if( rawType()
+				== typeid( high_t ) ) str.pushAppend( "H" ); }
 		inline Instance* copy() const override { return new FloatingptInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const FloatingptInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }
@@ -74,6 +77,6 @@ namespace eon
 		inline void value( float_type val ) noexcept { Value = val; }
 
 	private:
-		float_type Value{ 0.0 };
+		float_type Value{ static_cast<float_type>( 0.0 ) };
 	};
 }

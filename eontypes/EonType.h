@@ -3,7 +3,7 @@
 #include <eonstring/Name.h>
 #include <eonsource/SourceRef.h>
 #include "TypeDefinitions.h"
-#include "Stringifier.h"
+#include <eonstring/Stringifier.h>
 #include <vector>
 
 
@@ -101,8 +101,8 @@ namespace eon
 			return pos < Attributes.size() ? Attributes[ pos ].Name : no_name; }
 
 		//* Get type tuple as 'T'-prefixed string representation
-		void str( type::Stringifier& str ) const;
-		inline string str() const { type::Stringifier strf; str( strf ); return strf.output(); }
+		void str( Stringifier& str ) const;
+		inline string str() const { Stringifier strf; str( strf ); return strf.str(); }
 
 		//* Get source
 		inline const source::Ref& source() const noexcept { return Source; }
@@ -168,7 +168,7 @@ namespace eon
 		//
 	private:
 
-		void _toStr( type::Stringifier& str ) const;
+		void _toStr( Stringifier& str ) const;
 
 		int _compareAttributes( const EonType& other ) const noexcept;
 		bool _compatibleAttributes( const EonType& other ) const noexcept;

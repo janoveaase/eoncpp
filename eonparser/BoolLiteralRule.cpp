@@ -9,7 +9,7 @@ namespace eon
 		{
 			// Just match names "true" and "false"
 			static std::set<string> literals{ "true", "false" };
-			if( parser.current().is( name_name ) && literals.find( parser.current().str() ) != literals.end() )
+			if( parser && parser.current().is( name_name ) && literals.find( parser.current().str() ) != literals.end() )
 			{
 				auto matched = Token( parser.current().source(), Name );
 				parser.forward();

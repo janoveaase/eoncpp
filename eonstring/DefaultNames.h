@@ -140,11 +140,15 @@ namespace eon
 	extern const name_t name_close_curly;
 	extern const name_t name_open_angle;
 	extern const name_t name_close_angle;
+	extern const name_t name_slash;
 	extern const name_t name_backslash;
+	extern const name_t name_assign;
 	extern const name_t name_member;
 	extern const name_t name_doublequote;
 	extern const name_t name_singlequote;
 	extern const name_t name_point;
+	extern const name_t name_colon;
+	extern const name_t name_comma;
 	extern const name_t name_symbol;
 	extern const name_t name_questionmark;
 	extern const name_t name_hash;
@@ -200,4 +204,7 @@ namespace eon
 	extern const name_t name_literal;
 	extern const name_t name_scope;
 	extern const name_t name_defvar;
+	extern const name_t name_comment;
+	extern const name_t name_windows;
+	extern const name_t name_posix;
 }

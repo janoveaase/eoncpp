@@ -12,12 +12,25 @@ namespace eon
 	}
 	bool ReTokenizer::EncloseRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( EncloseStart != parser.current().type() )
+		if( !parser || EncloseStart != parser.current().type() || !parser.exists() )
 			return false;
 		auto initial = parser.pos();
 		parser.forward();
-		auto matched = Token( parser.current().source(), Name );
-		return _match( initial, matched, parser, output );
+		if( parser )
+		{
+			auto matched = Token( parser.current().source(), Name );
+			if( parser.current().type() != EncloseEnd )
+				return _match( initial, matched, parser, output );
+			else
+			{
+				matched.source().pullEnd();
+				output.push_back( std::move( matched ) );
+				parser.forward();
+				return true;
+			}
+		}
+		else
+			return false;
 	}
 	bool ReTokenizer::EncloseRule::_match( size_t initial, Token matched, TokenParser& parser, std::vector<Token>& output )
 		const noexcept
@@ -47,7 +60,7 @@ namespace eon
 				}
 				else if( parser.current().type() == EncloseEnd )
 				{
-					matched.extend( parser.prior().source().end() );
+					matched.extend( parser.current().source().start() );
 					output.push_back( std::move( matched ) );
 					parser.forward();
 					return true;
@@ -66,8 +79,21 @@ namespace eon
 			return false;
 		auto initial = parser.pos();
 		parser.forward( 2 );
-		auto matched = Token( parser.current().source(), Name );
-		return _match( initial, matched, parser, output );
+		if( parser )
+		{
+			auto matched = Token( parser.current().source(), Name );
+			if( parser.current().type() != EncloseEnd )
+				return _match( initial, matched, parser, output );
+			else
+			{
+				matched.source().pullEnd();
+				output.push_back( std::move( matched ) );
+				parser.forward();
+				return true;
+			}
+		}
+		else
+			return false;
 	}
 	bool ReTokenizer::ComboRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
@@ -138,7 +164,7 @@ namespace eon
 	}
 	bool ReTokenizer::LinestartRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( parser.current().source().start().bytePos() == 0 || parser.prior().type() == name_newline )
+		if( parser && ( parser.current().source().start().bytePos() == 0 || parser.prior().type() == name_newline ) )
 		{
 			if( parser.current().type() == Linestart )
 			{

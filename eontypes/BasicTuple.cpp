@@ -101,26 +101,12 @@ namespace eon
 		{
 			auto ttype = Type.name();
 			if( ttype == name_data || ttype == name_dynamic )
-			{
-				str.spacingOnce();
-				str.addWord( eon::str( ttype ) + "(" );
-				str.noSpacing();
-			}
+				str.pushPrefix( eon::str( ttype ) ).pushOpen( "(" );
 			else if( ttype == name_plain )
-			{
-				str.spacingOnce();
-				str.addWord( "p(" );
-				str.noSpacing();
-			}
-			str.pushTuple( ttype );
+				str.pushPrefix( "p" ).pushOpen( "(" );
 			_str( str );
-			str.popTuple();
 			if( isTupleType( ttype ) )
-			{
-				str.markRaw();
-				str.addWord( ")" );
-				str.spacingOnce();
-			}
+				str.pushClose( ")" );
 		}
 
 
@@ -370,7 +356,7 @@ namespace eon
 			return typeid( Tuple );
 		}
 
-		void BasicTuple::_str( type::Stringifier& str ) const
+		void BasicTuple::_str( Stringifier& str ) const
 		{
 			bool first = true;
 			for( auto& element : Attributes )
@@ -378,11 +364,7 @@ namespace eon
 				if( first )
 					first = false;
 				else
-				{
-					str.addRaw( "," );
-					str.resetRaw();
-					str.spacingOnce();
-				}
+					str.pushStop( "," );
 
 				if( element.type().name() == name_plain
 					|| element.type().name() == name_data
@@ -391,47 +373,34 @@ namespace eon
 					auto ttype = element.type().name();
 					if( element.name() )
 					{
-						str.addWord( element.name() );
+						str.pushWord( eon::str( element.name() ) );
 						if( ttype == name_data )
 						{
-							str.addWord( ":" );
-							str.addIndent();
-							str.newLine();
-							str.pushTuple( ttype );
+							str.pushStartBlock( ":");
 							standardPrefix( str );
 							( (const DataTuple*)element.value() )->_str( str );
 							standardPostfix( str );
-							str.popTuple();
-							str.noSpacing();
-							str.reduceIndent();
+							str.pushEndBlock();
 						}
 						else
 						{
-							str.addWord( "=" );
-							str.pushTuple( ttype );
+							str.pushSpecialOp( "=" );
 							explicitPrefix( str );
 							( (const DataTuple*)element.value() )->_str( str );
 							explicitPostfix( str );
-							str.popTuple();
 						}
 					}
 					else
 					{
-						str.pushTuple( ttype );
 						explicitPrefix( str );
 						( (const DataTuple*)element.value() )->_str( str );
-						str.noSpacing();
 						explicitPostfix( str );
-						str.popTuple();
 					}
 				}
 				else
 				{
 					if( element.name() )
-					{
-						str.addWord( element.name() );
-						str.addWord( "=" );
-					}
+						str.pushWord( eon::str( element.name() ) ).pushSpecialOp( "=" );
 					element.value()->str( str );
 				}
 			}

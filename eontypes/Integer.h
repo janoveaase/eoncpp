@@ -39,7 +39,8 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( type::Stringifier& str ) const override { str.addWord( type::Handler::mapType<int_type>() ); }
+		inline void str( Stringifier& str ) const override {
+			str.pushWord( eon::str( type::Handler::mapType<int_type>() ) ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override {
 			return instantiate( static_cast<int_type>( 0 ) ); }
@@ -64,7 +65,9 @@ namespace eon
 		inline Object* copy() override { return new IntegerInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( int_type ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
-		inline void str( type::Stringifier& str ) const override { str.addWord( string( Value ) ); }
+		inline void str( Stringifier& str ) const override {
+			str.pushWord( string( Value ) ); if( rawType() == typeid( short_t ) ) str.pushAppend( "S" ); else if( rawType()
+				== typeid( long_t ) ) str.pushAppend( "L" ); }
 		inline Instance* copy() const override { return new IntegerInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const IntegerInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }

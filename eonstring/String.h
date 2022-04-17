@@ -4,6 +4,8 @@
 #include <set>
 #include <list>
 #include <cstdlib>
+#include <sstream>
+#include <iomanip>
 
 
 
@@ -173,7 +175,7 @@ namespace eon
 #ifdef EON_APPLE
 		inline explicit string( int64_t value ) { *this = toString( value ); }
 #endif
-		inline explicit string( float value ) { *this = string( toString( static_cast<double>( value ) ) ).trimFloat(); }
+		inline explicit string( float value ) { *this = string( toString( value ).trimFloat() ); } // static_cast<double>( value ) ) ).trimFloat(); }
 		inline explicit string( double value ) { *this = string( toString( value ) ).trimFloat(); }
 		inline explicit string( long double value ) { *this = string( toString( value ) ).trimFloat(); }
 
@@ -1470,17 +1472,19 @@ namespace eon
 		//* (We want greater precision and to remove trailing decimal zeros!)
 		static inline string toString( double value )
 		{
-			static char digits[ 320 ];
-#ifdef EON_WINDOWS
-			sprintf_s( digits, 320, "%.8f", value );
-#else
-			sprintf( digits, "%.8f", value );
-#endif
-			auto size = strlen( digits );
-			for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.';
-				--size )
-				;
-			return string( std::string( digits, size ), true );
+			std::ostringstream ss;
+			auto digits = static_cast<size_t>( log10( abs( value ) ) ) + 1;
+			ss.precision( 7 + digits );
+			ss << value;
+			return string( ss.str() );
+		}
+		static inline string toString( long double value )
+		{
+			std::ostringstream ss;
+			auto digits = static_cast<size_t>( log10( abs( value ) ) ) + 1;
+			ss.precision( 10 + digits );
+			ss << value;
+			return string( ss.str() );
 		}
 		
 		//* Convert an [eon::string_iterator] into a string format (for

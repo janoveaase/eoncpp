@@ -2,7 +2,7 @@
 
 #include "TypeDefinitions.h"
 #include "EonType.h"
-#include "Stringifier.h"
+#include <eonstring/Stringifier.h>
 #include <eonsource/SourceRef.h>
 
 

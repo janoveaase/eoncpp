@@ -14,6 +14,7 @@ set(TYPES_HEADERS
 	DataTuple.h
 	DynamicTuple.h
 	Tuple.h
+	TypeTupleObj.h
 	Bool.h
 	BoolActions.h
 	Byte.h
@@ -49,7 +50,6 @@ set(TYPES_HEADERS
 	Operators.h
 	OperatorAction.h
 	Node.h
-	Stringifier.h
 	Primitives.h
 	StandardTypes.h
 	Scope.h

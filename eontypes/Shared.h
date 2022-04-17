@@ -58,7 +58,7 @@ namespace eon
 		inline void die() { Value.reset(); }
 		inline void callDestructor() override { delete this; }
 		inline Object* copy() override { return new Shared( Value ); }
-		inline void str( type::Stringifier& str ) const override { str.addWord( "str" );  }
+		inline void str( Stringifier& str ) const override { str.pushWord( "str" );  }
 
 	private:
 		shared Value;

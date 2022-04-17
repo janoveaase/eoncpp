@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TypeSystem.h"
-#include "Stringifier.h"
 #include "OperatorAction.h"
 #include "Scope.h"
 
@@ -91,11 +90,10 @@ namespace eon
 			inline bool isEllipsis() const noexcept { return Type == NodeType::name_only && Name == name_ellipsis; }
 
 			// Get as string
-			inline string str() const {
-				type::Stringifier strf; infixStr( strf ); return strf.output(); }
+			inline string str() const { Stringifier strf; infixStr( strf ); return strf.str(); }
 
 			// Format as infix string
-			void infixStr( type::Stringifier& str ) const;
+			void infixStr( Stringifier& str ) const;
 
 
 
@@ -178,7 +176,7 @@ namespace eon
 			std::vector<bool> _operandsNeedingParenthesis( const actions::OperatorAction& opr ) const;
 
 //			// Get as postfix string
-//			void postfixStr( type::Stringifier& str ) const;
+//			void postfixStr( Stringifier& str ) const;
 
 			void _infixInstanceStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const;
 			void _infixPreFirstStr( const actions::OperatorAction& action, Stringifier& str, const std::vector<bool>& need_par ) const;
