@@ -854,6 +854,35 @@ namespace eon
 		}
 	}
 
+	string string::toString( double value )
+	{
+		static char digits[ 320 ];
+#ifdef EON_WINDOWS
+		sprintf_s( digits, 320, "%.8f", value );
+#else
+		sprintf( digits, "%.8f", value );
+#endif
+		auto size = strlen( digits );
+		for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.';
+			--size )
+			;
+		return string( std::string( digits, size ), true );
+	}
+	string string::toString( long double value )
+	{
+		static char digits[ 480 ];
+#ifdef EON_WINDOWS
+		sprintf_s( digits, 480, "%.10f", value );
+#else
+		sprintf( digits, "%.10f", value );
+#endif
+		auto size = strlen( digits );
+		for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.';
+			--size )
+			;
+		return string( std::string( digits, size ), true );
+	}
+
 	const std::string& string::bom()
 	{
 		static std::string _bom;

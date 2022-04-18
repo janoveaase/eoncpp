@@ -1471,22 +1471,8 @@ namespace eon
 
 		//* Convert 'double' into string (specifically).
 		//* (We want greater precision and to remove trailing decimal zeros!)
-		static inline string toString( double value )
-		{
-			std::ostringstream ss;
-			auto digits = static_cast<size_t>( std::log10( abs( value ) ) ) + 1;
-			ss.precision( 7 + digits );
-			ss << value;
-			return string( ss.str() );
-		}
-		static inline string toString( long double value )
-		{
-			std::ostringstream ss;
-			auto digits = static_cast<size_t>( std::log10( abs( value ) ) ) + 1;
-			ss.precision( 10 + digits );
-			ss << value;
-			return string( ss.str() );
-		}
+		static string toString( double value );
+		static string toString( long double value );
 
 		//* Convert an [eon::string_iterator] into a string format (for
 		//* streaming/saving etc.): "<byte pos>:<char pos>"
