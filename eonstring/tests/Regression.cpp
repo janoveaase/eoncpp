@@ -782,7 +782,7 @@ namespace eon
 		WANT_EQ( "9034658634325425", string::toString( ui64 ) ) << "Wrong uint64_t value";
 		WANT_EQ( "1.23", string::toString( dbl_1 ) ) << "Wrong double value";
 		WANT_EQ( "-3546346.023414", string::toString( dbl_2 ) ) << "Wrong double value";
-		WANT_EQ( 309, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
+		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
 		WANT_EQ( "123456789.0112345666", string::toString( ldbl_1 ) ) << "Wrong long double value";
 		WANT_EQ( "-98765432109.8765411377", string::toString( ldbl_2 ) ) << "Wrong long double value";
 	}
