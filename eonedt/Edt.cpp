@@ -69,7 +69,8 @@ namespace eon
 	void edt::_load( source::Ref source, DataTuple& tuple, source::Reporter& reporter )
 	{
 		Reporter = &reporter;
-		TokenParser parser( _retokenize()( TokenParser( _tokenizer()( source ) ) ) );
+		TokenParser temp( _tokenizer()( source ) );
+		TokenParser parser( _retokenize()( temp ) );
 		_loadTuple( tuple, parser, 0, false );
 	}
 	void edt::_loadTuple( DataTuple& tuple, TokenParser& parser, index_t indentation, bool end_by_close )

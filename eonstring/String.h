@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 
 
@@ -1473,7 +1474,7 @@ namespace eon
 		static inline string toString( double value )
 		{
 			std::ostringstream ss;
-			auto digits = static_cast<size_t>( log10( abs( value ) ) ) + 1;
+			auto digits = static_cast<size_t>( std::log10( abs( value ) ) ) + 1;
 			ss.precision( 7 + digits );
 			ss << value;
 			return string( ss.str() );
@@ -1481,12 +1482,12 @@ namespace eon
 		static inline string toString( long double value )
 		{
 			std::ostringstream ss;
-			auto digits = static_cast<size_t>( log10( abs( value ) ) ) + 1;
+			auto digits = static_cast<size_t>( std::log10( abs( value ) ) ) + 1;
 			ss.precision( 10 + digits );
 			ss << value;
 			return string( ss.str() );
 		}
-		
+
 		//* Convert an [eon::string_iterator] into a string format (for
 		//* streaming/saving etc.): "<byte pos>:<char pos>"
 		//* (See matching [decodeIterator] method.)
