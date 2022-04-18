@@ -856,11 +856,11 @@ namespace eon
 
 	string string::toString( double value )
 	{
-		static char digits[ 320 ];
+		static char digits[ 325 ];
 #ifdef EON_WINDOWS
-		sprintf_s( digits, 320, "%.8f", value );
+		sprintf_s( digits, 325, "%.8f", value );
 #else
-		sprintf( digits, "%.8f", value );
+		snprintf( digits, 325, "%.8f", value );
 #endif
 		auto size = strlen( digits );
 		for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.';
@@ -872,9 +872,9 @@ namespace eon
 	{
 		static char digits[ 480 ];
 #ifdef EON_WINDOWS
-		sprintf_s( digits, 480, "%.10f", value );
+		sprintf_s( digits, 480, "%.10Lf", value );
 #else
-		sprintf( digits, "%.10f", value );
+		snprintf( digits, 480, "%.10Lf", value );
 #endif
 		auto size = strlen( digits );
 		for( ; digits[ size - 1 ] == '0' && digits[ size - 2 ] != '.';
