@@ -3,7 +3,7 @@
   
     <Type Name="::eon::name_t">
         <DisplayString Condition="Value==0">(no_name)</DisplayString>
-        <DisplayString Condition="Value!=0">{::eon::_Name::Names[Value-1]} #{Value}</DisplayString>
+        <DisplayString Condition="Value!=0">{::eon::Data->Names[Value-1]} #{Value}</DisplayString>
     </Type>
   
 </AutoVisualizer>

@@ -9,6 +9,7 @@ set(STRING_HEADERS
 	UniChar.h
 	NameDefs.h
 	Name.h
+	NameData.h
 	DefaultNames.h
 	NamePath.h
 	Hex.h
@@ -22,6 +23,7 @@ set(STRING_SOURCES
 	Substring.cpp
 	UniChar.cpp
 	Name.cpp
+	NameData.cpp
 	DefaultNames.cpp
 	NamePath.cpp
 	Hex.cpp

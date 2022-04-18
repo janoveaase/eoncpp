@@ -9,8 +9,8 @@
 #include <iomanip>
 #include <chrono>
 #include <filesystem>
-#include <eonstring/String.h>
 #include <eonstring/Name.h>
+#include <eonstring/String.h>
 #include <eonregex/RegEx.h>
 #include <eonterminal/Terminal.h>
 

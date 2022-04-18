@@ -6,7 +6,6 @@
 #include <eontokenizer/ReTokenizer.h>
 #include <eontokenizer/TokenMatcher.h>
 #include <eonsource/String.h>
-#include <chrono>
 
 
 namespace eon

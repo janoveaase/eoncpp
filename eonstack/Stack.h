@@ -3,30 +3,33 @@
 #include <vector>
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	//* Exception thrown when trying to access a stack element that doesn't exist
+	// Exception thrown when trying to access a stack element that doesn't exist
 	EONEXCEPT( NoElement );
 
 
 
 
-	/**************************************************************************
-	  Eon Stack Class - eon::stack
-
-	  This class is like std::stack, but also grants access to elements below
-	  the top, as well as iteration.
-	  A std::vector is used as underlying structure.
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// Eon Stack Class - eon::stack
+	//
+	// This class is like std::stack, but also grants access to elements below
+	// the top, as well as iteration.
+	// A std::vector is used as underlying structure.
+	//
 	template<class T>
 	class stack
 	{
-		/**********************************************************************
-		  Construction
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Construction
+		//
 	public:
 
 		stack() = default;
@@ -40,94 +43,98 @@ namespace eon
 
 
 
-		/**********************************************************************
-		  Modifier Methods
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Modifier Methods
+		//
 	public:
 
-		//* Replace elements by copying another stack
+		// Replace elements by copying another stack
 		inline stack& operator=( const stack& other ) { Data = other.Data; return *this; }
 
-		//* Replace elements by taking ownership of the elements of another stack
+		// Replace elements by taking ownership of the elements of another stack
 		inline stack& operator=( stack&& other ) noexcept { Data = std::move( other.Data ); return *this; }
 
-		//* Copy the elements of the other stack onto the top of this
-		//* The ordering of the elements will be maintained.
+		// Copy the elements of the other stack onto the top of this
+		// The ordering of the elements will be maintained.
 		inline stack& operator+=( const stack& other ) {
 			for( auto& elm : other.Data ) Data.push_back( elm ); return *this; }
 
-		//* Take ownership of the elements of the other stack, but put on top of this
-		//* The ordering of the elements will be maintained.
+		// Take ownership of the elements of the other stack, but put on top of this
+		// The ordering of the elements will be maintained.
 		inline stack& operator+=( stack&& other ) {
 			for( auto& elm : other.Data ) Data.push_back( std::move( elm ) ); other.clear(); return *this; }
 
 
-		//* Reserver space for a specific number of elements
-		inline void reserver( size_t capacity ) { Data.reserve( capacity ); }
+		// Reserve space for a specific number of elements
+		inline void reserve( size_t capacity ) { Data.reserve( capacity ); }
 
-		//* Clear all elements
+		// Clear all elements
 		void clear() noexcept { Data.clear(); }
 
 
 
 
-		/**********************************************************************
-		  Read-only Methods
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Read-only Methods
+		//
 	public:
 
-		//* Check if empty
+		// Check if empty
 		inline bool empty() const noexcept { return Data.empty(); }
 
-		//* Use as boolean
-		//* Returns true if not empty!
+		// Use as boolean
+		// Returns true if not empty!
 		inline operator bool() const noexcept { return !Data.empty(); }
 
-		//* Get number of stack elements
+		// Get number of stack elements
 		inline size_t size() const noexcept { return Data.size(); }
 
-		//* Get current capacity
+		// Get current capacity
 		inline size_t capacity() const noexcept { return Data.capacity(); }
 
 
 
 
-		/**********************************************************************
-		  Stack Operations
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//		
+		// Stack Operations
+		//
 	public:
 
-		//* Push an element onto the top of the stack
+		// Push an element onto the top of the stack
 		inline void push( const T& element ) { Data.push_back( element ); }
 		inline void push( T&& element ) { Data.push_back( std::move( element ) ); }
 
-		//* Access the top element
-		//* Throws [eon::NoElement] if stack is empty!
+		// Access the top element
+		// Throws [eon::NoElement] if stack is empty!
 		inline const T& top() const { return element( 0 ); }
 		inline T& top() { return element( 0 ); }
 
-		//* Access the bottom element
-		//* Throws [eon::NoElement] if stack is empty!
+		// Access the bottom element
+		// Throws [eon::NoElement] if stack is empty!
 		inline const T& bottom() const { return element( Data.size() - 1 ); }
 		inline T& bottom() { return element( Data.size() - 1 ); }
 
-		//* Access an element below the top
-		//* An argument value of zero is the same as calling top()!
-		//* Throws [eon::NoElement] if stack is empty!
+		// Access an element below the top
+		// An argument value of zero is the same as calling top()!
+		// Throws [eon::NoElement] if stack is empty!
 		inline const T& element( size_t steps_from_top ) const {
 			if( _end() >= steps_from_top ) return Data[ _end() - steps_from_top ]; else throw NoElement(); }
 		inline T& element( size_t steps_from_top ) {
 			if( _end() >= steps_from_top ) return Data[ _end() - steps_from_top ]; else throw NoElement(); }
 
-		//* Pop the top element
+		// Pop the top element
 		inline void pop() noexcept { if( !Data.empty() ) Data.resize( Data.size() - 1 ); }
 
 
 
 
-		/**********************************************************************
-		  Iteration
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Iteration
+		//
 	public:
 
 		using iterator = typename std::vector<T>::iterator;

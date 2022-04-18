@@ -439,9 +439,9 @@ namespace eon
 				str += eon::str( elm.type() );
 				if( elm.objValue() )
 				{
-					type::Stringifier strf;
-					elm.objValue()->str( strf );
-					str += "=" + strf.output();
+//					type::Stringifier strf;
+//					elm.objValue()->str( strf );
+//					str += "=" + strf.output();
 				}
 			}
 		}
