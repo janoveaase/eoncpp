@@ -274,9 +274,8 @@ namespace eon
 						auto operators = Tools->scope().global().getActions( compilerName( "$op_=" ), type,
 							EonType( { type } ), type );
 
-						if( !_checkOperator( operators,
-							actions::OperatorAction( type::operators::code::assign, 2, source::Ref() ),
-							type.str() + ", " + type.str(), type ) )
+						actions::OperatorAction act( type::operators::code::assign, 2, source::Ref() );
+						if( !_checkOperator( operators, act, type.str() + ", " + type.str(), type ) )
 							return false;
 
 						auto assign = type::Node::newOperator( (actions::OperatorAction*)*operators.begin() );
@@ -299,9 +298,8 @@ namespace eon
 							auto operators = Tools->scope().global().getActions( compilerName( "$op_=" ), type,
 								EonType( { type } ), type );
 
-							if( !_checkOperator( operators,
-								actions::OperatorAction( type::operators::code::assign, 2, source::Ref() ),
-								type.str() + ", " + type.str(), type ) )
+							actions::OperatorAction act( type::operators::code::assign, 2, source::Ref() );
+							if( !_checkOperator( operators, act, type.str() + ", " + type.str(), type ) )
 								return false;
 
 							auto assign = type::Node::newOperator( (actions::OperatorAction*)*operators.begin() );

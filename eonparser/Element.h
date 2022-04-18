@@ -1,7 +1,7 @@
 #pragma once
 #include <eontypes/TypeSystem.h>
 #include <eonsource/SourceRef.h>
-#include <eontypes/operators.h>
+#include <eontypes/Operators.h>
 
 
 /******************************************************************************
