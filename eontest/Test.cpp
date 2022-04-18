@@ -318,7 +318,7 @@ namespace eontest
 #endif
 			root /= "eon_sandbox";
 		}
-		Sandbox = sandbox_root.stdstr();
+		Sandbox = root / sandbox_root.stdstr();
 		if( !test_class.empty() )
 			Sandbox /= std::filesystem::path( test_class.stdstr() );
 		if( !test_name.empty() )
