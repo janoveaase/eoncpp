@@ -56,7 +56,7 @@ namespace eon
 
 		private:
 			inline bool _match( RxData& data, size_t steps ) override {
-				return !string::isSpaceChar( data() ) ? data.advance() : false; }
+				return data && !string::isSpaceChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\S"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
@@ -107,7 +107,7 @@ namespace eon
 
 		private:
 			inline bool _match( RxData& data, size_t steps ) override {
-				return !string::isPunctuation( data() ) ? data.advance() : false; }
+				return data && !string::isPunctuation( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\P"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
