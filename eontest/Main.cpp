@@ -41,8 +41,17 @@ Args processArgs( int argc, const char* argv[] )
 
 bool runTest( const std::string& exe, eontest::EonTest::TestRef& test )
 {
-	auto test_obj = test.Factory->createTest( test.TestClass, test.TestName );
-	test_obj->_runEonTest_( exe );
+	eontest::_EonTest* test_obj{ nullptr };
+	try
+	{
+		test_obj = test.Factory->createTest( test.TestClass, test.TestName );
+	}
+	catch( ... )
+	{
+		return false;
+	}
+	if( !test_obj->Failed )
+		test_obj->_runEonTest_( exe );
 	auto failed = test_obj->Failed;
 	delete test_obj;
 	return !failed;

@@ -281,7 +281,7 @@ namespace eontest
 	EonTestSandbox::EonTestSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root )
 	{
 		_prepSandbox( test_class, test_name, sandbox_root );
-		_createSandbox();
+		Failed = !_createSandbox();
 	}
 	EonTestSandbox::~EonTestSandbox()
 	{
@@ -335,22 +335,25 @@ namespace eontest
 			return true;
 		else
 		{
-			FAIL() << "Failed to create sandbox directory \"" + Sandbox.string() + "\": " + error.message();
+			ADD_FAILURE() << "Failed to create sandbox directory \"" + Sandbox.string() + "\": " + error.message();
 			return false;
 		}
 	}
 	bool EonTestSandbox::_removeSandbox() noexcept
 	{
 		if( Sandbox.empty() )
+		{
+			ADD_FAILURE() << "Have no sandbox directory specified!";
 			return false;
+		}
 		if( !std::filesystem::exists( Sandbox ) )
 			return true;
 		std::error_code error;
-		if( std::filesystem::remove_all( Sandbox, error ) )
+		if( std::filesystem::remove_all( Sandbox, error ) && !std::filesystem::exists( Sandbox ) )
 			return true;
 		else
 		{
-			FAIL() << "Failed to remove sandbox directory \"" + Sandbox.string() + "\": " + error.message();
+			ADD_FAILURE() << "Failed to remove sandbox directory \"" + Sandbox.string() + "\": " + error.message();
 			return false;
 		}
 	}
