@@ -185,6 +185,16 @@ namespace eon
 		WANT_TRUE( expr.match( "c" ) ) << "Didn't match 'c'";
 		WANT_FALSE( expr.match( "d" ) ) << "Matched 'd'";
 	}
+	TEST( RegExTest, match_chargroup_negate )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"([^aβc])" ) << "Failed to parse";
+
+		WANT_FALSE( expr.match( "a" ) ) << "Matched 'a'";
+		WANT_FALSE( expr.match( "β" ) ) << "Matched unicode letter";
+		WANT_FALSE( expr.match( "c" ) ) << "Matched 'c'";
+		WANT_TRUE( expr.match( "d" ) ) << "Didn't match 'd'";
+	}
 
 	TEST( RegExTest, match_capture_greedy_1 )
 	{
@@ -405,6 +415,15 @@ namespace eon
 	{
 		string str{ "alpha: 1:99:7 beta ." };
 		regex expr{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
+		WANT_TRUE( expr.match( str ) );
+	}
+
+	TEST( MiscTests, real_case1 )
+	{
+		string str{ "2022-04-27T08:13:28.391 INFO    : Log \"test\" opened, Details=aase015win;Windows;10.0.22000.434;+01:00 (+01:00 3M5W6D2H-10M5W6D3H);29720;8273120453202572832" };
+		regex expr{ R"(2022\-04\-27T\d\d:\d\d:\d\d\.\d\d\d INFO    : Log "test" opened, Details=[^;]+;Windows[^;]*;[^;]+;[^;]*;\d+;\d+)" };
+//		string str{ "aase015win;" };
+//		regex expr{ R"([^;]+;)" };
 		WANT_TRUE( expr.match( str ) );
 	}
 

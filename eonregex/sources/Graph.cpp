@@ -344,6 +344,11 @@ namespace eon
 			param.advance();			// The '['
 
 			CharGroup::CharGrp value;
+			if( param && param() == '^' )
+			{
+				value.Negate = true;
+				param.advance();
+			}
 			bool esc = false;
 			int64_t prev = -1;
 			while( param )

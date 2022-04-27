@@ -9,7 +9,7 @@ namespace eon
 		{
 			string s{ "[" };
 			if( Negate )
-				s += "!";
+				s += "^";
 			for( auto c : Chars )
 				s += c;
 			for( auto& r : Ranges )
@@ -51,6 +51,8 @@ namespace eon
 					}
 				}
 			}
+			if( Value.Negate )
+				data.advance();
 			return Value.Negate;
 		}
 		bool CharGroup::_match( char_t chr )
