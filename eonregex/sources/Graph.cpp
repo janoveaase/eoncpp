@@ -130,7 +130,11 @@ namespace eon
 				if( node != nullptr )
 				{
 					if( node->Type == NodeType::op_or )
+					{
 						node = parseOr( (OpOr*)node, param, start );
+						if( node )
+							param.set( node );
+					}
 					else
 						param.set( node );
 				}
@@ -685,8 +689,18 @@ namespace eon
 		Node* Graph::parseFixed( ParseParam& param, const string_iterator& start )
 		{
 			string value{ param() };
-			while( param.advance() && string::isWordChar( param() ) )
-				value += param();
+			if( string::isSpaceChar( param() ) )
+			{
+				while( param.advance() && string::isSpaceChar( param() ) )
+					value += param();
+			}
+			else if( string::isWordChar( param() ) )
+			{
+				while( param.advance() && string::isWordChar( param() ) )
+					value += param();
+			}
+			else
+				param.advance();
 			return new FixedValue( std::move( value ), substring( start, param.pos() ) );
 		}
 

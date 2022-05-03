@@ -378,6 +378,12 @@ namespace eon
 		WANT_EQ( "great", match.group( name( "2_" ) ).stdstr() ) << "Wrong second group";
 		WANT_EQ( "!", match.group( name( "three" ) ).stdstr() ) << "Wrong third group";
 	}
+	TEST( MiscTests, complex )
+	{
+		string str{ "this and that and this or that when that and this" };
+		regex expr{ R"(@<key>(\w+) @<conj>(and|or|when) this|that @:<conj> @:<key> !@:<conj>\w+ \w+ and|or|when this|that @:<conj> this|that)" };
+		WANT_TRUE( expr.match( str ) );
+	}
 
 	TEST( MiscTests, utf8_match )
 	{
@@ -422,8 +428,6 @@ namespace eon
 	{
 		string str{ "2022-04-27T08:13:28.391 INFO    : Log \"test\" opened, Details=aase015win;Windows;10.0.22000.434;+01:00 (+01:00 3M5W6D2H-10M5W6D3H);29720;8273120453202572832" };
 		regex expr{ R"(2022\-04\-27T\d\d:\d\d:\d\d\.\d\d\d INFO    : Log "test" opened, Details=[^;]+;Windows[^;]*;[^;]+;[^;]*;\d+;\d+)" };
-//		string str{ "aase015win;" };
-//		regex expr{ R"([^;]+;)" };
 		WANT_TRUE( expr.match( str ) );
 	}
 
