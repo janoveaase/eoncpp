@@ -16,18 +16,15 @@ namespace eon
 
 	directory& directory::ensureExists()
 	{
-		if( exists() )
+		if( Path.exists() )
 			return *this;
-		directory parent{ Path.parent() };
-		parent.ensureExists();
 		try
 		{
-			if( !std::filesystem::create_directory( Path.stdpath() ) )
-				throw filesys::Failure( "Failed to create directory \"" + Path.str() + "\"" );
+			std::filesystem::create_directories( Path.makeFilePath().stdpath() );
 		}
 		catch( std::exception& e )
 		{
-			throw filesys::Failure( e.what() );
+			throw filesys::Failure( "Failed to create directory \"" + Path.str() + "\" - " + e.what() );
 		}
 		return *this;
 	}

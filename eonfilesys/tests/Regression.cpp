@@ -183,6 +183,72 @@ namespace eon
 		auto str = string( ";" ).join( paths );
 		WANT_EQ( "alpha/;beta/;f1;f2;gamma/", str.stdstr() );
 	}
+	TEST( DirTest, ensure_exists_speed1 )
+	{
+		size_t iterations = 1000;
+#ifdef _DEBUG
+		iterations /= 5;
+#endif
+		directory root = path( sandbox() );
+		directory target = root.dpath() / "alpha" / "beta" / "gamma" / "delta" / "epsilon";
+		
+		std::chrono::steady_clock clock;
+		size_t successes = 0, failures = 0;
+		auto start = clock.now();
+		for( int i = 0; i < iterations; ++i )
+		{
+			try
+			{
+				target.ensureExists();
+				root.remove();
+				++successes;
+			}
+			catch( ... )
+			{
+				++failures;
+			}
+		}
+		auto end = clock.now();
+		auto e_time = end - start;
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+		eon::term << "Processing time: " << string::toString( ms.count() ) << "ms\n";
+		WANT_EQ( iterations, successes );
+		WANT_EQ( 0, failures );
+	}
+	TEST( DirTest, ensure_exists_speed2 )
+	{
+		size_t iterations = 1000;
+#ifdef _DEBUG
+		iterations /= 5;
+#endif
+		directory root = path( sandbox() );
+		directory target = root.dpath() / "alpha" / "beta" / "gamma" / "delta" / "epsilon";
+		REQUIRE_NO_EXCEPT( target.ensureExists() );
+
+		std::chrono::steady_clock clock;
+		size_t successes = 0, failures = 0;
+		int sum = 0;
+		auto start = clock.now();
+		for( int i = 0; i < iterations; ++i )
+		{
+			try
+			{
+				target.ensureExists();
+				sum += i;
+				++successes;
+			}
+			catch( ... )
+			{
+				++failures;
+			}
+		}
+		auto end = clock.now();
+		auto e_time = end - start;
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( e_time );
+		eon::term << "Processing time: " << string::toString( ms.count() ) << "ms " << sum << "\n";
+		WANT_EQ( iterations, successes );
+		WANT_EQ( 0, failures );
+	}
 
 	TEST( FileTest, basic )
 	{
