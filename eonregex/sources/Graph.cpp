@@ -418,6 +418,9 @@ namespace eon
 						case 'e':
 							// TODO: Handle escape sequence!
 							break;
+						default:
+							value.Chars.insert( '\\' );
+							break;
 					}
 					esc = false;
 				}

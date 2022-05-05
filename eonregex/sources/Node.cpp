@@ -120,11 +120,14 @@ namespace eon
 			if( Type == NodeType::val_any )
 			{
 				// Goble as much as we can
+				int gobbled{ 0 };
 				while( matches.size() - 1 < Quant.max() && matches.top() )
 				{
 					matches.push( matches.top() );
 					matches.top().advance();
-					if( MinCharsRemaining > 0 && matches.top().remaining() < MinCharsRemaining - 1 )
+					if( gobbled < MinCharsRemaining )
+						++gobbled;
+					if( MinCharsRemaining > 0 && matches.top().remaining() < MinCharsRemaining - gobbled )
 						return;
 				}
 				if( Next == nullptr )
