@@ -42,6 +42,8 @@ namespace eon
 	}
 	name_t NameData::compilerName( string&& str )
 	{
+		if( str.empty() )
+			return no_name;
 		std::lock_guard<std::mutex> lock( Lock );
 		auto found = Lookup.find( &str );
 		if( found != Lookup.end() )
