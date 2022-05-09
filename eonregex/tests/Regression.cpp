@@ -195,6 +195,17 @@ namespace eon
 		WANT_FALSE( expr.match( "c" ) ) << "Matched 'c'";
 		WANT_TRUE( expr.match( "d" ) ) << "Didn't match 'd'";
 	}
+	TEST( RegExTest, match_chargroup_negate2 )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(![aβc]x)" ) << "Failed to parse";
+
+		WANT_FALSE( expr.match( "a" ) ) << "Matched 'a'";
+		WANT_FALSE( expr.match( "β" ) ) << "Matched unicode letter";
+		WANT_FALSE( expr.match( "c" ) ) << "Matched 'c'";
+		WANT_FALSE( expr.match( "d" ) ) << "Matched 'd'";
+		WANT_TRUE( expr.match( "x" ) ) << "Didn't match 'x'";
+	}
 
 	TEST( RegExTest, match_capture_greedy_1 )
 	{
