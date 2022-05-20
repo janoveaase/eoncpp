@@ -70,7 +70,7 @@ namespace eon
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return Value == dynamic_cast<const CharGroup*>( &other )->Value; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 
 		private:
 			CharGrp Value;

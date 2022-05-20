@@ -38,7 +38,7 @@ namespace eon
 				return string::isLetterLowerCase( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\u"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
 		/*
@@ -64,7 +64,7 @@ namespace eon
 				return string::isLetterUpperCase( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\U"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}
 }

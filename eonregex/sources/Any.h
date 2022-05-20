@@ -38,7 +38,7 @@ namespace eon
 			inline string _strStruct() const override { return "."; }
 
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}
 }

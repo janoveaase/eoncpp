@@ -37,7 +37,7 @@ namespace eon
 				return string::isSpaceChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\s"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
 		class NotSpace : public Node
@@ -59,7 +59,7 @@ namespace eon
 				return data && !string::isSpaceChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\S"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
 		/*
@@ -86,7 +86,7 @@ namespace eon
 				return string::isPunctuation( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\p"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
 		class NotPunctuation : public Node
@@ -110,7 +110,7 @@ namespace eon
 				return data && !string::isPunctuation( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\P"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}
 }

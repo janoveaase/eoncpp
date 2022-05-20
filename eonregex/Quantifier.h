@@ -33,8 +33,8 @@ namespace eon
 
 			inline operator bool() const noexcept { return Set; }
 
-			inline size_t min() const noexcept { return Min; }
-			inline size_t max() const noexcept { return Max; }
+			inline size_t minQ() const noexcept { return Min; }
+			inline size_t maxQ() const noexcept { return Max; }
 			inline bool greedy() const noexcept { return Greedy; }
 
 

@@ -36,7 +36,7 @@ namespace eon
 			MinCharsRemaining = 0;
 			for( auto node : Optionals )
 			{
-				auto min = node->_countMinCharsRemaining() * Quant.min();
+				auto min = node->_countMinCharsRemaining() * Quant.minQ();
 				if( min < MinCharsRemaining )
 				{
 					MinCharsRemaining = min;

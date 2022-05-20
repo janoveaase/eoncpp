@@ -43,7 +43,7 @@ namespace eon
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return Value == dynamic_cast<const FixedValue*>( &other )->Value; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Value.numChars() * Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Value.numChars() * Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 
 		private:
 			string Value;

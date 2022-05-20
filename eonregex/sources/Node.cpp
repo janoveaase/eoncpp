@@ -42,9 +42,9 @@ namespace eon
 			// 3 range greedy
 			// 4 range non-greedy
 
-			if( Quant.min() == 1 && Quant.max() == 1 )
+			if( Quant.minQ() == 1 && Quant.maxQ() == 1 )
 				return matchSingle( data, steps );
-			else if( Quant.min() == 0 && Quant.max() == 1 )
+			else if( Quant.minQ() == 0 && Quant.maxQ() == 1 )
 				return matchOneOrZero( data, steps );
 			else if( Quant.greedy() )
 				return matchRangeGreedy( data, steps );
@@ -121,7 +121,7 @@ namespace eon
 			{
 				// Goble as much as we can
 				int gobbled{ 0 };
-				while( matches.size() - 1 < Quant.max() && matches.top() )
+				while( matches.size() - 1 < Quant.maxQ() && matches.top() )
 				{
 					matches.push( matches.top() );
 					matches.top().advance();
@@ -135,7 +135,7 @@ namespace eon
 			}
 			else
 			{
-				while( matches.size() - 1 < Quant.max() )
+				while( matches.size() - 1 < Quant.maxQ() )
 				{
 					if( !_match( matches.top(), steps ) )
 					{
@@ -149,7 +149,7 @@ namespace eon
 		}
 		bool Node::noNext( RxData& data, stack& matches )
 		{
-			if( matches.size() >= Quant.min() )
+			if( matches.size() >= Quant.minQ() )
 			{
 				if( !matches.empty() )
 					data = std::move( matches.top() );
@@ -159,7 +159,7 @@ namespace eon
 		}
 		bool Node::nextMatches( RxData& data, stack& matches )
 		{
-			while( matches.size() > Quant.min() )
+			while( matches.size() > Quant.minQ() )
 			{
 				size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
 				if( Next->match( matches.top(), next_steps ) )
@@ -176,7 +176,7 @@ namespace eon
 					if( matches.empty() )
 					{
 						// Check if we can get a way with zero matches
-						if( Quant.min() == 0 && Next == nullptr )
+						if( Quant.minQ() == 0 && Next == nullptr )
 							return true;
 						else
 							break;
@@ -190,7 +190,7 @@ namespace eon
 			// Match as few as possible from the start
 			RxData data_tmp{ data };
 			size_t matches = 0;
-			while( matches < Quant.min() )
+			while( matches < Quant.minQ() )
 			{
 				if( !_match( data_tmp, steps ) )
 					break;
@@ -200,7 +200,7 @@ namespace eon
 			// No next means we have nothing more to do
 			if( Next == nullptr )
 			{
-				if( matches >= Quant.min() && matches <= Quant.max() )
+				if( matches >= Quant.minQ() && matches <= Quant.maxQ() )
 				{
 					data = std::move( data_tmp );
 					return true;
@@ -209,7 +209,7 @@ namespace eon
 			}
 
 			// Now make sure the rest matches, or try matching this once more
-			while( matches <= Quant.max() )
+			while( matches <= Quant.maxQ() )
 			{
 				size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
 				if( Next->match( data_tmp, next_steps ) )

@@ -37,7 +37,7 @@ namespace eon
 				return string::isNumberAsciiDigit( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\d"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
 
@@ -60,7 +60,7 @@ namespace eon
 				return data && !string::isNumberDecimalDigit( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\D"; }
 			inline size_t _countMinCharsRemaining() noexcept override {
-				return MinCharsRemaining = Quant.min() + ( Next ? Next->_countMinCharsRemaining() : 0 );
+				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 );
 			}
 		};
 	}

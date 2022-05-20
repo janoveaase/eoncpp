@@ -254,7 +254,7 @@ namespace eon
 							throw;
 						}
 					}
-					if( value->Quant.min() != value->Quant.max() )
+					if( value->Quant.minQ() != value->Quant.maxQ() )
 					{
 						if( value->type() == NodeType::val_chargroup )
 						{
