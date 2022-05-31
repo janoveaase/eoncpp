@@ -118,6 +118,7 @@ namespace eon
 
 	private:
 		name_t Name{ no_name };
+	protected:
 		string Info;
 	};
 }
