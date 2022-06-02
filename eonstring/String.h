@@ -1092,7 +1092,7 @@ namespace eon
 			string str;
 			for( auto i = start; i != end; ++i )
 			{
-				if( !str.empty() )
+				if( i != start )
 					str += *this;
 				str += *i;
 			}

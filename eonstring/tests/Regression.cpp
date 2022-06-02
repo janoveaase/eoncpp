@@ -77,11 +77,18 @@ namespace eon
 			WANT_EQ( *e, eon::string( *a ) );
 		}
 	}
-	TEST( String, join )
+	TEST( String, join1 )
 	{
 		std::set<eon::string> elms{ "alpha", "beta", "gamma", "delta" };
 		auto act = eon::string( "--" ).join( elms.begin(), elms.end() );
 		auto exp = "alpha--beta--delta--gamma";
+		WANT_EQ( exp, act );
+	}
+	TEST( String, join2 )
+	{
+		std::vector<eon::string> elms{ "", "", "", "" };
+		auto act = eon::string( "|" ).join( elms );
+		auto exp = "|||";
 		WANT_EQ( exp, act );
 	}
 
