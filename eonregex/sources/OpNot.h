@@ -3,21 +3,21 @@
 #include "../Node.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/*
-		* Operator node
-		* Matches only if next node doesn't match
-		*/
+		// Operator node
+		// Matches only if next node doesn't match
 		class OpNot : public Node
 		{
 		public:

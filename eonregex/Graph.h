@@ -7,15 +7,17 @@
 #include "OpOr.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
 		class Graph
@@ -79,6 +81,10 @@ namespace eon
 				void replaceCur( Node* node ) noexcept;
 				inline Node* extract() noexcept { auto node = HeadNode; HeadNode = nullptr; CurNode = nullptr; return node; }
 
+				inline void resetPreAnchor() noexcept { PreAnchoring = Anchor::none; }
+				inline void preAnchor( Anchor anchor ) noexcept { PreAnchoring |= anchor; }
+				inline Anchor preAnchor() const noexcept { return PreAnchoring; }
+
 			private:
 				substring Source;
 				string_iterator CurPos;
@@ -86,6 +92,7 @@ namespace eon
 				Node* HeadNode{ nullptr };
 				Node* PrevNode{ nullptr };
 				Node* CurNode{ nullptr };
+				Anchor PreAnchoring{ Anchor::none };
 				bool Copy{ false };
 			};
 
@@ -115,8 +122,11 @@ namespace eon
 
 			Node* setQuantifier( ParseParam& param, size_t min, size_t max );
 
-			void removeDuplicates();
-			void countMinCharsRemaining();
+			void _removeDuplicates();
+			void _countMinCharsRemaining();
+			void _removeSuperfluousGroups() noexcept;
+			void _exposeLiterals();
+			void _failFastFixedEnd();
 
 
 

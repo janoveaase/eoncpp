@@ -3,21 +3,21 @@
 #include "../Node.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/*
-		* Value node
-		* Matches any space character
-		*/
+		// Value node
+		// Matches any space character
 		class Space : public Node
 		{
 		public:
@@ -62,10 +62,8 @@ namespace eon
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
-		/*
-		* Value node
-		* Matches any punctuation character
-		*/
+		// Value node
+		// Matches any punctuation character
 		class Punctuation : public Node
 		{
 		public:

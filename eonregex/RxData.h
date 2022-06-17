@@ -5,15 +5,17 @@
 #include <eonstring/Name.h>
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
 		using captures_t = std::unordered_map<name_t, substring>;
@@ -24,20 +26,22 @@ namespace eon
 			RxData() = default;
 			inline RxData( const RxData& other ) {
 				if( other.Captures ) { Captures = new captures_t( *other.Captures ); }
-				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; }
+				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; Marker = other.Marker; }
 			inline RxData( RxData&& other ) noexcept { *this = std::move( other ); }
-			inline RxData( const substring& source ) noexcept { Src = source; Pos = Src.begin(); }
-			inline RxData( const substring& source, Flag flags ) { Src = source; CmpFlags = flags; Pos = Src.begin(); }
+			inline RxData( const substring& source, uint16_t marker ) noexcept {
+				Src = source; Pos = Src.begin(); Marker = marker; }
+			inline RxData( const substring& source, Flag flags, uint16_t marker ) {
+				Src = source; CmpFlags = flags; Pos = Src.begin(); Marker = marker; }
 			virtual ~RxData() { reset(); }
 
 			inline void reset() noexcept { if( Captures ) { delete Captures; Captures = nullptr; } }
 
 			inline RxData& operator=( const RxData& other ) {
 				reset(); if( other.Captures ) { Captures = new captures_t( *other.Captures ); }
-				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; return *this; }
-			inline RxData& operator=( RxData&& other ) noexcept {
-				reset(); if( other.Captures ) { Captures = other.Captures; other.Captures = nullptr; }
-				Src = other.Src; CmpFlags = other.CmpFlags; other.CmpFlags = Flag::none; Pos = other.Pos; return *this; }
+				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; Marker = other.Marker; return *this; }
+			inline RxData& operator=( RxData&& other ) noexcept { reset(); if( other.Captures ) {
+				Captures = other.Captures; other.Captures = nullptr; } Src = other.Src; CmpFlags = other.CmpFlags;
+				other.CmpFlags = Flag::none; Pos = other.Pos; Marker = other.Marker; return *this; }
 
 			inline const substring& source() const noexcept { return Src; }
 			inline const string::iterator& pos() const noexcept { return Pos; }
@@ -62,6 +66,8 @@ namespace eon
 			inline bool accuracyOnly() const noexcept {
 				return ( CmpFlags & Flag::accuracy ) && !( CmpFlags & Flag::speed ); }
 
+			inline uint16_t marker() const noexcept { return Marker; }
+
 
 			// Captures
 			inline void registerCapture( name_t name, const substring& match ) {
@@ -78,6 +84,7 @@ namespace eon
 			string_iterator Pos;
 			Flag CmpFlags{ Flag::none };
 			captures_t* Captures{ nullptr };
+			uint16_t Marker{ 0 };
 		};
 	}
 }

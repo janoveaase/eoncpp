@@ -31,9 +31,9 @@ namespace eon
 		regex ex{ R"(a+a+)" };
 		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
 		ex = regex{ R"(a+a*)" };
-		WANT_EQ( "a+", ex.strStruct().stdstr() );
+		WANT_EQ( "aa*", ex.strStruct().stdstr() );
 		ex = regex{ R"(a*a+)" };
-		WANT_EQ( "a+", ex.strStruct().stdstr() );
+		WANT_EQ( "aa*", ex.strStruct().stdstr() );
 		ex = regex{ R"(a+a+?)" };
 		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
 		ex = regex{ R"(a+?a+)" };
@@ -41,13 +41,13 @@ namespace eon
 		ex = regex{ R"(a+?a+?)" };
 		WANT_EQ( "a{2,}?", ex.strStruct().stdstr() );
 		ex = regex{ R"((a+a+))" };
-		WANT_EQ( "(a{2,})", ex.strStruct().stdstr() );
+		WANT_EQ( "a{2,}", ex.strStruct().stdstr() );
 		ex = regex{ R"(a+a+a+a+)" };
 		WANT_EQ( "a{4,}", ex.strStruct().stdstr() );
 		ex = regex{ R"(a+?a+?a+?a+?)" };
 		WANT_EQ( "a{4,}?", ex.strStruct().stdstr() );
 		ex = regex{ R"((a+a+)(a+a+))" };
-		WANT_EQ( "(a{2,}){2}", ex.strStruct().stdstr() );
+		WANT_EQ( "a{4,}", ex.strStruct().stdstr() );
 		ex = regex{ R"(a{1,5}a{1,5})" };
 		WANT_EQ( "a{2,10}", ex.strStruct().stdstr() );
 		ex = regex{ R"(a{1,5}a{2,6})" };
@@ -57,9 +57,9 @@ namespace eon
 		ex = regex{ R"(\d\d+:)" };
 		WANT_EQ( "\\d{2,}:", ex.strStruct().stdstr() );
 		ex = regex{ R"((x+x+)+y)" };
-		WANT_EQ( "(x{2,})+y", ex.strStruct().stdstr() );
+		WANT_EQ( "x{2,}y", ex.strStruct().stdstr() );
 		ex = regex{ R"((x+?x+?)+?y)" };
-		WANT_EQ( "(x{2,}?)+?y", ex.strStruct().stdstr() );
+		WANT_EQ( "x{2,}?y", ex.strStruct().stdstr() );
 	}
 
 
@@ -124,7 +124,7 @@ namespace eon
 	TEST( RegExTest, match_digit_single_not )
 	{
 		regex expr;
-		REQUIRE_NO_EXCEPT( expr = R"(!\d)" ) << "Failed to parse";
+		REQUIRE_NO_EXCEPT( expr = R"(!\d.)" ) << "Failed to parse";
 
 		WANT_TRUE( expr.match( "b" ) ) << "Didn't match letter";
 		WANT_FALSE( expr.match( "8" ) ) << "Matched digit";
@@ -459,49 +459,127 @@ namespace eon
 		regex expr{ R"(.+?[\/]log[\/]test[\/]function[\/]unit_context[\/]eon_context.cpp:149$)" };
 		WANT_TRUE( expr.match( str ) );
 	}
-
-
-/*	TEST( OptimizeTests, basic )
+	TEST( MiscTests, real_case3 )
 	{
-		std::chrono::steady_clock clock;
-		string str{ "alpha: 1:99:7 beta ." };
+		string str{ R"(C:\ProgramData)" };
+		regex expr{ R"(C:\\ProgramData)" };
+		WANT_TRUE( expr.match( str ) );
+	}
 
-		int iterations = 10000;
+
+	// Common function used by optimize tests
+	void OptimizeTests::optimizeTest( regex& plain, regex& optimized, string& good_str, string& bad_str, int iterations )
+	{
 #ifdef _DEBUG
-		iterations /= 10;
+		if( iterations > 100 )
+			iterations /= 10;
 #endif
+
+		std::chrono::steady_clock clock;
 		std::chrono::steady_clock::time_point start, end;
-		std::chrono::nanoseconds time1{ 0 }, time2{ 0 };
+		std::chrono::nanoseconds plain_good{ 0 }, plain_bad{ 0 }, optimized_good{ 0 }, optimized_bad{ 0 };
 
-		regex expr1{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
-		regex expr2( R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)", "o" );
-		int matches1 = 0, matches2 = 0;
-
+		int plain_matches = 0;
+		start = clock.now();
 		for( auto i = 0; i < iterations; ++i )
 		{
-			start = clock.now();
-			if( expr1.match( str ) )
-				++matches1;
-			end = clock.now();
-			time1 += end - start;
-
-			start = clock.now();
-			if( expr2.match( str ) )
-				++matches2;
-			end = clock.now();
-			time2 += end - start;
+			if( plain.match( good_str ) )
+				++plain_matches;
 		}
+		end = clock.now();
+		plain_good = end - start;
+		start = clock.now();
+		for( auto i = 0; i < iterations; ++i )
+		{
+			if( plain.match( bad_str ) )
+				++plain_matches;
+		}
+		end = clock.now();
+		plain_bad = end - start;
 
-		auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>( time1 );
-		auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>( time2 );
-		eon::term << "Non-optimized: " << string::toString( duration1.count() ).separateThousands() << " microsecs\n";
-		eon::term << "    Optimized: " << string::toString( duration2.count() ).separateThousands() << " microsecs\n";
+		int optimized_matches = 0;
+		start = clock.now();
+		for( auto i = 0; i < iterations; ++i )
+		{
+			if( optimized.match( good_str ) )
+				++optimized_matches;
+		}
+		end = clock.now();
+		optimized_good = end - start;
+		start = clock.now();
+		for( auto i = 0; i < iterations; ++i )
+		{
+			if( optimized.match( bad_str ) )
+				++optimized_matches;
+		}
+		end = clock.now();
+		optimized_bad = end - start;
 
-		WANT_EQ( iterations, matches1 );
-		WANT_EQ( iterations, matches2 );
-		WANT_TRUE( duration2 <= ( duration1 / 4 ) * 3 ) << "Optimized must be <= "
-			<< string( ( ( duration1 / 4 ) * 3 ).count() ).separateThousands().stdstr() << " microsecs";
-	}*/
+		WANT_EQ( plain_matches, optimized_matches );
+
+		auto plain_good_time = std::chrono::duration_cast<std::chrono::microseconds>( plain_good );
+		auto plain_bad_time = std::chrono::duration_cast<std::chrono::microseconds>( plain_bad );
+		auto plain_total_time = plain_good_time + plain_bad_time;
+		auto optimized_good_time = std::chrono::duration_cast<std::chrono::microseconds>( optimized_good );
+		auto optimized_bad_time = std::chrono::duration_cast<std::chrono::microseconds>( optimized_bad );
+		auto optimized_total_time = optimized_good_time + optimized_bad_time;
+		eon::term << "Plain total    : " << string::toString( plain_total_time.count() / 1000.0 ).separateThousands()
+			<< " ms\n";
+		eon::term << "Plain good     : " << string::toString( plain_good_time.count() / 1000.0 ).separateThousands()
+			<< " ms\n";
+		eon::term << "Plain bad      : " << string::toString( plain_bad_time.count() / 1000.0 ).separateThousands()
+			<< " ms\n";
+		eon::term << "Optimized total: " << string::toString( optimized_total_time.count() / 1000.0 ).separateThousands()
+			<< " ms\n";
+		eon::term << "Optimized good : " << string::toString( optimized_good_time.count() / 1000.0 ).separateThousands()
+			<< " ms\n";
+		eon::term << "Optimized bad  : " << string::toString( optimized_bad_time.count() / 1000.0 ).separateThousands()
+			<< " ms\n";
+
+		WANT_TRUE( optimized_total_time < plain_total_time ) << "No improvement";
+	}
+
+/*	TEST( OptimizeTests, expose_literals )			// VERY SMALL IMPROVEMENT! CONSIDER REMOVING!
+	{
+		regex plain{ R"(A+)", "!e" };
+		regex optimized{ R"(A+)" };
+//		regex optimized( R"(A(A*))" );
+		string good{ "AAAAAAAAAAAAAAAAAAAAAAABB" };
+		string bad{ "ABBBBBBBBBBBB" };
+		optimizeTest( plain, optimized, good, bad );
+	}	//*/
+	TEST( OptimizeTests, removeSuperfluousGroups )	// CONSIDERABLE IMPROVEMENT! FINT OUT WHY!
+	{
+		regex plain{ R"(((A)|(B))*)", "!g" };
+		regex optimized( R"(((A)|(B))*)" );
+		string good{ "AAAABBBBABABABBBBBBCCC" };
+		string bad{ "CCCCCCCCCCCCCCCCCCCCCCCCCCBABABA" };
+		optimizeTest( plain, optimized, good, bad );
+	}	//*/
+/*	TEST( OptimizeTests, unroll_alternations )		// NO IMPROVEMENT! DO NOT ADD!
+	{
+		regex plain{ R"((\d|[aeiou])*)" };
+		regex optimized( R"(\d*([aeiou]+\d*)*)" );
+		string good{ "14e987eaie7e7e7e9876ei14ou" };
+		string bad{ "CCCCCCCCCCCCCCCCCCCCCCCCCCBABABA" };
+		optimizeTest( plain, optimized, good, bad );
+	}	//*/
+/*	TEST( OptimizeTests, expose_anchors )			// VERY SMALL IMPROVEMENT! DO NOT ADD!
+	{
+		regex plain{ R"((^A|^B))" };
+		regex optimized( R"(^(A|B))" );
+		string good{ "ACCCCCCCCCCCCCCCCCCCCCCCCCCC" };
+		string bad{ "CCCCCCCCCCCCCCCCCCCCCCCCCCBA" };
+		optimizeTest( plain, optimized, good, bad );
+	}	//*/
+	TEST( OptimizeTests, failfast_fixed_end )		// SIGNIFICANT IMPROVEMENT!
+	{
+		regex plain{ R"(.*A$)" };
+		regex optimized( R"(.*A$)", "f" );
+		string good{ "ACCCCCCCCCCCCCCCCCCCCCCCCCCCA" };
+		string bad{ "ACCCCCCCCCCCCCCCCCCCCCCCCCCB" };
+		optimizeTest( plain, optimized, good, bad );
+	}	//*/
 
 
 	TEST( SpeedCmp, eon_std_parse )
@@ -517,7 +595,7 @@ namespace eon
 #endif
 		std::chrono::steady_clock clock;
 		string e_pattern{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
-		std::string s_pattern{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" };
+		std::string s_pattern{ R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (?:alpha|beta){1,2} \s*\.$)" };
 		std::vector<eon::regex> e_list;
 		std::vector<std::regex> s_list;
 
@@ -551,8 +629,9 @@ namespace eon
 	{
 		eon::regex erx;
 		REQUIRE_NO_EXCEPT( erx = R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) << "Failed to parse Eon regex";
+		eon::term << "Optimized Eon regex: " << erx.strStruct() << "\n";
 		std::regex srx;
-		REQUIRE_NO_EXCEPT( srx = std::regex( R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) )
+		REQUIRE_NO_EXCEPT( srx = std::regex( R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (?:alpha|beta){1,2} \s*\.$)" ) )
 			<< "Failed to parse std regex";
 		size_t count = 5000;
 #ifdef _DEBUG
@@ -631,6 +710,8 @@ namespace eon
 			<< "ms\n";
 		eon::term << "Std regex (" << string::toString( s_successes ) << "): " << string::toString( s_ms.count() )
 			<< "ms\n";
+
+		WANT_EQ( s_successes, e_successes );
 	}
 	TEST( SpeedCmp, eon_match_only )
 	{

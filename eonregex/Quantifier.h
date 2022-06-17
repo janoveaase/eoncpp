@@ -3,28 +3,29 @@
 #include "RxDefs.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/*
-		* Quantifier objects are attributes to Node objects
-		* They specify how many times the node must or can match, minimum/
-		* maximum
-		*/
+		// Quantifier objects are attributes to Node objects
+		// They specify how many times the node must or can match, minimum/
+		// maximum
 		class Quantifier
 		{
 		public:
 			Quantifier() = default;
 			inline Quantifier( Quantifier& other ) noexcept { *this = other; };
 			inline Quantifier( Quantifier&& other ) noexcept { *this = other; };
+			inline Quantifier( size_t min, size_t max, bool greedy ) { Min = min; Max = max; Greedy = greedy; Set = true; }
 			virtual ~Quantifier() = default;
 
 			inline Quantifier& operator=( const Quantifier& other ) {
@@ -66,6 +67,7 @@ namespace eon
 
 			friend class Graph;
 			friend class Node;
+			friend class NodeGroup;
 		};
 	}
 }

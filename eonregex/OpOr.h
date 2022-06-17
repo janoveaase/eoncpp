@@ -3,21 +3,21 @@
 #include "Node.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/*
-		* Operator node
-		* Match one of the alternates
-		*/
+		// Operator node
+		// Match one of the alternates
 		class OpOr : public Node
 		{
 		public:
@@ -39,6 +39,8 @@ namespace eon
 			inline string _strStruct() const override {
 				string s; for( auto& opt : Optionals ) { if( !s.empty() ) s += "|"; s += opt->strStruct(); } return s; }
 			size_t _countMinCharsRemaining() noexcept override;
+			Node* _removeSuperfluousGroups() noexcept override;
+			void _failFastFixedEnd( Node& head ) override;
 
 		private:
 			std::vector<Node*> Optionals;

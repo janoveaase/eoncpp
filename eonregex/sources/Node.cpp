@@ -1,4 +1,6 @@
 #include "../Node.h"
+#include "../NodeGroup.h"
+#include "FixedValue.h"
 
 
 namespace eon
@@ -9,20 +11,24 @@ namespace eon
 		{
 			Type = other.Type;
 			Next = other.Next != nullptr ? other.Next->copy() : nullptr;
+			FixedEnd = other.FixedEnd;
 			Quant = other.Quant;
 			Source = other.Source;
 			Name = other.Name;
 			Open = other.Open;
+			PreAnchoring = other.PreAnchoring;
 			return *this;
 		}
 		Node& Node::operator=( Node&& other ) noexcept
 		{
 			Next = other.Next; other.Next = nullptr;
+			FixedEnd = other.FixedEnd; other.FixedEnd = nullptr;
 			Quant = other.Quant; other.Quant = Quantifier();
 			Name = other.Name; other.Name = false;
 			Open = other.Open; other.Open = true;
 			Source = other.Source; other.Source.clear();
 			Type = other.Type;
+			PreAnchoring = other.PreAnchoring; other.PreAnchoring = Anchor::none;
 			return *this;
 		}
 
@@ -36,21 +42,50 @@ namespace eon
 			if( data.remaining() < MinCharsRemaining )
 				return false;
 
+			// Check anchors
+			if( PreAnchoring != Anchor::none && !_preAnchorMatch( data ) )
+				return false;
+
+			// If we have a fixed end, then we can fail fast by checking if it's there or not
+			if( FixedEnd )
+			{
+				FixedValue* endvalue = (FixedValue*)FixedEnd;
+				if( endvalue->value().substr() != substring(
+					data.source().end() - endvalue->value().numChars(), data.source().end() ) )
+					return false;
+			}
+
 			// Cases:
 			// 1 single match
 			// 2 zero or one
 			// 3 range greedy
 			// 4 range non-greedy
 
+			bool success{ false };
 			if( Quant.minQ() == 1 && Quant.maxQ() == 1 )
-				return matchSingle( data, steps );
+				success = matchSingle( data, steps );
 			else if( Quant.minQ() == 0 && Quant.maxQ() == 1 )
-				return matchOneOrZero( data, steps );
+				success = matchOneOrZero( data, steps );
 			else if( Quant.greedy() )
-				return matchRangeGreedy( data, steps );
+				success = matchRangeGreedy( data, steps );
 			else
-				return matchRangeNongreedy( data, steps );
+				success = matchRangeNongreedy( data, steps );
+
+			return success;
 		}
+
+
+		void Node::_failFastFixedEnd( Node& head )
+		{
+			if( Next )
+			{
+				if( Type == NodeType::val_fixed && Next->type() == NodeType::loc_end )
+					head.FixedEnd = this;
+				Next->_failFastFixedEnd( head );
+			}
+		}
+
+
 
 		bool Node::matchSingle( RxData& data, size_t steps )
 		{
@@ -97,57 +132,67 @@ namespace eon
 		}
 		bool Node::matchRangeGreedy( RxData& data, size_t steps )
 		{
+			if( PrevPos.same( data.pos(), data.marker() ) )
+				return false;
+			PrevPos.mark( data.pos(), data.marker() );
+
 			// Match as many as possible from the start
 			auto matches = _stack();
-			matches.push( data );
-			matchMax( matches, steps );
+			matchMax( data, matches, steps );
+			if( matches.size() < Quant.Min )
+				return false;
+
+			if( Name && ( matches.empty() || !eon::validName( substring( data.pos(), matches.top().pos() ) ) ) )
+				return false;
 
 			// No next means we have nothing more to do
 			if( Next == nullptr )
 				return noNext( data, matches );
 
-			// Make sure that zero match is included
-			if( matches.empty() )
-				matches.push( data );
-
-			// Now make sure the rest matches, or move down the stack until
-			// they do
+			// Now make sure the rest matches, or move down the stack
+			// (backgrack) until they do
 			return nextMatches( data, matches );
 		}
-		void Node::matchMax( stack& matches, size_t steps )
+		void Node::matchMax( RxData data, Stack& matches, size_t steps )
 		{
-			// Special case: the '.' (any) character
-			if( Type == NodeType::val_any )
+			// Some special cases can be processed faster
+			if( _matchSpecialCase( data, matches ) )
+				return;
+
+			while( matches.size() < Quant.maxQ() )
 			{
-				// Goble as much as we can
-				int gobbled{ 0 };
-				while( matches.size() - 1 < Quant.maxQ() && matches.top() )
-				{
-					matches.push( matches.top() );
-					matches.top().advance();
-					if( gobbled < MinCharsRemaining )
-						++gobbled;
-					if( MinCharsRemaining > 0 && matches.top().remaining() < MinCharsRemaining - gobbled )
-						return;
-				}
-				if( Next == nullptr )
-					matches.pop();
-			}
-			else
-			{
-				while( matches.size() - 1 < Quant.maxQ() )
-				{
-					if( !_match( matches.top(), steps ) )
-					{
-						if( Next == nullptr )
-							matches.pop();
-						break;
-					}
-					matches.push( matches.top() );
-				}
+				if( !_match( matches.empty() ? data : matches.top(), steps ) )
+					break;
+				matches.push( matches.empty() ? data : matches.top() );
 			}
 		}
-		bool Node::noNext( RxData& data, stack& matches )
+		bool Node::_matchSpecialCase( RxData& data, Stack& matches )
+		{
+			switch( Type )
+			{
+				case NodeType::val_any:
+					_matchAny( data, matches );
+					return true;
+				default:
+					return false;
+			}
+		}
+		void Node::_matchAny( RxData& data, Stack& matches )
+		{
+			// Goble as much as we can
+			int gobbled{ 0 };
+			while( matches.size() < Quant.maxQ() && (matches.empty() ? data() : matches.top()() ) )
+			{
+				matches.push( matches.empty() ? data : matches.top() );
+				matches.top().advance();
+				if( gobbled < MinCharsRemaining )
+					++gobbled;
+				if( MinCharsRemaining > 0
+					&& ( matches.top().remaining() == 0 || matches.top().remaining() < MinCharsRemaining - gobbled ) )
+					return;
+			}
+		}
+		bool Node::noNext( RxData& data, Stack& matches )
 		{
 			if( matches.size() >= Quant.minQ() )
 			{
@@ -157,15 +202,16 @@ namespace eon
 			}
 			return false;
 		}
-		bool Node::nextMatches( RxData& data, stack& matches )
+		bool Node::nextMatches( RxData& data, Stack& matches )
 		{
-			while( matches.size() > Quant.minQ() )
+			size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
+			while( matches.size() >= Quant.minQ() )
 			{
-				size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
-				if( Next->match( matches.top(), next_steps ) )
+				if( Next->match( matches.empty() ? data : matches.top(), next_steps ) )
 				{
-					// Got a match
-					data = std::move( matches.top() );
+					// Got a match?
+					if( !matches.empty() )
+						data = std::move( matches.top() );
 					return true;
 				}
 				else
@@ -175,14 +221,17 @@ namespace eon
 
 					if( matches.empty() )
 					{
-						// Check if we can get a way with zero matches
-						if( Quant.minQ() == 0 && Next == nullptr )
+						// Check if we can get away with zero matches
+						if( Quant.minQ() == 0 && Next == nullptr && ( !Name || eon::validName( substring(
+							matches.size() < 2 ? data.pos() : matches.at( 1 ).pos(), matches.top().pos() ) ) ) )
 							return true;
 						else
 							break;
 					}
 				}
 			}
+			if( Next && Next->match( data, next_steps ) )
+				return true;
 			return false;
 		}
 		bool Node::matchRangeNongreedy( RxData& data, size_t steps )
@@ -196,6 +245,8 @@ namespace eon
 					break;
 				++matches;
 			}
+			if( Name && !eon::validName( substring( data.pos(), data_tmp.pos() ) ) )
+				return false;
 
 			// No next means we have nothing more to do
 			if( Next == nullptr )
@@ -235,10 +286,39 @@ namespace eon
 			return Next->match( data, steps );
 		}
 
+		bool Node::_preAnchorMatch( RxData& data )
+		{
+			if( !data() )			// End of input cannot be start of anything
+				return false;
+			if( PreAnchoring & Anchor::word )
+			{
+				if( !string::isWordChar( data() )
+					|| ( data.pos().numChar() > 0 && !string::isSpaceChar( data.prev() )
+						&& !string::isPunctuation( data.prev() ) ) )
+					return false;
+			}
+			if( PreAnchoring & Anchor::line )
+			{
+				if( data.pos().numChar() > 0 && data.prev() != NewlineChr )
+					return false;
+			}
+			if( PreAnchoring & Anchor::input )
+			{
+				if( data.pos().numChar() > 0 )
+					return false;
+			}
+			return true;
+		}
+
 
 		string Node::strStruct() const
 		{
-			auto s = _strStruct() + Quant.str();
+			string s;
+			if( PreAnchoring & Anchor::input )
+				s += "^";
+			else if( PreAnchoring & Anchor::word )
+				s += "\\b";
+			s += _strStruct() + Quant.str();
 			if( Next )
 				return s + Next->strStruct();
 			else

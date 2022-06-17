@@ -3,21 +3,21 @@
 #include "../NodeGroup.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/*
-		* Capture group node
-		* Captures matched group
-		*/
+		// Capture group node
+		// Captures matched group
 		class CaptureGroup : public NodeGroup
 		{
 		public:
@@ -44,6 +44,9 @@ namespace eon
 
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return NodeGroup::_equal( other, flags ) && Name == dynamic_cast<const CaptureGroup*>( &other )->Name; }
+
+			inline Node* _removeSuperfluousGroups() noexcept override {
+				if( Next ) Next = Next->_removeSuperfluousGroups(); return this; }
 
 		private:
 			name_t Name{ no_name };

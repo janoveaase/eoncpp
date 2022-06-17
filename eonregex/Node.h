@@ -3,23 +3,24 @@
 #include "RxDefs.h"
 #include "RxData.h"
 #include "Quantifier.h"
-#include <stack>
+#include <eonstack/Stack.h>
+//#include <stack>
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/**
-		* Super-class for all operators, locations and values
-		**/
+		// Super-class for all operators, locations and values
 		class Node
 		{
 		protected:
@@ -44,6 +45,9 @@ namespace eon
 
 			// Get node structure as a string
 			string strStruct() const;
+
+
+			inline void resetQuantifier() noexcept { Quant = Quantifier(); }
 
 
 			// Node comparison flags
@@ -75,35 +79,47 @@ namespace eon
 			virtual bool _equal( const Node& other, cmpflag flags ) const noexcept { return true; }
 			virtual void _removeDuplicates( std::set<Node*>& removed ) {}
 
-			using stack = std::stack<RxData, std::vector<RxData>>;
-			inline stack _stack() { std::vector<RxData> data; data.reserve( 53 ); return stack( std::move( data ) ); }
+			using Stack = stack<RxData>;
+			inline Stack _stack() { Stack data; data.reserve( 53 ); return data; }
 
 		public:
 			virtual size_t _countMinCharsRemaining() noexcept = 0;
+			virtual Node* _removeSuperfluousGroups() noexcept {
+				if( Next ) Next = Next->_removeSuperfluousGroups(); return this; }
+			virtual Node* _exposeLiterals() { if( Next ) Next = Next->_exposeLiterals(); return this; }
+			virtual void _failFastFixedEnd( Node& head );
 
 
 		private:
 			bool matchSingle( RxData& data, size_t steps );
 			bool matchOneOrZero( RxData& data, size_t steps );
 			bool matchRangeGreedy( RxData& data, size_t steps );
-			void matchMax( stack& matches, size_t steps );
-			bool noNext( RxData& data, stack& matches );
-			bool nextMatches( RxData& data, stack& matches );
+			void matchMax( RxData data, Stack& matches, size_t steps );
+			bool _matchSpecialCase( RxData& data, Stack& matches );
+			void _matchAny( RxData& data, Stack& matches );
+			bool noNext( RxData& data, Stack& matches );
+			bool nextMatches( RxData& data, Stack& matches );
 			bool matchRangeNongreedy( RxData& data, size_t steps );
 
 			bool matchNext( RxData& data, size_t steps );
 
+			bool _preAnchorMatch( RxData& data );
+
 		protected:
 			Node* Next{ nullptr };
+			Node* FixedEnd{ nullptr };
 			size_t MinCharsRemaining{ 0 };
 			Quantifier Quant;
 			bool Name{ false };
 			bool Open{ true };
 			substring Source;
 			NodeType Type{ NodeType::undef };
+			Anchor PreAnchoring{ Anchor::none };
+			RecordedPos PrevPos;
 
 			friend class Graph;
 			friend class NodeGroup;
+			friend class FixedValue;
 		};
 	}
 }

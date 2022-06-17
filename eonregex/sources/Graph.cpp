@@ -1,5 +1,4 @@
 #include "../Graph.h"
-#include "LocStart.h"
 #include "LocEnd.h"
 #include "OpNot.h"
 #include "../OpOr.h"
@@ -44,9 +43,18 @@ namespace eon
 
 			parse();
 
-			// TODO: Find out why matching runs slower with this done!
-			removeDuplicates();
-			countMinCharsRemaining();
+			if( Head )
+			{
+				// TODO: Find out why matching runs slower with this done!
+				_removeDuplicates();
+				if( !( MyFlags & Flag::no_ungroup ) )
+					_removeSuperfluousGroups();
+				if( !( MyFlags & Flag::no_exposing ) )
+					_exposeLiterals();
+				if( !(MyFlags & Flag::lines ) && ( MyFlags & Flag::failfast_fixed_end ) )
+					_failFastFixedEnd();
+				_countMinCharsRemaining();
+			}
 		}
 
 
@@ -60,32 +68,58 @@ namespace eon
 
 		void Graph::parseFlags( substring flags )
 		{
-			string invalid;
+			std::vector<string> invalid;
+			bool _not_ = false;
 			for( auto c : flags )
 			{
-				switch( c )
+				if( !_not_ )
 				{
-					case 'i':
-						MyFlags |= Flag::icase;
-						break;
-					case 'l':
-						MyFlags |= Flag::lines;
-						break;
-					case 's':
-						MyFlags |= Flag::speed;
-						break;
-					case 'S':
-						MyFlags |= Flag::accuracy;
-						break;
-					default:
-						invalid += c;
-						break;
+					switch( c )
+					{
+						case 'i':
+							MyFlags |= Flag::icase;
+							break;
+						case 'l':
+							MyFlags |= Flag::lines;
+							break;
+						case 'f':
+							MyFlags |= Flag::failfast_fixed_end;
+							break;
+						case '!':
+							_not_ = true;
+							break;
+
+						case 's':
+							MyFlags |= Flag::speed;
+							break;
+						case 'a':
+							MyFlags |= Flag::accuracy;
+							break;
+						default:
+							invalid.push_back( string( c ) );
+							break;
+					}
+				}
+				else
+				{
+					switch( c )
+					{
+						case 'g':
+							MyFlags |= Flag::no_ungroup;
+							break;
+						case 'e':
+							MyFlags |= Flag::no_exposing;
+							break;
+						default:
+							invalid.push_back( string( "!" ) << c );
+							break;
+					}
 				}
 			}
-			if( invalid.numChars() == 1 )
-				throw InvalidExpression( "Invalid flag: " + invalid );
-			else if( invalid.numChars() > 1 )
-				throw InvalidExpression( "Invalid flags: " + invalid );
+			if( invalid.size() == 1 )
+				throw InvalidExpression( "Invalid flag: " + *invalid.begin() );
+			else if( invalid.size() > 1 )
+				throw InvalidExpression( "Invalid flags: " + string( ", " ).join( invalid ) );
 		}
 
 		void Graph::ParseParam::set( Node* node ) noexcept
@@ -129,6 +163,8 @@ namespace eon
 				auto node = parseNode( param );
 				if( node != nullptr )
 				{
+					node->PreAnchoring = param.preAnchor();
+					param.resetPreAnchor();
 					if( node->Type == NodeType::op_or )
 					{
 						node = parseOr( (OpOr*)node, param, start );
@@ -159,7 +195,8 @@ namespace eon
 					case '^':
 					{
 						param.advance();
-						return new LocStart( substring( start, param.pos() ) );
+						param.preAnchor( MyFlags & Flag::lines ? Anchor::line : Anchor::input );
+						break;
 					}
 					case '$':
 					{
@@ -178,7 +215,12 @@ namespace eon
 					case '@':
 						return parseCaptureRelated( param, start );
 					case '\\':
-						return parseEscaped( param, start );
+					{
+						auto node = parseEscaped( param, start );
+						if( node )
+							return node;
+						break;
+					}
 					case '?':
 						param.advance();
 						if( param.cur() == nullptr )
@@ -240,6 +282,8 @@ namespace eon
 				auto value = parseNode( param );
 				if( value != nullptr )
 				{
+					value->PreAnchoring = param.preAnchor();
+					param.resetPreAnchor();
 					if( param.pos() && *param.pos() == '{' )
 					{
 						size_t min{ 0 }, max{ SIZE_MAX };
@@ -260,10 +304,6 @@ namespace eon
 						{
 							delete value;
 							throw InvalidExpression();
-/*							throw InvalidExpression(  "At position "
-								+ string( param.pos() - Source.begin() )
-								+ ": Detected '!' on a character group with"
-								" quantifier - use '[^...' instead" );*/
 						}
 					}
 					return new OpNot( value, substring( start, param.pos() ) );
@@ -296,6 +336,8 @@ namespace eon
 				auto node = parseNode( param );
 				if( node == nullptr )
 					continue;
+				node->PreAnchoring = param.preAnchor();
+				param.resetPreAnchor();
 				if( node->type() == NodeType::op_or )
 				{
 					// Two '|' in a row, assume second is a fixed value
@@ -311,6 +353,8 @@ namespace eon
 						delete node;
 						continue;
 					}
+					node->Next->PreAnchoring = param.preAnchor();
+					param.resetPreAnchor();
 				}
 				node_or->Optionals.push_back( node );
 
@@ -332,6 +376,8 @@ namespace eon
 						// Must be a quantifier, so try again
 						continue;
 					}
+					node->PreAnchoring = param.preAnchor();
+					param.resetPreAnchor();
 					break;
 				}
 				if( node->type() != NodeType::op_or )
@@ -573,7 +619,9 @@ namespace eon
 			switch( c )
 			{
 				case 'b':
-					return new LocWordStart( substring( start, param.pos() ) );
+					param.advance();
+					param.preAnchor( Anchor::word );
+					return nullptr;
 				case 'B':
 					return new LocWordEnd( substring( start, param.pos() ) );
 				case 'w':
@@ -723,18 +771,18 @@ namespace eon
 		}
 
 
-		void Graph::removeDuplicates()
+		void Graph::_removeDuplicates()
 		{
-			if( Head )
-			{
-				std::set<Node*> removed;
-				Head->removeDuplicates( removed );
-			}
+			std::set<Node*> removed;
+			Head->removeDuplicates( removed );
 		}
-		void Graph::countMinCharsRemaining()
-		{
-			if( Head )
-				Head->_countMinCharsRemaining();
-		}
+		void Graph::_countMinCharsRemaining() {
+			Head->_countMinCharsRemaining(); }
+		void Graph::_removeSuperfluousGroups() noexcept {
+			Head = Head->_removeSuperfluousGroups(); }
+		void Graph::_exposeLiterals() {
+			Head = Head->_exposeLiterals(); }
+		void Graph::_failFastFixedEnd() {
+			Head->_failFastFixedEnd( *Head ); }
 	}
 }

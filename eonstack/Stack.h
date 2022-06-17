@@ -109,20 +109,20 @@ namespace eon
 
 		// Access the top element
 		// Throws [eon::NoElement] if stack is empty!
-		inline const T& top() const { return element( 0 ); }
-		inline T& top() { return element( 0 ); }
+		inline const T& top() const { return at( 0 ); }
+		inline T& top() { return at( 0 ); }
 
 		// Access the bottom element
 		// Throws [eon::NoElement] if stack is empty!
 		inline const T& bottom() const { return element( Data.size() - 1 ); }
 		inline T& bottom() { return element( Data.size() - 1 ); }
 
-		// Access an element below the top
+		// Access an element by index
 		// An argument value of zero is the same as calling top()!
 		// Throws [eon::NoElement] if stack is empty!
-		inline const T& element( size_t steps_from_top ) const {
+		inline const T& at( size_t steps_from_top ) const {
 			if( _end() >= steps_from_top ) return Data[ _end() - steps_from_top ]; else throw NoElement(); }
-		inline T& element( size_t steps_from_top ) {
+		inline T& at( size_t steps_from_top ) {
 			if( _end() >= steps_from_top ) return Data[ _end() - steps_from_top ]; else throw NoElement(); }
 
 		// Pop the top element

@@ -3,21 +3,21 @@
 #include "Node.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  The 'eon::rx' namespace enclosed special elements for Eon regular
-	  expressions
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// The 'eon::rx' namespace enclosed special elements for Eon regular
+	// expressions
+	//
 	namespace rx
 	{
-		/*
-		* Node group node
-		* Matches a group of other nodes
-		*/
+		// Node group node
+		// Matches a group of other nodes
 		class NodeGroup : public Node
 		{
 		protected:
@@ -51,6 +51,8 @@ namespace eon
 			inline size_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = ( Head ? Head->_countMinCharsRemaining() * Quant.minQ() : 0 )
 					+ ( Next ? Next->_countMinCharsRemaining() : 0 ); }
+			virtual Node* _removeSuperfluousGroups() noexcept override;
+			void _failFastFixedEnd( Node& head ) override;
 
 			void _append( Node* node ) noexcept;
 			inline bool _locked() const noexcept { return _Cur == nullptr; }

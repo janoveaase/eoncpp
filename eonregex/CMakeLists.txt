@@ -12,7 +12,6 @@ set(REGEX_HEADERS
 	RxData.h
 	CharGroup.h
 	OpOr.h
-	sources/LocStart.h
 	sources/LocEnd.h
 	sources/OpNot.h
 	sources/FixedValue.h

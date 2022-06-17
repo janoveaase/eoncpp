@@ -47,5 +47,21 @@ namespace eon
 			MinCharsRemaining += Next ? Next->_countMinCharsRemaining() : 0;
 			return MinCharsRemaining;
 		}
+		Node* OpOr::_removeSuperfluousGroups() noexcept
+		{
+			if( Next )
+				Next = Next->_removeSuperfluousGroups();
+			for( auto opt = Optionals.begin(); opt != Optionals.end(); ++opt )
+				*opt = (*opt)->_removeSuperfluousGroups();
+			
+			return this;
+		}
+		void OpOr::_failFastFixedEnd( Node& head )
+		{
+			for( auto& opt : Optionals )
+				opt->_failFastFixedEnd( *opt );
+			if( Next )
+				Next->_failFastFixedEnd( head );
+		}
 	}
 }
