@@ -36,7 +36,11 @@ namespace eon
 	// Definition of other types
 	using int_t = int;
 	using short_t = int16_t;
+#ifdef EON_SUN
+	using long_t = long long int;
+#else
 	using long_t = int64_t;
+#endif
 	using index_t = size_t;
 	static const index_t no_index{ SIZE_MAX };
 	using flt_t = double;
