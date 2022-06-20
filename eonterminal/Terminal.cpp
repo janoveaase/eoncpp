@@ -4,6 +4,9 @@
 #else
 #	include <sys/ioctl.h>
 #	include <unistd.h>
+#	ifdef EON_SUN
+#		include <termios.h>
+#	endif
 #endif
 
 

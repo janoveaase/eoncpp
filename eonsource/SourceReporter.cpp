@@ -53,7 +53,8 @@ namespace eon
 				{
 					bool newline = Source.numChars() == 1 && Source.str() == "\n";
 					Pos start = Source.start();
-					auto lnumdigits = Source.end().line() < 10 ? 1 : static_cast<size_t>( log10( Source.end().line() ) );
+					auto lnumdigits = Source.end().line() < 10 ? 1 : static_cast<size_t>(
+						log10( static_cast<long double>( Source.end().line() ) ) );
 					for( int i = 0; ; ++i )
 					{
 						s += "\n";

@@ -79,18 +79,3 @@ namespace eon
 	static NameData* Data{ nullptr };
 #endif
 }
-
-#ifdef _DEBUG
-namespace std
-{
-	// Allow implicit use of [eon::name_t] as key/value when used in
-	// containers such as 'std::unordered_map' and 'std::unordered_set'.
-	template<>
-	struct hash<::eon::name_t> {
-		inline size_t operator()( const ::eon::name_t a ) const { return (size_t)a.Value; } };
-	template<>
-	struct equal_to<::eon::name_t> {
-		inline bool operator()( const ::eon::name_t a, const ::eon::name_t b ) const { return a.Value == b.Value; }
-	};
-}
-#endif

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstdlib>
+#include "UniChar.h"
 
 
 /******************************************************************************
@@ -9,7 +10,7 @@
 namespace eon
 {
 	//* The name type
-#ifdef _DEBUG
+#if defined( _DEBUG ) || defined( EON_SUN )
 	struct name_t
 	{
 		name_t() = default;
@@ -33,3 +34,17 @@ namespace eon
 	//* The null name
 	static const name_t no_name{ 0 };
 }
+
+#if defined( _DEBUG ) || defined( EON_SUN )
+namespace std
+{
+	template<>
+	struct hash<::eon::name_t> {
+		std::hash<uint32_t> Hasher;
+		inline size_t operator()( const ::eon::name_t& a ) const { return Hasher( a.Value ); } };
+	template<>
+	struct equal_to<::eon::name_t> {
+		inline bool operator()( const ::eon::name_t& a, const ::eon::name_t& b ) const { return a.Value == b.Value; }
+	};
+}
+#endif

@@ -15,6 +15,9 @@
 #elif defined( __unix ) || defined( __unix__ )
 #	define EON_UNIX
 #endif
+#if defined( sun ) || defined( __sun )
+#	define EON_SUN
+#endif
 
 
 

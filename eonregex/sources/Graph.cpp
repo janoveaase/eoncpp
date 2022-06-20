@@ -320,8 +320,7 @@ namespace eon
 			{
 				// No - this is an error!
 				delete node_or;
-				throw InvalidExpression( "At position "
-					+ string( start - Source.begin() )
+				throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 					+ ": Operator '|' cannot be the first element" );
 				return nullptr;
 			}
@@ -473,7 +472,7 @@ namespace eon
 			}
 			if( prev != -1 )
 				value.Chars.insert( static_cast<char_t>( prev ) );
-			throw InvalidExpression( "At position " + string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 				+ ": Character group starting here is missing ending ']'" );
 			return nullptr;
 		}
@@ -515,7 +514,7 @@ namespace eon
 				{
 					if( name.empty() )
 					{
-						throw InvalidExpression( "At position " + string( start - Source.begin() )
+						throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 							+ ": Capture group must have a name" );
 						return nullptr;
 					}
@@ -523,7 +522,8 @@ namespace eon
 					{
 						if( !param.advance() || param() != '(' )
 						{
-							throw InvalidExpression( "At position " + string( start - Source.begin() )
+							throw InvalidExpression( "At position "
+								+ string( static_cast<long_t>( start - Source.begin() ) )
 								+ ": Capture group must have a parenthesized group following immediately after the '>'" );
 							return nullptr;
 						}
@@ -531,14 +531,16 @@ namespace eon
 						auto nodegrp = parseNodeGroup( param, start );
 						if( nodegrp == nullptr )
 						{
-							throw InvalidExpression( "At position " + string( start - Source.begin() )
+							throw InvalidExpression( "At position "
+								+ string( static_cast<long_t>( start - Source.begin() ) )
 								+ ": Capture group starting here is missing terminating ')'" );
 							return nullptr;
 						}
 						auto _name = eon::name( name );
 						if( _name == no_name )
 						{
-							throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
+							throw InvalidExpression( "At position "
+								+ string( static_cast<long_t>( param.pos() - Source.begin() ) )
 								+ ": Name of capture group can only contain letters, "
 									"numbers and underscore, and not all numbers" );
 							return nullptr;
@@ -554,12 +556,12 @@ namespace eon
 				}
 				else
 				{
-					throw InvalidExpression( "At position "
-						+ string( param.pos() - Source.begin() ) + ": Invalid character in group name" );
+					throw InvalidExpression( "At position " + string( static_cast<long_t>( param.pos() - Source.begin() ) )
+						+ ": Invalid character in group name" );
 					return nullptr;
 				}
 			}
-			throw InvalidExpression( "At position " + string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 				+ ": Incomplete capture group started here" );
 			return nullptr;
 		}
@@ -585,27 +587,29 @@ namespace eon
 						param.advance();
 						if( name.empty() )
 						{
-							throw InvalidExpression( "At position " + string( start - Source.begin() )
+							throw InvalidExpression( "At position "
+								+ string( static_cast<long_t>( start - Source.begin() ) )
 								+ ": Back-reference must name a previously defined capture group" );
 							return nullptr;
 						}
 						auto _name = eon::name( name );
 						if( _name == no_name )
 						{
-							throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
+							throw InvalidExpression( "At position "
+								+ string( static_cast<long_t>( param.pos() - Source.begin() ) )
 								+ ": Back-reference name can only contain letters, "
 									"numbers and underscore, and not all numbers" );
 							return nullptr;
 						}
 						return new Backreference( _name, substring( start, param.pos() ) );
 					}
-					throw InvalidExpression("At position " + string( param.pos() - Source.begin() )
+					throw InvalidExpression("At position " + string( static_cast<long_t>( param.pos() - Source.begin() ) )
 						+ ": Invalid character in group name" );
 					return nullptr;
 				}
 			}
 		error:
-			throw InvalidExpression( "At position " + string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 				+ ": Incomplete back-reference started here" );
 			return nullptr;
 		}
@@ -684,7 +688,7 @@ namespace eon
 					digit += param();
 				else
 				{
-					throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
+					throw InvalidExpression( "At position " + string( static_cast<long_t>( param.pos() - Source.begin() ) )
 						+ ": Expected digit, comma, or '}' here" );
 				}
 				param.advance();
@@ -707,13 +711,13 @@ namespace eon
 					digit += param();
 				else
 				{
-					throw InvalidExpression( "At position " + string( param.pos() - Source.begin() )
+					throw InvalidExpression( "At position " + string( static_cast<long_t>( param.pos() - Source.begin() ) )
 						+ ": Expected digit, comma, or '}' here" );
 					return false;
 				}
 				param.advance();
 			}
-			throw InvalidExpression( "At position " + string( start - Source.begin() )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 				+ ": Expected '}' and the end the sequence starting here" );
 			return false;
 		}
@@ -727,7 +731,7 @@ namespace eon
 			if( !parse( param2, ')' ) )
 			{
 				param.endGroup();
-				throw InvalidExpression( "At position " + string( start - Source.begin() )
+				throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
 					+ ": Group started here i missing terminating ')'" );
 				param.pos( param2.pos() );
 				return nullptr;
