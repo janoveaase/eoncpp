@@ -174,12 +174,12 @@ namespace eon
 		inline explicit string( unsigned long value ) { *this = toString( value ); }
 #else
 		inline explicit string( unsigned short value ) { *this = toString( value ); }
+		inline explicit string( unsigned int value ) { *this = toString( value ); }
 #	ifdef EON_SUN
 		inline explicit string( long value ) { *this = toString( value ); }
 		inline explicit string( unsigned long value ) { *this = toString( value ); }
 #	else
 		inline explicit string( int8_t value ) { *this = toString( value ); }
-		inline explicit string( unsigned int value ) { *this = toString( value ); }
 		inline explicit string( long long unsigned int value ) { *this = toString( value ); }
 #		ifdef EON_APPLE
 		inline explicit string( short value ) { *this = toString( value ); }
