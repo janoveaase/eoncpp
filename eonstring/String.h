@@ -179,8 +179,8 @@ namespace eon
 		inline explicit string( int value ) { *this = toString( value ); }
 		inline explicit string( unsigned int value ) { *this = toString( value ); }
 		inline explicit string( int8_t value ) { *this = toString( value ); }
-#	endif
 		inline explicit string( long long unsigned int value ) { *this = toString( value ); }
+#	endif
 #endif
 #ifdef EON_APPLE
 		inline explicit string( int64_t value ) { *this = toString( value ); }

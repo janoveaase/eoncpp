@@ -31,7 +31,7 @@ namespace eon
 			inline Pos( const Pos& other ) noexcept { *this = other; }
 
 			//* Construct with specific details
-			inline Pos( size_t byte_pos, size_t char_pos, size_t line, size_t pos_on_line ) noexcept {
+			inline Pos( index_t byte_pos, index_t char_pos, index_t line, index_t pos_on_line ) noexcept {
 				BytePos = byte_pos; CharPos = char_pos; Line = line; PosOnLine = pos_on_line; }
 
 			//* Default destruction
@@ -48,16 +48,16 @@ namespace eon
 			inline operator bool() const noexcept { return BytePos > 0; }
 
 			//* Get the raw byte position (counted from start of source)
-			inline size_t bytePos() const noexcept { return BytePos; }
+			inline index_t bytePos() const noexcept { return BytePos; }
 
 			//* Get the character position (counted from the start of source)
-			inline size_t charPos() const noexcept { return CharPos; }
+			inline index_t charPos() const noexcept { return CharPos; }
 
 			//* Get the line number
-			inline size_t line() const noexcept { return Line; }
+			inline index_t line() const noexcept { return Line; }
 
 			//* Get the position on the lien
-			inline size_t posOnLine() const noexcept { return PosOnLine; }
+			inline index_t posOnLine() const noexcept { return PosOnLine; }
 
 
 			//* Get line and position on line as string format
@@ -77,10 +77,10 @@ namespace eon
 
 
 		public:
-			size_t BytePos{ 0 };
-			size_t CharPos{ 0 };
-			size_t Line{ 0 };
-			size_t PosOnLine{ 0 };
+			index_t BytePos{ 0 };
+			index_t CharPos{ 0 };
+			index_t Line{ 0 };
+			index_t PosOnLine{ 0 };
 		};
 	}
 }
