@@ -19,6 +19,9 @@
 #if defined( sun ) || defined( __sun )
 #	define EON_SUN
 #endif
+#if defined( __linux__ ) || defined( __linux ) || defined( linux ) || defined( __gnu_linux__ )
+#	define EON_LINUX
+#endif
 
 
 

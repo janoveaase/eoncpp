@@ -167,21 +167,25 @@ namespace eon
 		inline explicit string( low_t value ) { *this = toString( value ).trimFloat(); }
 		inline explicit string( high_t value ) { *this = toString( value ).trimFloat(); }
 
-		inline explicit string( long value ) { *this = toString( value ); }
-		inline explicit string( unsigned long value ) { *this = toString( value ); }
 #ifdef EON_WINDOWS
 		inline explicit string( uint16_t value ) { *this = toString( value ); }
 		inline explicit string( uint32_t value ) { *this = toString( value ); }
+		inline explicit string( long value ) { *this = toString( value ); }
+		inline explicit string( unsigned long value ) { *this = toString( value ); }
 #else
 		inline explicit string( unsigned short value ) { *this = toString( value ); }
 #	ifdef EON_SUN
+		inline explicit string( long value ) { *this = toString( value ); }
+		inline explicit string( unsigned long value ) { *this = toString( value ); }
 #	else
 		inline explicit string( int8_t value ) { *this = toString( value ); }
-		inline explicit string( short value ) { *this = toString( value ); }
-		inline explicit string( int value ) { *this = toString( value ); }
 		inline explicit string( unsigned int value ) { *this = toString( value ); }
 		inline explicit string( long long unsigned int value ) { *this = toString( value ); }
-#		if EON_APPLE
+#		ifdef EON_APPLE
+		inline explicit string( short value ) { *this = toString( value ); }
+		inline explicit string( int value ) { *this = toString( value ); }
+		inline explicit string( long value ) { *this = toString( value ); }
+		inline explicit string( unsigned long value ) { *this = toString( value ); }
 		inline explicit string( int64_t value ) { *this = toString( value ); }
 #		endif
 #	endif
