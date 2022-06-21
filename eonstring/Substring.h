@@ -228,7 +228,7 @@ namespace eon
 		inline int32_t toInt32() const { return static_cast<int32_t>( toInt() ); }
 		inline int64_t toInt64() const { return static_cast<int64_t>( toLong() ); }
 		inline uint32_t toUInt32() const { return static_cast<uint32_t>( toIndex() ); }
-		inline int64_t toUInt64() const { return static_cast<uint64_t>( toIndex() ); }
+		inline uint64_t toUInt64() const { return static_cast<uint64_t>( toIndex() ); }
 		inline size_t toSize() const { return static_cast<size_t>( toIndex() ); }
 		inline double toDouble( char_t decimal_separator = PointChr ) const {
 			return static_cast<double>( toFloat( decimal_separator ) ); }

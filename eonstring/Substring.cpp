@@ -245,7 +245,7 @@ namespace eon
 
 	index_t substring::toIndex() const
 	{
-		int64_t num = 0;
+		index_t num = 0;
 		if( empty() )
 			return num;
 		for( auto chr : *this )
@@ -253,7 +253,8 @@ namespace eon
 			if( !isDigit( chr ) )
 				break;
 			num *= 10;
-			num += ( chr - ZeroChr );
+			if( chr >= ZeroChr )
+				num += ( chr - ZeroChr );
 		}
 		return num;
 	}
