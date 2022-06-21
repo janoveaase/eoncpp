@@ -3,6 +3,7 @@
 
 namespace eontest
 {
+	using namespace eon;
 	std::list<_EonTest::TestRef>* _EonTest::_EonTests_{ nullptr };
 	std::list<std::string>* _EonTest::_EonClasses_{ nullptr };
 
@@ -95,12 +96,11 @@ namespace eontest
 	}
 
 
-	bool _EonTest::_testMatch( const eon::string& expected, const eon::string& actual,
-		const char* exp_expr, const char* act_expr )
+	bool _EonTest::_testMatch( const string& expected, const string& actual, const char* exp_expr, const char* act_expr )
 	{
 		bool matches{ true };
-		auto exp_lines = expected.splitSequential<std::vector<eon::string>>( '\n' );
-		auto act_lines = actual.splitSequential<std::vector<eon::string>>( '\n' );
+		auto exp_lines = expected.splitSequential<std::vector<string>>( '\n' );
+		auto act_lines = actual.splitSequential<std::vector<string>>( '\n' );
 		size_t lno = 0;
 		for( ; lno < exp_lines.size() && lno < act_lines.size(); ++lno )
 		{
@@ -111,29 +111,25 @@ namespace eontest
 				else
 				{
 					matches = false;
-					eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
-						<< eon::style::normal << "\n";
-					eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
-						<< eon::style::normal << "\n";
-					eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::green
-						<< "<empty>" << eon::style::normal << "\n";
-					eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::red
-						<< act_lines[ lno ] << eon::style::normal << "\n";
+					term << style::strong << "Expected expression: " << style::green << exp_expr << style::normal << "\n";
+					term << style::strong << "  Actual expression: " << style::red << act_expr << style::normal << "\n";
+					term << style::strong << "Expected line #" << ( lno + 1 ) << ": " << style::green << "<empty>"
+						<< style::normal << "\n";
+					term << style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << style::red
+						<< act_lines[ lno ] << style::normal << "\n";
 					continue;
 				}
 			}
-			eon::regex exp( exp_lines[ lno ] );
+			regex exp( exp_lines[ lno ] );
 			if( !exp.match( act_lines[ lno ] ) )
 			{
 				matches = false;
-				eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
-					<< eon::style::normal << "\n";
-				eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
-					<< eon::style::normal << "\n";
-				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << " regex: " << eon::style::green
-					<< exp_lines[ lno ] << eon::style::normal << "\n";
-				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::red
-					<< act_lines[ lno ] << eon::style::normal << "\n";
+				term << style::strong << "Expected expression: " << style::green << exp_expr << style::normal << "\n";
+				term << style::strong << "  Actual expression: " << style::red << act_expr << style::normal << "\n";
+				term << style::strong << "Expected line #" << ( lno + 1 ) << " regex: " << style::green << exp_lines[ lno ]
+					<< style::normal << "\n";
+				term << style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << style::red << act_lines[ lno ]
+					<< style::normal << "\n";
 			}
 		}
 		auto missing_act = exp_lines.size() - lno;
@@ -141,28 +137,26 @@ namespace eontest
 		if( missing_act > 0 || superfluous_act > 0 )
 		{
 			matches = false;
-			eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
-				<< eon::style::normal << "\n";
-			eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
-				<< eon::style::normal << "\n";
+			term << style::strong << "Expected expression: " << style::green << exp_expr << style::normal << "\n";
+			term << style::strong << "  Actual expression: " << style::red << act_expr << style::normal << "\n";
 		}
 		if( missing_act > 0 )
 		{
 			if( missing_act == 1 )
-				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::red
-				<< "No actual line!" << eon::style::normal << "\n";
+				term << style::strong << "Expected line #" << ( lno + 1 ) << ": " << style::red << "No actual line!"
+				<< style::normal << "\n";
 			else
-				eon::term << eon::style::strong << "Expected lines #" << ( lno + 1 ) << "-" << exp_lines.size()
-				<< ": " << eon::style::red << "No actual lines!" << eon::style::normal << "\n";
+				term << style::strong << "Expected lines #" << ( lno + 1 ) << "-" << exp_lines.size() << ": " << style::red
+				<< "No actual lines!" << style::normal << "\n";
 		}
 		else if( superfluous_act > 0 )
 		{
 			if( superfluous_act == 1 )
-				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << ": " << eon::style::red
-				<< "Extra line not in expected!" << eon::style::normal << "\n";
+				term << style::strong << "  Actual line #" << ( lno + 1 ) << ": " << style::red
+				<< "Extra line not in expected!" << style::normal << "\n";
 			else
-				eon::term << eon::style::strong << "  Actual lines #" << ( lno + 1 ) << "-" << act_lines.size() << ": "
-				<< eon::style::red << "Extra lines not in expected!" << eon::style::normal << "\n";
+				term << style::strong << "  Actual lines #" << ( lno + 1 ) << "-" << act_lines.size() << ": " << style::red
+				<< "Extra lines not in expected!" << style::normal << "\n";
 		}
 		return matches;
 	}
@@ -172,44 +166,42 @@ namespace eontest
 		const char* exp_expr, const char* act_expr )
 	{
 		Failed = true;
-		size_t start_pos{ 0 };
-		size_t dummy1{ SIZE_MAX }, dummy2{ SIZE_MAX };
+		index_t start_pos{ 0 };
+		index_t dummy1{ INDEX_MAX }, dummy2{ INDEX_MAX };
 		auto exp_lines = _splitLines( _encodeEon_( expected, dummy1 ) );
 		auto act_lines = _splitLines( _encodeEon_( actual, dummy2 ) );
-		auto diff_line = _findFirstDiffLine( exp_lines, act_lines );
-		eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr << eon::style::normal
-			<< "\n";
-		eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr << eon::style::normal
-			<< "\n";
+		index_t diff_line = _findFirstDiffLine( exp_lines, act_lines );
+		term << style::strong << "Expected expression: " << style::green << exp_expr << style::normal << "\n";
+		term << style::strong << "  Actual expression: " << style::red << act_expr << style::normal << "\n";
 		if( diff_line == exp_lines.size() || diff_line == act_lines.size() )
 		{
 			if( diff_line < exp_lines.size() )
 			{
-				eon::term << eon::style::strong << "Expected line #" << eon::string( diff_line + 1 ) << ": "
-					<< eon::style::normal << "\"" << eon::style::green
-					<< _extractLine( exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << eon::style::normal << "\"\n";
-				eon::term << eon::style::red << "No matching actual line!\n";
+				term << style::strong << "Expected line #" << string( diff_line + 1 ) << ": " << style::normal << "\""
+					<< style::green << _extractLine( exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << style::normal
+					<< "\"\n";
+				term << style::red << "No matching actual line!\n";
 			}
 			else
 			{
-				eon::term << "No matching expected line!\n";
-				eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
+				term << "No matching expected line!\n";
+				term << "  Actual line #" << string( diff_line + 1 ) << ": \""
 					<< _extractLine( act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
 			}
 		}
 		else
 		{
 			auto diff_pos = _findFirstDiffPos( exp_lines[ diff_line ], act_lines[ diff_line ] );
-			eon::term << "Expected line #" << eon::string( diff_line + 1 ) << ": \""
+			term << "Expected line #" << string( diff_line + 1 ) << ": \""
 				<< _extractLine( exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
-			eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
+			term << "  Actual line #" << string( diff_line + 1 ) << ": \""
 				<< _extractLine( act_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
-			eon::term << eon::string( diff_pos - start_pos + 19, ' ' ) << "^\n";
+			term << string( diff_pos - start_pos + 19, ' ' ) << "^\n";
 			std::string marker{ "Different here!" };
 			if( diff_pos > marker.size() + 2 )
-				eon::term << eon::string( diff_pos - start_pos + 18 - marker.size() - 1, ' ' ) << marker << " -'\n";
+				term << string( diff_pos - start_pos + 18 - marker.size() - 1, ' ' ) << marker << " -'\n";
 			else
-				eon::term << eon::string( diff_pos - start_pos + 19, ' ' ) << "'- " << marker << "\n";
+				term << string( diff_pos - start_pos + 19, ' ' ) << "'- " << marker << "\n";
 		}
 		return false;
 	}
@@ -278,7 +270,7 @@ namespace eontest
 	}
 
 
-	EonTestSandbox::EonTestSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root )
+	EonTestSandbox::EonTestSandbox( string test_class, string test_name, string sandbox_root )
 	{
 		_prepSandbox( test_class, test_name, sandbox_root );
 		Failed = !_createSandbox();
@@ -288,7 +280,7 @@ namespace eontest
 		_removeSandbox();
 	}
 
-	void EonTestSandbox::_prepSandbox( eon::string test_class, eon::string test_name, eon::string sandbox_root )
+	void EonTestSandbox::_prepSandbox( string test_class, string test_name, string sandbox_root )
 	{
 #ifdef EON_WINDOWS
 		test_class = test_class.replace( "/", "\\" );
