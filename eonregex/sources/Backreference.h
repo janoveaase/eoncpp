@@ -36,11 +36,11 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); Name = std::move( other.Name ); return *this; }
 
 		private:
-			bool _match( RxData& data, size_t steps ) override;
+			bool _match( RxData& data, index_t steps ) override;
 			inline string _strStruct() const override { return "@:<" + str( Name ) + ">"; }
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return Name == dynamic_cast<const Backreference*>( &other )->Name; }
-			inline size_t _countMinCharsRemaining() noexcept override { return MinCharsRemaining = 0; }
+			inline index_t _countMinCharsRemaining() noexcept override { return MinCharsRemaining = 0; }
 
 		private:
 			name_t Name{ no_name };

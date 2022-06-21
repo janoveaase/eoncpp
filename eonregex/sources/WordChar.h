@@ -33,10 +33,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override {
+			inline bool _match( RxData& data, index_t steps ) override {
 				return string::isWordChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\w"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
@@ -57,10 +57,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override {
+			inline bool _match( RxData& data, index_t steps ) override {
 				return data && !string::isWordChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\W"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}

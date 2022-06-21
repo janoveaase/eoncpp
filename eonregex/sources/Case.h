@@ -34,10 +34,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t step ) override {
+			inline bool _match( RxData& data, index_t step ) override {
 				return string::isLetterLowerCase( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\u"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
@@ -58,10 +58,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t step ) override {
+			inline bool _match( RxData& data, index_t step ) override {
 				return string::isLetterUpperCase( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\U"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}

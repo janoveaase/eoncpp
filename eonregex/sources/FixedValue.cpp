@@ -5,7 +5,7 @@ namespace eon
 {
 	namespace rx
 	{
-		bool FixedValue::_match( RxData& data, size_t steps )
+		bool FixedValue::_match( RxData& data, index_t steps )
 		{
 			RxData param_b{ data };
 

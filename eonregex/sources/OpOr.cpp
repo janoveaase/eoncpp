@@ -17,7 +17,7 @@ namespace eon
 
 
 
-		bool OpOr::_match( RxData& data, size_t steps )
+		bool OpOr::_match( RxData& data, index_t steps )
 		{
 			RxData data_b{ data };
 			for( auto& opt : Optionals )
@@ -31,7 +31,7 @@ namespace eon
 			return false;
 		}
 
-		size_t OpOr::_countMinCharsRemaining() noexcept
+		index_t OpOr::_countMinCharsRemaining() noexcept
 		{
 			MinCharsRemaining = 0;
 			for( auto node : Optionals )

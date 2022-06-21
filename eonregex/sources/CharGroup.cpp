@@ -20,7 +20,7 @@ namespace eon
 		}
 
 
-		bool CharGroup::_match( RxData& data, size_t steps )
+		bool CharGroup::_match( RxData& data, index_t steps )
 		{
 			if( data )
 			{

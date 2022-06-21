@@ -75,7 +75,7 @@ namespace eon
 			inline operator bool() const noexcept { return Captures; }
 
 			// Get number of captures (including the entire match)
-			inline size_t size() const noexcept { return Captures ? Captures->size() : 0; }
+			inline index_t size() const noexcept { return Captures ? Captures->size() : 0; }
 
 			// Get the entire match
 			inline substring all() const noexcept { return group( name_complete ); }

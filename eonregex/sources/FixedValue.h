@@ -38,13 +38,13 @@ namespace eon
 			inline const string& value() const noexcept { return Value; }
 
 		private:
-			bool _match( RxData& data, size_t steps ) override;
+			bool _match( RxData& data, index_t steps ) override;
 
 			string _strStruct() const override;
 
 			inline bool _equal( const Node& other, cmpflag flags ) const noexcept override {
 				return Value == dynamic_cast<const FixedValue*>( &other )->Value; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Value.numChars() * Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 			Node* _exposeLiterals() override;
 

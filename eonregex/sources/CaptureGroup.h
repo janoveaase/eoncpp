@@ -38,7 +38,7 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); Name = std::move( other.Name ); return *this; }
 
 		private:
-			bool _match( RxData& data, size_t steps ) override;
+			bool _match( RxData& data, index_t steps ) override;
 
 			inline string _strStruct() const override { return "@<" + str( Name ) + ">" + NodeGroup::_strStruct(); }
 

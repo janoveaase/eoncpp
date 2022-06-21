@@ -33,11 +33,11 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& param, size_t steps ) override {
+			inline bool _match( RxData& param, index_t steps ) override {
 				return !param ? true : param.pos() == param.source().end() ? true
 					: ( param.lines() && param() == '\n' ) ? param.advance() : false; }
 			inline string _strStruct() const override { return "$"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Next ? Next->_countMinCharsRemaining() : 0; }
 		};
 	}

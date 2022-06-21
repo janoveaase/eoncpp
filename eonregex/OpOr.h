@@ -35,10 +35,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); Optionals = std::move( other.Optionals ); return *this; }
 
 		private:
-			bool _match( RxData& param, size_t steps ) override;
+			bool _match( RxData& param, index_t steps ) override;
 			inline string _strStruct() const override {
 				string s; for( auto& opt : Optionals ) { if( !s.empty() ) s += "|"; s += opt->strStruct(); } return s; }
-			size_t _countMinCharsRemaining() noexcept override;
+			index_t _countMinCharsRemaining() noexcept override;
 			Node* _removeSuperfluousGroups() noexcept override;
 			void _failFastFixedEnd( Node& head ) override;
 

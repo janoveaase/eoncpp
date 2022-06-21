@@ -51,7 +51,7 @@ namespace eon
 			inline bool next( char_t c ) const noexcept { auto n = Pos + 1; return n ? *n == c : false; }
 			inline char_t next() const noexcept { auto n = Pos + 1; return n ? *n : NullChr;}
 
-			inline size_t remaining() const noexcept { return Src.end() - Pos; }
+			inline index_t remaining() const noexcept { return Src.end() - Pos; }
 
 			// Advance to next character in string
 			// To make it possible to advance upon success in matching, the

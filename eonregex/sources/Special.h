@@ -33,10 +33,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override {
+			inline bool _match( RxData& data, index_t steps ) override {
 				return string::isSpaceChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\s"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
@@ -55,10 +55,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override {
+			inline bool _match( RxData& data, index_t steps ) override {
 				return data && !string::isSpaceChar( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\S"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
@@ -80,10 +80,10 @@ namespace eon
 				*static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override {
+			inline bool _match( RxData& data, index_t steps ) override {
 				return string::isPunctuation( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\p"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 
@@ -104,10 +104,10 @@ namespace eon
 				noexcept { *static_cast<Node*>( this ) = std::move( other ); return *this; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override {
+			inline bool _match( RxData& data, index_t steps ) override {
 				return data && !string::isPunctuation( data() ) ? data.advance() : false; }
 			inline string _strStruct() const override { return "\\P"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Quant.minQ() + ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 		};
 	}

@@ -40,9 +40,9 @@ namespace eon
 					return Value->equal( *o.Value, cmpflag::deep | cmpflag::quant ); else return Value == o.Value; }
 
 		private:
-			inline bool _match( RxData& data, size_t steps ) override { return !Value->match( data, steps ); }
+			inline bool _match( RxData& data, index_t steps ) override { return !Value->match( data, steps ); }
 			inline string _strStruct() const override { return Value ? "!" + Value->strStruct() : "!"; }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Next ? Next->_countMinCharsRemaining() : 0; }
 
 		private:

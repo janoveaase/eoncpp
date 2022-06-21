@@ -5,7 +5,7 @@ namespace eon
 {
 	namespace rx
 	{
-		bool Backreference::_match( RxData& data, size_t steps )
+		bool Backreference::_match( RxData& data, index_t steps )
 		{
 			auto group = data.findCapture( Name );
 			if( group )
