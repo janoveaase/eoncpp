@@ -48,7 +48,7 @@ namespace eon
 		inline Anchor operator|( Anchor a, Anchor b ) noexcept {
 			return static_cast<Anchor>( static_cast<int>( a ) | static_cast<int>( b ) ); }
 
-		static const size_t nsize{ SIZE_MAX };
+		static const index_t nsize{ INDEX_MAX };
 
 		enum class Flag : int16_t
 		{

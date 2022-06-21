@@ -38,7 +38,7 @@ namespace eon
 				Head = other.Head; other.Head = nullptr; return *this; }
 
 		protected:
-			bool _match( RxData& data, size_t steps ) override;
+			bool _match( RxData& data, index_t steps ) override;
 
 			inline string _strStruct() const override { return Head ? "(" + Head->strStruct() + ")" : "()"; }
 
@@ -48,7 +48,7 @@ namespace eon
 
 			inline void _removeDuplicates( std::set<Node*>& removed ) override {
 				if( Head ) Head->removeDuplicates( removed ); }
-			inline size_t _countMinCharsRemaining() noexcept override {
+			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = ( Head ? Head->_countMinCharsRemaining() * Quant.minQ() : 0 )
 					+ ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 			virtual Node* _removeSuperfluousGroups() noexcept override;

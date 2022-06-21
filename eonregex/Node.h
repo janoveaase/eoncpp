@@ -40,7 +40,7 @@ namespace eon
 			inline NodeType type() const noexcept { return Type; }
 			inline bool open() const noexcept { return Open; }
 
-			bool match( RxData& data, size_t steps = nsize );
+			bool match( RxData& data, index_t steps = nsize );
 
 
 			// Get node structure as a string
@@ -72,7 +72,7 @@ namespace eon
 			void removeDuplicates( std::set<Node*>& removed );
 
 		protected:
-			virtual bool _match( RxData& data, size_t steps ) = 0;
+			virtual bool _match( RxData& data, index_t steps ) = 0;
 
 			virtual string _strStruct() const { return string(); }
 
@@ -83,7 +83,7 @@ namespace eon
 			inline Stack _stack() { Stack data; data.reserve( 53 ); return data; }
 
 		public:
-			virtual size_t _countMinCharsRemaining() noexcept = 0;
+			virtual index_t _countMinCharsRemaining() noexcept = 0;
 			virtual Node* _removeSuperfluousGroups() noexcept {
 				if( Next ) Next = Next->_removeSuperfluousGroups(); return this; }
 			virtual Node* _exposeLiterals() { if( Next ) Next = Next->_exposeLiterals(); return this; }
@@ -91,24 +91,24 @@ namespace eon
 
 
 		private:
-			bool matchSingle( RxData& data, size_t steps );
-			bool matchOneOrZero( RxData& data, size_t steps );
-			bool matchRangeGreedy( RxData& data, size_t steps );
-			void matchMax( RxData data, Stack& matches, size_t steps );
+			bool matchSingle( RxData& data, index_t steps );
+			bool matchOneOrZero( RxData& data, index_t steps );
+			bool matchRangeGreedy( RxData& data, index_t steps );
+			void matchMax( RxData data, Stack& matches, index_t steps );
 			bool _matchSpecialCase( RxData& data, Stack& matches );
 			void _matchAny( RxData& data, Stack& matches );
 			bool noNext( RxData& data, Stack& matches );
 			bool nextMatches( RxData& data, Stack& matches );
-			bool matchRangeNongreedy( RxData& data, size_t steps );
+			bool matchRangeNongreedy( RxData& data, index_t steps );
 
-			bool matchNext( RxData& data, size_t steps );
+			bool matchNext( RxData& data, index_t steps );
 
 			bool _preAnchorMatch( RxData& data );
 
 		protected:
 			Node* Next{ nullptr };
 			Node* FixedEnd{ nullptr };
-			size_t MinCharsRemaining{ 0 };
+			index_t MinCharsRemaining{ 0 };
 			Quantifier Quant;
 			bool Name{ false };
 			bool Open{ true };

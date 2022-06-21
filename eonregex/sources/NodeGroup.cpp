@@ -5,7 +5,7 @@ namespace eon
 {
 	namespace rx
 	{
-		bool NodeGroup::_match( RxData& data, size_t steps )
+		bool NodeGroup::_match( RxData& data, index_t steps )
 		{
 			if( Head != nullptr )
 			{
@@ -36,7 +36,7 @@ namespace eon
 				auto node = Head; Head = nullptr;
 				node->Next = Next; Next = nullptr;
 				node->Quant.Min *= Quant.Min;
-				node->Quant.Max = Quant.Max == SIZE_MAX || node->Quant.Max == SIZE_MAX ? SIZE_MAX
+				node->Quant.Max = Quant.Max == INDEX_MAX || node->Quant.Max == INDEX_MAX ? INDEX_MAX
 					: Quant.Max * node->Quant.Max;
 				node->Name = Name;
 				node->Open = Open;

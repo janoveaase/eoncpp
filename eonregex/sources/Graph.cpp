@@ -239,10 +239,10 @@ namespace eon
 							return setQuantifier( param, 0, 1 );
 					case '*':
 						param.advance();
-						return setQuantifier( param, 0, SIZE_MAX );
+						return setQuantifier( param, 0, INDEX_MAX );
 					case '+':
 						param.advance();
-						return setQuantifier( param, 1, SIZE_MAX );
+						return setQuantifier( param, 1, INDEX_MAX );
 					case '{':
 					{
 						if( param.cur() != nullptr
@@ -252,7 +252,7 @@ namespace eon
 							param.cur()->Name = true;
 							break;
 						}
-						size_t min{ 0 }, max{ SIZE_MAX };
+						index_t min{ 0 }, max{ INDEX_MAX };
 						try
 						{
 							if( parseQuantifier( param, min, max, start ) )
@@ -286,7 +286,7 @@ namespace eon
 					param.resetPreAnchor();
 					if( param.pos() && *param.pos() == '{' )
 					{
-						size_t min{ 0 }, max{ SIZE_MAX };
+						index_t min{ 0 }, max{ INDEX_MAX };
 						try
 						{
 							if( parseQuantifier( param, min, max, param.pos() ) )
@@ -662,7 +662,7 @@ namespace eon
 			}
 		}
 
-		bool Graph::parseQuantifier( ParseParam& param, size_t& min, size_t& max, const string_iterator& start )
+		bool Graph::parseQuantifier( ParseParam& param, index_t& min, index_t& max, const string_iterator& start )
 		{
 			if( !param.advance() )			// The '{'
 				return new FixedValue( "{", substring( start, param.pos() ) );
@@ -759,7 +759,7 @@ namespace eon
 			return new FixedValue( std::move( value ), substring( start, param.pos() ) );
 		}
 
-		Node* Graph::setQuantifier( ParseParam& param, size_t min, size_t max )
+		Node* Graph::setQuantifier( ParseParam& param, index_t min, index_t max )
 		{
 			if( param.cur() == nullptr )
 			{

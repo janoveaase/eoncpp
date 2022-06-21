@@ -36,11 +36,11 @@ namespace eon
 
 		Node* FixedValue::_exposeLiterals()
 		{
-			if( Quant.minQ() == 1 && Quant.maxQ() == SIZE_MAX )
+			if( Quant.minQ() == 1 && Quant.maxQ() == INDEX_MAX )
 			{
 				auto exposed = copy();
 				exposed->resetQuantifier();
-				Quant = Quantifier( 0, SIZE_MAX, Quant.greedy() );
+				Quant = Quantifier( 0, INDEX_MAX, Quant.greedy() );
 				exposed->Next = this;
 				return exposed;
 			}

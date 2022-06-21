@@ -25,7 +25,7 @@ namespace eon
 			Quantifier() = default;
 			inline Quantifier( Quantifier& other ) noexcept { *this = other; };
 			inline Quantifier( Quantifier&& other ) noexcept { *this = other; };
-			inline Quantifier( size_t min, size_t max, bool greedy ) { Min = min; Max = max; Greedy = greedy; Set = true; }
+			inline Quantifier( index_t min, index_t max, bool greedy ) { Min = min; Max = max; Greedy = greedy; Set = true; }
 			virtual ~Quantifier() = default;
 
 			inline Quantifier& operator=( const Quantifier& other ) {
@@ -34,8 +34,8 @@ namespace eon
 
 			inline operator bool() const noexcept { return Set; }
 
-			inline size_t minQ() const noexcept { return Min; }
-			inline size_t maxQ() const noexcept { return Max; }
+			inline index_t minQ() const noexcept { return Min; }
+			inline index_t maxQ() const noexcept { return Max; }
 			inline bool greedy() const noexcept { return Greedy; }
 
 
@@ -46,7 +46,7 @@ namespace eon
 
 			string str() const {
 				string s;
-				if( Max == SIZE_MAX )
+				if( Max == INDEX_MAX )
 					s = Min == 0 ? "*" : Min == 1 ? "+" : "{" + string( Min ) + ",}";
 				else if( Min == Max )
 					s = Min == 1 ? "" : "{" + string( Min ) + "}";
@@ -57,12 +57,12 @@ namespace eon
 				return Greedy ? s : s + "?"; }
 
 		private:
-			void _set( size_t min, size_t max, bool greedy ) { Min = min; Max = max; Greedy = greedy; Set = true; }
+			void _set( index_t min, index_t max, bool greedy ) { Min = min; Max = max; Greedy = greedy; Set = true; }
 
 		private:
 			bool Set{ false };
-			size_t Min{ 1 };
-			size_t Max{ 1 };
+			index_t Min{ 1 };
+			index_t Max{ 1 };
 			bool Greedy{ true };
 
 			friend class Graph;

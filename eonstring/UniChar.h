@@ -39,9 +39,11 @@ namespace eon
 #ifdef EON_SUN
 	using long_t = long long int;
 	using index_t = unsigned long long int;
+#define INDEX_MAX UINT64_MAX
 #else
 	using long_t = int64_t;
 	using index_t = size_t;
+#define INDEX_MAX SIZE_MAX
 #endif
 	static const index_t no_index{ SIZE_MAX };
 	using flt_t = double;

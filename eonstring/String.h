@@ -1061,7 +1061,7 @@ namespace eon
 		//       template type as such!
 		//       Example: splitSequential<std::list<eon::substring>>( ...
 		template<typename container_t>
-		container_t splitSequential( const string& delimiter, index_t max_elements = SIZE_MAX ) const {
+		container_t splitSequential( const string& delimiter, index_t max_elements = INDEX_MAX ) const {
 			return substr().splitSequential<container_t>( delimiter.substr(), max_elements ); }
 
 		// Split string on every occurrence of 'delimiter' (delimiter char
@@ -1073,7 +1073,7 @@ namespace eon
 		//       template type as such!
 		//       Example: splitSequential<std::list<eon::substring>>( ...
 		template<typename container_t>
-		container_t splitSequential( char_t delimiter, index_t max_elements = SIZE_MAX ) const {
+		container_t splitSequential( char_t delimiter, index_t max_elements = INDEX_MAX ) const {
 			return substr().splitSequential<container_t>( delimiter, max_elements ); }
 
 		// Split string on every occurrence of 'delimiter' (delimiter string

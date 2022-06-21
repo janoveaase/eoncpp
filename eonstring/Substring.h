@@ -477,7 +477,7 @@ namespace eon
 		//* If a max number of elements is specified, the last element will
 		//* reference the unsplit remainder.
 		template<typename container_t>
-		container_t splitSequential( const substring& delimiter, index_t max_elements = SIZE_MAX ) const
+		container_t splitSequential( const substring& delimiter, index_t max_elements = INDEX_MAX ) const
 		{
 			container_t elms;
 			auto start = begin();
@@ -493,7 +493,7 @@ namespace eon
 			return elms;
 		}
 		template<typename container_t>
-		container_t splitSequential( char_t delimiter, index_t max_elements = SIZE_MAX ) const
+		container_t splitSequential( char_t delimiter, index_t max_elements = INDEX_MAX ) const
 		{
 			container_t elms;
 			auto start = begin();

@@ -35,7 +35,7 @@ namespace eon
 
 
 
-		bool Node::match( RxData& data, size_t steps )
+		bool Node::match( RxData& data, index_t steps )
 		{
 			// If there are fewer characters remaining than the minimum required by the
 			// pattern, we can report failure right now!
@@ -87,7 +87,7 @@ namespace eon
 
 
 
-		bool Node::matchSingle( RxData& data, size_t steps )
+		bool Node::matchSingle( RxData& data, index_t steps )
 		{
 			RxData data_tmp{ data };
 
@@ -110,7 +110,7 @@ namespace eon
 			data = std::move( data_tmp );
 			return true;
 		}
-		bool Node::matchOneOrZero( RxData& data, size_t steps )
+		bool Node::matchOneOrZero( RxData& data, index_t steps )
 		{
 			// Try to match one first
 			if( matchSingle( data, steps ) )
@@ -130,7 +130,7 @@ namespace eon
 			else
 				return true;
 		}
-		bool Node::matchRangeGreedy( RxData& data, size_t steps )
+		bool Node::matchRangeGreedy( RxData& data, index_t steps )
 		{
 			if( PrevPos.same( data.pos(), data.marker() ) )
 				return false;
@@ -153,7 +153,7 @@ namespace eon
 			// (backgrack) until they do
 			return nextMatches( data, matches );
 		}
-		void Node::matchMax( RxData data, Stack& matches, size_t steps )
+		void Node::matchMax( RxData data, Stack& matches, index_t steps )
 		{
 			// Some special cases can be processed faster
 			if( _matchSpecialCase( data, matches ) )
@@ -204,7 +204,7 @@ namespace eon
 		}
 		bool Node::nextMatches( RxData& data, Stack& matches )
 		{
-			size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
+			index_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? INDEX_MAX : 6;
 			while( matches.size() >= Quant.minQ() )
 			{
 				if( Next->match( matches.empty() ? data : matches.top(), next_steps ) )
@@ -234,11 +234,11 @@ namespace eon
 				return true;
 			return false;
 		}
-		bool Node::matchRangeNongreedy( RxData& data, size_t steps )
+		bool Node::matchRangeNongreedy( RxData& data, index_t steps )
 		{
 			// Match as few as possible from the start
 			RxData data_tmp{ data };
-			size_t matches = 0;
+			index_t matches = 0;
 			while( matches < Quant.minQ() )
 			{
 				if( !_match( data_tmp, steps ) )
@@ -262,7 +262,7 @@ namespace eon
 			// Now make sure the rest matches, or try matching this once more
 			while( matches <= Quant.maxQ() )
 			{
-				size_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? SIZE_MAX : 6;
+				index_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? INDEX_MAX : 6;
 				if( Next->match( data_tmp, next_steps ) )
 				{
 					// Got a match
@@ -279,7 +279,7 @@ namespace eon
 			}
 			return false;
 		}
-		bool Node::matchNext( RxData& data, size_t steps )
+		bool Node::matchNext( RxData& data, index_t steps )
 		{
 			if( Next == nullptr )
 				return true;
@@ -378,10 +378,10 @@ namespace eon
 						Quant.Min += Next->Quant.Min;
 					else
 						Quant.Min = Quant.Min > Next->Quant.Min ? Quant.Min : Next->Quant.Min;
-					if( Quant.Max < SIZE_MAX && Next->Quant.Max < SIZE_MAX )
-						Quant.Max = SIZE_MAX - Quant.Max < Next->Quant.Max ? SIZE_MAX : Quant.Max + Next->Quant.Max;
+					if( Quant.Max < INDEX_MAX && Next->Quant.Max < INDEX_MAX )
+						Quant.Max = INDEX_MAX - Quant.Max < Next->Quant.Max ? INDEX_MAX : Quant.Max + Next->Quant.Max;
 					else
-						Quant.Max = SIZE_MAX;
+						Quant.Max = INDEX_MAX;
 					if( !Quant.Greedy && Next->Quant.Greedy )
 						Quant.Greedy = true;
 					auto next = Next;

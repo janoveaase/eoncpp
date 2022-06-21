@@ -73,7 +73,7 @@ namespace eon
 
 				inline const substring& source() const noexcept { return Source; }
 
-				inline size_t strSize() const noexcept { return Source.numChars(); }
+				inline index_t strSize() const noexcept { return Source.numChars(); }
 
 				void set( Node* node ) noexcept;
 				inline Node* head() const noexcept { return HeadNode; }
@@ -114,13 +114,13 @@ namespace eon
 
 			Node* parseEscaped( ParseParam& param, const string_iterator& start );
 
-			bool parseQuantifier( ParseParam& param, size_t& min, size_t& max, const string_iterator& start );
+			bool parseQuantifier( ParseParam& param, index_t& min, index_t& max, const string_iterator& start );
 
 			Node* parseNodeGroup( ParseParam& param, const string_iterator& start );
 
 			Node* parseFixed( ParseParam& param, const string_iterator& start );
 
-			Node* setQuantifier( ParseParam& param, size_t min, size_t max );
+			Node* setQuantifier( ParseParam& param, index_t min, index_t max );
 
 			void _removeDuplicates();
 			void _countMinCharsRemaining();
