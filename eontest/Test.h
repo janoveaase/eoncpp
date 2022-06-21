@@ -373,7 +373,7 @@ namespace eontest
 
 	public:
 		inline void _reportEonLocation_( const char* file, int line ) { eon::term << "In " << file << ":" << line << "\n"; }
-		std::string _encodeEon_( const std::string& str, size_t& diffpos );
+		std::string _encodeEon_( const std::string& str, eon::index_t& diffpos );
 
 		bool _testTrue( bool value, const char* expression )
 		{
@@ -698,7 +698,7 @@ namespace eontest
 		std::vector<std::string> _splitLines( const std::string& str ) const;
 		size_t _findFirstDiffLine( const std::vector<std::string>& expected, const std::vector<std::string>& actual ) const;
 		size_t _findFirstDiffPos( const std::string& expected, const std::string& actual ) const;
-		std::string _extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
+		std::string _extractLine( const std::string& line, size_t diff_pos, size_t available_size, eon::index_t& start_pos )
 			const;
 	};
 

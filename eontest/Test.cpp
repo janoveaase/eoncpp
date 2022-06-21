@@ -34,7 +34,7 @@ namespace eontest
 		}
 	}
 
-	std::string _EonTest::_encodeEon_( const std::string& str, size_t& diffpos )
+	std::string _EonTest::_encodeEon_( const std::string& str, eon::index_t& diffpos )
 	{
 		auto start = diffpos;
 		std::string encoded;
@@ -251,8 +251,8 @@ namespace eontest
 		}
 		return expected.size() < actual.size() ? expected.size() : actual.size();
 	}
-	std::string _EonTest::_extractLine( const std::string& line, size_t diff_pos, size_t available_size, size_t& start_pos )
-		const
+	std::string _EonTest::_extractLine( const std::string& line, size_t diff_pos, size_t available_size,
+		eon::index_t& start_pos ) const
 	{
 		size_t start{ 0 }, end{ 0 };
 		if( diff_pos <= 16 )

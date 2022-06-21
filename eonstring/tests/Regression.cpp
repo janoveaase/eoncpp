@@ -254,12 +254,12 @@ namespace eon
 		uint64_t ui64 = 1234567890123456LL;
 		size_t sz = 9988;
 		double dbl = -1234.5;
-		WANT_EQ( i32, eon::string( static_cast<int32_t>( i32 ) ).toInt32() ) << "Wrong int32_t";
-		WANT_EQ( ui32, eon::string( static_cast<uint32_t>( ui32 ) ).toUInt32() ) << "Wrong uint32_t";
+		WANT_EQ( i32, eon::string( i32 ).toInt32() ) << "Wrong int32_t";
+		WANT_EQ( ui32, eon::string( ui32 ).toUInt32() ) << "Wrong uint32_t";
 		WANT_EQ( i64, eon::string( i64 ).toInt64() ) << "Wrong int64_t";
 		WANT_EQ( ui64, eon::string( ui64 ).toUInt64() ) << "Wrong uint64_t";
 		WANT_EQ( dbl, eon::string( dbl ).toDouble() ) << "Wrong double";
-		WANT_EQ( sz, eon::string( static_cast<size_t>( sz ) ).toUInt32() ) << "Wrong size_t";
+		WANT_EQ( sz, eon::string( sz ).toUInt32() ) << "Wrong size_t";
 	}
 
 

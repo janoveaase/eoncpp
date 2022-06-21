@@ -174,16 +174,17 @@ namespace eon
 		inline explicit string( uint32_t value ) { *this = toString( value ); }
 #else
 		inline explicit string( unsigned short value ) { *this = toString( value ); }
-#	ifndef EON_SUN
+#	ifdef EON_SUN
+#	else
+		inline explicit string( int8_t value ) { *this = toString( value ); }
 		inline explicit string( short value ) { *this = toString( value ); }
 		inline explicit string( int value ) { *this = toString( value ); }
 		inline explicit string( unsigned int value ) { *this = toString( value ); }
-		inline explicit string( int8_t value ) { *this = toString( value ); }
 		inline explicit string( long long unsigned int value ) { *this = toString( value ); }
-#	endif
-#endif
-#ifdef EON_APPLE
+#		if EON_APPLE
 		inline explicit string( int64_t value ) { *this = toString( value ); }
+#		endif
+#	endif
 #endif
 
 

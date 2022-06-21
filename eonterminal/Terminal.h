@@ -170,6 +170,9 @@ namespace eon
 		inline Terminal& operator<<( const char* data ) { return *this << eon::string( data ); }
 		inline Terminal& operator<<( const unsigned char* data ) { return *this << eon::string( data ); }
 		inline Terminal& operator<<( const std::string& data ) { return *this << eon::string( data ); }
+#ifdef EON_SUN
+		inline Terminal& operator<<( unsigned int data ) { return *this << eon::string( static_cast<index_t>( data ) ); }
+#endif
 		template<typename T>
 		inline Terminal& operator<<( T data ) { return *this << eon::string( data ); }
 
