@@ -514,6 +514,17 @@ namespace eon
 		regex expr{ R"(C:\\ProgramData)" };
 		WANT_TRUE( expr.match( str ) );
 	}
+	TEST( MiscTests, real_case4 )
+	{
+		string str{ "Flexible License Manager status on Wed 1/20/2010 11:00" };
+		regex orig{ R"(Flexible License Manager status on \l+ @<month>(\d+)/@<day>(\d+)/@<year>(\d+) @<hour>(\d+):@<minute>(\d+))" };
+		regex expr = orig;
+		eon::term << "orig: " << orig.strStruct() << "\n";
+		eon::term << "expr: " << expr.strStruct() << "\n";
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		REQUIRE_EQ( 6, match.size() ) << "Wrong number of captures";
+	}
 
 
 	// Common function used by optimize tests

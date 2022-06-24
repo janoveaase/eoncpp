@@ -30,12 +30,12 @@ namespace eon
 				Name = name; Source = source; Type = NodeType::capt_group; delete group; }
 			virtual ~CaptureGroup() = default;
 
-			inline Node* copy() const override { return new NodeGroup( *this ); }
+			inline Node* copy() const override { return new CaptureGroup( *this ); }
 
 			inline CaptureGroup& operator=( const CaptureGroup& other ) {
-				*static_cast<Node*>( this ) = other; Name = other.Name; return *this; }
+				*static_cast<NodeGroup*>( this ) = other; Name = other.Name; return *this; }
 			inline CaptureGroup& operator=( CaptureGroup&& other ) noexcept {
-				*static_cast<Node*>( this ) = std::move( other ); Name = std::move( other.Name ); return *this; }
+				*static_cast<NodeGroup*>( this ) = std::move( other ); Name = std::move( other.Name ); return *this; }
 
 		private:
 			bool _match( RxData& data, index_t steps ) override;
