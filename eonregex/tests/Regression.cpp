@@ -175,6 +175,55 @@ namespace eon
 		WANT_TRUE( expr.match( ".") )<< "Didn't match punctuation";
 	}
 
+	TEST( RegExTest, match_letter )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(\l)" ) << "Failed to parse";
+
+		WANT_FALSE( expr.match( "8" ) ) << "Matched digit";
+		WANT_TRUE( expr.match( "b" ) ) << "Didn't match lower case letter";
+		WANT_TRUE( expr.match( "B" ) ) << "Didn't match upper case letter";
+		WANT_TRUE( expr.match( "β" ) ) << "Didn't match unicode letter";
+		WANT_FALSE( expr.match( "_" ) ) << "Matched underscore";
+		WANT_FALSE( expr.match( "." ) ) << "Matched punctuation";
+	}
+	TEST( RegExTest, match_notletter )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(\L)" ) << "Failed to parse";
+
+		WANT_TRUE( expr.match( "8" ) ) << "Didn't match digit";
+		WANT_FALSE( expr.match( "b" ) ) << "Matched lower case letter";
+		WANT_FALSE( expr.match( "B" ) ) << "Matched upper case letter";
+		WANT_FALSE( expr.match( "β" ) ) << "Matched unicode letter";
+		WANT_TRUE( expr.match( "_" ) ) << "Didn't match underscore";
+		WANT_TRUE( expr.match( "." ) ) << "Didn't match punctuation";
+	}
+	TEST( RegExTest, match_lower)
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(\u)" ) << "Failed to parse";
+
+		WANT_FALSE( expr.match( "8" ) ) << "Matched digit";
+		WANT_TRUE( expr.match( "b" ) ) << "Didn't match lower case letter";
+		WANT_FALSE( expr.match( "B" ) ) << "Matched upper case letter";
+		WANT_TRUE( expr.match( "β" ) ) << "Didn't match unicode letter";
+		WANT_FALSE( expr.match( "_" ) ) << "Matched underscore";
+		WANT_FALSE( expr.match( "." ) ) << "Matched punctuation";
+	}
+	TEST( RegExTest, match_upper )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(\U)" ) << "Failed to parse";
+
+		WANT_FALSE( expr.match( "8" ) ) << "Matched digit";
+		WANT_FALSE( expr.match( "b" ) ) << "Matched lower case letter";
+		WANT_TRUE( expr.match( "B" ) ) << "Didn't match upper case letter";
+		WANT_FALSE( expr.match( "β" ) ) << "Matched unicode letter";
+		WANT_FALSE( expr.match( "_" ) ) << "Matched underscore";
+		WANT_FALSE( expr.match( "." ) ) << "Matched punctuation";
+	}
+
 	TEST( RegExTest, match_chargroup_single )
 	{
 		regex expr;

@@ -9,6 +9,7 @@
 #include "WordChar.h"
 #include "Special.h"
 #include "Case.h"
+#include "Letter.h"
 #include "Digit.h"
 #include "Any.h"
 #include "CaptureGroup.h"
@@ -632,6 +633,10 @@ namespace eon
 					return new WordChar( substring( start, param.pos() ) );
 				case 'W':
 					return new NotWordChar( substring( start, param.pos() ) );
+				case 'l':
+					return new Letter( substring( start, param.pos() ) );
+				case 'L':
+					return new NotLetter( substring( start, param.pos() ) );
 				case 'u':
 					return new LowerCase( substring( start, param.pos() ) );
 				case 'U':

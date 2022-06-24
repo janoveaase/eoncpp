@@ -19,6 +19,7 @@ set(REGEX_HEADERS
 	sources/LocWordBoundary.h
 	sources/WordChar.h
 	sources/Special.h
+	sources/Letter.h
 	sources/Case.h
 	sources/Digit.h
 	sources/Any.h
