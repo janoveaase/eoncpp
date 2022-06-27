@@ -47,9 +47,11 @@ namespace eon
 
 			inline Node* _removeSuperfluousGroups() noexcept override {
 				if( Next ) Next = Next->_removeSuperfluousGroups(); return this; }
+			inline void _capture( RxData& data ) override { data.registerCapture( Name, substring( Start, data.pos() ) ); }
 
 		private:
 			name_t Name{ no_name };
+			string::iterator Start;
 		};
 	}
 }

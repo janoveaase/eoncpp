@@ -7,10 +7,10 @@ namespace eon
 	{
 		bool CaptureGroup::_match( RxData& data, index_t steps )
 		{
-			string::iterator pos = data.pos();
+			Start = data.pos();
 			if( NodeGroup::_match( data, steps ) )
 			{
-				data.registerCapture( Name, substring( pos, data.pos() ) );
+				data.registerCapture( Name, substring( Start, data.pos() ) );
 				return true;
 			}
 			return false;

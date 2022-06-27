@@ -526,6 +526,17 @@ namespace eon
 		REQUIRE_EQ( 6, match.size() ) << "Wrong number of captures";
 	}
 
+	TEST( MiscTests, tricky_case1 )
+	{
+		string str{ "abc: xyz: " };
+		regex expr{ R"(@<alpha>(\S+): @<beta>(\S+): )" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		REQUIRE_EQ( 3, match.size() ) << "Wrong number of captures";
+		WANT_EQ( "abc", eon::string( match.group( eon::name( "alpha" ) ) ) ) << "Wrong capture";
+		WANT_EQ( "xyz", eon::string( match.group( eon::name( "beta" ) ) ) ) << "Wrong capture";
+	}
+
 
 	// Common function used by optimize tests
 	void OptimizeTests::optimizeTest( regex& plain, regex& optimized, string& good_str, string& bad_str, int iterations )

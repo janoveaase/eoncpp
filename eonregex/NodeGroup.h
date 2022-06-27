@@ -53,6 +53,7 @@ namespace eon
 					+ ( Next ? Next->_countMinCharsRemaining() : 0 ); }
 			virtual Node* _removeSuperfluousGroups() noexcept override;
 			void _failFastFixedEnd( Node& head ) override;
+			void _unmatch() noexcept override { if( Head->_matched() ) Head->_unmatch(); Node::_unmatch(); }
 
 			void _append( Node* node ) noexcept;
 			inline bool _locked() const noexcept { return _Cur == nullptr; }

@@ -9,8 +9,8 @@ namespace eon
 			return rx::match();
 
 		rx::RxData data( str, ++((regex*)this)->Marker );
-		auto start = data.pos();
-		if( Graph.match( data ) && data.pos() != str.begin() )
+		string::iterator start = data.pos();
+		if( Graph.match( data ) ) //&& data.pos() != str.begin() )
 		{
 			data.registerCapture( name_complete, substring( start, data.pos() ) );
 			return rx::match( data.claimCaptures() );

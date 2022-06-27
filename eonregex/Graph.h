@@ -39,7 +39,8 @@ namespace eon
 
 			inline bool empty() const noexcept { return Head == nullptr; }
 
-			inline bool match( RxData& param ) const { return Head != nullptr ? Head->match( param ) : false; }
+			inline bool match( RxData& param ) const {
+				if( Head ) { Head->_unmatch(); return Head->match( param ); } else return false; }
 
 			inline const substring& source() const noexcept { return Source; }
 			

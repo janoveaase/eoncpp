@@ -10,6 +10,7 @@ namespace eon
 			if( Head != nullptr )
 			{
 				RxData param_b{ data };
+				Head->_setGroup( this );
 				if( Head->match( param_b, steps ) )
 				{
 					data = std::move( param_b );

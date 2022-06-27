@@ -88,6 +88,9 @@ namespace eon
 				if( Next ) Next = Next->_removeSuperfluousGroups(); return this; }
 			virtual Node* _exposeLiterals() { if( Next ) Next = Next->_exposeLiterals(); return this; }
 			virtual void _failFastFixedEnd( Node& head );
+			inline bool _matched() const noexcept { return static_cast<bool>( Matched.source() ); }
+			virtual void _unmatch() noexcept { if( _matched() ) { Matched = RxData(); if( Next ) Next->_unmatch(); } }
+			virtual void _capture( RxData& data ) {}
 
 
 		private:
@@ -97,16 +100,22 @@ namespace eon
 			void matchMax( RxData data, Stack& matches, index_t steps );
 			bool _matchSpecialCase( RxData& data, Stack& matches );
 			void _matchAny( RxData& data, Stack& matches );
-			bool noNext( RxData& data, Stack& matches );
-			bool nextMatches( RxData& data, Stack& matches );
+			bool _noNext( RxData& data, Stack& matches );
+			bool _matchNext( RxData& data, Stack& matches );
 			bool matchRangeNongreedy( RxData& data, index_t steps );
 
 			bool matchNext( RxData& data, index_t steps );
 
 			bool _preAnchorMatch( RxData& data );
 
+			inline void _setGroup( Node* node ) noexcept {
+				if( Next ) Next->_setGroup( node ); else Group = node; }
+			inline Node* _next() const noexcept { return Group ? Group->Next : Next; }
+
 		protected:
+			RxData Matched;
 			Node* Next{ nullptr };
+			Node* Group{ nullptr };
 			Node* FixedEnd{ nullptr };
 			index_t MinCharsRemaining{ 0 };
 			Quantifier Quant;

@@ -321,7 +321,7 @@ namespace eon
 			{
 				// No - this is an error!
 				delete node_or;
-				throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
+				throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() + 1 ) )
 					+ ": Operator '|' cannot be the first element" );
 				return nullptr;
 			}
@@ -473,7 +473,7 @@ namespace eon
 			}
 			if( prev != -1 )
 				value.Chars.insert( static_cast<char_t>( prev ) );
-			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() + 1 ) )
 				+ ": Character group starting here is missing ending ']'" );
 			return nullptr;
 		}
@@ -515,7 +515,8 @@ namespace eon
 				{
 					if( name.empty() )
 					{
-						throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
+						throw InvalidExpression( "At position "
+							+ string( static_cast<long_t>( start - Source.begin() + 1 ) )
 							+ ": Capture group must have a name" );
 						return nullptr;
 					}
@@ -524,7 +525,7 @@ namespace eon
 						if( !param.advance() || param() != '(' )
 						{
 							throw InvalidExpression( "At position "
-								+ string( static_cast<long_t>( start - Source.begin() ) )
+								+ string( static_cast<long_t>( start - Source.begin() + 1 ) )
 								+ ": Capture group must have a parenthesized group following immediately after the '>'" );
 							return nullptr;
 						}
@@ -533,7 +534,7 @@ namespace eon
 						if( nodegrp == nullptr )
 						{
 							throw InvalidExpression( "At position "
-								+ string( static_cast<long_t>( start - Source.begin() ) )
+								+ string( static_cast<long_t>( start - Source.begin() + 1 ) )
 								+ ": Capture group starting here is missing terminating ')'" );
 							return nullptr;
 						}
@@ -562,7 +563,7 @@ namespace eon
 					return nullptr;
 				}
 			}
-			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() + 1 ) )
 				+ ": Incomplete capture group started here" );
 			return nullptr;
 		}
@@ -589,7 +590,7 @@ namespace eon
 						if( name.empty() )
 						{
 							throw InvalidExpression( "At position "
-								+ string( static_cast<long_t>( start - Source.begin() ) )
+								+ string( static_cast<long_t>( start - Source.begin() + 1 ) )
 								+ ": Back-reference must name a previously defined capture group" );
 							return nullptr;
 						}
@@ -610,7 +611,7 @@ namespace eon
 				}
 			}
 		error:
-			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() + 1 ) )
 				+ ": Incomplete back-reference started here" );
 			return nullptr;
 		}
@@ -722,7 +723,7 @@ namespace eon
 				}
 				param.advance();
 			}
-			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
+			throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() + 1 ) )
 				+ ": Expected '}' and the end the sequence starting here" );
 			return false;
 		}
@@ -736,8 +737,8 @@ namespace eon
 			if( !parse( param2, ')' ) )
 			{
 				param.endGroup();
-				throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() ) )
-					+ ": Group started here i missing terminating ')'" );
+				throw InvalidExpression( "At position " + string( static_cast<long_t>( start - Source.begin() + 1 ) )
+					+ ": Group started here is missing terminating ')'" );
 				param.pos( param2.pos() );
 				return nullptr;
 			}

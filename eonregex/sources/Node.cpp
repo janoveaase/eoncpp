@@ -9,26 +9,34 @@ namespace eon
 	{
 		Node& Node::operator=( const Node& other )
 		{
-			Type = other.Type;
+			Matched = other.Matched;
 			Next = other.Next != nullptr ? other.Next->copy() : nullptr;
+			Group = nullptr;
 			FixedEnd = other.FixedEnd;
+			MinCharsRemaining = other.MinCharsRemaining;
 			Quant = other.Quant;
-			Source = other.Source;
 			Name = other.Name;
 			Open = other.Open;
+			Source = other.Source;
+			Type = other.Type;
 			PreAnchoring = other.PreAnchoring;
+			PrevPos = other.PrevPos;
 			return *this;
 		}
 		Node& Node::operator=( Node&& other ) noexcept
 		{
+			Matched = std::move( other.Matched );
 			Next = other.Next; other.Next = nullptr;
+			Group= nullptr;
 			FixedEnd = other.FixedEnd; other.FixedEnd = nullptr;
+			MinCharsRemaining = other.MinCharsRemaining; other.MinCharsRemaining = 0;
 			Quant = other.Quant; other.Quant = Quantifier();
 			Name = other.Name; other.Name = false;
 			Open = other.Open; other.Open = true;
 			Source = other.Source; other.Source.clear();
 			Type = other.Type;
 			PreAnchoring = other.PreAnchoring; other.PreAnchoring = Anchor::none;
+			PrevPos = other.PrevPos;
 			return *this;
 		}
 
@@ -37,14 +45,28 @@ namespace eon
 
 		bool Node::match( RxData& data, index_t steps )
 		{
+			// If this node has already been successfully matched, don't try again!
+			if( _matched() )
+			{
+				Matched.addCaptures( data.captures() );
+				data = Matched;
+				return true;
+			}
+
 			// If there are fewer characters remaining than the minimum required by the
 			// pattern, we can report failure right now!
 			if( data.remaining() < MinCharsRemaining )
+			{
+				_unmatch();
 				return false;
+			}
 
 			// Check anchors
 			if( PreAnchoring != Anchor::none && !_preAnchorMatch( data ) )
+			{
+				_unmatch();
 				return false;
+			}
 
 			// If we have a fixed end, then we can fail fast by checking if it's there or not
 			if( FixedEnd )
@@ -52,7 +74,10 @@ namespace eon
 				FixedValue* endvalue = (FixedValue*)FixedEnd;
 				if( endvalue->value().substr() != substring(
 					data.source().end() - endvalue->value().numChars(), data.source().end() ) )
+				{
+					_unmatch();
 					return false;
+				}
 			}
 
 			// Cases:
@@ -71,6 +96,10 @@ namespace eon
 			else
 				success = matchRangeNongreedy( data, steps );
 
+			if( success )
+				Matched = data;
+			else
+				_unmatch();
 			return success;
 		}
 
@@ -146,12 +175,12 @@ namespace eon
 				return false;
 
 			// No next means we have nothing more to do
-			if( Next == nullptr )
-				return noNext( data, matches );
+			if( !_next() )
+				return _noNext( data, matches );
 
 			// Now make sure the rest matches, or move down the stack
 			// (backgrack) until they do
-			return nextMatches( data, matches );
+			return _matchNext( data, matches );
 		}
 		void Node::matchMax( RxData data, Stack& matches, index_t steps )
 		{
@@ -159,11 +188,18 @@ namespace eon
 			if( _matchSpecialCase( data, matches ) )
 				return;
 
-			while( matches.size() < Quant.maxQ() )
+			matches.push( data );
+			while( true )
 			{
-				if( !_match( matches.empty() ? data : matches.top(), steps ) )
+				_unmatch();
+				if( !_match( matches.top(), steps ) )
+				{
+					matches.pop();
 					break;
-				matches.push( matches.empty() ? data : matches.top() );
+				}
+				if( matches.size() == Quant.maxQ() )
+					break;
+				matches.push( matches.top() );
 			}
 		}
 		bool Node::_matchSpecialCase( RxData& data, Stack& matches )
@@ -192,7 +228,7 @@ namespace eon
 					return;
 			}
 		}
-		bool Node::noNext( RxData& data, Stack& matches )
+		bool Node::_noNext( RxData& data, Stack& matches )
 		{
 			if( matches.size() >= Quant.minQ() )
 			{
@@ -202,16 +238,26 @@ namespace eon
 			}
 			return false;
 		}
-		bool Node::nextMatches( RxData& data, Stack& matches )
+		bool Node::_matchNext( RxData& data, Stack& matches )
 		{
 			index_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? INDEX_MAX : 6;
+			bool at_end = matches.empty() ? false : matches.top().pos() == matches.top().source().end();
+			bool capturing = Next == nullptr && Group->type() == NodeType::capt_group;
 			while( matches.size() >= Quant.minQ() )
 			{
-				if( Next->match( matches.empty() ? data : matches.top(), next_steps ) )
+				if( capturing )
+					Group->_capture( matches.top() );
+				RxData tmp_data = matches.empty() ? data : matches.top();
+				if( _next()->match( tmp_data, next_steps ) )
 				{
 					// Got a match?
-					if( !matches.empty() )
+					if( matches.empty() || at_end )
+						data = std::move( tmp_data );
+					else
+					{
 						data = std::move( matches.top() );
+						data.addCaptures( tmp_data.captures() );
+					}
 					return true;
 				}
 				else
@@ -222,7 +268,7 @@ namespace eon
 					if( matches.empty() )
 					{
 						// Check if we can get away with zero matches
-						if( Quant.minQ() == 0 && Next == nullptr && ( !Name || eon::validName( substring(
+						if( Quant.minQ() == 0 && _next() == nullptr && ( !Name || eon::validName( substring(
 							matches.size() < 2 ? data.pos() : matches.at( 1 ).pos(), matches.top().pos() ) ) ) )
 							return true;
 						else
@@ -230,7 +276,7 @@ namespace eon
 					}
 				}
 			}
-			if( Next && Next->match( data, next_steps ) )
+			if( _next() && _next()->match( data, next_steps ) )
 				return true;
 			return false;
 		}

@@ -41,6 +41,7 @@ namespace eon
 
 		private:
 			inline bool _match( RxData& data, index_t steps ) override { return !Value->match( data, steps ); }
+			void _unmatch() noexcept override { if( Value->_matched() ) Value->_unmatch(); Node::_unmatch(); }
 			inline string _strStruct() const override { return Value ? "!" + Value->strStruct() : "!"; }
 			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = Next ? Next->_countMinCharsRemaining() : 0; }

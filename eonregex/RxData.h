@@ -75,6 +75,7 @@ namespace eon
 			substring findCapture( name_t name ) const noexcept;
 			inline captures_t* captures() noexcept { return Captures; }
 			inline captures_t* claimCaptures() noexcept { auto capt = Captures; Captures = nullptr; return capt; }
+			inline void addCaptures( captures_t* other ) { if( other ) for( auto& capture : *other ) registerCapture( capture.first, capture.second ); }
 
 
 

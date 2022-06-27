@@ -41,6 +41,8 @@ namespace eon
 			index_t _countMinCharsRemaining() noexcept override;
 			Node* _removeSuperfluousGroups() noexcept override;
 			void _failFastFixedEnd( Node& head ) override;
+			void _unmatch() noexcept override {
+				for( auto node : Optionals ) { if( node->_matched() ) node->_unmatch(); } Node::_unmatch(); }
 
 		private:
 			std::vector<Node*> Optionals;
