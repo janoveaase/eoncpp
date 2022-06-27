@@ -241,6 +241,7 @@ namespace eon
 		bool Node::_matchNext( RxData& data, Stack& matches )
 		{
 			index_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? INDEX_MAX : 6;
+			auto top_elm = matches.size();
 			bool at_end = matches.empty() ? false : matches.top().pos() == matches.top().source().end();
 			bool capturing = Next == nullptr && Group->type() == NodeType::capt_group;
 			while( matches.size() >= Quant.minQ() )
@@ -251,7 +252,7 @@ namespace eon
 				if( _next()->match( tmp_data, next_steps ) )
 				{
 					// Got a match?
-					if( matches.empty() || at_end )
+					if( matches.empty() || matches.size() == top_elm || at_end )
 						data = std::move( tmp_data );
 					else
 					{

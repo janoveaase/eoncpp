@@ -536,6 +536,15 @@ namespace eon
 		WANT_EQ( "abc", eon::string( match.group( eon::name( "alpha" ) ) ) ) << "Wrong capture";
 		WANT_EQ( "xyz", eon::string( match.group( eon::name( "beta" ) ) ) ) << "Wrong capture";
 	}
+	TEST( MiscTests, tricky_case2 )
+	{
+		string str{ "(a 6)" };
+		regex expr{ R"(\(a(\s+@<n2>(\d+))?\))" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		REQUIRE_EQ( 2, match.size() ) << "Wrong number of captures";
+		WANT_EQ( "6", eon::string( match.group( eon::name( "n2" ) ) ) ) << "Wrong capture";
+	}
 
 
 	// Common function used by optimize tests
