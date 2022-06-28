@@ -531,7 +531,10 @@ namespace eon
 		regex expr{ R"(\s*\"@<name1>([^"]+)\"@<v>(\d+[^,]*),b:@<name2>(\S+))" };
 		auto match = expr.match( str );
 		REQUIRE_TRUE( match ) << "Failed to match";
-//		REQUIRE_EQ( 6, match.size() ) << "Wrong number of captures";
+		REQUIRE_EQ( 4, match.size() ) << "Wrong number of captures";
+		WANT_EQ( "A", eon::string( match.group( eon::name( "name1" ) ) ) );
+		WANT_EQ( "5", eon::string( match.group( eon::name( "v" ) ) ) );
+		WANT_EQ( "B", eon::string( match.group( eon::name( "name2" ) ) ) );
 	}
 
 	TEST( MiscTests, tricky_case1 )
