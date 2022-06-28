@@ -247,7 +247,7 @@ namespace eon
 			while( matches.size() >= Quant.minQ() )
 			{
 				if( capturing )
-					Group->_capture( matches.top() );
+					Group->_capture( matches.empty() ? data : matches.top() );
 				RxData tmp_data = matches.empty() ? data : matches.top();
 				if( _next()->match( tmp_data, next_steps ) )
 				{

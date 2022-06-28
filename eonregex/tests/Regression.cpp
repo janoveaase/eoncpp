@@ -525,6 +525,14 @@ namespace eon
 		REQUIRE_TRUE( match ) << "Failed to match";
 		REQUIRE_EQ( 6, match.size() ) << "Wrong number of captures";
 	}
+	TEST( MiscTests, real_case5 )
+	{
+		string str{ "\"A\"5,b:B" };
+		regex expr{ R"(\s*\"@<name1>([^"]+)\"@<v>(\d+[^,]*),b:@<name2>(\S+))" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+//		REQUIRE_EQ( 6, match.size() ) << "Wrong number of captures";
+	}
 
 	TEST( MiscTests, tricky_case1 )
 	{
