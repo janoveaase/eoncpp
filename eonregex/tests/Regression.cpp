@@ -545,6 +545,13 @@ namespace eon
 		REQUIRE_TRUE( match.group( eon::name( "v" ) ) ) << "Didn't get version";
 		WANT_EQ( "17", eon::string( match.group( eon::name( "v" ) ) ) );
 	}
+	TEST( MiscTests, real_case7 )
+	{
+		string str{ "a 36.0         -8.7            292.2          437.0              " };
+		regex expr{ R"(@<name1>(\S+) @<name2>([^(]+) \(v@<v>(\d+.*)\) \(@<name3>([^/]+)/@<num1>(\d+) @<num1>(\d+)\))" };
+		auto match = expr.match( str );
+		REQUIRE_FALSE( match ) << "Failed to match";
+	}
 
 	TEST( MiscTests, tricky_case1 )
 	{

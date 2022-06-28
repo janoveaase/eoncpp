@@ -200,6 +200,8 @@ namespace eon
 				}
 				if( matches.size() > Quant.maxQ() )
 					break;
+				if( matches.size() > 1 && matches.top().pos() == matches.at( 1 ).pos() )
+					break;
 				matches.push( matches.top() );
 			}
 		}
