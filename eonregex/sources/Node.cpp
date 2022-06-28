@@ -88,13 +88,13 @@ namespace eon
 
 			bool success{ false };
 			if( Quant.minQ() == 1 && Quant.maxQ() == 1 )
-				success = matchSingle( data, steps );
+				success = _matchSingle( data, steps );
 			else if( Quant.minQ() == 0 && Quant.maxQ() == 1 )
-				success = matchOneOrZero( data, steps );
+				success = _matchOneOrZero( data, steps );
 			else if( Quant.greedy() )
-				success = matchRangeGreedy( data, steps );
+				success = _matchRangeGreedy( data, steps );
 			else
-				success = matchRangeNongreedy( data, steps );
+				success = _matchRangeNongreedy( data, steps );
 
 			if( success )
 				Matched = data;
@@ -116,7 +116,7 @@ namespace eon
 
 
 
-		bool Node::matchSingle( RxData& data, index_t steps )
+		bool Node::_matchSingle( RxData& data, index_t steps )
 		{
 			RxData data_tmp{ data };
 
@@ -139,10 +139,10 @@ namespace eon
 			data = std::move( data_tmp );
 			return true;
 		}
-		bool Node::matchOneOrZero( RxData& data, index_t steps )
+		bool Node::_matchOneOrZero( RxData& data, index_t steps )
 		{
 			// Try to match one first
-			if( matchSingle( data, steps ) )
+			if( _matchSingle( data, steps ) )
 				return true;
 
 			// That's OK, now we try to match zero
@@ -159,7 +159,7 @@ namespace eon
 			else
 				return true;
 		}
-		bool Node::matchRangeGreedy( RxData& data, index_t steps )
+		bool Node::_matchRangeGreedy( RxData& data, index_t steps )
 		{
 			if( PrevPos.same( data.pos(), data.marker() ) )
 				return false;
@@ -167,8 +167,9 @@ namespace eon
 
 			// Match as many as possible from the start
 			auto matches = _stack();
-			matchMax( data, matches, steps );
-			if( matches.size() < Quant.Min )
+			matches.push( data );
+			_matchMax( matches, steps );
+			if( matches.size() <= Quant.Min )
 				return false;
 
 			if( Name && ( matches.empty() || !eon::validName( substring( data.pos(), matches.top().pos() ) ) ) )
@@ -182,13 +183,13 @@ namespace eon
 			// (backgrack) until they do
 			return _matchNext( data, matches );
 		}
-		void Node::matchMax( RxData data, Stack& matches, index_t steps )
+		void Node::_matchMax( Stack& matches, index_t steps )
 		{
 			// Some special cases can be processed faster
-			if( _matchSpecialCase( data, matches ) )
+			if( _matchSpecialCase( matches ) )
 				return;
 
-			matches.push( data );
+			matches.push( matches.top() );
 			while( true )
 			{
 				_unmatch();
@@ -197,29 +198,29 @@ namespace eon
 					matches.pop();
 					break;
 				}
-				if( matches.size() == Quant.maxQ() )
+				if( matches.size() > Quant.maxQ() )
 					break;
 				matches.push( matches.top() );
 			}
 		}
-		bool Node::_matchSpecialCase( RxData& data, Stack& matches )
+		bool Node::_matchSpecialCase( Stack& matches )
 		{
 			switch( Type )
 			{
 				case NodeType::val_any:
-					_matchAny( data, matches );
+					_matchAny( matches );
 					return true;
 				default:
 					return false;
 			}
 		}
-		void Node::_matchAny( RxData& data, Stack& matches )
+		void Node::_matchAny( Stack& matches )
 		{
 			// Goble as much as we can
 			int gobbled{ 0 };
-			while( matches.size() < Quant.maxQ() && (matches.empty() ? data() : matches.top()() ) )
+			while( matches.size() <= Quant.maxQ() && matches.top()() )
 			{
-				matches.push( matches.empty() ? data : matches.top() );
+				matches.push( matches.top() );
 				matches.top().advance();
 				if( gobbled < MinCharsRemaining )
 					++gobbled;
@@ -240,25 +241,18 @@ namespace eon
 		}
 		bool Node::_matchNext( RxData& data, Stack& matches )
 		{
+			// 'matches' is a stack of RxData objects where the bottom element
+			// is the start of the current potential greedy match and the top
+			// is the end.
 			index_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? INDEX_MAX : 6;
-			auto top_elm = matches.size();
-			bool at_end = matches.empty() ? false : matches.top().pos() == matches.top().source().end();
 			bool capturing = Next == nullptr && Group->type() == NodeType::capt_group;
-			while( matches.size() >= Quant.minQ() )
+			while( matches.size() > Quant.minQ() )
 			{
 				if( capturing )
-					Group->_capture( matches.empty() ? data : matches.top() );
-				RxData tmp_data = matches.empty() ? data : matches.top();
-				if( _next()->match( tmp_data, next_steps ) )
+					Group->_capture( matches.top() );
+				if( _next()->match( matches.top(), next_steps ) )
 				{
-					// Got a match?
-					if( matches.empty() || matches.size() == top_elm || at_end )
-						data = std::move( tmp_data );
-					else
-					{
-						data = std::move( matches.top() );
-						data.addCaptures( tmp_data.captures() );
-					}
+					data = std::move( matches.top() );
 					return true;
 				}
 				else
@@ -281,7 +275,7 @@ namespace eon
 				return true;
 			return false;
 		}
-		bool Node::matchRangeNongreedy( RxData& data, index_t steps )
+		bool Node::_matchRangeNongreedy( RxData& data, index_t steps )
 		{
 			// Match as few as possible from the start
 			RxData data_tmp{ data };
@@ -326,7 +320,7 @@ namespace eon
 			}
 			return false;
 		}
-		bool Node::matchNext( RxData& data, index_t steps )
+		bool Node::_matchNext( RxData& data, index_t steps )
 		{
 			if( Next == nullptr )
 				return true;

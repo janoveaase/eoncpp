@@ -536,6 +536,15 @@ namespace eon
 		WANT_EQ( "5", eon::string( match.group( eon::name( "v" ) ) ) );
 		WANT_EQ( "B", eon::string( match.group( eon::name( "name2" ) ) ) );
 	}
+	TEST( MiscTests, real_case6 )
+	{
+		string str{ "A (v17) (ls/5 2)," };
+		regex expr{ R"(@<name1>([^(]+) \(v@<v>(\d+.*)\) \([^/]+/\d+ \d+\),)" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		REQUIRE_TRUE( match.group( eon::name( "v" ) ) ) << "Didn't get version";
+		WANT_EQ( "17", eon::string( match.group( eon::name( "v" ) ) ) );
+	}
 
 	TEST( MiscTests, tricky_case1 )
 	{

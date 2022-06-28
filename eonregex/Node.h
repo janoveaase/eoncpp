@@ -94,17 +94,17 @@ namespace eon
 
 
 		private:
-			bool matchSingle( RxData& data, index_t steps );
-			bool matchOneOrZero( RxData& data, index_t steps );
-			bool matchRangeGreedy( RxData& data, index_t steps );
-			void matchMax( RxData data, Stack& matches, index_t steps );
-			bool _matchSpecialCase( RxData& data, Stack& matches );
-			void _matchAny( RxData& data, Stack& matches );
+			bool _matchSingle( RxData& data, index_t steps );
+			bool _matchOneOrZero( RxData& data, index_t steps );
+			bool _matchRangeGreedy( RxData& data, index_t steps );
+			void _matchMax( Stack& matches, index_t steps );
+			bool _matchSpecialCase( Stack& matches );
+			void _matchAny( Stack& matches );
 			bool _noNext( RxData& data, Stack& matches );
 			bool _matchNext( RxData& data, Stack& matches );
-			bool matchRangeNongreedy( RxData& data, index_t steps );
+			bool _matchRangeNongreedy( RxData& data, index_t steps );
 
-			bool matchNext( RxData& data, index_t steps );
+			bool _matchNext( RxData& data, index_t steps );
 
 			bool _preAnchorMatch( RxData& data );
 
