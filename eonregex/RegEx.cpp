@@ -28,7 +28,10 @@ namespace eon
 		{
 			rx::RxData data( substring( pos, str.end() ), ++( (regex*)this )->Marker );
 			if( Graph.match( data ) )
+			{
+				data.registerCapture( name_complete, substring( pos, data.pos() ) );
 				return rx::match( data.claimCaptures() );
+			}
 		}
 		return rx::match();
 	}
@@ -41,7 +44,10 @@ namespace eon
 		{
 			rx::RxData data( substring( pos, str.end() ), ++( (regex*)this )->Marker );
 			if( Graph.match( data ) )
+			{
+				data.registerCapture( name_complete, substring( pos - 1, data.pos() ) );
 				return rx::match( data.claimCaptures() );
+			}
 		}
 		return rx::match();
 	}

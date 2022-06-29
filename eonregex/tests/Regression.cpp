@@ -574,6 +574,38 @@ namespace eon
 	}
 
 
+	TEST( FindTests, findFirst )
+	{
+		string good{ "123caa456ba78" };
+		string bad{ "123CAA456BA78" };
+		regex rx1{ R"([abc]+)" };
+		regex rx2{ R"(\d+)" };
+		auto found = rx1.findFirst( good );
+		REQUIRE_TRUE( found ) << "Failed to find good";
+		WANT_EQ( "caa", eon::string( found.group( name_complete ) ) ) << "Wrong value found";
+		found = rx1.findFirst( bad );
+		REQUIRE_FALSE( found ) << "Found bad";
+		found = rx2.findFirst( good );
+		REQUIRE_TRUE( found ) << "Failed to find alternate";
+		WANT_EQ( "123", eon::string( found.group( name_complete ) ) ) << "Wrong altenate value found";
+	}
+	TEST( FindTests, findLast )
+	{
+		string good{ "123caa456ba78" };
+		string bad{ "123CAA456BA78" };
+		regex rx1{ R"([abc]+)" };
+		regex rx2{ R"(\d+)" };
+		auto found = rx1.findLast( good );
+		REQUIRE_TRUE( found ) << "Failed to find good";
+		WANT_EQ( "ba", eon::string( found.group( name_complete ) ) ) << "Wrong value found";
+		found = rx1.findLast( bad );
+		REQUIRE_FALSE( found ) << "Found bad";
+		found = rx2.findLast( good );
+		REQUIRE_TRUE( found ) << "Failed to find alternate";
+		WANT_EQ( "78", eon::string( found.group( name_complete ) ) ) << "Wrong altenate value found";
+	}
+
+
 	// Common function used by optimize tests
 	void OptimizeTests::optimizeTest( regex& plain, regex& optimized, string& good_str, string& bad_str, int iterations )
 	{

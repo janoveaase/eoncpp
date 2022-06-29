@@ -133,9 +133,9 @@ namespace eon
 		// [eon::substring]) or [eon::rx::match::group(name)] to get a
 		// specific capture.
 		rx::match findFirst( const substring& str ) const;
-		inline rx::match findFirst( const string& str ) const { return match( str.substr() ); }
-		inline rx::match findFirst( const std::string& str ) const { return match( substring( str ) ); }
-		inline rx::match findFirst( const char* str ) const { return match( substring( str ) ); }
+		inline rx::match findFirst( const string& str ) const { return findFirst( str.substr() ); }
+		inline rx::match findFirst( const std::string& str ) const { return findFirst( substring( str ) ); }
+		inline rx::match findFirst( const char* str ) const { return findFirst( substring( str ) ); }
 
 		// Find the last section of the [eon::substring that matches]
 		// Returns an [eon::rx::match] object that is either 'true' if there
@@ -144,9 +144,9 @@ namespace eon
 		// [eon::substring]) or [eon::rx::match::group(name)] to get a
 		// specific capture.
 		rx::match findLast( const substring& str ) const;
-		inline rx::match findLast( const string& str ) const { return match( str.substr() ); }
-		inline rx::match findLast( const std::string& str ) const { return match( substring( str ) ); }
-		inline rx::match findLast( const char* str ) const { return match( substring( str ) ); }
+		inline rx::match findLast( const string& str ) const { return findLast( str.substr() ); }
+		inline rx::match findLast( const std::string& str ) const { return findLast( substring( str ) ); }
+		inline rx::match findLast( const char* str ) const { return findLast( substring( str ) ); }
 
 
 
