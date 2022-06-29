@@ -1082,9 +1082,9 @@ namespace eon
 		// std::multiset). Uses the 'insert' method!
 		// NOTE: All elements will be substring objects, so specify the
 		//       template type as such!
-		//       Example: splitNonsequential<std::set<eon::substring>>( ...
+		//       Example: splitNonSequential<std::set<eon::substring>>( ...
 		template<typename container_t>
-		container_t splitNonsequential( const string& delimiter ) const {
+		container_t splitNonSequential( const string& delimiter ) const {
 			return substr().splitNonSequential<container_t>( delimiter.substr() ); }
 
 		// Split string on every occurrence of 'delimiter' (delimiter char
@@ -1092,7 +1092,7 @@ namespace eon
 		// std::multiset). Uses the 'insert' method!
 		// NOTE: All elements will be substring objects, so specify the
 		//       template type as such!
-		//       Example: splitNonsequential<std::set<eon::substring>>( ...
+		//       Example: splitNonSequential<std::set<eon::substring>>( ...
 		template<typename container_t>
 		container_t splitNonSequential( char_t delimiter ) const {
 			return substr().splitNonSequential<container_t>( delimiter ); }
