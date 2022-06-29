@@ -550,7 +550,16 @@ namespace eon
 		string str{ "a 36.0         -8.7            292.2          437.0              " };
 		regex expr{ R"(@<name1>(\S+) @<name2>([^(]+) \(v@<v>(\d+.*)\) \(@<name3>([^/]+)/@<num1>(\d+) @<num1>(\d+)\))" };
 		auto match = expr.match( str );
-		REQUIRE_FALSE( match ) << "Failed to match";
+		REQUIRE_FALSE( match ) << "Didn't fail to match";
+	}
+	TEST( MiscTests, real_case8 )
+	{
+		string str{ "v=\"a b\" " };
+		regex expr{ R"(@<key>(\S+)=@<qt>(\")?@<value>(.+)@:<qt>)" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		WANT_EQ( "v", eon::string( match.group( eon::name( "key" ) ) ) ) << "Wrong key";
+		WANT_EQ( "a b", eon::string( match.group( eon::name( "value" ) ) ) ) << "Wrong value";
 	}
 
 	TEST( MiscTests, tricky_case1 )

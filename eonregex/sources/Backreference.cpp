@@ -10,6 +10,8 @@ namespace eon
 			auto group = data.findCapture( Name );
 			if( group )
 			{
+				if( !data )
+					return false;
 				RxData param_b{ data };
 
 				for( auto c = group.begin(); c != group.end() && param_b; ++c )
