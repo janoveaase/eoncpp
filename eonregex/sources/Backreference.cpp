@@ -24,7 +24,8 @@ namespace eon
 				data = std::move( param_b );
 				return true;
 			}
-			return false;
+			else
+				return true;	// Non-existing groups always match!
 		}
 	}
 }

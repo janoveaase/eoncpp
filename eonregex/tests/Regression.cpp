@@ -328,6 +328,25 @@ namespace eon
 			WANT_EQ( "pri", string( result.group( eon::name( "m" ) ) ).stdstr() ) << "Wrong capture for spring";
 	}
 
+	TEST( RegExTest, backreference1 )
+	{
+		string str{ "v=\"a b\" " };
+		regex expr{ R"(@<key>(\S+)=@<qt>(\")?@<value>(.+)@:<qt>)" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		WANT_EQ( "v", eon::string( match.group( eon::name( "key" ) ) ) ) << "Wrong key";
+		WANT_EQ( "a b", eon::string( match.group( eon::name( "value" ) ) ) ) << "Wrong value";
+	}
+	TEST( RegExTest, backreference2 )
+	{
+		string str{ "v=a" };
+		regex expr{ R"(@<key>(\S+)=@<qt>(\")?@<value>(.+)@:<qt>)" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		WANT_EQ( "v", eon::string( match.group( eon::name( "key" ) ) ) ) << "Wrong key";
+		WANT_EQ( "a", eon::string( match.group( eon::name( "value" ) ) ) ) << "Wrong value";
+	}
+
 	TEST( RegExTest, match_newline_tab )
 	{
 		regex expr;
@@ -551,15 +570,6 @@ namespace eon
 		regex expr{ R"(@<name1>(\S+) @<name2>([^(]+) \(v@<v>(\d+.*)\) \(@<name3>([^/]+)/@<num1>(\d+) @<num1>(\d+)\))" };
 		auto match = expr.match( str );
 		REQUIRE_FALSE( match ) << "Didn't fail to match";
-	}
-	TEST( MiscTests, real_case8 )
-	{
-		string str{ "v=\"a b\" " };
-		regex expr{ R"(@<key>(\S+)=@<qt>(\")?@<value>(.+)@:<qt>)" };
-		auto match = expr.match( str );
-		REQUIRE_TRUE( match ) << "Failed to match";
-		WANT_EQ( "v", eon::string( match.group( eon::name( "key" ) ) ) ) << "Wrong key";
-		WANT_EQ( "a b", eon::string( match.group( eon::name( "value" ) ) ) ) << "Wrong value";
 	}
 
 	TEST( MiscTests, tricky_case1 )
