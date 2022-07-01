@@ -124,6 +124,7 @@ namespace eon
 			Node* setQuantifier( ParseParam& param, index_t min, index_t max );
 
 			void _removeDuplicates();
+			void _combineFixed();
 			void _countMinCharsRemaining();
 			void _removeSuperfluousGroups() noexcept;
 			void _exposeLiterals();

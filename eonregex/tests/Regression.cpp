@@ -874,36 +874,36 @@ namespace eon
 	TEST( SpeedCmp, eon_match_only )
 	{
 		eon::regex rx;
-		REQUIRE_NO_EXCEPT( rx = R"(^\w{2,6}: \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) << "Failed to parse Eon regex";
+		REQUIRE_NO_EXCEPT( rx = R"(^\l{2,6}: a\-b\.c \d\d?:\d\d?:\d\d? (alpha|beta){1,2} \s*\.$)" ) << "Failed to parse Eon regex";
 		size_t count = 5000;
 #ifdef _DEBUG
 		count /= 10;
 #endif
 		std::map<string, bool> text{
-			{ "alpha: 1:99:7 beta .", true },
-			{ "beta: 01:3:18 alphabeta       .", true },
-			{ "gamma: 123:1:1 alpha  .", false },
-			{ "delta: 1:1:1 gamma  .", false },
-			{ "epsilon: 1:1:1 alpha .", false },
-			{ "zeta: 00:00:00 betaalpha      .", true },
-			{ "eta: 0::1 alpha .", false },
-			{ "theta: :: beta .", false },
-			{ "iota: 1:2:3 alpha.", false },
-			{ "kappa: 11:22:33 beta          .", true },
-			{ "lambda: 9:8:7 alphaalpha      .", true },
-			{ "mu: 1:2 alpha .", false },
-			{ "nu: 1.2:3 alpha .", false },
-			{ "xi: 1:2.3 alpha .", false },
-			{ "omikron: 2:2:2 alpha .", false },
-			{ "pi:: 1:2:3 alpha .", false },
-			{ "rho 1:2:3 alpha .", false },
-			{ "sigma: 1:1:1 alpha                                                                                          .", true },
-			{ "tau: 1,2,3 alpha .", false },
-			{ "upsilon: 1:2:3 beta .", false },
-			{ "phi:  1:2:3 alpha .", false },
-			{ "chi: 1 :2 :3 alpa .", false },
-			{ "psi: 1.:2.:3. alpha .", false },
-			{ "omega: 44:55:66 beta                                                                                                .", true }
+			{ "alpha: a-b.c 1:99:7 beta .", true },
+			{ "beta: a-b.c 01:3:18 alphabeta       .", true },
+			{ "gamma: a-b.c 123:1:1 alpha  .", false },
+			{ "delta: a-b.c 1:1:1 gamma  .", false },
+			{ "epsilon: a-b.c 1:1:1 alpha .", false },
+			{ "zeta: a-b.c 00:00:00 betaalpha      .", true },
+			{ "eta: a-b.c 0::1 alpha .", false },
+			{ "theta: a-b.c :: beta .", false },
+			{ "iota: a-b.c 1:2:3 alpha.", false },
+			{ "kappa: a-b.c 11:22:33 beta          .", true },
+			{ "lambda: a-b.c 9:8:7 alphaalpha      .", true },
+			{ "mu: a-b.c 1:2 alpha .", false },
+			{ "nu: a-b.c 1.2:3 alpha .", false },
+			{ "xi: a-b.c 1:2.3 alpha .", false },
+			{ "omikron: a-b.c 2:2:2 alpha .", false },
+			{ "pi:: a-b.c 1:2:3 alpha .", false },
+			{ "rho a-b.c 1:2:3 alpha .", false },
+			{ "sigma: a-b.c 1:1:1 alpha                                                                                          .", true },
+			{ "tau: a-b.c 1,2,3 alpha .", false },
+			{ "upsilon: a-b.c 1:2:3 beta .", false },
+			{ "phi: a-b.c  1:2:3 alpha .", false },
+			{ "chi: a-b.c 1 :2 :3 alpa .", false },
+			{ "psi: a-b.c 1.:2.:3. alpha .", false },
+			{ "omega: a-b.c 44:55:66 beta                                                                                                .", true }
 		};
 		std::chrono::steady_clock clock;
 		size_t successes = 0;

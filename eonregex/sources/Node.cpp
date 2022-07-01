@@ -403,14 +403,12 @@ namespace eon
 		}
 
 
-		void Node::removeDuplicates( std::set<Node*>& removed )
+		void Node::removeDuplicates()
 		{
-			if( removed.find( this ) != removed.end() )
-				return;
-			_removeDuplicates( removed );
+			_removeDuplicates();
 			while( Next != nullptr )
 			{
-				Next->removeDuplicates( removed );
+				Next->removeDuplicates();
 
 				// Find out if the two are identical, quantification excluded
 				if( equal( *Next, cmpflag::none ) )
@@ -435,6 +433,21 @@ namespace eon
 				else
 					break;
 			}
+		}
+		void Node::combineFixed()
+		{
+			_combinedFixed();
+			while( Type == NodeType::val_fixed && Quant.Min == 1 && Quant.Max == 1 && Next
+				&& Next->Type == NodeType::val_fixed && Next->Quant.Min == 1 && Next->Quant.Max == 1 )
+			{
+				( (FixedValue*)this )->append( ( (FixedValue*)Next )->value() );
+				auto next = Next;
+				Next = Next->Next;
+				next->Next = nullptr;
+				delete next;
+			}
+			if( Next )
+				Next->combineFixed();
 		}
 	}
 }

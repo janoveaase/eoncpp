@@ -69,7 +69,8 @@ namespace eon
 
 
 			// Optimizations
-			void removeDuplicates( std::set<Node*>& removed );
+			void removeDuplicates();
+			void combineFixed();
 
 		protected:
 			virtual bool _match( RxData& data, index_t steps ) = 0;
@@ -77,7 +78,8 @@ namespace eon
 			virtual string _strStruct() const { return string(); }
 
 			virtual bool _equal( const Node& other, cmpflag flags ) const noexcept { return true; }
-			virtual void _removeDuplicates( std::set<Node*>& removed ) {}
+			virtual void _removeDuplicates() {}
+			virtual void _combinedFixed() {}
 
 			using Stack = stack<RxData>;
 			inline Stack _stack() { Stack data; data.reserve( 53 ); return data; }

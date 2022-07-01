@@ -39,6 +39,8 @@ namespace eon
 			inline string _strStruct() const override {
 				string s; for( auto& opt : Optionals ) { if( !s.empty() ) s += "|"; s += opt->strStruct(); } return s; }
 			index_t _countMinCharsRemaining() noexcept override;
+			inline void _removeDuplicates() override { for( auto node : Optionals ) node->removeDuplicates(); }
+			inline void _combinedFixed() override { for( auto node : Optionals ) node->combineFixed(); }
 			Node* _removeSuperfluousGroups() noexcept override;
 			void _failFastFixedEnd( Node& head ) override;
 			void _unmatch() noexcept override {

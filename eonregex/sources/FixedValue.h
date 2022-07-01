@@ -37,6 +37,8 @@ namespace eon
 
 			inline const string& value() const noexcept { return Value; }
 
+			inline void append( const string& value ) noexcept { Value += value; }
+
 		private:
 			bool _match( RxData& data, index_t steps ) override;
 

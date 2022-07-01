@@ -46,8 +46,8 @@ namespace eon
 				auto& o = *dynamic_cast<const NodeGroup*>( &other ); if( Head && o.Head )
 					return Head->equal( *o.Head, cmpflag::deep | cmpflag::quant ); else return Head == o.Head; }
 
-			inline void _removeDuplicates( std::set<Node*>& removed ) override {
-				if( Head ) Head->removeDuplicates( removed ); }
+			inline void _removeDuplicates() override { if( Head ) Head->removeDuplicates(); }
+			inline void _combinedFixed() override { if( Head ) Head->combineFixed(); }
 			inline index_t _countMinCharsRemaining() noexcept override {
 				return MinCharsRemaining = ( Head ? Head->_countMinCharsRemaining() * Quant.minQ() : 0 )
 					+ ( Next ? Next->_countMinCharsRemaining() : 0 ); }

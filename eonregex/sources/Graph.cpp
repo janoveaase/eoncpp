@@ -46,8 +46,8 @@ namespace eon
 
 			if( Head )
 			{
-				// TODO: Find out why matching runs slower with this done!
 				_removeDuplicates();
+				_combineFixed();
 				if( !( MyFlags & Flag::no_ungroup ) )
 					_removeSuperfluousGroups();
 				if( !( MyFlags & Flag::no_exposing ) )
@@ -781,11 +781,10 @@ namespace eon
 		}
 
 
-		void Graph::_removeDuplicates()
-		{
-			std::set<Node*> removed;
-			Head->removeDuplicates( removed );
-		}
+		void Graph::_removeDuplicates() {
+			Head->removeDuplicates(); }
+		void Graph::_combineFixed() {
+			Head->combineFixed(); }
 		void Graph::_countMinCharsRemaining() {
 			Head->_countMinCharsRemaining(); }
 		void Graph::_removeSuperfluousGroups() noexcept {
