@@ -9,30 +9,40 @@ namespace eon
 //		term.setBackground( Terminal::intensity::dark );
 		term << "This test requires manual inspection of the output!\n\n";
 
-		term << "normal:    " << style::normal << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "strong:    " << style::strong << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "weak:      " << style::weak << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "black:     " << style::black << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "dark:      " << style::dark << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "white:     " << style::white << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "bright:    " << style::bright << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "red:       " << style::red << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "green:     " << style::green << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "yellow:    " << style::yellow << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "blue:      " << style::blue << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "magenta:   " << style::magenta << " The quick brown fox jumped over the lazy dog "
+		term << "normal:     " << style::normal << " The quick brown fox jumped over the lazy dog " << style::normal
+			<< "\n";
+		term << "strong:     " << style::strong << " The quick brown fox jumped over the lazy dog " << style::normal
+			<< "\n";
+		term << "weak:       " << style::weak << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "black:      " << style::black << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "dark:       " << style::dark << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "white:      " << style::white << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "bright:     " << style::bright << " The quick brown fox jumped over the lazy dog " << style::normal
+			<< "\n";
+		term << "red:        " << style::red << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "green:      " << style::green << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "yellow:     " << style::yellow << " The quick brown fox jumped over the lazy dog " << style::normal
+			<< "\n";
+		term << "blue:       " << style::blue << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "magenta:    " << style::magenta << " The quick brown fox jumped over the lazy dog "
 			<< style::normal << "\n";
-		term << "cyan:      " << style::cyan << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "note:      " << style::note << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "warning:   " << style::warning << " The quick brown fox jumped over the lazy dog "
+		term << "cyan:       " << style::cyan << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "note:       " << style::note << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "warning:    " << style::warning << " The quick brown fox jumped over the lazy dog "
 			<< style::normal << "\n";
-		term << "error:     " << style::error << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "success:   " << style::success << " The quick brown fox jumped over the lazy dog "
+		term << "error:      " << style::error << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "success:    " << style::success << " The quick brown fox jumped over the lazy dog "
 			<< style::normal << "\n";
-		term << "quote:     " << style::quote << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "reference: " << style::reference << " The quick brown fox jumped over the lazy dog "
+		term << "quote:      " << style::quote << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "reference:  " << style::reference << " The quick brown fox jumped over the lazy dog "
 			<< style::normal << "\n";
-		term << "code:      " << style::code << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "code:       " << style::code << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "left:       " << style::left << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "right:      " << style::right << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "left_value: " << style::left_value << " The quick brown fox jumped over the lazy dog " << style::normal
+			<< "\n";
+		term << "right_value:" << style::right_value << " The quick brown fox jumped over the lazy dog " << style::normal
+			<< "\n";
 	}
 
 	TEST( TerminalTest, viewport )

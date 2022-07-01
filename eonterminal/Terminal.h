@@ -37,7 +37,11 @@ namespace eon
 		success,        // white        dark green
 		quote,          // dark blue    light yellow
 		reference,      // dark yellow  default
-		code            // dark red     light gray
+		code,           // dark red     light gray
+		left,			// yellow       default
+		right,			// cyan         default
+		left_value,     // black        light yellow
+		right_value,    // black		light cyan
 	};
 
 

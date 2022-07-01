@@ -111,14 +111,14 @@ namespace eontest
 				else
 				{
 					matches = false;
-					eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
+					eon::term << eon::style::strong << "Expected expression: " << eon::style::left << exp_expr
 						<< eon::style::normal << "\n";
-					eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
+					eon::term << eon::style::strong << "  Actual expression: " << eon::style::right << act_expr
 						<< eon::style::normal << "\n";
-					eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::green
+					eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::left
 						<< "<empty>" << eon::style::normal << "\n";
-					eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::red
-						<< act_lines[ lno ] << eon::style::normal << "\n";
+					eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::normal
+						<< "\"" << eon::style::right_value << act_lines[ lno ] << eon::style::normal << "\"\n";
 					continue;
 				}
 			}
@@ -126,14 +126,14 @@ namespace eontest
 			if( !exp.match( act_lines[ lno ] ) )
 			{
 				matches = false;
-				eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
+				eon::term << eon::style::strong << "Expected expression: " << eon::style::left << exp_expr
 					<< eon::style::normal << "\n";
-				eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
+				eon::term << eon::style::strong << "  Actual expression: " << eon::style::right << act_expr
 					<< eon::style::normal << "\n";
-				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << " regex: " << eon::style::green
-					<< exp_lines[ lno ] << eon::style::normal << "\n";
-				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: " << eon::style::red
-					<< act_lines[ lno ] << eon::style::normal << "\n";
+				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << " regex: \""
+					<< eon::style::left_value << exp_lines[ lno ] << eon::style::normal << "\"\n";
+				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << " value: \""
+					<< eon::style::right_value << act_lines[ lno ] << eon::style::normal << "\"\n";
 			}
 		}
 		auto missing_act = exp_lines.size() - lno;
@@ -141,28 +141,28 @@ namespace eontest
 		if( missing_act > 0 || superfluous_act > 0 )
 		{
 			matches = false;
-			eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr
+			eon::term << eon::style::strong << "Expected expression: " << eon::style::left << exp_expr
 				<< eon::style::normal << "\n";
-			eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr
+			eon::term << eon::style::strong << "  Actual expression: " << eon::style::right << act_expr
 				<< eon::style::normal << "\n";
 		}
 		if( missing_act > 0 )
 		{
 			if( missing_act == 1 )
-				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::red
+				eon::term << eon::style::strong << "Expected line #" << ( lno + 1 ) << ": " << eon::style::left
 				<< "No actual line!" << eon::style::normal << "\n";
 			else
 				eon::term << eon::style::strong << "Expected lines #" << ( lno + 1 ) << "-" << exp_lines.size()
-				<< ": " << eon::style::red << "No actual lines!" << eon::style::normal << "\n";
+				<< ": " << eon::style::left << "<<No actual lines!>>" << eon::style::normal << "\n";
 		}
 		else if( superfluous_act > 0 )
 		{
 			if( superfluous_act == 1 )
-				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << ": " << eon::style::red
-				<< "Extra line not in expected!" << eon::style::normal << "\n";
+				eon::term << eon::style::strong << "  Actual line #" << ( lno + 1 ) << ": " << eon::style::right
+				<< "<<Extra line not in expected!>>" << eon::style::normal << "\n";
 			else
 				eon::term << eon::style::strong << "  Actual lines #" << ( lno + 1 ) << "-" << act_lines.size() << ": "
-				<< eon::style::red << "Extra lines not in expected!" << eon::style::normal << "\n";
+				<< eon::style::right << "<<Extra lines not in expected!>>" << eon::style::normal << "\n";
 		}
 		return matches;
 	}
@@ -177,33 +177,33 @@ namespace eontest
 		auto exp_lines = _splitLines( _encodeEon_( expected, dummy1 ) );
 		auto act_lines = _splitLines( _encodeEon_( actual, dummy2 ) );
 		eon::index_t diff_line = _findFirstDiffLine( exp_lines, act_lines );
-		eon::term << eon::style::strong << "Expected expression: " << eon::style::green << exp_expr << eon::style::normal
+		eon::term << eon::style::strong << "Expected expression: " << eon::style::left << exp_expr << eon::style::normal
 			<< "\n";
-		eon::term << eon::style::strong << "  Actual expression: " << eon::style::red << act_expr << eon::style::normal
+		eon::term << eon::style::strong << "  Actual expression: " << eon::style::right << act_expr << eon::style::normal
 			<< "\n";
 		if( diff_line == exp_lines.size() || diff_line == act_lines.size() )
 		{
 			if( diff_line < exp_lines.size() )
 			{
 				eon::term << eon::style::strong << "Expected line #" << eon::string( diff_line + 1 ) << ": "
-					<< eon::style::normal << "\"" << eon::style::green
+					<< eon::style::normal << "\"" << eon::style::left_value
 					<< _extractLine( exp_lines[ diff_line ], 0, 79 - 19, start_pos ) << eon::style::normal << "\"\n";
-				eon::term << eon::style::red << "No matching actual line!\n";
+				eon::term << eon::style::right << "No matching actual line!\n";
 			}
 			else
 			{
 				eon::term << "No matching expected line!\n";
 				eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
-					<< _extractLine( act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
+					<< eon::style::right << _extractLine( act_lines[ diff_line ], 0, 79 - 19, start_pos ) << "\"\n";
 			}
 		}
 		else
 		{
 			auto diff_pos = _findFirstDiffPos( exp_lines[ diff_line ], act_lines[ diff_line ] );
 			eon::term << "Expected line #" << eon::string( diff_line + 1 ) << ": \""
-				<< _extractLine( exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
+				<< eon::style::left << _extractLine( exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
 			eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
-				<< _extractLine( act_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
+				<< eon::style::right << _extractLine( act_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
 			eon::term << eon::string( diff_pos - start_pos + 19, ' ' ) << "^\n";
 			std::string marker{ "Different here!" };
 			if( diff_pos > marker.size() + 2 )

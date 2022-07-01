@@ -202,6 +202,11 @@ namespace eon
 		Styles[ style::bright ] = StyleDetails( Color( color::white, intensity::dark ) );
 		Styles[ style::cyan ] = StyleDetails( Color( color::cyan ) );
 
+		Styles[ style::left ] = StyleDetails( Color( color::yellow ) );
+		Styles[ style::right ] = StyleDetails( Color( color::cyan ) );
+		Styles[ style::left_value ] = StyleDetails( Color( color::black, intensity::dark ), fontstyle::bold, Color( color::yellow, intensity::bright ) );
+		Styles[ style::right_value ] = StyleDetails( Color( color::black, intensity::dark ), fontstyle::bold, Color( color::cyan, intensity::bright ) );
+
 		if( background == intensity::bright )
 		{
 			Styles[ style::red ] = StyleDetails( Color( color::red ) );
