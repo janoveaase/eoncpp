@@ -45,9 +45,10 @@ namespace eon
 
 			inline const substring& source() const noexcept { return Src; }
 			inline const string::iterator& pos() const noexcept { return Pos; }
-			inline char_t operator()() const noexcept { return Pos ? *Pos : NullChr; }
-			inline bool prev( char_t c ) const noexcept { return Pos && Pos.numByte() > 0 && *( Pos - 1 ) == c; }
-			inline char_t prev() const noexcept { return Pos && Pos.numByte() > 0 ? *( Pos - 1 ) : NullChr; }
+			inline bool valid() const noexcept { return Pos && Pos < Src.end(); }
+			inline char_t operator()() const noexcept { return valid() ? *Pos : NullChr; }
+			inline bool prev( char_t c ) const noexcept { return Pos && Pos > Src.begin() && *( Pos - 1 ) == c; }
+			inline char_t prev() const noexcept { return Pos && Pos > Src.begin() ? *( Pos - 1 ) : NullChr; }
 			inline bool next( char_t c ) const noexcept { auto n = Pos + 1; return n ? *n == c : false; }
 			inline char_t next() const noexcept { auto n = Pos + 1; return n ? *n : NullChr;}
 

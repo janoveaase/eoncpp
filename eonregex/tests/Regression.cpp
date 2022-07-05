@@ -256,6 +256,20 @@ namespace eon
 		WANT_TRUE( expr.match( "x" ) ) << "Didn't match 'x'";
 	}
 
+	TEST( RegExTest, match_substring )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(.*)" ) << "Failed to parse";
+		string total{ "12345" };
+		auto sub = total.slice( 2, -3 );
+
+		auto match = expr.match( sub );
+		REQUIRE_TRUE( match ) << "Didn't match!";
+
+		string matched( match.group( name_complete ) );
+		WANT_EQ( "3", matched ) << "Wrong part of sub-string matched";
+	}
+
 	TEST( RegExTest, match_capture_greedy_1 )
 	{
 		regex expr;
