@@ -148,6 +148,14 @@ namespace eon
 		inline rx::match findLast( const std::string& str ) const { return findLast( substring( str ) ); }
 		inline rx::match findLast( const char* str ) const { return findLast( substring( str ) ); }
 
+		// Find all matches of the pattern within the specified string
+		// NOTE: There will be no overlaps! A found item is bypassed completely when searching for the next.
+		// Returns a vector of matches, in order. Empty if none matched.
+		std::vector<rx::match> findAll( const substring& str ) const;
+		inline std::vector<rx::match> findAll( const string& str ) const { return findAll( str.substr() ); }
+		inline std::vector<rx::match> findAll( const std::string& str ) const { return findAll( substring( str ) ); }
+		inline std::vector<rx::match> findAll( const char* str ) const { return findAll( substring( str ) ); }
+
 
 
 	private:

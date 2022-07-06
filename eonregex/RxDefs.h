@@ -40,7 +40,8 @@ namespace eon
 			none = 0x00,
 			input = 0x01,
 			line = 0x02,
-			word = 0x04
+			word = 0x04,
+			spaces = 0x08
 		};
 		inline bool operator&( Anchor a, Anchor b ) noexcept { return static_cast<int>( a ) & static_cast<int>( b ); }
 		inline Anchor& operator|=( Anchor& a, Anchor b ) noexcept {
@@ -52,16 +53,17 @@ namespace eon
 
 		enum class Flag : int16_t
 		{
-			none = 0x00,
-			icase = 0x01,		// Ignore case
-			lines = 0x02,		// Make ^ and $ apply to lines
-			speed = 0x04,		// Maximize speed (for long and complex expressions)
-			accuracy = 0x08,	// Maximize accuracy (for long and complex expressions)
+			none = 0x0000,
+			icase = 0x0001,			// Ignore case
+			lines = 0x0002,			// Make ^ and $ apply to lines
+			bounds = 0x0004,		// Make \b and \B only look at spaces
+			speed = 0x0008,			// Maximize speed (for long and complex expressions)
+			accuracy = 0x0010,		// Maximize accuracy (for long and complex expressions)
 
-			no_ungroup = 0x10,				// Do not remove superfluous groupings
-			no_exposing = 0x20,				// Do not expose literal characters
+			no_ungroup = 0x0020,			// Do not remove superfluous groupings
+			no_exposing = 0x0040,			// Do not expose literal characters
 			
-			failfast_fixed_end = 0x040,		// When <fixed>$ at the end and not 'lines', check end of input first
+			failfast_fixed_end = 0x0080,	// When <fixed>$ at the end and not 'lines', check end of input first
 		};
 		inline bool operator&( Flag a, Flag b ) noexcept { return static_cast<int>( a ) & static_cast<int>( b ); }
 		inline Flag& operator|=( Flag& a, Flag b ) noexcept {

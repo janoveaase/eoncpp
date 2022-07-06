@@ -26,6 +26,32 @@ namespace eon
 		WANT_EXCEPT( expr = R"(@<spaces>(\s*?)..@:<spa!ces>)", rx::InvalidExpression );
 	}
 
+	TEST( RegExTest, boundaries )
+	{
+		regex input_rx( R"(^\l+$)" );
+		regex line_rx( R"(.+?^\l+$.+?)", "l" );
+		regex word_rx{ R"(.+?\b.+?\B.+)" };
+		regex spaces_rx{ R"(.+?\b.+?\B.+)", "b" };
+
+		WANT_TRUE( input_rx.match( "one" ) );
+		WANT_FALSE( input_rx.match( ".one" ) );
+		WANT_FALSE( input_rx.match( "one." ) );
+
+		WANT_TRUE( line_rx.match( " \none\n " ) );
+		WANT_FALSE( line_rx.match( "one\n" ) );
+		WANT_FALSE( line_rx.match( "one\n" ) );
+
+		WANT_TRUE( word_rx.match( " one " ) );
+		WANT_TRUE( word_rx.match( " .one. " ) );
+		WANT_FALSE( word_rx.match( " ... " ) );
+		WANT_FALSE( word_rx.match( "   " ) );
+
+		WANT_TRUE( spaces_rx.match( " one " ) );
+		WANT_TRUE( spaces_rx.match( " .one. " ) );
+		WANT_TRUE( spaces_rx.match( " ... " ) );
+		WANT_FALSE( spaces_rx.match( "   " ) );
+	}
+
 	TEST( RegExTest, removeDuplicates )
 	{
 		regex ex{ R"(a+a+)" };
@@ -636,6 +662,19 @@ namespace eon
 		found = rx2.findLast( good );
 		REQUIRE_TRUE( found ) << "Failed to find alternate";
 		WANT_EQ( "78", eon::string( found.group( name_complete ) ) ) << "Wrong altenate value found";
+	}
+	TEST( FindTests, findAll )
+	{
+		string good{ "123caa456ba78" };
+		string bad{ "123CAA456BA78" };
+		regex rx{ R"(\u+)" };
+		auto found = rx.findAll( good );
+		REQUIRE_EQ( 2, found.size() ) << "Failed to find good";
+		WANT_EQ( "caa", eon::string( found[ 0 ].group( name_complete ) ) ) << "Wrong first value found";
+		WANT_EQ( "ba", eon::string( found[ 1 ].group( name_complete ) ) ) << "Wrong second value found";
+		
+		found = rx.findAll( bad );
+		WANT_EQ( 0, found.size() ) << "Found bad";
 	}
 
 

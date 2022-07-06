@@ -83,6 +83,9 @@ namespace eon
 						case 'l':
 							MyFlags |= Flag::lines;
 							break;
+						case 'b':
+							MyFlags |= Flag::bounds;
+							break;
 						case 'f':
 							MyFlags |= Flag::failfast_fixed_end;
 							break;
@@ -625,8 +628,7 @@ namespace eon
 			switch( c )
 			{
 				case 'b':
-					param.advance();
-					param.preAnchor( Anchor::word );
+					param.preAnchor( MyFlags & Flag::bounds ? Anchor::spaces : Anchor::word );
 					return nullptr;
 				case 'B':
 					return new LocWordEnd( substring( start, param.pos() ) );

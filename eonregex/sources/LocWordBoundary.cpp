@@ -7,9 +7,16 @@ namespace eon
 	{
 		bool LocWordEnd::_match( RxData& data, index_t steps )
 		{
-			return string::isWordChar( data.prev() )
-				&& ( !data || string::isSpaceChar( data() ) || string::isPunctuation( data() ) )
-				? data.advance() : false;
+			if( data.bounds() )
+			{
+				return !string::isSeparatorSpace( data.prev() )
+					&& ( !data || string::isSeparatorSpace( data() ) ) ? true : false;
+			}
+			else
+			{
+				return string::isWordChar( data.prev() )
+					&& ( !data || string::isSeparatorSpace( data() ) || string::isPunctuation( data() ) ) ? true : false;
+			}
 		}
 	}
 }

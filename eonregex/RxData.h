@@ -28,10 +28,8 @@ namespace eon
 				if( other.Captures ) { Captures = new captures_t( *other.Captures ); }
 				Src = other.Src; CmpFlags = other.CmpFlags; Pos = other.Pos; Marker = other.Marker; }
 			inline RxData( RxData&& other ) noexcept { *this = std::move( other ); }
-			inline RxData( const substring& source, uint16_t marker ) noexcept {
-				Src = source; Pos = Src.begin(); Marker = marker; }
-			inline RxData( const substring& source, Flag flags, uint16_t marker ) {
-				Src = source; CmpFlags = flags; Pos = Src.begin(); Marker = marker; }
+			inline RxData( const substring& source, Flag flags, uint16_t marker ) noexcept {
+				Src = source; Pos = Src.begin(); CmpFlags = flags; Marker = marker; }
 			virtual ~RxData() { reset(); }
 
 			inline void reset() noexcept { if( Captures ) { delete Captures; Captures = nullptr; } }
@@ -63,6 +61,7 @@ namespace eon
 			inline Flag flags() const noexcept { return CmpFlags; }
 			inline bool icase() const noexcept { return CmpFlags & Flag::icase; }
 			inline bool lines() const noexcept { return CmpFlags & Flag::lines; }
+			inline bool bounds() const noexcept { return CmpFlags & Flag::bounds; }
 			inline bool speedOnly() const noexcept { return ( CmpFlags & Flag::speed ) && !( CmpFlags & Flag::accuracy ); }
 			inline bool accuracyOnly() const noexcept {
 				return ( CmpFlags & Flag::accuracy ) && !( CmpFlags & Flag::speed ); }

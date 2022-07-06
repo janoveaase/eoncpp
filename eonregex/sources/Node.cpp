@@ -333,10 +333,16 @@ namespace eon
 		{
 			if( !data() )			// End of input cannot be start of anything
 				return false;
+			if( PreAnchoring & Anchor::spaces )
+			{
+				if( string::isSeparatorSpace( data() )
+					|| ( data.pos().numChar() > 0 && !string::isSeparatorSpace( data.prev() ) ) )
+					return false;
+			}
 			if( PreAnchoring & Anchor::word )
 			{
 				if( !string::isWordChar( data() )
-					|| ( data.pos().numChar() > 0 && !string::isSpaceChar( data.prev() )
+					|| ( data.pos().numChar() > 0 && !string::isSeparatorSpace( data.prev() )
 						&& !string::isPunctuation( data.prev() ) ) )
 					return false;
 			}
@@ -375,6 +381,10 @@ namespace eon
 			if( Type != other.Type )
 				return false;
 
+			// Different pre-anchoring are not equal
+			if( PreAnchoring != other.PreAnchoring )
+				return false;
+
 			// Cmpare quantifiers if so instructed
 			if( flags & cmpflag::quant && Quant != other.Quant )
 				return false;
@@ -410,7 +420,7 @@ namespace eon
 			{
 				Next->removeDuplicates();
 
-				// Find out if the two are identical, quantification excluded
+				// Find out if the two are identical, quantification excluded, pre-anchor included!
 				if( equal( *Next, cmpflag::none ) )
 				{
 					// They are
