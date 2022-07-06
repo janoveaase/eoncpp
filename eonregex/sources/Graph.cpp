@@ -281,6 +281,8 @@ namespace eon
 
 		Node* Graph::parseNot( ParseParam& param, const string_iterator& start )
 		{
+			auto pre_anchoring = param.preAnchor();
+			param.resetPreAnchor();
 			if( param.advance() )			// the '!'
 			{
 				auto value = parseNode( param );
@@ -313,6 +315,7 @@ namespace eon
 					return new OpNot( value, substring( start, param.pos() ) );
 				}
 			}
+			param.preAnchor( pre_anchoring );
 			return new FixedValue( "!", substring( start, param.pos() ) );
 		}
 		Node* Graph::parseOr( OpOr* node_or, ParseParam& param,

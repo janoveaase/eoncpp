@@ -52,6 +52,14 @@ namespace eon
 		WANT_FALSE( spaces_rx.match( "   " ) );
 	}
 
+	TEST( RegExTest, prefix_not )
+	{
+		regex rx( R"(.\b!a\l)" );
+
+		WANT_TRUE( rx.match( "ab" ) );
+		WANT_FALSE( rx.match( "aa" ) );
+	}
+
 	TEST( RegExTest, removeDuplicates )
 	{
 		regex ex{ R"(a+a+)" };
