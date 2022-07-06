@@ -71,7 +71,7 @@ namespace eon
 
 			// Captures
 			inline void registerCapture( name_t name, const substring& match ) {
-				if( !Captures ) Captures = new captures_t(); Captures->insert( std::make_pair( name, match ) ); }
+				if( !Captures ) Captures = new captures_t(); (*Captures)[ name ] = match; }
 			substring findCapture( name_t name ) const noexcept;
 			inline captures_t* captures() noexcept { return Captures; }
 			inline captures_t* claimCaptures() noexcept { auto capt = Captures; Captures = nullptr; return capt; }

@@ -292,7 +292,7 @@ namespace eon
 				return false;
 
 			// No next means we have nothing more to do
-			if( Next == nullptr )
+			if( !_next() )
 			{
 				if( matches >= Quant.minQ() && matches <= Quant.maxQ() )
 				{
@@ -303,10 +303,13 @@ namespace eon
 			}
 
 			// Now make sure the rest matches, or try matching this once more
+			bool capturing = Next == nullptr && Group->type() == NodeType::capt_group;
 			while( matches <= Quant.maxQ() )
 			{
+				if( capturing )
+					Group->_capture( data_tmp );
 				index_t next_steps = data.speedOnly() ? 1 : data.accuracyOnly() ? INDEX_MAX : 6;
-				if( Next->match( data_tmp, next_steps ) )
+				if( _next()->match( data_tmp, next_steps ) )
 				{
 					// Got a match
 					data = std::move( data_tmp );
@@ -336,13 +339,13 @@ namespace eon
 			if( PreAnchoring & Anchor::spaces )
 			{
 				if( string::isSeparatorSpace( data() )
-					|| ( data.pos().numChar() > 0 && !string::isSeparatorSpace( data.prev() ) ) )
+					|| ( data.pos().numChar() > 0 && data.prev() != NullChr && !string::isSeparatorSpace( data.prev() ) ) )
 					return false;
 			}
 			if( PreAnchoring & Anchor::word )
 			{
 				if( !string::isWordChar( data() )
-					|| ( data.pos().numChar() > 0 && !string::isSeparatorSpace( data.prev() )
+					|| ( data.pos().numChar() > 0 && data.prev() != NullChr && !string::isSeparatorSpace( data.prev() )
 						&& !string::isPunctuation( data.prev() ) ) )
 					return false;
 			}

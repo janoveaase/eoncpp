@@ -8,9 +8,11 @@ namespace eon
 		bool CaptureGroup::_match( RxData& data, index_t steps )
 		{
 			Start = data.pos();
+			Captured = false;
 			if( NodeGroup::_match( data, steps ) )
 			{
-				data.registerCapture( Name, substring( Start, data.pos() ) );
+				if( !Captured )
+					data.registerCapture( Name, substring( Start, data.pos() ) );
 				return true;
 			}
 			return false;

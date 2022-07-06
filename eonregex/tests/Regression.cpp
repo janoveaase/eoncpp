@@ -367,6 +367,19 @@ namespace eon
 		if( result )
 			WANT_EQ( "pri", string( result.group( eon::name( "m" ) ) ).stdstr() ) << "Wrong capture for spring";
 	}
+	TEST( RegExTest, match_capture_issue2 )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"(x@<m>(.+?)x)" ) << "Failed to parse";
+		rx::match result;
+
+		WANT_TRUE( result = expr.match( "xax" ) );
+		if( result )
+			WANT_EQ( "a", string( result.group( eon::name( "m" ) ) ) );
+		WANT_TRUE( result = expr.match( "xaax" ) );
+		if( result )
+			WANT_EQ( "aa", string( result.group( eon::name( "m" ) ) ) );
+	}
 
 	TEST( RegExTest, backreference1 )
 	{
