@@ -417,6 +417,31 @@ namespace eon
 		WANT_EQ( "olle", eon::string( str.slice( 4, 1 ) ) );
 	}
 
+	TEST( String, beforeFirst )
+	{
+		eon::string str{ "Hello World!" };
+		WANT_EQ( "He", eon::string( str.beforeFirst( 'l' ) ) );
+		WANT_EQ( "Hel", eon::string( str.beforeFirst( "lo" ) ) );
+	}
+	TEST( String, beforeLast)
+	{
+		eon::string str{ "Hello World!" };
+		WANT_EQ( "Hello Wor", eon::string( str.beforeLast( 'l' ) ) );
+		WANT_EQ( "Hel", eon::string( str.beforeFirst( "lo" ) ) );
+	}
+	TEST( String, afterFirst )
+	{
+		eon::string str{ "Hello World!" };
+		WANT_EQ( "lo World!", eon::string( str.afterFirst( 'l' ) ) );
+		WANT_EQ( " World!", eon::string( str.afterFirst( "lo" ) ) );
+	}
+	TEST( String, afterLast )
+	{
+		eon::string str{ "Hello World lol!" };
+		WANT_EQ( "!", eon::string( str.afterLast( 'l' ) ) );
+		WANT_EQ( "l!", eon::string( str.afterLast( "lo" ) ) );
+	}
+
 	TEST( String, count )
 	{
 		eon::string str{ "abacad" };

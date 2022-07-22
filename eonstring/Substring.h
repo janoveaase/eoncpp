@@ -341,12 +341,12 @@ namespace eon
 
 
 		//* Find last occurrence of the 'to_find' substring
-		//* Both substrings must be 'low-to-high'! (No checking is done!)
+		//* Both substrings must be 'high-to-low'! (No checking is done!)
 		//* Returns the found substring - invalid substring if not found.
 		substring findLast( const substring& to_find ) const noexcept;
 
 		//* Find last occurrence of the 'to_find' codepoint
-		//* 'this' substring must be 'low-to-high'! (No checking is done!)
+		//* 'this' substring must be 'high-to-low'! (No checking is done!)
 		//* Returns the found codepoint as a substring - invalid substring if
 		//* not found.
 		substring findLast( char_t to_find ) const noexcept;

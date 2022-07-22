@@ -678,7 +678,7 @@ namespace eon
 	}
 	substring substring::beforeLast( const substring& delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( begin(), found.begin() );
 		else
@@ -686,7 +686,7 @@ namespace eon
 	}
 	substring substring::beforeLast( char_t delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( begin(), found.begin() );
 		else
@@ -710,7 +710,7 @@ namespace eon
 	}
 	substring substring::afterLast( const substring& delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( found.end(), end() );
 		else
@@ -718,7 +718,7 @@ namespace eon
 	}
 	substring substring::afterLast( char_t delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( found.end(), end() );
 		else
