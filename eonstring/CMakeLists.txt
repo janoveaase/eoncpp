@@ -16,6 +16,7 @@ set(STRING_HEADERS
 	Serializer.h
 	ByteSerializer.h
 	Stringifier.h
+	StringifierDefs.h
 )
 set(STRING_SOURCES
 	String.cpp

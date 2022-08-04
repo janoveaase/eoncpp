@@ -56,8 +56,17 @@ namespace eon
 	{
 		regex rx( R"(.\b!a\l)" );
 
-		WANT_TRUE( rx.match( "ab" ) );
-		WANT_FALSE( rx.match( "aa" ) );
+		WANT_TRUE( rx.match( " b" ) );
+		WANT_FALSE( rx.match( " a" ) );
+	}
+
+	TEST( RegExTest, ignore_case )
+	{
+		regex rx1( R"(aBc)", "i" );
+
+		WANT_TRUE( rx1.match( "abc" ) );
+		WANT_TRUE( rx1.match( "ABC" ) );
+		WANT_TRUE( rx1.match( "AbC" ) );
 	}
 
 	TEST( RegExTest, removeDuplicates )

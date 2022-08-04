@@ -28,6 +28,7 @@ namespace eon
 		std::unordered_set<name_t> Handler::LegalDataTupleAttributeTypes;
 		std::unordered_map<std::type_index, name_t> Handler::RawToEonTypeMap;
 		std::unordered_map<name_t, name_t> Handler::GenericToDataTupleAttributeTypeMap;
+		std::unordered_map<name_t, std::unordered_set<name_t>> Handler::CompatibleDataTupleAttributeTypes;
 
 
 		void Handler::init()
@@ -41,31 +42,40 @@ namespace eon
 				RawToEonTypeMap = {
 					{ std::type_index( typeid( bool ) ), name_bool },
 					{ std::type_index( typeid( byte_t ) ), name_byte },
+					{ std::type_index( typeid( char ) ), name_byte },
 					{ std::type_index( typeid( char_t ) ), name_char },
 					{ std::type_index( typeid( int_t ) ), name_int },
 					{ std::type_index( typeid( short_t ) ), name_short },
 					{ std::type_index( typeid( long_t ) ), name_long },
 					{ std::type_index( typeid( flt_t ) ), name_float },
+					{ std::type_index( typeid( double ) ), name_float },
 					{ std::type_index( typeid( low_t ) ), name_low },
+					{ std::type_index( typeid( float ) ), name_low },
 					{ std::type_index( typeid( high_t ) ), name_high },
+					{ std::type_index( typeid( long double ) ), name_high },
+					{ std::type_index( typeid( index_t ) ), name_index },
+					{ std::type_index( typeid( unsigned int ) ), name_index },
 					{ std::type_index( typeid( name_t ) ), name_name },
+					{ std::type_index( typeid( char* ) ), name_bytes },
 					{ std::type_index( typeid( std::string ) ), name_bytes },
 					{ std::type_index( typeid( string ) ), name_string },
 					{ std::type_index( typeid( regex ) ), name_regex },
 					{ std::type_index( typeid( namepath ) ), name_namepath },
 					{ std::type_index( typeid( path ) ), name_path },
 					{ std::type_index( typeid( EonType ) ), name_typetuple },
+					{ std::type_index( typeid( Tuple ) ), name_plain },
+					{ std::type_index( typeid( DynamicTuple ) ), name_dynamic },
 					{ std::type_index( typeid( DataTuple ) ), name_data }
 				};
 				GenericToDataTupleAttributeTypeMap = {
 					{ name_bool, name_bool },
 					{ name_byte, name_byte },
 					{ name_char, name_char },
-					{ name_int, name_long },
-					{ name_short, name_long },
+					{ name_int, name_int },
+					{ name_short, name_int },
 					{ name_long, name_long },
-					{ name_float, name_high },
-					{ name_low, name_high },
+					{ name_float, name_float },
+					{ name_low, name_float },
 					{ name_high, name_high },
 					{ name_name, name_name },
 					{ name_bytes, name_bytes },
@@ -75,6 +85,14 @@ namespace eon
 					{ name_path, name_path },
 					{ name_typetuple, name_typetuple },
 					{ name_data, name_data }
+				};
+				CompatibleDataTupleAttributeTypes = {
+					{ name_short, { name_int, name_long } },
+					{ name_int, { name_short, name_long } },
+					{ name_long, { name_short, name_int } },
+					{ name_low, { name_float, name_high } },
+					{ name_float, { name_low, name_high } },
+					{ name_high, { name_low, name_float } }
 				};
 			}
 		}
@@ -239,7 +257,7 @@ namespace eon
 				return new DataTuple( std::move( *(DataTuple*)value ) );
 			else if( type == name_dynamic )
 				return new DynamicTuple( std::move( *(DynamicTuple*)value ) );
-			else if( type == name_tuple )
+			else if( type == name_plain )
 				return new Tuple( std::move( *(Tuple*)value ) );
 			else
 				throw IncompatibleType();

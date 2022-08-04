@@ -99,17 +99,78 @@ namespace eon
 
 		void BasicTuple::str( Stringifier& str ) const
 		{
-			auto ttype = Type.name();
-			if( ttype == name_data || ttype == name_dynamic )
-				str.pushPrefix( eon::str( ttype ) ).pushOpen( "(" );
-			else if( ttype == name_plain )
-				str.pushPrefix( "p" ).pushOpen( "(" );
-			_str( str );
-			if( isTupleType( ttype ) )
-				str.pushClose( ")" );
+			stack<const BasicTuple*> ancestors;
+			_str( str, ancestors, false );
 		}
 
 
+
+
+		index_t BasicTuple::deepCount() const noexcept
+		{
+			index_t count = numAttributes();
+			for( auto& element : Attributes )
+			{
+				auto type = element.type().name();
+				if( ( type == name_data && element.name() == no_name ) || type == name_plain || type == name_dynamic )
+					count += dynamic_cast<BasicTuple*>( element.value() )->deepCount();
+			}
+			return count;
+		}
+
+		index_t BasicTuple::depth() const noexcept
+		{
+			index_t d = Attributes.empty() ? 0 : 1;
+			for( auto& element : Attributes )
+			{
+				if( element.type().name() == name_plain || element.type().name() == name_data
+					|| element.type().name() == name_dynamic )
+				{
+					auto dd = dynamic_cast<BasicTuple*>( element.value() )->depth();
+					if( dd + 1 > d )
+						d = dd + 1;
+				}
+			}
+			return d;
+		}
+
+		bool BasicTuple::hasTupleAttributes() const noexcept
+		{
+			for( auto& element : Attributes )
+			{
+				if( element.type().name() == name_plain || element.type().name() == name_data
+					|| element.type().name() == name_dynamic )
+					return true;
+			}
+			return false;
+		}
+
+		bool BasicTuple::hasNamedSubtupleAttributes() const noexcept
+		{
+			for( auto& element : Attributes )
+			{
+				if( element.type().name() == name_plain || element.type().name() == name_data
+					|| element.type().name() == name_dynamic )
+				{
+					if( element.name() != no_name )
+						return true;
+					else if( static_cast<BasicTuple*>( element.value() )->hasNamedSubtupleAttributes() )
+						return true;
+				}
+			}
+			return false;
+		}
+
+		bool BasicTuple::hasFlag( name_t flag_name ) const noexcept
+		{
+			for( auto& elm : Attributes )
+			{
+				if( elm.name() == no_name && elm.type() == name_name
+					&& ( (NameInstance*)elm.value() )->value() == flag_name )
+					return true;
+			}
+			return false;
+		}
 
 
 		BasicTuple& BasicTuple::addName( name_t name, name_t value )
@@ -346,25 +407,84 @@ namespace eon
 			}
 		}
 
-		const name_t& BasicTuple::_nameValue( index_t pos ) const noexcept
-		{
-			return ( (const NameInstance*)Attributes[ pos ].value() )->value();
-		}
+		const name_t& BasicTuple::_nameValue( index_t pos ) const noexcept {
+			return ( (const NameInstance*)Attributes[ pos ].value() )->value(); }
 
-		std::type_index BasicTuple::tupleType() const noexcept
-		{
-			return typeid( Tuple );
-		}
+		std::type_index BasicTuple::tupleType() const noexcept {
+			return typeid( Tuple ); }
 
-		void BasicTuple::_str( Stringifier& str ) const
+		void BasicTuple::_str( Stringifier& str, stack<const BasicTuple*>& ancestors, int indented, bool is_block ) const
 		{
-			bool first = true;
+			if( ancestors.empty() || ancestors.bottom()->type().name() != type().name() )
+				formalPrefix( str );
+			else if( !is_block || ancestors.bottom()->type().name() != name_data )
+				informalPrefix( str );
+			ancestors.push( this );
+
+			bool newline_between_attributes = false;
+			bool started_block = false;
+			bool need_block_on_newline = false;
+
+			auto dcount = deepCount();
+			bool split_attributes = dcount > 10;
+			if( !split_attributes )
+			{
+				auto depth = this->depth();
+				if( isData() )
+				{
+					if( depth > 2 && dcount > 5 )
+						split_attributes = true;
+				}
+				else if( ( isPlain() || isDynamic() ) && depth > 4 )
+					split_attributes = true;
+			}
+			
+			if( split_attributes )
+			{
+				newline_between_attributes = true;
+				if( ancestors.size() == 1 )
+				{
+					started_block = true;
+					str.start_block();
+				}
+				else if( !is_block )
+					need_block_on_newline = true;
+			}
+			else if( isData() && is_block && depth() > 1 )
+				newline_between_attributes = true;
+
+			index_t attrib_no{ 0 };
 			for( auto& element : Attributes )
 			{
-				if( first )
-					first = false;
-				else
-					str.pushStop( "," );
+				if( ++attrib_no > 1 )
+				{
+					str.punct( ",", eon::stringify::Type::end_block ); 
+					if( newline_between_attributes )
+					{
+						str.hard_lf();
+						if( need_block_on_newline )
+						{
+							need_block_on_newline = false;
+							str.start_block();
+							started_block = true;
+						}
+					}
+					else
+					{
+						switch( ancestors.size() )
+						{
+							case 1:
+								str.prim_split_block();
+								break;
+							case 2:
+								str.sec_split_block();
+								break;
+							default:
+								str.tert_split_block();
+								break;
+						}
+					}
+				}
 
 				if( element.type().name() == name_plain
 					|| element.type().name() == name_data
@@ -373,41 +493,58 @@ namespace eon
 					auto ttype = element.type().name();
 					if( element.name() )
 					{
-						str.pushWord( eon::str( element.name() ) );
 						if( ttype == name_data )
 						{
-							str.pushStartBlock( ":");
-							standardPrefix( str );
-							( (const DataTuple*)element.value() )->_str( str );
-							standardPostfix( str );
-							str.pushEndBlock();
+							bool another_started_block = false;
+							if( !started_block && str.lastElement() != stringify::Type::start_block )
+							{
+								str.start_block();
+								another_started_block = true;
+							}
+							str.word( eon::str( element.name() ) );
+							str.append( ":" );
+							str.start_block();
+							auto& dt = *(const BasicTuple*)element.value();
+							dt._str( str, ancestors, indented > 0 ? indented - 1 : 0, true );
+							str.end_block();
+							if( another_started_block )
+								str.end_block();
 						}
 						else
 						{
-							str.pushSpecialOp( "=" );
-							explicitPrefix( str );
-							( (const DataTuple*)element.value() )->_str( str );
-							explicitPostfix( str );
+							str.word( eon::str( element.name() ) );
+							str.op2( "=" ).tert_split_block();
+							auto& dt = *(const BasicTuple*)element.value();
+							dt._str( str, ancestors, false );
 						}
 					}
 					else
 					{
-						explicitPrefix( str );
-						( (const DataTuple*)element.value() )->_str( str );
-						explicitPostfix( str );
+						auto& dt = *(const BasicTuple*)element.value();
+						dt._str( str, ancestors );
 					}
 				}
 				else
 				{
 					if( element.name() )
-						str.pushWord( eon::str( element.name() ) ).pushSpecialOp( "=" );
+						str.word( eon::str( element.name() ) ).op2( "=" );
 					element.value()->str( str );
 				}
 			}
+
+			ancestors.pop();
+			if( ancestors.empty() || ancestors.bottom()->type().name() != type().name() )
+				formalPostfix( str );
+			else if( !is_block || ancestors.bottom()->type().name() != name_data )
+				informalPostfix( str );
+
+			if( started_block )
+				str.end_block();
 		}
 
+		bool BasicTuple::isPlainTuple( const std::type_info& type ) const { return type == typeid( Tuple ); }
 		bool BasicTuple::isDynamicTuple( const std::type_info& type ) const { return type == typeid( DynamicTuple ); }
 		bool BasicTuple::isDataTuple( const std::type_info& type ) const { return type == typeid( DataTuple ); }
-		bool BasicTuple::isLambda( const std::type_info& type ) const { return false; }// return type == typeid( Lambda ); }
+//		bool BasicTuple::isLambda( const std::type_info& type ) const { return false; }// return type == typeid( Lambda ); }
 	}
 }

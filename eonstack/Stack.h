@@ -114,8 +114,8 @@ namespace eon
 
 		// Access the bottom element
 		// Throws [eon::NoElement] if stack is empty!
-		inline const T& bottom() const { return element( Data.size() - 1 ); }
-		inline T& bottom() { return element( Data.size() - 1 ); }
+		inline const T& bottom() const { return at( Data.size() - 1 ); }
+		inline T& bottom() { return at( Data.size() - 1 ); }
 
 		// Access an element by index
 		// An argument value of zero is the same as calling top()!

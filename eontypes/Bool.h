@@ -26,7 +26,7 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( Stringifier& str ) const override { str.pushWord( "bool" ); }
+		inline void str( Stringifier& str ) const override { str.word( "bool" ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override { return instantiate( false ); }
 		type::Instance* instantiate( bool value ) const;
@@ -47,7 +47,7 @@ namespace eon
 		inline Object* copy() override { return new BoolInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( bool ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
-		inline void str( Stringifier& str ) const override { str.pushWord( Value ? "true" : "false" ); }
+		inline void str( Stringifier& str ) const override { str.word( Value ? "true" : "false" ); }
 		inline Instance* copy() const override { return new BoolInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const BoolInstance*)&other; return Value < o.Value ? -1 : o.Value < Value ? 1 : 0; }

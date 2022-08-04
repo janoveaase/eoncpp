@@ -27,7 +27,7 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( Stringifier& str ) const override { str.pushWord( "path" ); }
+		inline void str( Stringifier& str ) const override { str.word( "path" ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override { return instantiate( path() ); }
 		type::Instance* instantiate( const path& value ) const;
@@ -52,7 +52,7 @@ namespace eon
 		inline Object* copy() override { return new PathInstance( Value, source() ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( path ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
-		inline void str( Stringifier& str ) const override { str.pushWord( "p\"" + Value.str() + "\"" ); }
+		inline void str( Stringifier& str ) const override { str.word( "p\"" + Value.str() + "\"" ); }
 		inline Instance* copy() const override { return new PathInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const PathInstance*)&other; return Value.compare( o.Value ); }

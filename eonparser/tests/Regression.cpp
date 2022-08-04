@@ -1,4 +1,4 @@
-#include "Regression.h"
+/*#include "Regression.h"
 
 
 
@@ -414,7 +414,7 @@ namespace eon
 		type::Node root;
 		REQUIRE_NO_EXCEPT( pex( tools, root ) );
 		WANT_EQ( "test (EDT, version=0,0,1):\n  Hello", root.str() );
-	}*/
+	}* /
 
 
 
@@ -448,3 +448,4 @@ namespace eon
 		return str;
 	}
 }
+*/

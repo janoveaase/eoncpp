@@ -1,27 +1,30 @@
-#pragma once
+/*#pragma once
 #include "ToolBox.h"
 #include <eontypes/BasicTuple.h>
 #include <eontypes/Expression.h>
 #include <eontypes/Primitives.h>
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+//  The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
 	namespace parser
 	{
-		/**************************************************************************
-		  Eon ParseExpression Class - eon::ParseExpression
-
-		  Parse an Æon Expression.
-		**************************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Eon ParseExpression Class - eon::ParseExpression
+		//
+		// Parse an Æon Expression.
+		//
 		class ParseExpression
 		{
-			/**********************************************************************
-			  Construction
-			**********************************************************************/
+			///////////////////////////////////////////////////////////////////
+			//
+			// Construction
+			//
 		public:
 
 			ParseExpression() = default;
@@ -33,9 +36,10 @@ namespace eon
 
 
 
-			/**********************************************************************
-			  Execution
-			**********************************************************************/
+			///////////////////////////////////////////////////////////////////
+			//
+			// Execution
+			//
 		public:
 
 			//* Parse expression
@@ -123,3 +127,4 @@ namespace eon
 		};
 	}
 }
+*/

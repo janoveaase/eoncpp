@@ -312,6 +312,7 @@ namespace eon
 							throw InvalidExpression();
 						}
 					}
+					param.preAnchor( pre_anchoring );
 					return new OpNot( value, substring( start, param.pos() ) );
 				}
 			}

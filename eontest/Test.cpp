@@ -201,9 +201,11 @@ namespace eontest
 		{
 			auto diff_pos = _findFirstDiffPos( exp_lines[ diff_line ], act_lines[ diff_line ] );
 			eon::term << "Expected line #" << eon::string( diff_line + 1 ) << ": \""
-				<< eon::style::left << _extractLine( exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
+				<< eon::style::left_value << _extractLine( exp_lines[ diff_line ], diff_pos, 79 - 19, start_pos )
+				<< eon::style::normal << "\"\n";
 			eon::term << "  Actual line #" << eon::string( diff_line + 1 ) << ": \""
-				<< eon::style::right << _extractLine( act_lines[ diff_line ], diff_pos, 79 - 19, start_pos ) << "\"\n";
+				<< eon::style::right_value << _extractLine( act_lines[ diff_line ], diff_pos, 79 - 19, start_pos )
+				<< eon::style::normal << "\"\n";
 			eon::term << eon::string( diff_pos - start_pos + 19, ' ' ) << "^\n";
 			std::string marker{ "Different here!" };
 			if( diff_pos > marker.size() + 2 )

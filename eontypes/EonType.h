@@ -102,7 +102,7 @@ namespace eon
 
 		//* Get type tuple as 'T'-prefixed string representation
 		void str( Stringifier& str ) const;
-		inline string str() const { Stringifier strf; str( strf ); return strf.str(); }
+		inline string str() const { Stringifier strf; str( strf ); return strf.generateString(); }
 
 		//* Get source
 		inline const source::Ref& source() const noexcept { return Source; }

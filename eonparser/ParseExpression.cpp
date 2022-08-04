@@ -1,4 +1,4 @@
-#include "ParseExpression.h"
+/*#include "ParseExpression.h"
 #include <eontypes/Bool.h>
 #include <eontypes/Byte.h>
 #include <eontypes/Char.h>
@@ -146,7 +146,7 @@ namespace eon
 			else if( Tools->current().is( name_name ) && *Tools->current().nameValue() == "data"
 				&& Tools->ahead().is( name_brace ) && Tools->ahead().nameValue() == name_open )
 				Tools->push( ToolBox::Context::data_tuple );
-		}*/
+		}* /
 
 		bool ParseExpression::_processExpressionElement()
 		{
@@ -1047,3 +1047,4 @@ namespace eon
 		}
 	}
 }
+*/

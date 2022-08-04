@@ -68,6 +68,9 @@ namespace eon
 		inline void callDestructor() override { this->~DataTuple(); }
 
 
+		virtual void formalPrefix( Stringifier& str ) const override { str.prepend( "data" ); str.start_grp1( "(" ); }
+
+
 
 
 		//////////////////////////////////////////////////////////////////////

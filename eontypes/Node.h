@@ -90,7 +90,7 @@ namespace eon
 			inline bool isEllipsis() const noexcept { return Type == NodeType::name_only && Name == name_ellipsis; }
 
 			// Get as string
-			inline string str() const { Stringifier strf; infixStr( strf ); return strf.str(); }
+			inline string str() const { Stringifier strf; infixStr( strf ); return strf.generateString(); }
 
 			// Format as infix string
 			void infixStr( Stringifier& str ) const;

@@ -58,6 +58,10 @@ namespace eon
 		inline void callDestructor() override { this->~DynamicTuple(); }
 
 
+		virtual void formalPrefix( Stringifier& str ) const override { str.prepend( "dynamic" ); str.start_grp1( "(" ); }
+		virtual void informalPrefix( Stringifier& str ) const { formalPrefix( str ); }
+
+
 
 
 		/**********************************************************************

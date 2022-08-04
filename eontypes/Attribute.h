@@ -42,8 +42,8 @@ namespace eon
 			inline const EonType& type() const noexcept { return Type; }
 			inline Object* value() const noexcept { return Value; }
 
-			virtual void assign( Object* value ) { if( value ) {
-				if( value->type() == Type ) Value = value; else throw IncompatibleType(); } }
+			virtual void assign( Object* value ) { if( value ) { if( value->type().name() == name_plain
+				|| value->type() == Type ) Value = value; else throw IncompatibleType(); } }
 
 
 		private:

@@ -318,6 +318,7 @@ namespace eon
 				else
 				{
 					// Didn't get a match, try matching this again
+					_unmatch();
 					if( !_match( data_tmp, steps ) )
 						return false;
 					++matches;

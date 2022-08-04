@@ -160,16 +160,16 @@ namespace eon
 
 	void filebuffer::write( byte_t byte )
 	{
-		if( BufferSize - BufPos < 1 )
+		if( BufPos + 1 >= BufferCapacity )
 			flush();
 		*( Buffer + BufPos ) = byte;
 		++BufPos;
 	}
 	void filebuffer::write( char_t chr )
 	{
-		if( BufferSize - BufPos < 4 )
-			flush();
 		string bytes{ chr };
+		if( BufPos + bytes.numBytes() >= BufferCapacity )
+			flush();
 		memcpy( Buffer + BufPos, bytes.c_str(), bytes.numBytes() );
 		BufPos += bytes.numBytes();
 	}

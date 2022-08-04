@@ -26,6 +26,7 @@ namespace eon
 	class NamePathTest : public eontest::EonTest {};
 
 	class TupleTest : public eontest::EonTest {};
+	class TupleStrTest : public eontest::EonTest {};
 
 	class TypeTest : public eontest::EonTest {};
 	

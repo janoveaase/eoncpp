@@ -27,7 +27,7 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( Stringifier& str ) const override { str.pushWord( "regex" ); }
+		inline void str( Stringifier& str ) const override { str.word( "regex" ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override { return instantiate( type::Expression() ); }
 		type::Instance* instantiate( const type::Expression& value ) const;

@@ -26,7 +26,7 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( Stringifier& str ) const override { str.pushWord( "bytes" ); }
+		inline void str( Stringifier& str ) const override { str.word( "bytes" ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override {
 			return instantiate( std::string() ); }
@@ -55,7 +55,7 @@ namespace eon
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( std::string ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( Stringifier& str ) const override {
-			str.pushPrefix( "b\"" ).pushWord( Value ).pushAppend( "\"" ); } // .escapeAll(); }
+			str.prepend( "b\"" ).word( Value ).append( "\"" ); } // .escapeAll(); }
 		inline Instance* copy() const override { return new BytesInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const BytesInstance*)&other; return Value.compare( o.Value ); }

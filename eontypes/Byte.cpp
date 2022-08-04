@@ -20,28 +20,28 @@ namespace eon
 		switch( Value )
 		{
 			case 0x07:
-				str.pushWord( "b'\\a'" );
+				str.word( "b'\\a'" );
 				return;
 			case 0x08:
-				str.pushWord( "b'\\b'" );
+				str.word( "b'\\b'" );
 				return;
 			case 0x0C:
-				str.pushWord( "b'\\f'" );
+				str.word( "b'\\f'" );
 				return;
 			case 0x0A:
-				str.pushWord( "b'\\n'" );
+				str.word( "b'\\n'" );
 				return;
 			case 0x09:
-				str.pushWord( "b'\\t'" );
+				str.word( "b'\\t'" );
 				return;
 			case 0x0B:
-				str.pushWord( "b'\\v'" );
+				str.word( "b'\\v'" );
 				return;
 			case 0x5C:
-				str.pushWord( "b'\\\\'" );
+				str.word( "b'\\\\'" );
 				return;
 			case 0x27:
-				str.pushWord( "b'\\''" );
+				str.word( "b'\\''" );
 				return;
 			default:
 				if( Value < 0x20 || Value > 0x7E )
@@ -55,10 +55,10 @@ namespace eon
 						octal += string( rem );
 						val = div;
 					}
-					str.pushWord( "b'\\" + octal.reverse() + "'" );
+					str.word( "b'\\" + octal.reverse() + "'" );
 				}
 				else
-					str.pushWord( string( "b'" ) + Value + "'" );
+					str.word( string( "b'" ) + Value + "'" );
 		}
 	}
 }

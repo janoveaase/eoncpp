@@ -11,7 +11,8 @@ namespace eon
 
 			for( auto c : Value )
 			{
-				if( param_b() == c )
+				bool match = data.flags() & Flag::icase ? std::tolower( param_b() ) == std::tolower( c ) : param_b() == c;
+				if( match )
 					param_b.advance();
 				else
 					return false;

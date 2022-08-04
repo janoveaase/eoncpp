@@ -62,6 +62,10 @@ namespace eon
 		virtual void callDestructor() override { this->~Tuple(); }
 
 
+		virtual void formalPrefix( Stringifier& str ) const override { str.prepend( "p" ); str.start_grp1( "(" ); }
+		virtual void formalPostfix( Stringifier& str ) const override { str.end_grp1( ")" ); }
+
+
 
 
 		/**********************************************************************

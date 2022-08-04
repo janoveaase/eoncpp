@@ -377,7 +377,7 @@ namespace eon
 			auto j = to_find.begin();
 			for( ; j != to_find.end() && i != end() && *i == *j; ++j, ++i )
 				;
-			if( j )
+			if( j == to_find.end() )
 				return substring( i_beg, i );
 		}
 		return substring( End.getEnd() );

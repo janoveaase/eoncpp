@@ -20,6 +20,7 @@
 #include <eontypes/DataTuple.h>
 #include <eontypes/EonType.h>
 #include <eontypes/DynamicTuple.h>
+#include <stack>
 
 
 namespace eon

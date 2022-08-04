@@ -68,7 +68,7 @@ namespace eon
 			inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
 			virtual type::Object* copy() override { throw AccessDenied( "Cannot copy action object!" ); }
-			virtual void str( Stringifier& str ) const override { str.pushWord( eon::str( Name ) ); }
+			virtual void str( Stringifier& str ) const override { str.word( eon::str( Name ) ); }
 			inline name_t generalType() const noexcept override { return name_action; }
 			inline const EonType& instanceType() const noexcept { return InstanceType; }
 			inline actions::Type actionType() const noexcept { return ActionType; }

@@ -170,8 +170,10 @@ namespace eon
 		char_t prev = '\0';
 		for( auto c : text )
 		{
+#ifdef EON_WINDOWS
 			if( c == NewlineChr && prev != CReturnChr )
 				buffer.write( CReturnChr );
+#endif
 			buffer.write( c );
 			prev = c;
 		}

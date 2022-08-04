@@ -383,7 +383,32 @@ namespace eon
 
 		Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "p(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.str() );
+		string act = str.generateString();
+		string exp{ "p(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleTest, plain_depth )
+	{
+		type::Handler::init();
+		Tuple empty, single, shallow, deep;
+		empty.finalize();
+		WANT_EQ( 0, empty.depth() );
+
+		single.addRaw( "alpha" );
+		single.addRaw( "beta" );
+		single.finalize();
+		WANT_EQ( 1, single.depth() );
+
+		shallow.addRaw( "alpha" );
+		shallow.addRaw( std::move( single ) );
+		shallow.addRaw( "beta" );
+		shallow.finalize();
+		WANT_EQ( 2, shallow.depth() );
+
+		deep.addRaw( "alpha" );
+		deep.addRaw( std::move( shallow ) );
+		deep.addRaw( "beta" );
+		WANT_EQ( 3, deep.depth() );
 	}
 	TEST( TupleTest, plain_compare )
 	{
@@ -532,7 +557,7 @@ namespace eon
 		DynamicTuple tup;
 		tup.addRaw( "unnamed" );
 		tup.addRaw( eon::name( "named" ), "Name" );
-		auto child = tup.addPlainTuple( eon::name( "deep" ) );
+		auto child = tup.addDynamicTuple( eon::name( "deep" ) );
 		auto grandchild = child->addDynamicTuple( eon::name( "deeper" ) );
 		grandchild->addRaw( "Rock" );
 		grandchild->addRaw( "bottom" );
@@ -542,7 +567,8 @@ namespace eon
 
 		Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "dynamic(\"unnamed\", named=\"Name\", deep=(deeper=(\"Rock\", \"bottom\")))", str.str() );
+		WANT_EQ( "dynamic(\"unnamed\", named=\"Name\", deep=dynamic(deeper=dynamic(\"Rock\", \"bottom\")))",
+			str.generateString() );
 	}
 	TEST( TupleTest, dynamic_compare )
 	{
@@ -644,6 +670,7 @@ namespace eon
 		type::Handler::init();
 		DataTuple tup;
 		tup.addRaw( false );
+		tup.addRaw( static_cast<short_t>( -54 ) );
 		tup.addRaw( static_cast<int_t>( -54 ) );
 		tup.addName( name_active );
 		tup.addRaw( string( "I am string!" ) );
@@ -653,17 +680,19 @@ namespace eon
 		EonType exp_type( name_data );
 		WANT_EQ( exp_type.str(), tup.type().str() );
 
-		REQUIRE_EQ( 5, tup.numAttributes() );
+		REQUIRE_EQ( 6, tup.numAttributes() );
 		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
-		REQUIRE_EQ( name_long, tup[ 1 ].type().name() );
-		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
-		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
-		REQUIRE_EQ( name_high, tup[ 4 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 2 ].type().name() );
+		REQUIRE_EQ( name_name, tup[ 3 ].type().name() );
+		REQUIRE_EQ( name_string, tup[ 4 ].type().name() );
+		REQUIRE_EQ( name_float, tup[ 5 ].type().name() );
 		WANT_FALSE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<long_t>( 1 ) );
-		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
-		WANT_EQ( "I am string!", tup.value<string>( 3 ) );
-		WANT_EQ( 3.14, tup.value<high_t>( 4 ) );
+		WANT_EQ( -54, tup.value<int_t>( 1 ) );
+		WANT_EQ( -54, tup.value<int_t>( 2 ) );
+		WANT_EQ( name_active, tup.value<name_t>( 3 ) );
+		WANT_EQ( "I am string!", tup.value<string>( 4 ) );
+		WANT_EQ( 3.14, tup.value<double>( 5 ) );
 	}
 	TEST( TupleTest, data_named )
 	{
@@ -677,11 +706,11 @@ namespace eon
 
 		REQUIRE_EQ( 4, tup.numAttributes() );
 		REQUIRE_EQ( name_bool, tup[ 0 ].type().name() );
-		REQUIRE_EQ( name_long, tup[ 1 ].type().name() );
+		REQUIRE_EQ( name_int, tup[ 1 ].type().name() );
 		REQUIRE_EQ( name_name, tup[ 2 ].type().name() );
 		REQUIRE_EQ( name_string, tup[ 3 ].type().name() );
 		WANT_TRUE( tup.value<bool>( 0 ) );
-		WANT_EQ( -54, tup.value<long_t>( eon::name( "two" ) ) );
+		WANT_EQ( -54, tup.value<int_t>( eon::name( "two" ) ) );
 		WANT_EQ( name_active, tup.value<name_t>( 2 ) );
 		WANT_EQ( "I am string!", tup.value<string>( eon::name( "four" ) ) );
 	}
@@ -702,7 +731,38 @@ namespace eon
 
 		Stringifier str;
 		REQUIRE_NO_EXCEPT( tup.str( str ) );
-		WANT_EQ( "data(\"unnamed\", named=\"Name\", deep:\n  deeper:\n    \"Rock\", \"bottom\")\n", str.str() );
+		string act = str.generateString();
+		string exp{
+			"data(\"unnamed\", named=\"Name\",\n"
+			"  deep:\n"
+			"    deeper:\n"
+			"      \"Rock\", \"bottom\")" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleTest, data_complex )
+	{
+		type::Handler::init();
+		DataTuple tup;
+		tup.addRaw( "unnamed" );
+		tup.addRaw( eon::name( "named" ), "Name" );
+		REQUIRE_EXCEPT( tup.addPlainTuple( eon::name( "deep" ) ), type::AccessDenied );
+		auto child = tup.addDataTuple( eon::name( "deep" ) );
+		auto grandchild = child->addDataTuple( eon::name( "deeper" ) );
+		grandchild->addRaw( "Rock" );
+		grandchild->addRaw( "bottom" );
+		grandchild->finalize();
+		child->finalize();
+		tup.finalize();
+
+		Stringifier str;
+		REQUIRE_NO_EXCEPT( tup.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(\"unnamed\", named=\"Name\",\n"
+			"  deep:\n"
+			"    deeper:\n"
+			"      \"Rock\", \"bottom\")" };
+		WANT_EQ( exp, act );
 	}
 	TEST( TupleTest, data_compare )
 	{
@@ -797,6 +857,236 @@ namespace eon
 		WANT_TRUE( c2.compatibleWith( base ) );
 		WANT_FALSE( n1.compatibleWith( base ) );
 		WANT_FALSE( n2.compatibleWith( base ) );
+	}
+
+
+	TEST( TupleStrTest, rule_1 )
+	{
+		type::Handler::init();
+		DynamicTuple dynamic;
+		DataTuple data;
+		Tuple plain;
+		data.addRaw( 1 );
+		data.finalize();
+		plain.addRaw( 2 );
+		plain.finalize();
+		dynamic.addRaw( std::move( data ) );
+		dynamic.addRaw( std::move( plain ) );
+		dynamic.finalize();
+
+		Stringifier str;
+		REQUIRE_NO_EXCEPT( dynamic.str( str ) );
+		string act = str.generateString();
+		string exp{ "dynamic(data(1), p(2))" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_2 )
+	{
+		type::Handler::init();
+		DataTuple dt, sub;
+		sub.addRaw( eon::name( "one" ) );
+		sub.addRaw( eon::name( "two" ) );
+		sub.finalize();
+		dt.addRaw( eon::name( "value" ), std::move( sub ) );
+		dt.finalize();
+
+		Stringifier str;
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(\n"
+			"  value:\n"
+			"    one, two)" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_3 )
+	{
+		type::Handler::init();
+		DynamicTuple dt, sub1;
+		DataTuple sub2, sub3;
+		sub3.addRaw( 1 );
+		sub3.finalize();
+		sub2.addRaw( eon::name( "value" ), std::move( sub3 ) );
+		sub2.finalize();
+		sub1.addRaw( std::move( sub2 ) );
+		sub1.finalize();
+		dt.add( std::move( sub1 ) );
+		dt.finalize();
+
+		Stringifier str;
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"dynamic(dynamic(data(\n"
+			"  value:\n"
+			"    data(1))))" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_4_1a )
+	{
+		type::Handler::init();
+		DataTuple dt, sub1, sub2, sub3;
+		sub1.addRaw( "Element 1.1" );
+		sub1.addRaw( "Element 1.2" );
+		sub1.finalize();
+		sub2.addRaw( "Element 2.1" );
+		sub2.addRaw( "Element 2.2" );
+		sub2.finalize();
+		sub3.addRaw( "Element 3.1" );
+		sub3.addRaw( "Element 3.2" );
+		sub3.finalize();
+		dt.addRaw( std::move( sub1 ) );
+		dt.addRaw( std::move( sub2 ) );
+		dt.addRaw( std::move( sub3 ) );
+		dt.finalize();
+
+		Stringifier str;
+		str.softLineWidth( 40 );
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data((\"Element 1.1\", \"Element 1.2\"),\n"
+			"  (\"Element 2.1\", \"Element 2.2\"),\n"
+			"  (\"Element 3.1\", \"Element 3.2\"))" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_4_1b )
+	{
+		type::Handler::init();
+		DataTuple dt, sub2, sub3;
+		sub2.addRaw( "Element 2.1" );
+		sub2.addRaw( "Element 2.2" );
+		sub2.finalize();
+		sub3.addRaw( "Element 3.1" );
+		sub3.addRaw( "Element 3.2" );
+		sub3.finalize();
+		dt.addRaw( "Just long enough to consume a line." );
+		dt.addRaw( std::move( sub2 ) );
+		dt.addRaw( std::move( sub3 ) );
+		dt.finalize();
+
+		Stringifier str;
+		str.softLineWidth( 40 );
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(\n"
+			"  \"Just long enough to consume a line.\",\n"
+			"  (\"Element 2.1\", \"Element 2.2\"),\n"
+			"  (\"Element 3.1\", \"Element 3.2\"))" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_4_2 )
+	{
+		type::Handler::init();
+		DataTuple dt;
+		dt.addRaw( eon::name( "value" ), "Just long enough to consume a line." );
+		dt.finalize();
+
+		Stringifier str;
+		str.softLineWidth( 40 );
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(value=\n"
+			"  \"Just long enough to consume a line.\")" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_4_3 )
+	{
+		type::Handler::init();
+		DataTuple dt;
+		dt.addRaw( eon::name( "value" ), "Just long enough to consume a line." );
+		dt.finalize();
+
+		Stringifier str;
+		str.softLineWidth( 40 );
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(value=\n"
+			"  \"Just long enough to consume a line.\")" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_4_4a )
+	{
+		type::Handler::init();
+		DataTuple dt;
+		dt.addRaw( "An element that is too long to fit on a single line!" );
+		dt.finalize();
+
+		Stringifier str;
+		str.softLineWidth( 40 );
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(\n"
+			"  \"An element that is too long to fit on a single line!\"\n"
+			"  )" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, rule_4_4b )
+	{
+		type::Handler::init();
+		DataTuple dt;
+		dt.addRaw( "An element that is too long to fit on a single line!" );
+		dt.finalize();
+
+		Stringifier str;
+		str.hardLineWidth( 40 );
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"data(\n"
+			"  \"An element that is too long to fit \\\n"
+			"    on a single line!\"\n"
+			"  )" };
+		WANT_EQ( exp, act );
+	}
+	TEST( TupleStrTest, misc_1 )
+	{
+		type::Handler::init();
+		DynamicTuple dt, dynamic;
+		Tuple plain;
+		dt.addRaw( eon::name( "bool_val" ), true );
+		dt.addRaw( eon::name( "byte_val" ), byte_t( 'b' ) );
+		dt.addRaw( eon::name( "char_val" ), char_t( 'c' ) );
+		dt.addRaw( eon::name( "int_val" ), int_t( -99 ) );
+		dt.addRaw( eon::name( "float_val" ), flt_t( -99.99 ) );
+		dt.addRaw( eon::name( "index_val" ), index_t( 5635466241234LL ) );
+		dt.addRaw( eon::name( "name_val" ), eon::name( "test" ) );
+		dynamic.addRaw( eon::name( "short_val" ), short_t( 123 ) );
+		dynamic.addRaw( eon::name( "long_val" ), long_t( -45764735234 ) );
+		dynamic.addRaw( eon::name( "low_val" ), low_t( 9.11 ) );
+		dynamic.addRaw( eon::name( "high_val" ), high_t( 47676476.0 ) );
+		dynamic.finalize();
+		dt.addRaw( eon::name( "tuple_val" ), std::move( dynamic ) );
+		dt.addRaw( eon::name( "string_val" ), eon::string( "alpha beta" ) );
+		dt.addRaw( "some value" );
+		plain.addRaw( eon::name( "one" ) );
+		plain.addRaw( eon::name( "two" ) );
+		plain.addRaw( eon::name( "three" ) );
+		plain.finalize();
+		dt.addRaw( std::move( plain ) );
+		dt.finalize();
+
+		Stringifier str;
+		REQUIRE_NO_EXCEPT( dt.str( str ) );
+		string act = str.generateString();
+		string exp{
+			"dynamic(\n"
+			"  bool_val=true,\n"
+			"  byte_val=b'b',\n"
+			"  char_val='c',\n"
+			"  int_val=-99,\n"
+			"  float_val=-99.99,\n"
+			"  index_val=5635466241234,\n"
+			"  name_val=test,\n"
+			"  tuple_val=dynamic(short_val=123S, long_val=-45764735234L, low_val=9.11L, high_val=47676476.0H),\n"
+			"  string_val=\"alpha beta\",\n"
+			"  \"some value\",\n"
+			"  p(one, two, three))" };
+		WANT_EQ( exp, act );
 	}
 
 

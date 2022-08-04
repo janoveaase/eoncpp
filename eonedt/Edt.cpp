@@ -35,34 +35,38 @@ namespace eon
 			{
 				if( attribute.name() == no_name )
 				{
-					str.pushOpen( "(" );
+					str.start_grp2( "(" );
 					_toStr( *(DataTuple*)attribute.value(), str, true );
-					str.pushClose( ")" );
+					str.end_grp2( ")" );
 				}
 				else
 				{
-					str.pushWord( eon::str( attribute.name() ) );
-					str.pushStartBlock( ":" );
+					str.word( eon::str( attribute.name() ) );
+					str.append( ":" );
+					str.start_block();
 					_toStr( *(DataTuple*)attribute.value(), str, false );
-					str.pushEndBlock();
+					str.end_block();
 				}
 			}
 			else
 			{
 				if( attribute.name() != no_name )
 				{
-					str.pushWord( eon::str( attribute.name() ) );
-					str.pushOperator( "=" );
+					str.word( eon::str( attribute.name() ) );
+					str.op1( "=" );
 				}
 				attribute.value()->str( str );
 			}
 			if( comma_sep )
 			{
 				if( i < tuple.numAttributes() - 1 )
-					str.pushStop( "," );
+				{
+					str.punct( "," );
+					str.sec_split_block();
+				}
 			}
 			else
-				str.endLine();
+				str.hard_lf();
 		}
 	}
 
@@ -85,9 +89,9 @@ namespace eon
 			if( parser.current().is( name_name ) )
 			{
 				// We have either a 'key' or a name value
-				if( parser.ahead().is( name_assign ) )
+				if( parser.exists() && parser.ahead().is( name_assign ) )
 					_loadAssignedChild( tuple, name( parser.current().str() ), parser );
-				else if( parser.ahead().is( name_colon ) )
+				else if( parser.exists() && parser.ahead().is( name_colon ) )
 					_loadIndentedChild( tuple, name( parser.current().str() ), parser );
 				else
 				{

@@ -35,7 +35,7 @@ namespace eon
 		inline void die() override { Value = nullptr; }
 		inline void callDestructor() override { delete this; }
 		inline Object* copy() override { return new Reference( Value ); }
-		inline void str( Stringifier& str ) const override { str.pushWord( "str" );  }
+		inline void str( Stringifier& str ) const override { str.word( "str" );  }
 
 	protected:
 		Object* Value{ nullptr };
@@ -62,6 +62,6 @@ namespace eon
 
 
 		inline name_t generalType() const noexcept override { return name_modify; }
-		inline void str( Stringifier& str ) const override { str.pushWord( "str" ); }
+		inline void str( Stringifier& str ) const override { str.word( "str" ); }
 	};
 }

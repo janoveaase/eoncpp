@@ -8,10 +8,10 @@ namespace eon
 		void Expression::str( Stringifier& str ) const
 		{
 			if( Variable )
-				str.pushWord( "e" ).pushOpen( "(" );
+				str.word( "e" ).start_grp2( "(" );
 			Value.infixStr( str );
 			if( Variable )
-				str.pushClose( ")" );
+				str.end_grp2( ")" );
 		}
 	}
 }

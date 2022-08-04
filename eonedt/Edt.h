@@ -30,6 +30,8 @@ namespace eon
 		//
 	public:
 
+		edt() = default;
+
 		// Constructor for saving data tuple as EDT
 		// User str() to save to string and save() to save to file
 		inline edt( const DataTuple& tuple_to_save ) { ToSave = &tuple_to_save; }
@@ -81,7 +83,7 @@ namespace eon
 	private:
 
 		inline string _toStr( const DataTuple& tuple ) {
-			Stringifier str; _toStr( tuple, str, false ); return str.str(); }
+			Stringifier str; _toStr( tuple, str, false ); return str.generateString(); }
 		void _toStr( const DataTuple& tuple, Stringifier& str, bool comma_sep );
 
 		void _load( source::Ref source, DataTuple& tuple, source::Reporter& reporter );

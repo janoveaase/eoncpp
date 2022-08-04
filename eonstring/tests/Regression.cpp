@@ -1102,53 +1102,132 @@ namespace eon
 	TEST( StringifierTest, basic )
 	{
 		Stringifier str;
-		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" );
-		WANT_EQ( "Hello World!", str.str() );
+		str.word( "Hello" ).word( "World" ).punct( "!" );
+		WANT_EQ( "Hello World!", str.generateString() );
+	}
+	TEST( StringifierTest, operators )
+	{
+		Stringifier str;
+		str.word( "alpha" ).op1( "=" ).word( "beta" ).word( "gamma" ).op2( "=" ).word( "delta" );
+		WANT_EQ( "alpha = beta gamma=delta", str.generateString() );
 	}
 	TEST( StringifierTest, append_prefix )
 	{
 		Stringifier str;
-		str.pushWord( "Hello" ).pushAppend( "World" ).pushPrefix( "T" ).pushOpen( "(" ).pushClose( ")" ).pushStop( "!" );
-		WANT_EQ( "HelloWorld T()!", str.str() );
+		str.word( "Hello" ).append( "World" ).prepend( "T" ).start_grp2( "(" ).end_grp2( ")" ).punct( "!" );
+		WANT_EQ( "HelloWorld T()!", str.generateString() );
 	}
 	TEST( StringifierTest, multiline )
 	{
 		Stringifier str;
-		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).endLine();
-		str.pushOpen( "(" ).pushWord( "9" ).pushOperator( "+" ).pushWord( "55" ).pushClose( ")" );
-		WANT_EQ( "Hello World!\n(9 + 55)", str.str() );
-	}
-	TEST( StringifierTest, multiline_indented )
-	{
-		Stringifier str( 16 );
-		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).endLine();
-		str.pushOpen( "(" ).pushWord( "999999" ).pushOperator( "+" ).pushWord( "55555" );
-		str.pushOperator( "-" ).pushWord( "6" ).pushClose( ")" );
-		WANT_EQ( "Hello World!\n(999999 + 55555\n  - 6)", str.str() );
+		str.word( "Hello" ).word( "World" ).punct( "!" ).hard_lf();
+		str.start_grp2( "(" ).word( "9" ).op1( "+" ).word( "55" ).end_grp2( ")" );
+		WANT_EQ( "Hello World!\n(9 + 55)", str.generateString() );
 	}
 	TEST( StringifierTest, multiline_colon )
 	{
 		Stringifier str;
-		str.pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).pushStartBlock( ":" );
-		str.pushOpen( "(" ).pushWord( "9" ).pushOperator( "+" ).pushWord( "55" );
-		str.pushOperator( "-" ).pushWord( "6" ).pushClose( ")" ).pushEndBlock();
-		WANT_EQ( "Hello World!:\n  (9 + 55 - 6)\n", str.str() );
+		str.spacesInsideGrp1( true );
+		str.word( "Hello" ).word( "World" ).punct( "!" ).append( ":" ).start_block();
+		str.start_grp1( "(" ).word( "9" ).op1( "+" ).word( "55" );
+		str.op1( "-" ).word( "6" ).end_grp1( ")" ).end_block();
+		WANT_EQ( "Hello World!:\n  ( 9 + 55 - 6 )", str.generateString() );
 	}
 	TEST( StringifierTest, multiline_parenthesis_colon )
 	{
 		Stringifier str;
-		str.pushOpen( "(" ).pushWord( "Hello" ).pushWord( "World" ).pushStop( "!" ).pushStartBlock( ":" );
-		str.pushWord( "One" ).pushWord( "Two" ).pushClose( ")" ).pushEndBlock();
-		WANT_EQ( "(Hello World!:\n  One Two)\n", str.str() );
+		str.start_grp2( "(" ).word( "Hello" ).word( "World" ).punct( "!" ).append( ":" ).start_block();
+		str.word( "One" ).word( "Two" ).end_grp2( ")" ).end_block();
+		WANT_EQ( "(Hello World!:\n  One Two)", str.generateString() );
 	}
-	TEST( StringifierTest, very_long_line )
+	TEST( StringifierTest, multiline_nested_blocks )
 	{
-		Stringifier str( 20 );
-		str.pushPrefix( "\"" ).pushWord( "Hello World!" ).pushAppend( "\"" ).pushStop( "," );
-		str.pushWord( "One" ).pushStop( "," ).pushWord( "Two" ).pushStop( "," ).pushWord( "Three" ).pushStop( "," );
-		str.pushWord( "Four" ).pushStop( "," ).pushPrefix( "\"" );
-		str.pushWord( "A long string value with many words inside it, more than will fit on a line." ).pushAppend( "\"" );
-		WANT_EQ( "\"Hello World!\", One,\n  Two, Three, Four,\n  "
-			"\"A long string value with many words inside it, more than will fit on a line.\"", str.str() );
+		Stringifier str;
+		str.word( "level1" ).append( ":" ).start_block();
+		str.word( "level2" ).append( ":" ).start_block();
+		str.word( "level3" ).end_block().end_block();
+		string act = str.generateString();
+		string exp = "level1:\n  level2:\n    level3";
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, hard_line_width )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," );
+		str.word( "One" ).punct( "," ).word( "Two" ).punct( "," ).word( "Three" ).punct( "," );
+		str.word( "Four" ).punct( "," );
+		str.doubleq( "A long string value with many words inside it, more than will fit on a line." );
+		string act = str.generateString();
+		string exp{
+			"\"Hello World!\", One,\n"
+			"  Two, Three, Four,\n"
+			"  \"A long string \\\n"
+			"    value with \\\n"
+			"    many words \\\n"
+			"    inside it, \\\n"
+			"    more than will \\\n"
+			"    fit on a line.\"" };
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, primary_split )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," ).prim_split();
+		str.word( "One" ).punct( "," ).sec_split().word( "Two" ).punct( "," ).tert_split().word( "Three" );
+		string act = str.generateString();
+		string exp{ "\"Hello World!\",\nOne, Two, Three" };
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, secondary_split )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," ).sec_split();
+		str.word( "One" ).punct( "," ).sec_split().word( "Two" ).punct( "," ).tert_split().word( "Three" );
+		string act = str.generateString();
+		string exp{ "\"Hello World!\", One,\nTwo, Three" };
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, tertiary_split )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," ).tert_split();
+		str.word( "One" ).punct( "," ).tert_split().word( "Two" ).punct( "," ).tert_split().word( "Three" );
+		string act = str.generateString();
+		string exp{ "\"Hello World!\", One,\nTwo, Three" };
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, primary_split_block )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," ).prim_split_block();
+		str.word( "One" ).punct( "," ).sec_split_block().word( "Two" ).punct( "," ).tert_split_block().word( "Three" );
+		string act = str.generateString();
+		string exp{ "\"Hello World!\",\n  One, Two, Three" };
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, secondary_split_block )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," ).sec_split_block();
+		str.word( "One" ).punct( "," ).sec_split_block().word( "Two" ).punct( "," ).tert_split_block().word( "Three" );
+		string act = str.generateString();
+		string exp{ "\"Hello World!\", One,\n  Two, Three" };
+		WANT_EQ( exp, act );
+	}
+	TEST( StringifierTest, teriary_split_block )
+	{
+		Stringifier str;
+		str.hardLineWidth( 20 );
+		str.doubleq( "Hello World!" ).punct( "," ).tert_split_block();
+		str.word( "One" ).punct( "," ).tert_split_block().word( "Two" ).punct( "," ).tert_split_block().word( "Three" );
+		string act = str.generateString();
+		string exp{ "\"Hello World!\", One,\n  Two, Three" };
+		WANT_EQ( exp, act );
 	}
 }

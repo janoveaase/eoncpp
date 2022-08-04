@@ -22,8 +22,8 @@ set_target_properties(
 )
 set_property(TARGET EonEdt PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonEdt PUBLIC EonString
-	EonSource EonTokenizer EonRegex EonExcept EonFileSys EonTypes EonParser
+target_link_libraries(EonEdt PUBLIC EonString EonParser
+	EonSource EonTokenizer EonRegex EonExcept EonFileSys EonTypes
 )
 target_include_directories(EonEdt PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"

@@ -73,6 +73,11 @@ namespace eon
 				if( found != GenericToDataTupleAttributeTypeMap.end() )
 					return found->second; else throw IncompatibleType(); }
 
+			// Given two Æon type names, check if the latter can be typecast to the former
+			static inline bool compatibleDataTupleAttributeTypes( name_t wanted, name_t actual ) noexcept {
+				auto found = CompatibleDataTupleAttributeTypes.find( wanted ); return found !=
+					CompatibleDataTupleAttributeTypes.end() ? found->second.find( actual ) != found->second.end() : false; }
+
 
 
 		private:
@@ -102,6 +107,9 @@ namespace eon
 
 			// Mapping between general Æon attribute type names and those supported by data tuples
 			static std::unordered_map<name_t, name_t> GenericToDataTupleAttributeTypeMap;
+
+			// Mapping between compatible types within data tuples
+			static std::unordered_map<name_t, std::unordered_set<name_t>> CompatibleDataTupleAttributeTypes;
 		};
 	}
 }

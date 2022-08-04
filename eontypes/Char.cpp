@@ -21,31 +21,31 @@ namespace eon
 		switch( Value )
 		{
 			case 0x00:
-				str.pushWord( "'\\0'" );
+				str.word( "'\\0'" );
 				return;
 			case 0x07:
-				str.pushWord( "'\\a'" );
+				str.word( "'\\a'" );
 				return;
 			case 0x08:
-				str.pushWord( "'\\b'" );
+				str.word( "'\\b'" );
 				return;
 			case 0x0C:
-				str.pushWord( "'\\f'" );
+				str.word( "'\\f'" );
 				return;
 			case 0x0A:
-				str.pushWord( "'\\n'" );
+				str.word( "'\\n'" );
 				return;
 			case 0x09:
-				str.pushWord( "'\\t'" );
+				str.word( "'\\t'" );
 				return;
 			case 0x0B:
-				str.pushWord( "'\\v'" );
+				str.word( "'\\v'" );
 				return;
 			case 0x5C:
-				str.pushWord( "'\\\\'" );
+				str.word( "'\\\\'" );
 				return;
 			case 0x27:
-				str.pushWord( "'\\''" );
+				str.word( "'\\''" );
 				return;
 			default:
 				break;
@@ -58,13 +58,13 @@ namespace eon
 			if( hexchars.numChars() < 4 )
 				hexchars = hexchars.padLeft( 4, '0' );
 			if( hexchars.numChars() == 4 )
-				str.pushWord( "'\\u" + hexchars + "'" );
+				str.word( "'\\u" + hexchars + "'" );
 			else if( hexchars.numBytes() < 8 )
-				str.pushWord( hexchars.padLeft( 8, '0' ) );
+				str.word( hexchars.padLeft( 8, '0' ) );
 			else
-				str.pushWord( "'\\U" + hexchars + "'" );
+				str.word( "'\\U" + hexchars + "'" );
 		}
 		else
-			str.pushWord( "'" + string( Value ) + "'" );
+			str.word( "'" + string( Value ) + "'" );
 	}
 }

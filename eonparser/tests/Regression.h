@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <eontest/Test.h>
 #include <eonsource/String.h>
@@ -18,3 +18,4 @@ namespace eon
 
 	class ParseExpressionTest : public eontest::EonTest {};
 }
+*/

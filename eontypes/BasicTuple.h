@@ -2,6 +2,7 @@
 
 #include "Attribute.h"
 #include "TypeSystem.h"
+#include <eonstack/Stack.h>
 #include <typeinfo>
 #include <unordered_set>
 
@@ -34,8 +35,8 @@ namespace eon
 			//
 		public:
 
-			//* Tuple permissions
-			//* Permissions apply once the tuple has been finalized!
+			// Tuple permissions
+			// Permissions apply once the tuple has been finalized!
 			enum class Permission
 			{
 				none		= 0x00,
@@ -118,27 +119,34 @@ namespace eon
 			//
 		public:
 
-			//* Get the C++ type
+			// Get the C++ type
 			inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
 
-			//* Identify this as a tuple
+			// Identify this as a tuple
 			virtual name_t generalType() const noexcept override { return name_tuple; }
 
-			//* Check if this tuple is compatible with another object
+			// Check if this tuple is compatible with another object
 			bool compatibleWith( const Object& other ) const noexcept override;
 
-			//* Identify tuple type
+			// Identify tuple type
+			inline bool isTuple() const noexcept {
+				return Type.name() == name_plain || Type.name() == name_dynamic || Type.name() == name_data; }
 			inline bool isPlain() const noexcept { return Type.name() == name_plain; }
 			inline bool isDynamic() const noexcept { return Type.name() == name_dynamic; }
 			inline bool isData() const noexcept { return Type.name() == name_data; }
 
-			//* Check if the tuple has been finalized
+			// Check if the tuple has been finalized
 			inline bool finalized() const noexcept { return Finalized; }
 
-			//* Create a copy of 'this'
-			virtual type::Object* copy() override { return new BasicTuple( *this ); }
-
-			//* Get object as string representation
+			// Get object as string representation
+			// Rules for data tuples:
+			//   1. '(' immediately after tuple type identifier, no newline. Example: "data("
+			//   2. Value of tuple-attribute with key shall follow indented on next line. Example: "value:\n  (a, b)"
+			//   3. ')' to be added after last item without newlines. Example: "data(sub:\n  (a, b))"
+			//   4. Long lines shall be split as follows:
+			//      1. Split on ',' for highest possible attribute level
+			//      2. Split on '='
+			//      3. Split bytes/string values on space with a backslash at the end of the split line
 			virtual void str( Stringifier& str ) const override;
 
 
@@ -150,35 +158,64 @@ namespace eon
 			//
 		public:
 
-			//* Check if there are any attributes at all
+			// Check if there are any attributes at all
 			inline bool empty() const noexcept { return Attributes.empty(); }
 			inline operator bool() const noexcept { return !Attributes.empty(); }
 
-			//* Get number of attributes in tuple
+			// Get number of attributes in tuple
 			inline index_t numAttributes() const noexcept { return Attributes.size(); }
 
+			// Get the total number of attributes including sub-tuples and sub-sub-tuples etc.
+			// Do not include named datatuple attributes!
+			index_t deepCount() const noexcept;
 
-			//* Get position of named attribute - returns no_index if not found
+			// Get the depth of the tuple (longest path through sub-tuples to a non-tuple attribute)
+			index_t depth() const noexcept;
+
+			// Check if any of the attributes are tuples
+			bool hasTupleAttributes() const noexcept;
+
+			// Check if there are named sub-tuple attributes, named sub-sub-tuple attributes, etc.
+			bool hasNamedSubtupleAttributes() const noexcept;
+
+
+			// Get position of named attribute - returns no_index if not found
 			inline index_t pos( name_t name ) const noexcept {
 				auto found = NamedAttribs.find( name );
 				return found != NamedAttribs.end() ? found->second : no_index; }
 
-			//* Get name of attribute at position - returns no_name if not named.
+			// Get name of attribute at position - returns no_name if not named.
 			inline name_t name( index_t pos ) const noexcept {
 				return pos < numAttributes() ? Attributes[ pos ].name() : no_name; }
 
-			//* Get type of attribute at position
-			//* Throws [eon::type::NotFound] if invalid position
-			inline EonType attributeType( index_t pos ) const {
-				if( pos < numAttributes() ) return _type( pos ); throw type::NotFound(); }
 
-			//* Check if attribute exists
+
+			// Check if attribute exists
 			inline bool exists( index_t pos ) const noexcept { return pos < numAttributes(); }
 			inline bool exists( name_t name ) const noexcept { return NamedAttribs.find( name ) != NamedAttribs.end(); }
 
+			// Check if a flag is set (if an unnamed name attribute exists)
+			bool hasFlag( name_t flag_name ) const noexcept;
 
-			//* Access attributes as read-only
-			//* Throws [eon::type::NotFound] if invalid position
+
+			// Get type of attribute at specified position or for named attribute
+			// Returns 'false' if invalid position/name!
+			inline const EonType& typeOf( index_t pos ) const noexcept {
+				static const EonType no_type; return pos < numAttributes() ? _type( pos ) : no_type; }
+			inline const EonType& typeOf( name_t name ) const noexcept { return typeOf( pos( name ) ); }
+
+
+			// Access attribute values
+			// Throws [eon::type::NotFound] if invalid position and [eon::type::WrongType] if trying to access wrong type
+			template<typename T> inline const T& value( index_t pos ) const { return ( (BasicTuple*)this )->_value<T>( pos ); }
+			template<typename T> inline const T& value( name_t name ) const {
+				return ( (BasicTuple*)this )->_value<T>( pos( name ) ); }
+			template<typename T> inline T& value( index_t pos ) { return _value<T>( pos ); }
+			template<typename T> inline T& value( name_t name ) { return _value<T>( pos( name ) ); }
+
+
+			// Access raw attributes
+			// Throws [eon::type::NotFound] if invalid position
 			inline const type::Attribute& at( index_t pos ) const {
 				if( pos < numAttributes() ) return Attributes[ pos ]; throw type::NotFound(); }
 			inline const type::Attribute& at( name_t name ) const {
@@ -188,112 +225,9 @@ namespace eon
 				return at( pos < 0 ? Attributes.size() - static_cast<index_t>( -pos ) : static_cast<index_t>( pos ) ); }
 			inline const type::Attribute& operator[]( name_t name ) const { return at( name ); }
 
-			//* Access modifiable attributes
-			//* Throws [eon::type::NotFound] if invalid position!
-			//* Throws [eon::type::AccessDenied] if modify is not permitted!
-			inline type::Attribute& at( index_t pos ) {
-				_assertCanModify( pos ); if( pos >= numAttributes() ) throw type::NotFound(); return Attributes[ pos ]; }
-			inline type::Attribute& at( name_t name ) { auto p = pos( name );
-				if( p == no_index ) throw type::NotFound(); _assertCanModify( p ); return Attributes[ p ]; }
-			inline type::Attribute& operator[]( index_t pos ) { return at( pos ); }
-			inline type::Attribute& operator[]( int pos ) {
-				return at( pos < 0 ? Attributes.size() - static_cast<index_t>( -pos ) : static_cast<index_t>( pos ) ); }
-			inline type::Attribute& operator[]( name_t name ) { return at( name ); }
 
-
-			//* Get read-only reference to attribute value at specified position
-			//* Throws [eon::type::NotFound] if the position is > numAttributes()!
-			//* Throws [eon::type::WrongType] if the type requested doesn't match the actual attribute type!
-			template<typename T>
-			const T& value( index_t pos ) const
-			{
-				auto& attribute = at( pos );
-				if( attribute.type().name() == name_syntax ) {
-					if( typeid( T ) == typeid( name_t ) ) return *(T*)&_nameValue( pos ); else throw type::WrongType(); }
-				auto object = (const Object*)attribute.value();
-				if( object )
-				{
-					if( object->generalType() == name_instance )
-					{
-						auto instance = (const type::Instance*)object;
-						if( std::type_index( typeid( T ) ) == instance->rawType() )
-							return *(const T*)instance->rawValue();
-					}
-					else if( object->generalType() == name_tuple )
-					{
-						auto tuple = (BasicTuple*)object;
-						if( tuple->type().name() == name_plain && std::type_index( typeid( T ) ) == tupleType() )
-							return *(const T*)object;
-						else if( tuple->type().name() == name_dynamic && isDynamicTuple( typeid( T ) ) )
-							return *(const T*)object;
-						else if( tuple->type().name() == name_data && isDataTuple( typeid( T ) ) )
-							return *(const T*)object;
-						else if( tuple->type().name() == name_lambda && isLambda( typeid( T ) ) )
-							return *(const T*)object;
-					}
-				}
-				throw type::WrongType();
-			}
-			template<typename T>
-			const T& value( int pos ) const { return value<T>( pos < 0 ? Attributes.size() - static_cast<index_t>( -pos )
-				: static_cast<index_t>( pos ) ); }
-			template<typename T>
-			const T& value( name_t name ) const { return value<T>( pos( name ) ); }
-			template<typename T>
-			const T& operator[]( index_t pos ) const { return value<T>( pos ); }
-			template<typename T>
-			const T& operator[]( int pos ) const { return value<T>( pos < 0
-				? Attributes.size() - static_cast<index_t>( -pos ) : static_cast<index_t>( pos ) ); }
-
-			//* Get modifiable reference to attribute value at specified position
-			//* Throws [eon::type::NotFound] if the position is > numAttributes()!
-			//* Throws [eon::AccessDenied] if modify is not permitted!
-			//* Throws [eon::type::WrongType] if the type requested doesn't match the
-			//* actual attribute type or isn't an instance type nor a (legal) tuple!
-			template<typename T>
-			T& value( index_t pos )
-			{
-				auto& attribute = at( pos );
-				if( attribute.type().name() == name_syntax ) {
-					if( typeid( T ) == typeid( name_t ) ) return *(T*)&_nameValue( pos ); else throw type::WrongType(); }
-				auto object = (Object*)attribute.value();
-				if( object )
-				{
-					if( object->generalType() == name_instance )
-					{
-						auto instance = (type::Instance*)object;
-						if( std::type_index( typeid( T ) ) == instance->rawType() )
-							return *(T*)instance->rawValue();
-					}
-					else if( object->generalType() == name_tuple )
-					{
-						auto tuple = (BasicTuple*)object;
-						if( tuple->isPlain() && std::type_index( typeid( T ) ) == tupleType() )
-							return *(T*)object;
-						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
-							return *(T*)object;
-						else if( tuple->isData() && isDataTuple( typeid( T ) ) )
-							return *(T*)object;
-//						else if( tuple->isLambda() && isLambda( typeid( T ) ) )
-//							return *(T*)object;
-					}
-				}
-				throw type::WrongType();
-			}
-			template<typename T>
-			T& value( int pos ) { return value<T>( pos < 0 ? Attributes.size() - static_cast<index_t>( -pos )
-				: static_cast<index_t>( pos ) ); }
-			template<typename T>
-			T& value( name_t name ) { return value<T>( pos( name ) ); }
-			template<typename T>
-			T& operator[]( index_t pos ) { return value<T>( pos ); }
-			template<typename T>
-			T& operator[]( int pos ) { return value<T>( pos < 0 ? Attributes.size() - static_cast<index_t>( -pos )
-				: static_cast<index_t>( pos ) ); }
-
-
-			//* Add a new named attribute
-			//* Throws [eon::type::AccessDenied] if not adding to data tuple!
+			// Add a new named attribute
+			// Throws [eon::type::AccessDenied] if not adding to data tuple!
 			inline BasicTuple& add( name_t name, Object* value ) { return *this += Attribute( name, value ); }
 
 			BasicTuple& addName( name_t name, name_t value );
@@ -322,8 +256,8 @@ namespace eon
 			}
 
 
-			//* Add a new unnamed attribute
-			//* Throws [eon::type::AccessDenied] if not adding to data tuple!
+			// Add a new unnamed attribute
+			// Throws [eon::type::AccessDenied] if not adding to data tuple!
 			inline BasicTuple& add( Object* value ) { return *this += Attribute( value ); }
 			inline BasicTuple& add( Object&& value ) { return *this += Attribute( value.consume() ); }
 
@@ -349,43 +283,43 @@ namespace eon
 				return *this;
 			}
 
-			//* Add a tuple as attribute, return pointer to it
-			//* This is only possible when tuple is not finalized!
-			//* Throws [eon::type::AccessDenied] if finalized!
+			// Add a tuple as attribute, return pointer to it
+			// This is only possible when tuple is not finalized!
+			// Throws [eon::type::AccessDenied] if finalized!
 			BasicTuple* addPlainTuple( name_t name = no_name, source::Ref source = source::Ref() );
 			BasicTuple* addDynamicTuple( name_t name = no_name, source::Ref source = source::Ref() );
 			BasicTuple* addDataTuple( name_t name = no_name, source::Ref source = source::Ref() );
 
-			//* Add a new detailed attribute
-			//* Throws [eon::type::AccessDenied] if adding is not permitted!
-			//* Throws [eon::type::DuplicateName] if named and name already exists!
+			// Add a new detailed attribute
+			// Throws [eon::type::AccessDenied] if adding is not permitted!
+			// Throws [eon::type::DuplicateName] if named and name already exists!
 			BasicTuple& operator+=( type::Attribute&& attribute );
 
-			//* Add multiple attributes
-			//* Throws [eon::type::AccessDenied] if adding is not permitted!
-			//* Throws [eon::type::DuplicateName] if named and name already exists!
+			// Add multiple attributes
+			// Throws [eon::type::AccessDenied] if adding is not permitted!
+			// Throws [eon::type::DuplicateName] if named and name already exists!
 			inline BasicTuple& operator+=( std::initializer_list<type::Attribute> attributes ) {
 				for( auto& attribute : attributes ) *this += std::move( *(Attribute*)&attribute ); return *this; }
 
-			//* Add another tuple
-			//* Throws [eon::type::DuplicateName] if the other tuple contains one
-			//* or more named attributes with names already existing in this!
-			//* Throws [eon::type::AccessDenied] if adding is not permitted!
+			// Add another tuple
+			// Throws [eon::type::DuplicateName] if the other tuple contains one
+			// or more named attributes with names already existing in this!
+			// Throws [eon::type::AccessDenied] if adding is not permitted!
 			BasicTuple& operator+=( const BasicTuple& other );
 
-			//* Remove elements from another tuple
-			//* The other duple must be compatible!
-			//* Throws [eon::type::AccessDenied] if removing is not permitted or other tuple is incompatible!
+			// Remove elements from another tuple
+			// The other duple must be compatible!
+			// Throws [eon::type::AccessDenied] if removing is not permitted or other tuple is incompatible!
 			BasicTuple& operator-=( const BasicTuple& other );
 
-			//* Remove a named attribute
-			//* Throws [eon::type::NotFound] if no such attribute!
-			//* Throws [eon::type::AccessDenied] if removing is not permitted!
+			// Remove a named attribute
+			// Throws [eon::type::NotFound] if no such attribute!
+			// Throws [eon::type::AccessDenied] if removing is not permitted!
 			BasicTuple& remove( name_t name );
 
-			//* Remove attribute by position, negative value counts from the end
-			//* Throws [eon::type::NotFound] if no such attribute!
-			//* Throws [eon::type::AccessDenied] if removing is not permitted!
+			// Remove attribute by position, negative value counts from the end
+			// Throws [eon::type::NotFound] if no such attribute!
+			// Throws [eon::type::AccessDenied] if removing is not permitted!
 			BasicTuple& remove( size_t pos );
 			inline BasicTuple& remove( int_t pos ) {
 				return remove( static_cast<size_t>( pos < 0 ? Attributes.size() + pos : pos ) ); }
@@ -436,8 +370,8 @@ namespace eon
 				return Perm & Permission::mod_var && attribute_no < Attributes.size()
 					&& Attributes[ attribute_no ].value()->generalType() != name_action; }
 			inline bool _canDelVar() const noexcept { return Perm & Permission::del_var; }
-			inline bool _canAddCache() const noexcept { return Perm & Permission::add_cache; }
-			inline bool _canAddAct() const noexcept { return Perm & Permission::add_act; }
+/*			inline bool _canAddCache() const noexcept { return Perm & Permission::add_cache; }
+			inline bool _canAddAct() const noexcept { return Perm & Permission::add_act; }*/
 
 			inline void _assertCanAddVar() const { if( !_canAddVar() ) throw AccessDenied(); }
 			void _assertCanAddVar( const EonType& type );
@@ -458,20 +392,60 @@ namespace eon
 			// Get the C++ type of eon::Tuple
 			std::type_index tupleType() const noexcept;
 
-			void _str( Stringifier& str ) const;
+			void _str( Stringifier& str, stack<const BasicTuple*>& ancestors, int indented = 0, bool is_block = false ) const;
 
-			// Output standard parenthesized prefix and posfix for tuple
-			virtual void standardPrefix( Stringifier& str ) const {}
-			virtual void standardPostfix( Stringifier& str ) const {}
+			// Output formalized prefix/postfix for tuple
+			// Example: "dynamic(" + ")"
+			virtual void formalPrefix( Stringifier& str ) const = 0;
+			virtual void formalPostfix( Stringifier& str ) const { str.end_grp1( ")", eon::stringify::Type::end_block ); }
 
-			// Output explicit parenthesized prefix and postfix for tuple
-			virtual void explicitPrefix( Stringifier& str ) const { str.pushOpen( "(" ); }
-			virtual void explicitPostfix( Stringifier& str ) const { str.pushClose( ")" ); }
+			// Output informal prefix/postfix for tuple
+			// Example: "(" + ")"
+			virtual void informalPrefix( Stringifier& str ) const { str.start_grp1( "(" ); }
+			virtual void informalPostfix( Stringifier& str ) const { str.end_grp1( ")", eon::stringify::Type::end_block ); }
 
 			// Check if the specified typeid matches
+			bool isPlainTuple( const std::type_info& type ) const;
 			bool isDynamicTuple( const std::type_info& type ) const;
 			bool isDataTuple( const std::type_info& type ) const;
-			bool isLambda( const std::type_info& type ) const;
+/*			bool isLambda( const std::type_info& type ) const;*/
+
+			// Get attribute as specific type
+			template<typename T>
+			T& _value( index_t pos )
+			{
+				if( pos >= numAttributes() )
+					throw type::NotFound();
+				auto& attribute = Attributes[ pos ];
+				if( attribute.type().name() == name_syntax )
+				{
+					if( typeid( T ) == typeid( name_t ) )
+						return *(T*)&_nameValue( pos );
+					else
+						throw type::WrongType();
+				}
+				auto object = (Object*)attribute.value();
+				if( object )
+				{
+					if( object->generalType() == name_instance )
+					{
+						auto instance = (type::Instance*)object;
+						if( std::type_index( typeid( T ) ) == instance->rawType() )
+							return *(T*)instance->rawValue();
+					}
+					else if( object->generalType() == name_tuple )
+					{
+						auto tuple = (BasicTuple*)object;
+						if( tuple->isPlain() && std::type_index( typeid( T ) ) == tupleType() )
+							return *(T*)object;
+						else if( tuple->isDynamic() && isDynamicTuple( typeid( T ) ) )
+							return *(T*)object;
+						else if( tuple->isData() && isDataTuple( typeid( T ) ) )
+							return *(T*)object;
+					}
+				}
+				throw type::WrongType();
+			}
 
 
 

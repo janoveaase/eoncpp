@@ -102,7 +102,7 @@ namespace eon
 			//* Check context
 			inline Context context() const noexcept { return ContextStack.empty() ? Context::global : ContextStack.top(); }
 			inline bool underTupleContext() const noexcept {
-				return ContextStack.size() > 1 && ContextStack.element( 1 ) == Context::tuple; }
+				return ContextStack.size() > 1 && ContextStack.at( 1 ) == Context::tuple; }
 
 			//* Push a new context onto the context stack
 			inline void push( Context context ) { ContextStack.push( context ); }

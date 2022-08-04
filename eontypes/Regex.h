@@ -27,7 +27,7 @@ namespace eon
 		void callDestructor() override {}
 		Object* copy() override { throw type::AccessDenied( "Cannot copy type object!" ); }
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( *this ) ); }
-		inline void str( Stringifier& str ) const override { str.pushWord( "regex" ); }
+		inline void str( Stringifier& str ) const override { str.word( "regex" ); }
 
 		inline type::Instance* instantiate( type::Node* args = nullptr ) const override { return instantiate( regex() ); }
 		type::Instance* instantiate( const regex& value ) const;
@@ -55,7 +55,7 @@ namespace eon
 		inline std::type_index rawType() const noexcept override { return std::type_index( typeid( regex ) ); }
 		inline void* rawValue() const noexcept override { return (void*)&Value; }
 		inline void str( Stringifier& str ) const override {
-			str.pushPrefix( "r\"" ).pushWord( Value.str() ).pushAppend( "\"" ); }
+			str.prepend( "r\"" ).word( Value.str() ).append( "\"" ); }
 		inline Instance* copy() const override { return new RegexInstance( Value, source() ); }
 		inline int compare( const Instance& other ) const noexcept override {
 			auto& o = *(const RegexInstance*)&other; return Value.str().compare( o.Value.str() ); }

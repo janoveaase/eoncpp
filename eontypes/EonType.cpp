@@ -52,12 +52,12 @@ namespace eon
 
 	void EonType::str( Stringifier& str ) const
 	{
-		str.pushPrefix( "T" ).pushOpen( "(" );
+		str.prepend( "T" ).start_grp2( "(" );
 		if( Name != name_plain )
 		{
 			if( AttributeName != no_name )
-				str.pushWord( eon::str( AttributeName ) ).pushSpecialOp( "=" );
-			str.pushAppend( eon::str( Name ) );
+				str.word( eon::str( AttributeName ) ).op2( "=" );
+			str.append( eon::str( Name ) );
 		}
 		else
 		{
@@ -67,11 +67,11 @@ namespace eon
 				if( first )
 					first = false;
 				else
-					str.pushStop( "," );
+					str.punct( "," );
 				attribute._toStr( str );
 			}
 		}
-		str.pushClose( ")" );
+		str.end_grp2( ")" );
 	}
 
 
@@ -109,22 +109,22 @@ namespace eon
 	void EonType::_toStr( Stringifier& str ) const
 	{
 		if( AttributeName != no_name )
-			str.pushWord( eon::str( AttributeName ) ).pushSpecialOp( "=" );
+			str.word( eon::str( AttributeName ) ).op2( "=" );
 		if( Name != name_plain )
-			str.pushAppend( eon::str( Name ) );
+			str.word( eon::str( Name ) );
 		else
 		{
-			str.pushOpen( "(" );
+			str.start_grp2( "(" );
 			bool first = true;
 			for( auto& attribute : Attributes )
 			{
 				if( first )
 					first = false;
 				else
-					str.pushStop( "," );
+					str.punct( "," );
 				attribute._toStr( str );
 			}
-			str.pushClose( ")" );
+			str.end_grp2( ")" );
 		}
 	}
 

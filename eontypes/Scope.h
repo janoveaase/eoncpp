@@ -61,6 +61,9 @@ namespace eon
 
 			inline name_t generalType() const noexcept override { return name_scope; }
 			inline type::Object* copy() override { throw type::AccessDenied( "Cannot copy scope object!" ); }
+
+			virtual void formalPrefix( Stringifier& str ) const override {}
+			virtual void formalPostfix( Stringifier& str ) const override {}
 		};
 
 		class Global : public Scope

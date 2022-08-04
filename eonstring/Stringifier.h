@@ -1,6 +1,7 @@
 #pragma once
 
 #include "String.h"
+#include "StringifierDefs.h"
 
 
 
@@ -12,54 +13,13 @@ namespace eon
 {
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// "Stringifying" is turning objects into a human-readable string/text
-	// where formatting is handled more or less automatically.
+	// "Stringifying" is generating human-readable (mostly) string/text data
+	// from objects and data.
 	//
-	// Once a Stringifier object has been created, we can "push" elements of
-	// varying types, keeping a max line length and automatically maintaining
-	// indentation.
-	//
-	// The possible types are:
-	//
-	//   word:
-	//     Sequence of characters (not necessarily 'true' words).
-	//     If pushed after 'word' or 'stop', then add a space inbetween.
-	//   append:
-	//     Append 'word' to 'word.
-	//     If pushed after 'word', do not add space. Otherwise, identical to
-	//     'word' (and treated as word by following pushes).
-	//   prefix:
-	//     This is a 'word' that is a prefix to whatever follows, so no space
-	//     after!
-	//   operator:
-	//     Sequence of characters (not necessarily 'true' operators).
-	//     If operators are specified to have spaces around them (default),
-	//     then they will be added, otherwise no space before or after.
-	//     Allow auto-splitting of long lines BEFORE!
-	//   opname:
-	//     Operator name, same as 'operator' except:
-	//       Always with space before and after.
-	//   specialop:
-	//     Special operator, same as 'operator' except:
-	//       Separate space setting where default is to not include.
-	//   stop:
-	//     Sequence of characters that ends something.
-	//     There will be no space before it, but one will typically be added
-	//     after.
-	//     Allow auto-splitting long lines AFTER!
-	//     Do not put on new line if after endblock!
-	//   open:
-	//     Single character with space before it, optional (default off) after.
-	//     Allow auto-splitting of long lines AFTER!
-	//   close:
-	//     Single character with optional (default off) space before it, space
-	//     after except before 'stop'.
-	//     Allow auto-splitting of long lines AFTER!
-	//   startblock:
-	//     Zero or more characters marking the start of a new (indented) block.
-	//     Hard newline after and indent following lines until 'endblock'.
-	//   endblock:
-	//     Zero or more characters marking the end of a (indented) block.
+	// Once a Stringifier object has been created, we can add various types of
+	// elements. When done, we can extract the whole thing as a string where
+	// each line is at most a specified number of characters (default is 125),
+	// automatically split and indented.
 	//
 	class Stringifier
 	{
@@ -69,151 +29,194 @@ namespace eon
 		//
 	public:
 
-		// Construct a stringifier
-		inline Stringifier( index_t max_line_width = 125 ) { MaxLineWidth = max_line_width; }
+		Stringifier() = default;
+		virtual ~Stringifier() = default;
 
 
 
 
-		///////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 		//
-		// Settings
+		// Adding Elements
 		//
-	public:
-
-		inline void spacesAroundOperators( bool on ) noexcept { OpSpaces1 = on; }
-		inline void spacesAroundSpecialOperators( bool on ) noexcept { OpSpaces2 = on; }
-
-		inline void spacesInsideOpenClose( bool on ) noexcept { OpenCloseSpaces = on; }
-
-
-
-
-		///////////////////////////////////////////////////////////////////
-		//
-		// Pushing elements
+		// If the "before" argument is included then if element is to be added
+		// just after a "before" element, add it before. If multiple elements
+		// match the "before" type specified, move before them as well.
+		// This will ignore hard line-feeds.
 		//
 	public:
 
-		inline Stringifier& pushWord( string&& word ) { return push( Type::word, std::move( word ) ); }
-		inline Stringifier& pushAppend( string&& word ) { return push( Type::append, std::move( word ) ); }
-		inline Stringifier& pushPrefix( string&& word ) { return push( Type::prefix, std::move( word ) ); }
-		inline Stringifier& pushOperator( string&& opr ) { return push( Type::opr, std::move( opr ) ); }
-		inline Stringifier& pushOpName( string&& name ) { return push( Type::opname, std::move( name ) ); }
-		inline Stringifier& pushSpecialOp( string&& opr ) { return push( Type::specop, std::move( opr ) ); }
-		inline Stringifier& pushStop( string&& chars ) { return push( Type::stop, std::move( chars ) ); }
-		inline Stringifier& pushOpen( string&& chars = "" ) { return push( Type::open, std::move( chars ) ); }
-		inline Stringifier& pushClose( string&& chars = "" ) { return push( Type::close, std::move( chars ) ); }
-		inline Stringifier& pushStartBlock( string&& chars = "" ) { return push( Type::startblock, std::move( chars ) ); }
-		inline Stringifier& pushEndBlock( string&& chars = "" ) { return afterLF() ? _replace(
-			Type::endblock, std::move( chars ) ) : push( Type::endblock, std::move( chars ) ); }
+		// Add a basic "word", 1 space before and after - with exceptions
+		inline Stringifier& word( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::word, std::move( value ), before ); return *this; }
 
-		inline Stringifier& pushWord( const string& word ) { return push( Type::word, string( word ) ); }
-		inline Stringifier& pushAppend( const string& word ) { return push( Type::append, string( word ) ); }
-		inline Stringifier& pushPrefix( const string& word ) { return push( Type::prefix, string( word ) ); }
-		inline Stringifier& pushOperator( const string& opr ) { return push( Type::opr, string( opr ) ); }
-		inline Stringifier& pushOpName( const string& name ) { return push( Type::opname, string( name ) ); }
-		inline Stringifier& pushSpecialOp( const string& opr ) { return push( Type::specop, string( opr ) ); }
-		inline Stringifier& pushStop( const string& chars ) { return push( Type::stop, string( chars ) ); }
-		inline Stringifier& pushOpen( const string& chars ) { return push( Type::open, string( chars ) ); }
-		inline Stringifier& pushClose( const string& chars ) { return push( Type::close, string( chars ) ); }
-		inline Stringifier& pushStartBlock( const string& chars ) { return push( Type::startblock, string( chars ) ); }
-		inline Stringifier& pushEndBlock( const string& chars ) { return push( Type::endblock, string( chars ) ); }
+		// Add a double quoted string, escape special characters using string::escape, same rules as "word"
+		inline Stringifier& doubleq( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::doubleq, std::move( value ), before ); return *this; }
 
-		// Hard newline
-		inline Stringifier& endLine() { return afterLF() || afterBlock() ? *this : _push( Type::lf, "\n" ); }
+		// Add a single quoted string, escape special characters using string::escapeAll, same rules as "word"
+		inline Stringifier& singleq( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::singleq, std::move( value ), before ); return *this; }
+
+		// Append to previous element, no space between
+		inline Stringifier& append( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::append, std::move( value ), before ); return *this; }
+
+		// Prepend to next element, no space between
+		inline Stringifier& prepend( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::prepend, std::move( value ), before ); return *this; }
+
+		// Add an operator type 1, 1 space before and after, can be overriden
+		inline Stringifier& op1( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::op1, std::move( value ), before ); return *this; }
+
+		// Add an operator type 2, no space before or after, can be overridden
+		inline Stringifier& op2( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::op2, std::move( value ), before ); return *this; }
+
+		// Add punctuation, no space towards previous element, 1 space towards next
+		inline Stringifier& punct( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::punct, std::move( value ), before ); return *this; }
+
+		// Start a grouped section type 1, 1 space before and 1 after, can be overridden
+		inline Stringifier& start_grp1( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::start_grp1, std::move( value ), before ); return *this; }
+		// End a grouped section type 1
+		inline Stringifier& end_grp1( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::end_grp1, std::move( value ), before ); return *this; }
+
+		// Start a grouped section type 2, no space before or after, can be overridden
+		inline Stringifier& start_grp2( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::start_grp2, std::move( value ), before ); return *this; }
+		// End a gropued section type 2
+		inline Stringifier& end_grp2( string value, stringify::Type before = stringify::Type::none ) {
+			_add( stringify::Type::end_grp2, std::move( value ), before ); return *this; }
+
+		// Start a block (hard lf + indented set of lines)
+		inline Stringifier& start_block() { hard_lf(); ++Indentation; _add( stringify::Type::start_block ); return *this; }
+		// End a block (indentation back to normal + hard lf)
+		inline Stringifier& end_block() { bool lf = CurLine < Lines.size(); _add( stringify::Type::end_block );
+			if( lf ) hard_lf(); --Indentation; return *this; }
+
+		// Start a "chapter", empty line before (except when at start) and after (except when at end)
+		inline Stringifier& start_chapt() { _add( stringify::Type::start_chapt ); return *this; }
+		// End a "chapter"
+		inline Stringifier& end_chapt() { _add( stringify::Type::end_chapt ); return *this; }
+
+		// Add a hard line-feed
+		inline Stringifier& hard_lf() { if( CurLine < Lines.size() ) ++CurLine; return *this; }
+
+		// Primary split points. Prefer long lines to be split here.
+		// Use the 'block' version to have subsequent lines indented.
+		inline Stringifier& prim_split() { _add( stringify::Type::prim_split ); return *this; }
+		inline Stringifier& prim_split_block() { _add( stringify::Type::prim_split_block ); return *this; }
+
+		// Secondary split points. Prefer long lines to be split here, if no primary splits are found.
+		// Use the 'block' version to have subsequent lines indented.
+		inline Stringifier& sec_split() { _add( stringify::Type::sec_split ); return *this; }
+		inline Stringifier& sec_split_block() { _add( stringify::Type::sec_split_block ); return *this; }
+
+		// Tertiary split points. Split long lines here if no primary or secondary splits are found.
+		// Use the 'block' version to have subsequent lines indented.
+		inline Stringifier& tert_split() { _add( stringify::Type::tert_split ); return *this; }
+		inline Stringifier& tert_split_block() { _add( stringify::Type::tert_split_block ); return *this; }
+
+
+		// Check the last element added
+		inline stringify::Type lastElement() const noexcept {
+			return CurLine < Lines.size() ? Lines[ CurLine ].Elements.rbegin()->get()->ElmType : stringify::Type::none; }
 
 
 
 
-		///////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 		//
-		// Read-only Methods
+		// Generating String Output
 		//
 	public:
 
-		// Get formatted string
-		string str() const;
+		// Override operator type 1 space settings
+		// Default is on=true
+		inline void spacesBeforeAfterOp1( bool on ) noexcept { Configuration.SpacesBeforeAfterOp1 = on; }
+		inline bool spacesBeforeAfterOp1() const noexcept { return Configuration.SpacesBeforeAfterOp1; }
+
+		// Override operator type 2 space settings
+		// Default is on=false
+		inline void spacesBeforeAfterOp2( bool on ) noexcept { Configuration.SpacesBeforeAfterOp2 = on; }
+		inline bool spacesBeforeAfterOp2() const noexcept { return Configuration.SpacesBeforeAfterOp2; }
+
+		// Override group type 1 space settings
+		// Default is outside=true, inside=false
+		inline void spacesOutsideGrp1( bool on ) noexcept { Configuration.SpacesOutsideGrp1 = on; }
+		inline bool spacesOutsideGrp1() const noexcept { return Configuration.SpacesOutsideGrp1; }
+		inline void spacesInsideGrp1( bool on ) noexcept { Configuration.SpacesInsideGrp1 = on; }
+		inline bool spacesInsideGrp1() const noexcept { return Configuration.SpacesInsideGrp1; }
+
+		// Override group type 2 space settings
+		// Default is outside=false, inside=false
+		inline void spacesOutsideGrp2( bool on ) noexcept { Configuration.SpacesOutsideGrp2 = on; }
+		inline bool spacesOutsideGrp2() const noexcept { return Configuration.SpacesOutsideGrp2; }
+		inline void spacesInsideGrp2( bool on ) noexcept { Configuration.SpacesInsideGrp2 = on; }
+		inline bool spacesInsideGrp2() const noexcept { return Configuration.SpacesInsideGrp2; }
+
+		// Set maximum line width, but allow single elements that exceed this to remain unbroken
+		// Default is 125
+		inline void softLineWidth( index_t limit ) noexcept { Configuration.SoftLineWidth = limit; }
+		inline bool softLineWidth() const noexcept { return Configuration.SoftLineWidth; }
+
+		// Set maximum line width, do not allow any lines to exceed this under any circumstances
+		// Default is no limit
+		inline void hardLineWidth( index_t limit ) noexcept { Configuration.HardLineWidth = limit; if(
+			limit < Configuration.SoftLineWidth ) Configuration.SoftLineWidth = limit; }
+		inline bool hardLineWidth() const noexcept { return Configuration.HardLineWidth; }
+
+
+		// Get output as a vector of lines
+		std::vector<string> generateLines() const;
+
+		// Get output as a string
+		inline string generateString() const { return string( "\n" ).join( generateLines() ); }
 
 
 
 
-		///////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 		//
 		// Helpers
 		//
 	private:
 
-		enum class Type
-		{
-			none,
-			word,
-			append,
-			prefix,
-			opr,
-			opname,
-			specop,
-			stop,
-			open,
-			close,
-			startblock,
-			endblock,
+		inline void _add( stringify::Type type, stringify::Type before = stringify::Type::none ) {
+			_add( type, string(), before ); }
+		void _add( stringify::Type type, string&& value, stringify::Type before = stringify::Type::none );
 
-			space,
-			lf
-		};
-		struct Element
-		{
-			Element() = default;
-			Element( Type what, string&& value, index_t raw_line_pos ) noexcept {
-				What = what; Value = std::move( value ); RawLinePos = raw_line_pos; }
-
-			Type What{ Type::none };
-			string Value;
-			index_t RawLinePos{ 0 };
-		};
-
-		inline bool afterWord() const noexcept { return LastType == Type::word; }
-		inline bool afterOp1() const noexcept { return LastType == Type::opr; }
-		inline bool afterOp2() const noexcept { return LastType == Type::specop; }
-		inline bool afterStop() const noexcept { return LastType == Type::stop; }
-		inline bool afterOpen() const noexcept { return LastType == Type::open; }
-
-		inline bool afterSpace() const noexcept { return LastType == Type::space; }
-		inline bool afterLF() const noexcept { return LastType == Type::lf; }
-		inline bool afterBlock() const noexcept { return LastType == Type::endblock; }
-
-		Stringifier& push( Type what, string&& value );
-
-		inline Stringifier& _push( Type what, string&& value ) {
-			Elements.push_back( Element( what, std::move( value ), _curLinePos() ) ); LastType = what; return *this; }
-		inline Stringifier& _replace( Type what, string&& value ) {
-			*Elements.rbegin() = Element( what, std::move( value ), 0 ); return *this; }
-
-		inline index_t _curLinePos() const noexcept {
-			return Elements.empty() ? 0 : Elements.rbegin()->RawLinePos + Elements.rbegin()->Value.numChars(); }
-
-		void _processLine( string& line, std::vector<string>& lines, std::vector<index_t>& splitpoints,
-			index_t indentation, bool endline ) const;
-		void _processSplitPoints( string& line, std::vector<string>& lines, std::vector<index_t>& splitpoints,
-			index_t indentation, bool endline ) const;
+		std::vector<stringify::ElementPtr>::const_iterator _fillLine( const std::vector<stringify::ElementPtr>& line,
+			std::vector<stringify::ElementPtr>::const_iterator probe, index_t indentation ) const noexcept;
+		std::vector<stringify::ElementPtr>::const_iterator _findSplit(
+			std::vector<stringify::ElementPtr>::const_iterator begin,
+			std::vector<stringify::ElementPtr>::const_iterator end ) const noexcept;
+		std::vector<stringify::ElementPtr>::const_iterator _findSplit( stringify::Type type, stringify::Type type_block,
+			std::vector<stringify::ElementPtr>::const_iterator begin,
+			std::vector<stringify::ElementPtr>::const_iterator end ) const noexcept;
+		
+		void _splitHard( const stringify::Element& value, std::vector<string>& output, index_t indentation ) const;
+		eon::string::iterator _findStringSplitPoint( eon::string::iterator beg, eon::string::iterator end ) const;
+		void _output( std::vector<stringify::ElementPtr>::const_iterator begin,
+			std::vector<stringify::ElementPtr>::const_iterator end, std::vector<string>& output,
+			index_t indentation ) const;
 
 
 
 
-
-
-		///////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 		//
 		// Attributes
 		//
 	private:
 
-		index_t MaxLineWidth{ 125 };
-		std::vector<Element> Elements;
-		Type LastType{ Type::none };
-
-		bool OpSpaces1{ true }, OpSpaces2{ false };
-		bool OpenCloseSpaces{ false };
+		stringify::Conf Configuration;
+		std::vector<stringify::Line> Lines;
+		index_t CurLine{ 0 };
+		index_t Indentation{ 0 };
 	};
 }
