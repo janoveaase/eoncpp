@@ -678,7 +678,7 @@ namespace eon
 	}
 	substring substring::beforeLast( const substring& delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( begin(), found.begin() );
 		else
@@ -686,7 +686,7 @@ namespace eon
 	}
 	substring substring::beforeLast( char_t delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( begin(), found.begin() );
 		else
@@ -710,7 +710,7 @@ namespace eon
 	}
 	substring substring::afterLast( const substring& delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( found.end(), end() );
 		else
@@ -718,7 +718,7 @@ namespace eon
 	}
 	substring substring::afterLast( char_t delimiter ) const noexcept
 	{
-		auto found = findLast( delimiter );
+		auto found = highToLow().findLast( delimiter );
 		if( found )
 			return substring( found.end(), end() );
 		else
@@ -806,13 +806,13 @@ namespace eon
 
 
 
-	const char* substring::_findFirst( const char* source, index_t source_size, const char* substr, index_t substr_size )
-		const noexcept
+	const char* substring::_findFirst( const char* source, index_t source_size,
+		const char* substr, index_t substr_size ) const noexcept
 	{
 		const char* end = source + source_size - ( substr_size - 1 );
 		for( auto c = _findFirst( source, source_size, *substr );
 			c != nullptr && c != end;
-			c = _findFirst( c + 1, source_size, *substr ) )
+			c = _findFirst( c + 1, end - ( c + 1 ), *substr ) )
 		{
 			if( memcmp( c + 1, substr + 1, substr_size - 1 ) == 0 )
 				return c;
