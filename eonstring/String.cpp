@@ -410,22 +410,21 @@ namespace eon
 	{
 		if( sub.empty() )
 			return *this;
-		auto area = sub.lowToHigh();
-		auto found = this->findFirst( find, area );
+		auto found = this->findFirst( find, sub );
 		if( !found )
 			return *this;
 
 		string result;
 		if( found.begin() != begin() )
 			result = substr( begin(), found.begin() );
-		else if( area.begin() > begin() )
-			result += substr( begin(), area.begin() );
+		else if( sub.begin() > begin() )
+			result += substr( begin(), sub.begin() );
 		auto pos = end();
 		while( found )
 		{
 			result += replacement;
 			pos = found.end();
-			found = this->findFirst( find, substring( pos, area.end() ) );
+			found = this->findFirst( find, substring( pos, sub.end() ) );
 			if( found && found.begin() > pos )
 				result += substr( pos, found.begin() );
 		}
