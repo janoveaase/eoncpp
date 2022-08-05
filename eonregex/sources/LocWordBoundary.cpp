@@ -9,13 +9,12 @@ namespace eon
 		{
 			if( data.bounds() )
 			{
-				return !string::isSeparatorSpace( data.prev() )
-					&& ( !data || string::isSeparatorSpace( data() ) ) ? true : false;
+				return !string::isSeparatorSpace( data.prev() ) && ( !data || string::isSeparatorSpace( data() ) );
 			}
 			else
 			{
-				return string::isWordChar( data.prev() )
-					&& ( !data || string::isSeparatorSpace( data() ) || string::isPunctuation( data() ) ) ? true : false;
+				return !string::isSeparator( data.prev() ) && !string::isPunctuation( data.prev() )
+					&& ( !data || string::isSeparator( data() ) || string::isPunctuation( data() ) );
 			}
 		}
 	}

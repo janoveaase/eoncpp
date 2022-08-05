@@ -33,7 +33,7 @@ namespace eon
 
 		index_t OpOr::_countMinCharsRemaining() noexcept
 		{
-			MinCharsRemaining = 0;
+			MinCharsRemaining = SIZE_MAX;
 			for( auto node : Optionals )
 			{
 				auto min = node->_countMinCharsRemaining() * Quant.minQ();

@@ -298,6 +298,17 @@ namespace eon
 		WANT_FALSE( expr.match( "d" ) ) << "Matched 'd'";
 		WANT_TRUE( expr.match( "x" ) ) << "Didn't match 'x'";
 	}
+	TEST( RegExTest, match_chargroup_special )
+	{
+		regex expr;
+		REQUIRE_NO_EXCEPT( expr = R"([\dAB\p])" ) << "Failed to parse";
+
+		WANT_TRUE( expr.match( "1" ) ) << "Didn't match '1'";
+		WANT_TRUE( expr.match( "A" ) ) << "Didn't match 'A'";
+		WANT_TRUE( expr.match( "9" ) ) << "Didn't match '9'";
+		WANT_TRUE( expr.match( "*" ) ) << "Didn't match '*'";
+		WANT_FALSE( expr.match( "d" ) ) << "Matched 'd'";
+	}
 
 	TEST( RegExTest, match_substring )
 	{
@@ -660,6 +671,23 @@ namespace eon
 		REQUIRE_TRUE( match ) << "Failed to match";
 		REQUIRE_EQ( 2, match.size() ) << "Wrong number of captures";
 		WANT_EQ( "6", eon::string( match.group( eon::name( "n2" ) ) ) ) << "Wrong capture";
+	}
+	TEST( MiscTests, tricky_case3 )
+	{
+		string str{ "(*A*)" };
+		regex expr{ R"((!\*\p\*)@<m>([^*]+?)\*($|\s|\p))" };
+		auto match = expr.match( str );
+		REQUIRE_TRUE( match ) << "Failed to match";
+		REQUIRE_EQ( 2, match.size() ) << "Wrong number of captures";
+		WANT_EQ( "A", eon::string( match.group( eon::name( "m" ) ) ) ) << "Wrong capture";
+	}
+
+	TEST( MiscTests, quote_issue )
+	{
+		string str{ "\"  " };
+		regex expr{ R"(\"[^"]+?\")" };
+		auto match = expr.match( str );
+		REQUIRE_FALSE( match ) << "Didn't fail to match.";
 	}
 
 
