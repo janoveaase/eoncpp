@@ -107,7 +107,9 @@ namespace eon
 		void _convert( const DataTuple& dt, bool is_element, string& html );
 
 		inline void _endl( string& html ) { if( !html.empty() && !html.endsWith( NewlineChr ) ) html << "\n"; }
+		string _encode( const string& str );
 
+		void _convertTitle( const DataTuple& dt, string& html );
 		inline void _convertH1( const DataTuple& dt, string& html ) { _convertH( dt, 1, html ); }
 		inline void _convertH2( const DataTuple& dt, string& html ) { _convertH( dt, 2, html ); }
 		inline void _convertH3( const DataTuple& dt, string& html ) { _convertH( dt, 3, html ); }
@@ -118,8 +120,8 @@ namespace eon
 
 		void _convertText( const DataTuple& dt, string& html );
 		void _convertParagraph( const DataTuple& dt, string& html );
-		void _convertTextElements( const DataTuple& dt, string& html );
-		void _convertPlainText( string text, string& html );
+		void _convertTextElements( const DataTuple& dt, string& html, bool insert_definitions = true );
+		void _convertPlainText( string text, string& html, bool insert_definitions = true );
 		void _convertEmphasizedText( const string& text, string& html );
 		void _convertQuotedText( const string& text, string& html );
 		void _convertReference( const DataTuple& dt, string& html );
@@ -143,6 +145,8 @@ namespace eon
 
 		void _insertToc( index_t num_char, index_t num_byte, int level, string& html );
 
+		std::vector<std::pair<string, bool>> _splitForDef( const string& text );
+
 
 
 
@@ -164,7 +168,10 @@ namespace eon
 		struct Definition
 		{
 			Definition() = default;
-			inline Definition( string phrase, string definition ) { Phrase = phrase; Def= definition; }
+			inline Definition( string phrase ) { Phrase = phrase.lower(); }
+			inline Definition( string phrase, string definition ) { Phrase = phrase.lower(); Def= definition; }
+//			inline bool operator<( const Definition& other ) const noexcept { return Phrase < other.Phrase; }
+
 			string Phrase;
 			string Def;
 		};

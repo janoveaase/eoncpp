@@ -12,9 +12,26 @@ namespace eon
 {
 	DataTuple edoc::parse( const eon::string& input_edoc )
 	{
+		if( Source.empty() )
+			Source = "input string";
 		Input = input_edoc.splitSequential<std::vector<string>>( NewlineChr );
 		for( CurLine = Input.begin(); CurLine != Input.end(); )
-			_parse();
+		{
+			try
+			{
+				_parse();
+			}
+			catch( exception& e )
+			{
+				throw ParseError( "Failed to parse " + Source + ":"
+					+ string( CurLine - Input.begin() + 1 ) + ":\n" + e.details() );
+			}
+			catch( ... )
+			{
+				throw ParseError( "Failed to parse " + Source + ":"
+					+ string( CurLine - Input.begin() + 1 ) + ":\nUnknown error!" );
+			}
+		}
 		_endPara();
 		return Output;
 	}
@@ -24,7 +41,8 @@ namespace eon
 	void edoc::_parse()
 	{
 		static regex enumListPattern{ R"(  (\d+)|# )" };
-		static regex definitionPattern{ R"(  \!?@<quot>(\")?\S(\w| )*@:<quot>: |$)" };
+		static regex definitionPattern1{ R"(  "[^"]+": |$)" };
+		static regex definitionPattern2{ R"(  \!?[^:]+: |$)" };
 
 		if( CurLine->empty() )
 		{
@@ -34,7 +52,12 @@ namespace eon
 		else
 		{
 			if( CurLine->startsWith( ">>" ) )
-				_parseHeader();
+			{
+				if( CurLine->endsWith( "<<" ) )
+					_parseTitle();
+				else
+					_parseHeader();
+			}
 			else if( CurLine->startsWith( "  * " ) )
 				_parseBulletList();
 			else if( CurLine->startsWith( "  - " ) )
@@ -49,7 +72,7 @@ namespace eon
 				_parseExclamation( name_todo );
 			else if( CurLine->startsWith( "TIP:" ) )
 				_parseExclamation( name_tip );
-			else if( definitionPattern.match( *CurLine ) )
+			else if( definitionPattern1.match( *CurLine ) || definitionPattern2.match( *CurLine ) )
 				_parseDefinition();
 			else if( CurLine->startsWith( "  --" ) )
 				_parseInsert();
@@ -58,6 +81,20 @@ namespace eon
 		}
 	}
 
+	void edoc::_parseTitle()
+	{
+		string title = CurLine->slice( 2, -3 ).trim();
+		bool no_indexing = title.startsWith( '!' );
+		DataTuple dt;
+		if( no_indexing )
+			title = title.substr( title.begin() + 1 );
+		dt.addName( name_type, name( "title" ) );
+		if( no_indexing )
+			dt.addName( name_no_indexing );
+		dt.addRaw( name_value, title );
+		Output.addRaw( std::move( dt ) );
+		++CurLine;
+	}
 	void edoc::_parseHeader()
 	{
 		_endPara();
@@ -126,7 +163,7 @@ namespace eon
 				value += " ";
 			value += CurLine->trim();
 		}
-		dt.addRaw( name_value, value );
+		_processText( std::move( value ), dt, true );
 		Output.addRaw( std::move( dt ) );
 	}
 
@@ -135,30 +172,42 @@ namespace eon
 		_endPara();
 		DataTuple dt;
 		dt.addName( name_type, name_definition );
+		bool custom_text = true;
 		auto beg = CurLine->begin() + 2;
-		bool anonymous{ false };
 		if( *beg == '!' )
 		{
-			anonymous = true;
-			++beg;
-		}
-		string phrase = CurLine->substr( beg, CurLine->findFirst( ColonChr ).begin() ).trim();
-		if( phrase.isDoubleQuoted() )
-		{
-			anonymous = true;
-			phrase = phrase.unQuote();
-		}
-		if( anonymous )
 			dt.addName( name_anonymous );
+			++beg;
+			custom_text = false;
+		}
+		auto quoted = *beg == DblQuoteChr;
+		string phrase, value;
+		if( quoted )
+		{
+			auto endquote = CurLine->findFirst( DblQuoteChr, CurLine->substr( beg + 1 ) );
+			auto colon = CurLine->findFirst( ColonChr, CurLine->substr( endquote.end() ) );
+			phrase = CurLine->substr( beg, colon.begin() ).trim();
+			phrase = phrase.unQuote();
+			dt.addName( name_quoted );
+			value = CurLine->substr( colon.end() ).trim();
+			custom_text = false;
+		}
+		else
+		{
+			auto colon = CurLine->findFirst( ColonChr );
+			phrase = CurLine->substr( beg, colon.begin() ).trim();
+			value = CurLine->substr( colon.end() ).trim();
+		}
 		dt.addRaw( name_phrase, phrase );
-		string value = CurLine->substr( CurLine->findFirst( ColonChr ).begin() + 2 ).trim();
 		while( ++CurLine != Input.end() && CurLine->startsWith( "    " ) )
 		{
 			if( !value.empty() )
 				value += " ";
 			value += CurLine->trim();
 		}
-		dt.addRaw( name_value, value );
+		if( custom_text )
+			dt.addRaw( name_text, value );
+		_processText( std::move( value ), dt, true );
 		Output.addRaw( std::move( dt ) );
 	}
 
@@ -408,7 +457,7 @@ namespace eon
 	}
 	void edoc::_patchReference( std::list<std::pair<string, name_t>>& elements )
 	{
-		static regex pattern{ R"(([^!]\[)|(^\[)@<reference>(([^:\]]+:)?[^\]]+)\])" };
+		static regex pattern{ R"(([^!"]\[)|(^\[)@<reference>(([^:\]]+:)?[^\]]+)\])" };
 		for( auto line = elements.begin(); line != elements.end(); )
 		{
 			if( line->second != name_text )
@@ -445,7 +494,7 @@ namespace eon
 	}
 	void edoc::_patchQuote( std::list<std::pair<string, name_t>>& elements )
 	{
-		static regex pattern{ R"(\"@<quoted>([^\"]+)\")" };
+		static regex pattern{ R"(\"@<quoted>([^"]+?)\")" };
 		for( auto line = elements.begin(); line != elements.end(); )
 		{
 			if( line->second != name_text )
@@ -481,7 +530,13 @@ namespace eon
 	}
 	void edoc::_patchEmphasize( std::list<std::pair<string, name_t>>& elements )
 	{
-		static regex pattern( R"(\b!\!\*!\s@<emphasized>(.+?)\*(\B|!\*\p))", "b" );
+		// Any sequence of characters between two '*' characters are to be emphasized, if:
+		//   1. The first '*' is:
+		//      1. First on line or follows a separator or punctuation.
+		//      2. Is not itself followed by a separator.
+		//      3. Is not following a '!'.
+		//   2. The last '*' is last on line or is followed by a separator or punctuation.
+		static regex pattern( R"(!\!^\*|(\s\*)|(!\*\p\*)@<emphasized>([^*]+?)\*($|\s|\p))" );
 		for( auto line = elements.begin(); line != elements.end(); )
 		{
 			if( line->second != name_text )
@@ -501,16 +556,16 @@ namespace eon
 			auto beg = line->first.begin();
 			for( auto& elm : found )
 			{
-				if( elm.group( name_complete ).begin() != beg )
+				auto match = elm.group( name_emphasized );
+				if( match.begin() > beg + 1 )
 				{
 					pos = elements.insert( pos, std::make_pair(
-						string( line->first.substr( beg, elm.group( name_complete ).begin() ) ).replace( "!*", "*" ),
-						name_text ) );
+						string( line->first.substr( beg, match.begin() - 1 ) ).replace( "!*", "*" ), name_text ) );
 					++pos;
 				}
-				pos = elements.insert( pos, std::make_pair( string( elm.group( name_emphasized ) ), name_emphasized ) );
+				pos = elements.insert( pos, std::make_pair( string( match ), name_emphasized ) );
 				++pos;
-				beg = elm.group( name_complete ).end();
+				beg = match.end() + 1;
 			}
 			if( beg != line->first.end() )
 				elements.insert( pos, std::make_pair( string( line->first.substr( beg ) ), name_text ) );
@@ -521,9 +576,9 @@ namespace eon
 	void edoc::_processText( string&& text, DataTuple& dt, bool first )
 	{
 		std::list<std::pair<string, name_t>> elements{ { std::move( text ), name_text } };
+		_patchQuote( elements );
 		_patchReference( elements );
 		_patchHttp( elements );
-		_patchQuote( elements );
 		_patchEmphasize( elements );
 
 		if( elements.size() == 1 && elements.begin()->second == name_text && first )

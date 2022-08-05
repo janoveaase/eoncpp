@@ -3,6 +3,7 @@
 #include <eonfilesys/Path.h>
 #include <eonfilesys/File.h>
 #include <eonregex/RegEx.h>
+#include <eonexcept/Exception.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +39,9 @@ namespace eon
 	static const name_t name_caption{ name( "caption" ) };
 	static const name_t name_no_indexing{ name( "no_indexing" ) };
 
+	// Exception raised when parsing fails
+	EONEXCEPT( ParseError );
+
 
 
 
@@ -69,7 +73,8 @@ namespace eon
 	public:
 
 		// Parse a file
-		inline DataTuple parse( const file& input_edoc ) { return parse( input_edoc.loadText() ); }
+		inline DataTuple parse( const file& input_edoc ) {
+			Source = input_edoc.fpath().str(); return parse( input_edoc.loadText() ); }
 
 		// Parse a string
 		DataTuple parse( const eon::string& input_edoc );
@@ -85,6 +90,7 @@ namespace eon
 
 		void _parse();
 
+		void _parseTitle();
 		void _parseHeader();
 
 		inline void _parseBulletList() { _parseList( name_bullet ); }
@@ -131,6 +137,7 @@ namespace eon
 			started
 		};
 
+		string Source;
 		std::vector<string> Input;
 		std::vector<string>::iterator CurLine;
 		DataTuple Para;

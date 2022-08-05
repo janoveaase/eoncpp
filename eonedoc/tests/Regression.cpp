@@ -84,22 +84,62 @@ namespace eon
 		WANT_EQ( exp, act );
 	}
 
-	TEST( EdocTest, definition )
+	TEST( EdocTest, definition1 )
 	{
 		edoc doc;
 		auto output = doc.parse( "  alpha: The first letter in the Greek alphabet\n"
 			"  two words: Example of two word definition\n  multiline:\n    Line 1\n    Line 2\n"
-			"  !anonymous def: One\n  \"also anonymous\":\n    Indented and anonymous" );
+			"  !anonymous def: One\n  \"double quoted\":\n    Indented and anonymous" );
 		Stringifier strf;
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
 			"data(\n"
-			"  (type=definition, phrase=\"alpha\", value=\"The first letter in the Greek alphabet\"),\n"
-			"  (type=definition, phrase=\"two words\", value=\"Example of two word definition\"),\n"
-			"  (type=definition, phrase=\"multiline\", value=\"Line 1 Line 2\"),\n"
+			"  (type=definition, phrase=\"alpha\", text=\"The first letter in the Greek alphabet\",\n"
+			"    value=\"The first letter in the Greek alphabet\"),\n"
+			"  (type=definition, phrase=\"two words\", text=\"Example of two word definition\", value=\"Example of two word definition\"),\n"
+			"  (type=definition, phrase=\"multiline\", text=\"Line 1 Line 2\", value=\"Line 1 Line 2\"),\n"
 			"  (type=definition, anonymous, phrase=\"anonymous def\", value=\"One\"),\n"
-			"  (type=definition, anonymous, phrase=\"also anonymous\", value=\"Indented and anonymous\"))";
+			"  (type=definition, quoted, phrase=\"double quoted\", value=\"Indented and anonymous\"))";
+		WANT_EQ( exp, act );
+	}
+	TEST( EdocTest, definition2 )
+	{
+		edoc doc;
+		auto output = doc.parse(
+			"Plain text.\n"
+			"\n"
+			"  \"{A}\":\n"
+			"    Match element exactly A number of times.\n"
+			"  B:\n"
+			"    A B!" );
+		Stringifier strf;
+		output.str( strf );
+		auto act = strf.generateString();
+		auto exp =
+			"data(\n"
+			"  (type=paragraph,\n"
+			"    value:\n"
+			"      (type=text, value=\"Plain text.\")),\n"
+			"  (type=definition, quoted, phrase=\"{A}\", value=\"Match element exactly A number of times.\"),\n"
+			"  (type=definition, phrase=\"B\", text=\"A B!\", value=\"A B!\"))";
+		WANT_EQ( exp, act );
+	}
+	TEST( EdocTest, definition3 )
+	{
+		edoc doc;
+		auto output = doc.parse(
+			"  \"@<A>(B)\":\n"
+			"    Match B (a sub-expression) and record using the group name A. Example: \"@<eonname>(\\w+{name})\"." );
+		Stringifier strf;
+		output.str( strf );
+		auto act = strf.generateString();
+		auto exp =
+			"data((type=definition, quoted, phrase=\"@<A>(B)\",\n"
+			"  value:\n"
+			"    (type=text, value=\"Match B (a sub-expression) and record using the group name A. Example: \"),\n"
+			"    (type=quoted, value=\"@<eonname>(\\\\w+{name})\"),\n"
+			"    (type=text, value=\".\")))";
 		WANT_EQ( exp, act );
 	}
 
@@ -200,6 +240,23 @@ namespace eon
 			"      value:\n"
 			"        (type=newline),\n"
 			"        (type=text, value=\" not*bold*\"))))";
+		WANT_EQ( exp, act );
+	}
+	TEST( EdocTest, emphasize_1 )
+	{
+		edoc doc;
+		auto output = doc.parse( "(*BOLD*)" );
+		Stringifier strf;
+		output.str( strf );
+		auto act = strf.generateString();
+		auto exp =
+			"data((type=paragraph,\n"
+			"  value:\n"
+			"    (type=text,\n"
+			"      value:\n"
+			"        (type=text, value=\"(\"),\n"
+			"        (type=emphasized, value=\"BOLD\"),\n"
+			"        (type=text, value=\")\"))))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, quote )
@@ -374,25 +431,32 @@ namespace eon
 	{
 		auto output = edoc().parse( "  alpha: The first letter in the Greek alphabet\n"
 			"  two words: Example of two word definition\n  multiline:\n    Line 1\n    Line 2\n"
-			"  !anonymous def: One\n  \"also anonymous\":\n    Indented and anonymous\n\nWhat is alpha? Is it two words?" );
+			"  !anonymous def: One\n  \"double quoted\":\n    Indented and anonymous\n\nWhat is alpha? Is it two words?" );
 		ToHtml tohtml;
 		string act = tohtml.convert( output );
-		string exp{ "<div class=\"eon_frame\">\n"
+		string exp{
+			"<div class=\"eon_frame\">\n"
 			"<div class=\"eon_define\" id=\"alpha\">\n"
-			"  <div class=\"eon_phrase\">alpha:</div>\n"
-			"  <div class=\"eon_definition\">The first letter in the Greek alphabet</div>\n</div>\n"
+			"  <div class=\"eon_phrase\"><span class=\"eon_phrase_normal\">alpha</span> :</div>\n"
+			"  <div class=\"eon_definition\">The first letter in the Greek alphabet</div>\n"
+			"</div>\n"
 			"<div class=\"eon_define\" id=\"two_words\">\n"
-			"  <div class=\"eon_phrase\">two words:</div>\n"
-			"  <div class=\"eon_definition\">Example of two word definition</div>\n</div>\n"
+			"  <div class=\"eon_phrase\"><span class=\"eon_phrase_normal\">two words</span> :</div>\n"
+			"  <div class=\"eon_definition\">Example of two word definition</div>\n"
+			"</div>\n"
 			"<div class=\"eon_define\" id=\"multiline\">\n"
-			"  <div class=\"eon_phrase\">multiline:</div>\n  <div class=\"eon_definition\">Line 1 Line 2</div>\n</div>\n"
+			"  <div class=\"eon_phrase\"><span class=\"eon_phrase_normal\">multiline</span> :</div>\n"
+			"  <div class=\"eon_definition\">Line 1 Line 2</div>\n"
+			"</div>\n"
 			"<div class=\"eon_define\">\n"
-			"  <div class=\"eon_phrase\">anonymous def:</div>\n  <div class=\"eon_definition\">One</div>\n</div>\n"
+			"  <div class=\"eon_phrase\"><span class=\"eon_phrase_anonymous\">anonymous def</span> :</div>\n"
+			"  <div class=\"eon_definition\">One</div>\n"
+			"</div>\n"
 			"<div class=\"eon_define\">\n"
-			"  <div class=\"eon_phrase\">also anonymous:</div>\n"
+			"  <div class=\"eon_phrase\"><span class=\"eon_phrase_quoted\">double quoted</span> :</div>\n"
 			"  <div class=\"eon_definition\">Indented and anonymous</div>\n</div>\n"
-			"<p class=\"eon_paragraph\">\n  What is <span class=\"eon_def_popup\" "
-				"title=\"The first letter in the Greek alphabet\">alpha</span>? Is it "
+			"<p class=\"eon_paragraph\">\n"
+			"  What is <span class=\"eon_def_popup\" title=\"The first letter in the Greek alphabet\">alpha</span>? Is it "
 				"<span class=\"eon_def_popup\" title=\"Example of two word definition\">two words</span>?\n</p>\n"
 			"</div>\n" };
 		WANT_EQ( exp, act );
