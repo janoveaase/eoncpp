@@ -65,7 +65,7 @@ namespace eon
 				perm |= _S_IWRITE;
 				break;
 		}
-		auto error = _sopen_s( &Handle, Path.c_str(), mode, sharing, perm );
+		auto error = _wsopen_s( &Handle, Path.str().wstr().c_str(), mode, sharing, perm );
 		if( error != 0 )
 			throw filesys::OpenError( "File: " + Path.str() + "\nError: " + errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];
