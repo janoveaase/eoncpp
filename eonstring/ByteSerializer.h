@@ -9,6 +9,7 @@
 namespace eon
 {
 	///////////////////////////////////////////////////////////////////////////
+	//
 	// Eon Byte Serializer Class - eon::byteserializer
 	//
 	// A name path is a list of names that can be used to identify a

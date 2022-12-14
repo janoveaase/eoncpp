@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Æon</title>
+  <link rel="icon" type="image/png" href="https://aaseweb.no/eon_logo_64.png">
+  <style>
+    .eon_frame {max-width: 125ch;}
+    .eon_title {margin: 0pt 0pt 8pt 0pt; font: bold 175% Georgia, serif;}
+    .eon_h1 {margin: 12pt 0pt 4pt 0pt;}
+    .eon_h2 {margin: 12pt 0pt 4pt 0pt;}
+    .eon_h3 {margin: 12pt 0pt 4pt 0pt;}
+    .eon_h4 {margin: 12pt 0pt 4pt 0pt;}
+    .eon_paragraph {margin: 0ch 0ch 1ch 0ch; padding: 0pt 0pt 0pt 0pt;}
+    .eon_shout {margin: 8pt 0pt 8pt 0pt; overflow: auto;}
+    .eon_note {font: 150% bold sans-serif; background-color: Gold; padding: 0pt 4pt 0pt 4pt; margin-right: 0.5ch; float: left;}
+    .eon_note_text {font-family: sans-serif; margin-top: 0.5ch; color: #585528;}
+    .eon_warning {font: 150% bold sans-serif; color: white; background-color: FireBrick; padding: 0pt 4pt 0pt 4pt; margin-right: 0.5ch; float: left;}
+    .eon_warning_text {font-family: sans-serif; margin-top: 0.5ch; color: DarkRed;}
+    .eon_todo {font: 150% bold sans-serif; background-color: LightSteelBlue; padding: 0pt 4pt 0pt 4pt; margin-right: 0.5ch; float: left;}
+    .eon_todo_text {font-family: sans-serif; margin-top: 0.5ch; color: MidnightBlue;}
+    .eon_tip {font: 150% bold sans-serif; background-color: YellowGreen; padding: 0pt 4pt 0pt 4pt; margin-right: 0.5ch; float: left;}
+    .eon_tip_text {font-family: sans-serif; margin-top: 0.5ch; color: DarkGreen;}
+    .eon_define {margin: 1ch 0ch 0ch 3ch;}
+    .eon_phrase {}
+    .eon_phrase_normal {font-style: italic; color: navy;}
+    .eon_phrase_anonymous {font-family: Monaco, Monospace; color: Indigo;}
+    .eon_phrase_quoted{font-family: Monaco, Monospace; color: Indigo; background-color: #ffede6;}
+    .eon_definition {font-family: Helvetica, sans-serif; margin: 0ch 0ch 1ch 3ch;}
+    .eon_def_popup {text-decoration-line: underline; text-decoration-style: dotted;}
+    .eon_def_popup:hover {cursor: help;}
+    .eon_insert_frame {margin: 1ch 1ch 1ch 2ch;}
+    .eon_insert_header_line {font: 125% bold; background-color: #FFECEC;}
+    .eon_insert_lead {margin-left: 1ch; font-size: 70%; float: left; color: brown;}
+    .eon_insert_title {padding: 0ch 1ch 0ch 1ch; text-transform: capitalize;}
+    .eon_insert_subtext {margin: 0ch; font-size: 85%; padding: 0.5ch; background-color: WhiteSmoke;}
+    .eon_code_lang {color: #8B0000; font: 125% bold;}
+    .eon_code {font-family: Monospace; border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; color: #004310; background-color: #F9FEF7;}
+    .eon_example {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; background-color: #FFFAFA;}
+    .eon_quote {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; font-style: italic; background-color: #F9FBFD;}
+    .eon_toc {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; Background-color: #FAFAFE; font-family: sans-serif;}
+    .eon_toc1 {margin-left: 0ch; font-size: 120%;}
+    .eon_toc2 {margin-left: 2ch; font-size: 110%;}
+    .eon_toc3 {margin-left: 4ch; font-size: 100%;}
+    .eon_toc4 {margin-left: 6ch; font-size: 90%;}
+    .eon_image {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch;}
+    .eon_emphasized {color: DarkViolet; text-shadow: 1px 1px Lavender;}
+    .eon_quoted {color: SaddleBrown; font-family: Monaco, monospace;}
+    .eon_reference {}
+  </style>
+</head>
+<body>
+<div class="eon_frame">
+<div class="eon_title" id="Æon_Regular_Expressions">Æon Regular Expressions</div>
+<p class="eon_paragraph">
+  Similar to many approaches to regular expressions, but with a few special tweaks that sets it apart.
+</p>
+<div class="eon_insert_frame">
+<div class="eon_insert_header_line"><span class="eon_insert_title">Index</span></div>
+  <div class="eon_toc">
+    <div class="eon_toc1"><a href="#Elements">Elements</a></div>
+    <div class="eon_toc1"><a href="#Operators">Operators</a></div>
+    <div class="eon_toc1"><a href="#Quantifiers">Quantifiers</a></div>
+    <div class="eon_toc1"><a href="#Qualifiers">Qualifiers</a></div>
+    <div class="eon_toc1"><a href="#Anchors_and_Boundaries">Anchors and Boundaries</a></div>
+    <div class="eon_toc1"><a href="#Character_Groups">Character Groups</a></div>
+    <div class="eon_toc1"><a href="#Captures">Captures</a></div>
+    <div class="eon_toc1"><a href="#Flags">Flags</a></div>
+  </div>
+</div>
+<p class="eon_paragraph">
+  An Æon regular expression - <span class="eon_emphasized">regex</span> - consists of literal values and meta-characters, where the latter include operators, character groups, quantifiers, and qualifiers.
+</p>
+<h1 class="eon_h1" id="Elements">Elements</h1>
+<p class="eon_paragraph">
+  Before diving into the details of meta-characters, we need to clarify what an <span class="eon_emphasized">element</span> is. Quantifiers, operators and qualifiers all apply to <span class="eon_emphasized">elements</span>. The following applies:
+</p>
+<ol>
+  <li>Any sequence of arbitrary Unicode letters form an element.</li>
+  <li>Any sequence of digits form an element.</li>
+  <li>Any character not a letter or a digit or a meta-character form an individual element.</li>
+  <li>All meta-characters break or form elements on their own.</li>
+  <li>Parenthesis can be used to make a group of elements into a larger element.</li>
+  <li>Boundary start (<span class="eon_quoted">"^"</span>, <span class="eon_quoted">"\b"</span>, <span class="eon_quoted">"!^"</span>, and <span class="eon_quoted">"!\b"</span>) are not elements of their own, but applies to the element immediately to the right. (Boundary end (<span class="eon_quoted">"$"</span>, <span class="eon_quoted">"\B"</span>, <span class="eon_quoted">"!$"</span>, and <span class="eon_quoted">"!\B"</span>) form proper elements.)</li>
+</ol>
+<div class="eon_shout">
+  <div class="eon_note">NOTE!</div>
+  <div class="eon_note_text">Grouping elements using parenthesis will not <span class="eon_emphasized">capture</span> anything! Æon captures are always explicit.</div>
+</div>
+<h1 class="eon_h1" id="Operators">Operators</h1>
+<p class="eon_paragraph">
+  Æon regex has two operators: <span class="eon_emphasized">or</span> and <span class="eon_emphasized">not</span>. The former is expressed using the <span class="eon_quoted">"|"</span> (pipe) character, the latter the <span class="eon_quoted">"!"</span> (exclamation point). The <span class="eon_emphasized">or</span> operator is binary and applies to the elements immediately before and after. In case of alternating element and <span class="eon_emphasized">or</span> operator, each element will be attempted matched in order from first to last. If there is a match, the remaining options are ignored. The <span class="eon_emphasized">not</span> operator is unary and applies to the element immediately to the right.
+</p>
+<div class="eon_insert_frame">
+<div class="eon_insert_header_line"><span class="eon_insert_lead">Code:</span><span class="eon_code_lang">Regex</span><span class="eon_insert_title">"Or" Operator Example</span></div>
+<pre class="eon_code">
+alpha|beta|gamma</pre>
+</div>
+<p class="eon_paragraph">
+  This will match <span class="eon_quoted">"alpha"</span>, <span class="eon_quoted">"beta"</span> or <span class="eon_quoted">"gamma"</span>, but no other combination of characters.
+</p>
+<p class="eon_paragraph">
+  As for the <span class="eon_quoted">"not"</span> operator, this is a non-matching operator. It will fail if the element prefixed with <span class="eon_quoted">"!"</span> matches, but otherwise it will not match anything. Therefore, the following expression can only tell you if the string to match isn't <span class="eon_quoted">"alpha"</span> and nothing else:
+</p>
+<div class="eon_insert_frame">
+<div class="eon_insert_header_line"><span class="eon_insert_lead">Code:</span><span class="eon_code_lang">Regex</span><span class="eon_insert_title">"Not" Operator Example 1</span></div>
+<pre class="eon_code">
+!alpha</pre>
+</div>
+<p class="eon_paragraph">
+  The operator must be used together with other elements to make an actual match:
+</p>
+<div class="eon_insert_frame">
+<div class="eon_insert_header_line"><span class="eon_insert_lead">Code:</span><span class="eon_code_lang">Regex</span><span class="eon_insert_title">"Not" Operator Example 2</span></div>
+<pre class="eon_code">
+!alpha\l+</pre>
+</div>
+<p class="eon_paragraph">
+  This will match any sequence of letters, except <span class="eon_quoted">"alpha"</span>.
+</p>
+<p class="eon_paragraph">
+  Furthermore, the operator cannot be used together with quantifiers. Specifying e.g., <span class="eon_quoted">"!alpha+"</span> is an error.
+</p>
+<h1 class="eon_h1" id="Quantifiers">Quantifiers</h1>
+<p class="eon_paragraph">
+  The quantifiers are more or less identical to that of most regular expression implementations. All quantifiers apply to the element immediately to the left.
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">{A}</span> :</div>
+  <div class="eon_definition">Match element exactly A number of times.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">{A,B}</span> :</div>
+  <div class="eon_definition">Match element at least A number of times, at most B. <span class="eon_quoted">"A"</span> defaults to zero when omitted, <span class="eon_quoted">"B"</span> to infinite. Matching is greedy by default and will try to match as many as possible before trying to match the rest of the expression.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">{A,B}?</span> :</div>
+  <div class="eon_definition">Non-greedy version of the above. Match only A number of times before trying to match the rest of the expression.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">?</span> :</div>
+  <div class="eon_definition">Match element zero or one time. This is the same as <span class="eon_quoted">"{0,1}"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">*</span> :</div>
+  <div class="eon_definition">Match zero or more times, greedy. This is the same as <span class="eon_quoted">"{0,}"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">*?</span> :</div>
+  <div class="eon_definition">Match zero or more times, non-greedy. This is the same as <span class="eon_quoted">"{0,}?"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">+</span> :</div>
+  <div class="eon_definition">Match one or more times, greedy. This is the same as <span class="eon_quoted">"{1,}"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">+?</span> :</div>
+  <div class="eon_definition">Match one or more times, non-greedy. This is the same as <span class="eon_quoted">"{1,}?"</span>.</div>
+</div>
+<h1 class="eon_h1" id="Qualifiers">Qualifiers</h1>
+<p class="eon_paragraph">
+  There is only one qualifier and it is unique to Æon.
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">{name}</span> :</div>
+  <div class="eon_definition">Previously matched element must be a valid <span class="eon_emphasized">name</span>. The typical pattern would be: <span class="eon_quoted">"\w+{name}"</span>. Because Æon names can start with a digit, more common name matching expressions won't work. Therefore, this special construct is included to make proper Æon name matching easy.</div>
+</div>
+<h1 class="eon_h1" id="Anchors_and_Boundaries">Anchors and Boundaries</h1>
+<p class="eon_paragraph">
+  Like the <span class="eon_emphasized">not</span> operator, anchors/boundaries will not matching anything. They will fail to match if not at a boundary.
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">^</span> :</div>
+  <div class="eon_definition">Anchor to start of input/line. (Fail to match if not at start.)</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">!^</span> :</div>
+  <div class="eon_definition">Anchor to <span class="eon_quoted">"not start"</span> of input/line. (Fail to match if at start.)</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">$</span> :</div>
+  <div class="eon_definition">Bounadary. Fail match if not at end of input/line.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">!$</span> :</div>
+  <div class="eon_definition">Bounadary. Fail match if at end of input/line.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\b</span> :</div>
+  <div class="eon_definition">Anchor to start of word. A word is in this context any sequence of characters that is not a punctuation or separator character.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\B</span> :</div>
+  <div class="eon_definition">Bounadary. Fail match if end of word.</div>
+</div>
+<p class="eon_paragraph">
+  It is important to know that anchors are attached to the element immediately following, they are not elements of their own. <span class="eon_quoted">"^|\s"</span> will not work! Boundaries are, however, elements in their own right.
+</p>
+<div class="eon_shout">
+  <div class="eon_note">NOTE!</div>
+  <div class="eon_note_text">The <span class="eon_quoted">"l"</span> and <span class="eon_quoted">"b"</span> flags will change the meaning of the anchors/boundaries!</div>
+</div>
+<h1 class="eon_h1" id="Character_Groups">Character Groups</h1>
+<p class="eon_paragraph">
+  The following is a complete list of supported patterns for matching various types and groups of characters:
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">[&lt;characters&gt;]</span> :</div>
+  <div class="eon_definition">Match one of the character listed. Dashes can be used to specify ranges between literal characters. The backslashed groups below can also be included. Apart from those, the only characters that require backslash are backslash itself, <span class="eon_quoted">"]"</span>, and <span class="eon_quoted">"-"</span>. Double quotes can have backslash, but are not required to. Adding backslash in front of any other character will match backslash + that character.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">[^&lt;characters&gt;]</span> :</div>
+  <div class="eon_definition">When <span class="eon_quoted">"^"</span> is the first character within, match any character not listed.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">.</span> :</div>
+  <div class="eon_definition">Match any character (including newline).</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\w</span> :</div>
+  <div class="eon_definition">Match any word character = Unicode letters, basic digits, and underscore.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\W</span> :</div>
+  <div class="eon_definition">Match any non-word character.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\l</span> :</div>
+  <div class="eon_definition">Match any Unicode letter.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\L</span> :</div>
+  <div class="eon_definition">Match any character that is not a Unicode letter.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\u</span> :</div>
+  <div class="eon_definition">Match any lower case Unicode letter.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\U</span> :</div>
+  <div class="eon_definition">Match any upper case Unicode letter.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\d</span> :</div>
+  <div class="eon_definition">Match any basic digit. This is the same as <span class="eon_quoted">"[0-9]"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\D</span> :</div>
+  <div class="eon_definition">Match any character that is not a basic digit. This is the same as <span class="eon_quoted">"[^0-9]"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\s</span> :</div>
+  <div class="eon_definition">Match any space character. This includes all the characters in the <span class="eon_emphasized">separator</span> character category.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\S</span> :</div>
+  <div class="eon_definition">Match any character that is not a space character.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\p</span> :</div>
+  <div class="eon_definition">Match any character in the <span class="eon_emphasized">punctuation</span> category.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\P</span> :</div>
+  <div class="eon_definition">Match any character not in the <span class="eon_emphasized">punctuation</span> category.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">\e</span> :</div>
+  <div class="eon_definition">Match the escaped character following.  <span class="eon_emphasized">TODO!</span></div>
+</div>
+<div class="eon_shout">
+  <div class="eon_note">NOTE!</div>
+  <div class="eon_note_text">The complementary (e.g., <span class="eon_quoted">"\s"</span> vs. <span class="eon_quoted">"\S"</span>) is not the same as putting <span class="eon_quoted">"!"</span> (not) in front. (<span class="eon_quoted">"\S"</span> is not the same as <span class="eon_quoted">"!\s"</span>.) The former will make an actual match (e.g., if a non-space letter is seen), the latter will only cause a failed match if it is not.</div>
+</div>
+<h1 class="eon_h1" id="Captures">Captures</h1>
+<p class="eon_paragraph">
+  In order to capture a part of the matched string data, we need to explicitly mark this. (Except for the whole match, which is captured under the group name <span class="eon_quoted">"complete"</span>.)<br />
+  Captures can be extracted after the match has completed, but they can also be referenced later within the same expression.
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">@&lt;A&gt;(B)</span> :</div>
+  <div class="eon_definition">Match B (a sub-expression) and record using the group name A. Example: <span class="eon_quoted">"@&lt;eonname&gt;(\w+{name})"</span>.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">@:&lt;A&gt;</span> :</div>
+  <div class="eon_definition">Match previously captured group A. Example: <span class="eon_quoted">"@&lt;eonname&gt;(\w+{name})\s+@:&lt;eonname&gt;"</span>. (Will match e.g., <span class="eon_quoted">"alpha   alpha"</span>.)</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">!@:&lt;A&gt;</span> :</div>
+  <div class="eon_definition">Fail match if the previously captured group A matches. Example: <span class="eon_quoted">"@&lt;eonname&gt;(\w+{name})\s+!@:&lt;eonname&gt;.+"</span>. ( Will match <span class="eon_quoted">"alpha   beta"</span> but not <span class="eon_quoted">"alpha  alpha"</span>.)</div>
+</div>
+<h1 class="eon_h1" id="Flags">Flags</h1>
+<p class="eon_paragraph">
+  Flags are specified as a second argument to a regex definition and will influence how matching is done. Each flag is a single letter and one can specify multiple flag letters in the same string argument.
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">i</span> :</div>
+  <div class="eon_definition">Ignore case. This has effekt on literal character values and the <span class="eon_quoted">"\l"</span> (letter) character group. <span class="eon_quoted">"\u"</span> and <span class="eon_quoted">"\U"</span> will ignore thist flag!</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">l</span> :</div>
+  <div class="eon_definition">Make <span class="eon_quoted">"^"</span> and <span class="eon_quoted">"$"</span> match start and end of line rather than start and end of the full input.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">b</span> :</div>
+  <div class="eon_definition">Make <span class="eon_quoted">"\b"</span> and <span class="eon_quoted">"\B"</span> match any sequence of characters between start of line or space and end of line or space respectively.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">f</span> :</div>
+  <div class="eon_definition">If there is a literal element at the end of the expression to be matched at least once, then setting this flag will force that last element to be matched first in order to fail fast if it doesn't match. Can be very efficient if the expression is otherwise complex and long, and a majority of input strings are presumed to fail.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">q</span> :</div>
+  <div class="eon_definition">If the expression contains one or more literal elements to be matched at least once, then setting this flag will trigger a quick search for those elements (in the correct order) before the expression is attempted matched. Can be very efficient if the expression is complex and long, and a majority of input strings are presumed to fail.</div>
+</div>
+<p class="eon_paragraph">
+  The following flags are likely to be removed:
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">s</span> :</div>
+  <div class="eon_definition">Favor speed over accuracy.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">a</span> :</div>
+  <div class="eon_definition">Favor accuracy over speed (Both <span class="eon_quoted">"s"</span> and <span class="eon_quoted">"a"</span> will balance the two).</div>
+</div>
+<p class="eon_paragraph">
+  The following flags are for speed testing only:
+</p>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">!g</span> :</div>
+  <div class="eon_definition">Do not remove superfluous groupings.</div>
+</div>
+<div class="eon_define">
+  <div class="eon_phrase"><span class="eon_phrase_quoted">!e</span> :</div>
+  <div class="eon_definition">Do not expose literal characters.</div>
+</div>
+</div>
+</body></html>

@@ -265,14 +265,18 @@ namespace eon
 	void string_iterator::_utf8CharacterCount() noexcept
 	{
 		char32_t state = 0, cp = 0;
+		const char* cs{ nullptr };
 		NumChars = 0;
 		for( auto c = Source; c != SourceEnd; ++c )
 		{
+			if( cs == nullptr )
+				cs = c;
 			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
 			{
-				if( c == Pos )
+				if( cs == Pos )
 					NumChar = NumChars;
 				++NumChars;
+				cs = nullptr;
 			}
 		}
 		ValidUTF8 = state == UTF8_ACCEPT;

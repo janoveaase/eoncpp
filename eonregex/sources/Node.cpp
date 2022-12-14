@@ -282,7 +282,7 @@ namespace eon
 			// Match as few as possible from the start
 			RxData data_tmp{ data };
 			index_t matches = 0;
-			while( matches < Quant.minQ() )
+			while( matches < Quant.minQ() && data_tmp() )
 			{
 				if( !_match( data_tmp, steps ) )
 					break;
@@ -304,7 +304,7 @@ namespace eon
 
 			// Now make sure the rest matches, or try matching this once more
 			bool capturing = Next == nullptr && Group->type() == NodeType::capt_group;
-			while( matches <= Quant.maxQ() )
+			while( matches <= Quant.maxQ() && data_tmp() )
 			{
 				if( capturing )
 					Group->_capture( data_tmp );
@@ -339,15 +339,14 @@ namespace eon
 				return false;
 			if( PreAnchoring & Anchor::spaces )
 			{
-				if( string::isSeparatorSpace( data() )
-					|| ( data.pos().numChar() > 0 && data.prev() != NullChr && !string::isSeparatorSpace( data.prev() ) ) )
+				if( data.pos().numChar() > 0 && data.prev() != NullChr && !string::isSeparatorSpace( data.prev() ) )
 					return false;
 			}
 			if( PreAnchoring & Anchor::word )
 			{
-				if( !string::isWordChar( data() )
-					|| ( data.pos().numChar() > 0 && data.prev() != NullChr && !string::isSeparatorSpace( data.prev() )
-						&& !string::isPunctuation( data.prev() ) ) )
+				// Must be at start of input or after space/punctuation.
+				if( !data.pos().numChar() == 0 && data.prev() != NullChr
+					&& !string::isSeparator( data.prev() ) && !string::isPunctuation( data.prev() ) )
 					return false;
 			}
 			if( PreAnchoring & Anchor::line )

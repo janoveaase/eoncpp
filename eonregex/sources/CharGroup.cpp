@@ -65,6 +65,52 @@ namespace eon
 				if( chr >= range.first && chr <= range.second )
 					return true;
 			}
+			for( auto& special : Value.Special )
+			{
+				switch( special )
+				{
+					case 'w':
+						if( string::isWordChar( chr ) )
+							return true;
+						break;
+					case 'W':
+						if( !string::isWordChar( chr ) )
+							return true;
+						break;
+					case 'u':
+						if( string::isLetterLowerCase( chr ) )
+							return true;
+						break;
+					case 'U':
+						if( string::isLetterUpperCase( chr ) )
+							return true;
+						break;
+					case 'd':
+						if( string::isNumberAsciiDigit( chr ) )
+							return true;
+						break;
+					case 'D':
+						if( !string::isNumberAsciiDigit( chr ) )
+							return true;
+						break;
+					case 's':
+						if( string::isSeparator( chr ) )
+							return true;
+						break;
+					case 'S':
+						if( !string::isSeparator( chr ) )
+							return true;
+						break;
+					case 'p':
+						if( string::isPunctuation( chr ) )
+							return true;
+						break;
+					case 'P':
+						if( !string::isPunctuation( chr ) )
+							return true;
+						break;
+				}
+			}
 			return false;
 		}
 	}

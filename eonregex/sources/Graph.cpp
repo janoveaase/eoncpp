@@ -452,6 +452,7 @@ namespace eon
 						case '\\':
 						case ']':
 						case '-':
+						case '"':
 							value.Chars.insert( c );
 							param.advance();
 							break;

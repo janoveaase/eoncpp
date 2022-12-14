@@ -21,14 +21,16 @@ namespace eon
 	string ToHtml::css()
 	{
 		static string str{
-			".eon_frame {}\n"
-			".eon_h1 {margin: 8pt 0pt 4pt 0pt}\n"
-			".eon_h2 {margin: 8pt 0pt 4pt 0pt}\n"
-			".eon_h3 {margin: 8pt 0pt 4pt 0pt}\n"
-			".eon_h4 {margin: 8pt 0pt 4pt 0pt}\n"
+			".eon_frame {max-width: 125ch;}\n"
+
+			".eon_title {margin: 0pt 0pt 8pt 0pt; font: bold 175% Georgia, serif;}\n"
+			".eon_h1 {margin: 12pt 0pt 4pt 0pt;}\n"
+			".eon_h2 {margin: 12pt 0pt 4pt 0pt;}\n"
+			".eon_h3 {margin: 12pt 0pt 4pt 0pt;}\n"
+			".eon_h4 {margin: 12pt 0pt 4pt 0pt;}\n"
 			".eon_paragraph {margin: 0ch 0ch 1ch 0ch; padding: 0pt 0pt 0pt 0pt;}\n"
 
-			".eon_shout {margin: 0px; overflow: auto;}\n"
+			".eon_shout {margin: 8pt 0pt 8pt 0pt; overflow: auto;}\n"
 			".eon_note {font: 150% bold sans-serif; background-color: Gold; padding: 0pt 4pt 0pt 4pt; margin-right: 0.5ch; float: left;}\n"
 			".eon_note_text {font-family: sans-serif; margin-top: 0.5ch; color: #585528;}\n"
 			".eon_warning {font: 150% bold sans-serif; color: white; background-color: FireBrick; padding: 0pt 4pt 0pt 4pt; margin-right: 0.5ch; float: left;}\n"
@@ -39,12 +41,15 @@ namespace eon
 			".eon_tip_text {font-family: sans-serif; margin-top: 0.5ch; color: DarkGreen;}\n"
 
 			".eon_define {margin: 1ch 0ch 0ch 3ch;}\n"
-			".eon_phrase {font-weight: bold;}\n"
+			".eon_phrase {}\n"
+			".eon_phrase_normal {font-style: italic; color: navy;}\n"
+			".eon_phrase_anonymous {font-family: Monaco, Monospace; color: Indigo;}\n"
+			".eon_phrase_quoted{font-family: Monaco, Monospace; color: Indigo; background-color: #ffede6;}\n"
 			".eon_definition {font-family: Helvetica, sans-serif; margin: 0ch 0ch 1ch 3ch;}\n"
 			".eon_def_popup {text-decoration-line: underline; text-decoration-style: dotted;}\n"
 			".eon_def_popup:hover {cursor: help;}\n"
 
-			".eon_insert_frame {margin: 1ch 1ch 1ch 2ch; max-width: 125ch;}\n"
+			".eon_insert_frame {margin: 1ch 1ch 1ch 2ch;}\n"
 			".eon_insert_header_line {font: 125% bold; background-color: #FFECEC;}\n"
 			".eon_insert_lead {margin-left: 1ch; font-size: 70%; float: left; color: brown;}\n"
 			".eon_insert_title {padding: 0ch 1ch 0ch 1ch; text-transform: capitalize;}\n"
@@ -57,7 +62,7 @@ namespace eon
 
 			".eon_quote {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; font-style: italic; background-color: #F9FBFD;}\n"
 
-			".eon_toc {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; Background-color: #FAFAFE;}\n"
+			".eon_toc {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch; Background-color: #FAFAFE; font-family: sans-serif;}\n"
 			".eon_toc1 {margin-left: 0ch; font-size: 120%;}\n"
 			".eon_toc2 {margin-left: 2ch; font-size: 110%;}\n"
 			".eon_toc3 {margin-left: 4ch; font-size: 100%;}\n"
@@ -65,8 +70,8 @@ namespace eon
 
 			".eon_image {border: 1pt solid #FFECEC; margin: 0pt; padding: 1ch;}\n"
 
-			".eon_emphasized {font-weight: bold;}\n"
-			".eon_quoted {color: SaddleBrown;}\n"
+			".eon_emphasized {color: DarkViolet; text-shadow: 1px 1px Lavender;}\n"
+			".eon_quoted {color: SaddleBrown; font-family: Monaco, monospace;}\n"
 			".eon_reference {}\n"
 		};
 		return str;
@@ -116,6 +121,7 @@ namespace eon
 		using std::placeholders::_2;
 		std::function<void (const DataTuple&, string&)> func = std::bind( &ToHtml::_convertH1, this, _1, _2 );
 		std::map<name_t, std::function<void (const DataTuple&, string& html)>> converters{
+			{ name_title, std::bind( &ToHtml::_convertTitle, this, _1, _2 ) },
 			{ name_h1, std::bind( &ToHtml::_convertH1, this, _1, _2 ) },
 			{ name_h2, std::bind( &ToHtml::_convertH2, this, _1, _2 ) },
 			{ name_h3, std::bind( &ToHtml::_convertH3, this, _1, _2 ) },
@@ -142,6 +148,39 @@ namespace eon
 		}
 	}
 
+	string ToHtml::_encode( const string& str )
+	{
+		static std::unordered_map<char_t, string> encodings{
+			{ '<', "&lt;" },
+			{ '>', "&gt;" }
+		};
+		string html;
+		for( auto c : str )
+		{
+			auto found = encodings.find( c );
+			if( found != encodings.end() )
+				html << found->second;
+			else
+				html << c;
+		}
+		return html;
+	}
+
+	void ToHtml::_convertTitle( const DataTuple& dt, string& html )
+	{
+		if( dt.exists( name_value ) )
+		{
+			if( dt.at( name_value ).type() == name_string )
+			{
+				html << "<div class=\"eon_title\" id=\"";
+				html << _encode( dt.value<string>( name_value ).replace( " ", "_" ) );
+				html << "\">" << _encode( dt.value<string>( name_value ) );
+				html << "</div>";
+				if( !dt.hasFlag( name_no_indexing ) )
+					Headers.push_back( Header( dt.value<string>( name_value ), 1 ) );
+			}
+		}
+	}
 	void ToHtml::_convertH( const DataTuple& dt, int level, string& html )
 	{
 		if( dt.exists( name_value ) )
@@ -149,8 +188,9 @@ namespace eon
 			if( dt.at( name_value ).type() == name_string )
 			{
 				html << "<h" << level << " class=\"eon_h" << level << "\" id=\"";
-				html << dt.value<string>( name_value ).replace( " ", "_" );
-				html << "\">" << dt.value<string>( name_value ) << "</h" << level << ">";
+				html << _encode( dt.value<string>( name_value ).replace( " ", "_" ) );
+				html << "\">" << _encode( dt.value<string>( name_value ) );
+				html << "</h" << level << ">";
 				if( !dt.hasFlag( name_no_indexing ) )
 					Headers.push_back( Header( dt.value<string>( name_value ), level ) );
 			}
@@ -205,7 +245,7 @@ namespace eon
 		_endl( html );
 		html << "</p>";
 	}
-	void ToHtml::_convertTextElements( const DataTuple& dt, string& html )
+	void ToHtml::_convertTextElements( const DataTuple& dt, string& html, bool insert_definitions )
 	{
 		for( auto& elm : dt )
 		{
@@ -219,14 +259,14 @@ namespace eon
 					{
 						name_t type = value.value<name_t>( name_type );
 						if( type == name_text )
-							_convertPlainText( value.value<string>( name_value ), html );
+							_convertPlainText( value.value<string>( name_value ), html, insert_definitions );
 						else if( type == name_emphasized )
 							_convertEmphasizedText( value.value<string>( name_value ), html );
 						else if( type == name_quoted )
 							_convertQuotedText( value.value<string>( name_value ), html );
 					}
 					else if( value_type == name_data )
-						_convertTextElements( value.value<DataTuple>( name_value ), html );
+						_convertTextElements( value.value<DataTuple>( name_value ), html, insert_definitions );
 				}
 				else
 				{
@@ -240,31 +280,65 @@ namespace eon
 			}
 		}
 	}
-	void ToHtml::_convertPlainText( string text, string& html )
+	void ToHtml::_convertPlainText( string text, string& html, bool insert_definitions )
 	{
-		for( auto& def : Definitions )
+		text = _encode( text );
+		if( insert_definitions )
 		{
-			text = text.replace( def.Phrase, "<span class=\"eon_def_popup\" title=\"" + def.Def + "\">" + def.Phrase
-				+ "</span>" );
+			auto split = _splitForDef( text );
+			for( auto& elm : split )
+			{
+				if( elm.second )
+				{
+					string value = elm.first.lower();
+					for( string::iterator c1 = elm.first.begin(), c2 = value.begin(); c2 != value.end(); )
+					{
+						for( auto& def : Definitions )
+						{
+							if( value.substr( c2, c2 + def.Phrase.numChars() ) == def.Phrase.substr() )
+							{
+								html << "<span class=\"eon_def_popup\" title=\"" << def.Def << "\">";
+								for( index_t i = 0; i < def.Phrase.numChars(); ++i )
+								{
+									html << *c1;
+									++c1;
+									++c2;
+								}
+								html << "</span>";
+								goto done;
+							}
+						}
+						html << *c1;
+						++c1;
+						++c2;
+					done:
+						;
+					}
+				}
+				else
+					html << elm.first;
+			}
 		}
-		html << text;
+		else
+			html << text;
+		return;
 	}
 	void ToHtml::_convertEmphasizedText( const string& text, string& html )
 	{
 		html << "<span class=\"eon_emphasized\">";
-		_convertPlainText( text, html );
+		_convertPlainText( text, html, false );
 		html << "</span>";
 	}
 	void ToHtml::_convertQuotedText( const string& text, string& html )
 	{
 		html << "<span class=\"eon_quoted\">\"";
-		_convertPlainText( text, html );
+		_convertPlainText( text, html, false );
 		html << "\"</span>";
 	}
 	void ToHtml::_convertReference( const DataTuple& dt, string& html )
 	{
 		static regex http_pattern{ R"((http(s)?)|ftp://)" };
-		string target = dt.value<string>( name_target );
+		string target = _encode( dt.value<string>( name_target ) );
 		html << "<a href=\"";
 		if( !http_pattern.match( target ) )
 		{
@@ -273,9 +347,9 @@ namespace eon
 		}
 		html << target << "\" class=\"eon_reference\">";
 		if( dt.exists( name_caption ) && dt.at( name_caption ).type() == name_string )		
-			_convertPlainText( dt.value<string>( name_caption ), html );
+			_convertPlainText( dt.value<string>( name_caption ), html, false );
 		else
-			_convertPlainText( target, html );
+			_convertPlainText( target, html, false );
 		html << "</a>";
 	}
 
@@ -305,26 +379,39 @@ namespace eon
 		html << "  <div class=\"eon_" + shout + "\">" << shout.upper() << "!</div>\n";
 		html << "  <div class=\"eon_" + shout + "_text\">";
 		if( dt.at( name_value ).type() == name_string )
-			html << dt.value<string>( name_value );
+			_convertPlainText( dt.value<string>( name_value ), html );
 		else if( dt.at( name_value ).type() == name_data )
-			_convert( *(DataTuple*)dt.at( name_value ).value(), true, html );
+			_convertTextElements( *(DataTuple*)dt.at( name_value ).value(), html );
 		html << "</div>\n</div>";
 	}
 
 	void ToHtml::_convertDefinition( const DataTuple& dt, string& html )
 	{
 		if( !dt.exists( name_phrase ) || dt.at( name_phrase ).type() != name_string
-			|| !dt.exists( name_value ) || dt.at( name_value ).type() != name_string )
+			|| !dt.exists( name_value ) || (
+				dt.at( name_value ).type() != name_string && dt.at( name_value ).type() != name_data ) )
 			return;
 		html << "<div class=\"eon_define\"";
-		if( !dt.hasFlag( name_anonymous ) )
+		if( !dt.hasFlag( name_anonymous ) && !dt.hasFlag( name_quoted ) )
 		{
-			Definitions.push_back( Definition( dt.value<string>( name_phrase ), dt.value<string>( name_value ) ) );
+			Definitions.push_back( Definition( dt.value<string>( name_phrase ), dt.value<string>( name_text ) ) );
 			html << " id=\"" << dt.value<string>( name_phrase ).replace( " ", "_" ) << "\"";
 		}
 		html << ">\n";
-		html << "  <div class=\"eon_phrase\">" << dt.value<string>( name_phrase ) << ":</div>\n";
-		html << "  <div class=\"eon_definition\">" << dt.value<string>( name_value ) << "</div>\n";
+		html << "  <div class=\"eon_phrase\"><span class=\"eon_phrase_";
+		if( dt.hasFlag( name_anonymous ) )
+			html << "anonymous";
+		else if( dt.hasFlag( name_quoted ) )
+			html << "quoted";
+		else
+			html << "normal";
+		html << "\">" << _encode( dt.value<string>( name_phrase ) ) << "</span> :</div>\n";
+		html << "  <div class=\"eon_definition\">";
+		if( dt.at( name_value ).type() == name_string )
+			_convertPlainText( dt.value<string>( name_value ), html, false );
+		else if( dt.at( name_value ).type() == name_data )
+			_convertTextElements( dt.value<DataTuple>( name_value ), html, false );
+		html << "</div>\n";
 		html << "</div>";
 	}
 
@@ -378,9 +465,8 @@ namespace eon
 		_convertInsertHeader( dt, { { name_title, "eon_insert_title" } }, html );
 		html << "</div>\n";
 		html << "  <div class=\"eon_toc\"><";
-		TocInsert to_insert( html.last(), dt.exists( name_level ) ? static_cast<int>( dt.value<int_t>( name_level ) ) : 4 );
-		TocInserts.push_back( to_insert );
-//		TocInserts.push_back( TocInsert( html.last(), dt.exists( name_level ) ? static_cast<int>( dt.value<int_t>( name_level ) ) : 4 ) );
+		TocInserts.push_back( TocInsert( html.last(), dt.exists( name_level )
+			? static_cast<int>( dt.value<int_t>( name_level ) ) : 4 ) );
 		html << "/div>\n";
 		_convertInsertBody( dt, "insert_subtext", html );
 	}
@@ -396,7 +482,7 @@ namespace eon
 				html << " style=\"float:" << str( dt.value<name_t>( name_align ) ) << ";\"";
 			html << "><img src=\"" << dt.value<string>( name_source ) << "\" ";
 			if( dt.exists( name_title ) && dt.at( name_title ).type() == name_string )
-				html << "alt=\"" << dt.value<string>( name_title ) << "\" ";
+				html << "alt=\"" << _encode( dt.value<string>( name_title ) ) << "\" ";
 			html << "/></div>\n";
 		}
 		_convertInsertBody( dt, "insert_subtext", html );
@@ -416,25 +502,26 @@ namespace eon
 		for( auto& detail : details )
 		{
 			if( dt.exists( detail.first ) && dt.at( detail.first ).type() == name_string )
-				html << "<span class=\"" << detail.second << "\">" << dt.value<string>( detail.first ) << "</span>";
+				html << "<span class=\"" << detail.second << "\">" << _encode( dt.value<string>( detail.first ) )
+				<< "</span>";
 		}
 	}
 	void ToHtml::_convertInsertBody( const DataTuple& dt, string div_class, string& html )
 	{
-		bool code = div_class == "code";
-		if( !code )
-			html << "  ";
-		html << "<" << ( code ? "pre" : "div" ) << " class=\"eon_" << div_class << "\">";
-		if( !code )
-			html << "\n";
 		if( dt.exists( name_value ) )
 		{
+			bool code = div_class == "code";
+			if( !code )
+				html << "  ";
+			html << "<" << ( code ? "pre" : "div" ) << " class=\"eon_" << div_class << "\">";
+			if( !code )
+				html << "\n";
 			if( dt.at( name_value ).type() == name_string )
 			{
 				if( code )
 					html << "\n" << dt.value<string>( name_value );
 				else
-					html << "    " << dt.value<string>( name_value );
+					html << "    " << _encode( dt.value<string>( name_value ) );
 			}
 			else if( dt.at( name_value ).type() == name_data )
 			{
@@ -451,17 +538,17 @@ namespace eon
 						else
 							html << "<br />\n";
 						if( val.type() == name_string )
-							html << "    " << ( (StringInstance*)val.value() )->value();
+							html << "    " << _encode( ( (StringInstance*)val.value() )->value() );
 					}
 				}
 			}
+			if( !code )
+			{
+				_endl( html );
+				html << "  ";
+			}
+			html << "</" << ( code ? "pre" : "div" ) << ">\n";
 		}
-		if( !code )
-		{
-			_endl( html );
-			html << "  ";
-		}
-		html << "</" << ( code ? "pre" : "div" ) << ">\n";
 	}
 
 	void ToHtml::_insertToc( index_t num_char, index_t num_byte, int level, string& html )
@@ -479,5 +566,38 @@ namespace eon
 		toc << "\n  ";
 		string::iterator pos( html.begin(), html.c_str() + num_byte, num_char );
 		html = html.substr( html.begin(), pos ) + toc + html.substr( pos );
+	}
+
+	std::vector<std::pair<string, bool>> ToHtml::_splitForDef( const string& text )
+	{
+		// We want to split out that which can contain defined words and phrases from that which cannot.
+		// That means that anything that isn't word characters and space gets split out.
+		std::vector<std::pair<string, bool>> split;
+		if( text.empty() )
+			return split;
+		size_t pos = 0;
+		for( auto c : text )
+		{
+			if( c == SpaceChr || string::isWordChar( c ) )
+			{
+				if( split.empty() || !split[ pos ].second )
+				{
+					if( !split.empty() )
+						++pos;
+					split.push_back( std::make_pair( "", true ) );
+				}
+			}
+			else
+			{
+				if( split.empty() || split[ pos ].second )
+				{
+					if( !split.empty() )
+						++pos;
+					split.push_back( std::make_pair( "", false ) );
+				}
+			}
+			split[ pos ].first << c;
+		}
+		return split;
 	}
 }
