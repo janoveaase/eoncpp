@@ -1,4 +1,5 @@
 #include "File.h"
+#include <filesystem>
 
 
 namespace eon
@@ -10,6 +11,9 @@ namespace eon
 		Path = std::move( file_path );
 		return *this;
 	}
+	EON_XTEST_2STEP( file, operator_assign, dir_path,
+		filesys::BadPath, path dpath( "one/two/" ), file f = std::move( dpath ) );
+	EON_NOXTEST_2STEP( file, operator_assign, file_path, path fpath( "one/two" ), file f = std::move( fpath ) );
 
 
 
@@ -22,6 +26,8 @@ namespace eon
 			std::filesystem::last_write_time( Path.stdpath(),
 				std::filesystem::file_time_type::clock::now() );
 	}
+	EON_CMPTEST_SANDBOX_3STEP( file, touch, basic,
+		file a( sandboxDirStr() + "/dummy.tmp" ), a.touch(), EON_EQ, true, a.exists() );
 
 	file& file::rename( const string& new_name )
 	{
@@ -43,6 +49,14 @@ namespace eon
 		}
 		return *this = std::move( target );
 	}
+	EON_XTEST_SANDBOX_2STEP( file, rename, unnamed, filesys::Failure, file f, f.rename( "new" ) );
+	EON_XTEST_SANDBOX_2STEP( file, rename, no_source, filesys::Failure,
+		file f( sandboxDirStr() + "/old" ), f.rename( "new" ) );
+	EON_XTEST_SANDBOX_3STEP( file, rename, existing_target, filesys::Failure,
+		file f( sandboxDirStr() + "/old" ), file( sandboxDirStr() + "/new" ).touch(), f.rename( "new" ) );
+	EON_NOXTEST_SANDBOX_3STEP( file, rename, success,
+		file f( sandboxDirStr() + "/old" ), f.touch(), f.rename( "new" ) );
+
 	file& file::forceRename( const string& new_name )
 	{
 		if( !Path )

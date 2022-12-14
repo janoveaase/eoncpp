@@ -62,3 +62,23 @@ endif()
 if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
+if(EON_INLINE_TESTS)
+	message(STATUS "Including Inline Tests!")
+	add_executable(EonStringInlineTests ${STRING_HEADERS} ${STRING_SOURCES})
+	target_compile_definitions(EonStringInlineTests PRIVATE EON_INLINE_TEST_PROJECT)
+	set_target_properties(
+		EonStringInlineTests
+		PROPERTIES
+			OUTPUT_NAME_DEBUG eon_string_inlinetests
+			OUTPUT_NAME_RELEASE eon_string_inlinetests
+	)
+	set_property(TARGET EonStringInlineTests PROPERTY CXX_STANDARD 17)
+
+	target_link_libraries(EonStringInlineTests PUBLIC EonInlineTest)
+
+	install(TARGETS EonStringInlineTests
+		RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
+	)
+
+	target_include_directories(EonStringInlineTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
+endif()

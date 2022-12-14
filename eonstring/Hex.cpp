@@ -15,6 +15,8 @@ namespace eon
 		}
 		return *this;
 	}
+	EON_CMPTEST( hex, operator_assign, binary_stdstr, EON_EQ, "4139", ( hex() = std::string( "A9" ) ).Value );
+
 	hex& hex::operator=( const char* binary_data )
 	{
 		clear();
@@ -26,29 +28,16 @@ namespace eon
 		}
 		return *this;
 	}
+	EON_CMPTEST( hex, operator_assign, binary_char, EON_EQ, "4139", ( hex() = "A9" ).Value );
 
-	void hex::setHex( const std::string& hex )
+	hex& hex::setHex( const std::string& hex )
 	{
-		if( hex.size() % 2 == 1 )
-			throw Invalid( "Odd number of digits" );
-		if( hex.size() == 0 )
-		{
-			clear();
-			return;
-		}
-		std::string value;
-		digits hx;
-		for( auto c = hex.c_str(), end = c + hex.size(); c != end; c += 2 )
-		{
-			hx.first = *c;
-			hx.second = *( c + 1 );
-			if( !isDigit( hx.first ) || !isDigit( hx.second ) )
-				throw Invalid( "Contains non-hex digits" );
-			value += static_cast<char>( hx.first );
-			value += static_cast<char>( hx.second );
-		}
-		Value = std::move( value );
+		_assertValidHex( hex );
+		Value = _parseHex( hex );
+		return *this;
 	}
+	EON_CMPTEST( hex, setHex, empty, EON_EQ, "", hex().setHex( "" ).Value );
+	EON_CMPTEST( hex, setHex, nonempty, EON_EQ, "10DE", hex().setHex( "10DE" ).Value );
 
 
 
@@ -65,6 +54,7 @@ namespace eon
 		}
 		return bin;
 	}
+	EON_CMPTEST( hex, binary, basic, EON_EQ, "a1Z", hex( "a1Z" ).binary() );
 
 
 
@@ -78,10 +68,45 @@ namespace eon
 		hex.second += hex.second < 10 ? 0x30 : 0x37;
 		return hex;
 	}
+	EON_CMPTEST( hex, toHex, low, EON_EQ, "48", hex::toHex( 'H' ) );
+	EON_CMPTEST( hex, toHex, high, EON_EQ, "EC", hex::toHex( 236 ) );
+
 	byte_t hex::toByte( digits hex ) noexcept
 	{
 		hex.first -= hex.first >= 0x41 ? 0x37 : 0x30;
 		hex.second -= hex.second >= 0x41 ? 0x37 : 0x30;
 		return hex.first * 16 + hex.second;
 	}
+	EON_CMPTEST( hex, toByte, low, EON_EQ, byte_t( 'H' ), hex::toByte( hex::digits( '4', '8' ) ) );
+	EON_CMPTEST( hex, toByte, high, EON_EQ, byte_t( 236 ), hex::toByte( hex::digits( 'E', 'C' ) ) );
+
+
+
+
+	std::string hex::_parseHex( const std::string& hex )
+	{
+		if( hex.size() == 0 )
+			return std::string();
+		else
+			return _parseNonEmptyHex( hex );
+	}
+	EON_CMPTEST( hex, _parseHex, empty, EON_EQ, "", hex()._parseHex( "" ) );
+	EON_CMPTEST( hex, _parseHex, nonempty, EON_EQ, "10DE", hex()._parseHex( "10DE" ) );
+
+	std::string hex::_parseNonEmptyHex( const std::string& hex )
+	{
+		std::string value;
+		digits hx;
+		for( auto c = hex.c_str(), end = c + hex.size(); c != end; c += 2 )
+		{
+			hx.first = *c;
+			hx.second = *( c + 1 );
+			if( !isDigit( hx.first ) || !isDigit( hx.second ) )
+				throw Invalid( "Contains non-hex digits" );
+			value += static_cast<char>( hx.first );
+			value += static_cast<char>( hx.second );
+		}
+		return value;
+	}
+	EON_CMPTEST( hex, _parseNonEmptyHex, basic, EON_EQ, "0EFF32", hex()._parseNonEmptyHex( "0EFF32" ) );
 }

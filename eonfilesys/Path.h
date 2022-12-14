@@ -2,6 +2,7 @@
 
 #include <eonexcept/Exception.h>
 #include <eonstring/String.h>
+#include <eoninlinetest/InlineTest.h>
 #include <filesystem>
 
 
@@ -320,6 +321,8 @@ namespace eon
 		path& _parse( const path& other ) noexcept;
 
 		bool _isRoot( const string& str ) noexcept;
+
+		path& _ext( const substring& part );
 
 
 

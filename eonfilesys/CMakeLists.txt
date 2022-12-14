@@ -45,3 +45,23 @@ endif()
 if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
+if(EON_INLINE_TESTS)
+	message(STATUS "Including Inline Tests!")
+	add_executable(EonFilesysInlineTests ${FILESYS_HEADERS} ${FILESYS_SOURCES})
+	target_compile_definitions(EonFilesysInlineTests PRIVATE EON_INLINE_TEST_PROJECT)
+	set_target_properties(
+		EonFilesysInlineTests
+		PROPERTIES
+			OUTPUT_NAME_DEBUG eon_filesys_inlinetests
+			OUTPUT_NAME_RELEASE eon_filesys_inlinetests
+	)
+	set_property(TARGET EonFilesysInlineTests PROPERTY CXX_STANDARD 17)
+
+	target_link_libraries(EonFilesysInlineTests PUBLIC EonInlineTest)
+
+	install(TARGETS EonFilesysInlineTests
+		RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
+	)
+
+	target_include_directories(EonFilesysInlineTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
+endif()
