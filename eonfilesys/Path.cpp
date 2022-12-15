@@ -10,9 +10,9 @@ namespace eon
 		else
 			return str();
 	}
-	EON_CMPTEST( path, systemStr, unix, EON_EQ, "/one/two/three", path( "/one/two/three" ).systemStr( name( "unix" ) ) );
-	EON_CMPTEST( path, systemStr, windows, EON_EQ,
-		"C:\\one\\two\\three", path( "C:/one/two/three" ).systemStr( name_windows ) );
+	EON_CMPTEST( path, systemStr, unix, "/one/two/three", EON_EQ, path( "/one/two/three" ).systemStr( name( "unix" ) ) );
+	EON_CMPTEST( path, systemStr, windows,
+		"C:\\one\\two\\three", EON_EQ, path( "C:/one/two/three" ).systemStr( name_windows ) );
 
 
 
@@ -29,7 +29,7 @@ namespace eon
 	EON_XTEST_3STEP( path, operator_concatenate_elm, except, filesys::BadPath, path a( "/one" ), path b( "/two" ), a /= b );
 	EON_NOXTEST_3STEP( path, operator_concatenate_elm, no_except, path a( "/one" ), path b( "two" ), a /= b );
 	EON_CMPTEST_3STEP( path, operator_concatenate_elm, basic,
-		path a( "/one" ), path b( "two" ), EON_EQ, "/one/two", ( a /= b ).str() );
+		path a( "/one" ), path b( "two" ), "/one/two", EON_EQ, ( a /= b ).str() );
 
 
 
@@ -45,9 +45,9 @@ namespace eon
 	}
 	EON_XTEST_2STEP( path, ext, except, filesys::BadPath, path a( "/one/" ), a.ext( "ext" ) );
 	EON_NOXTEST_2STEP( path, ext, no_except, path a( "/one" ), a.ext( "ext" ) );
-	EON_CMPTEST_2STEP( path, ext, multi_ext, path a( "one/two" ), EON_EQ, "one/two.ext1.ext2", a.ext( "ext1.ext2" ).str() );
-	//EON_CMPTEST_2STEP( path, ext, replace_ext,
-	//	path a( "one/two.ext1" ), EON_EQ, "one/two.ext2", a.ext( "ext2" ).str() );
+	EON_CMPTEST_2STEP( path, ext, multi_ext, path a( "one/two" ), "one/two.ext1.ext2", EON_EQ, a.ext( "ext1.ext2" ).str() );
+	EON_CMPTEST_2STEP( path, ext, replace_ext,
+		path a( "one/two.ext1" ), "one/two.ext2", EON_EQ, a.ext( "ext2" ).str() );
 
 
 
@@ -334,15 +334,16 @@ namespace eon
 
 	path& path::_ext( const substring& part )
 	{
-		Full += "." + part;
+		if( !Ext )
+			Full += "." + part;
+		else
+		{
+			Full = Full.substr( Full.begin(), Ext.begin() );
+			Full += part;
+		}
 		if( Base )
 			Base = Full.substr( Base.begin(), Full.end() );
-		else
-			Base = Full.substr( Full.last() - part.numChars(), Full.end() );
-		if( Ext )
-			Ext = Full.substr( Ext.begin(), Ext.begin() + part.numChars() );
-		else
-			Ext = Full.substr( Full.last() - part.numChars(), Full.end() );
+		Ext = Full.substr( Full.end() - part.numChars(), Full.end() );
 		Name = Full.substr( Base.begin(), Ext.begin() - 1 );
 		return *this;
 	}

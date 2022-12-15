@@ -27,7 +27,7 @@ namespace eon
 				std::filesystem::file_time_type::clock::now() );
 	}
 	EON_CMPTEST_SANDBOX_3STEP( file, touch, basic,
-		file a( sandboxDirStr() + "/dummy.tmp" ), a.touch(), EON_EQ, true, a.exists() );
+		file a( sandboxDirStr() + "/dummy.tmp" ), a.touch(), true, EON_EQ, a.exists() );
 
 	file& file::rename( const string& new_name )
 	{

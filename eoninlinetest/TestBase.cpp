@@ -15,12 +15,7 @@ namespace eonitest
 			TestNames = std::make_unique<std::set<__EonTestName>>();
 		}
 		if( TestNames->find( name ) != TestNames->end() )
-		{
-			//eon::term << eon::style::error << "FATAL ERROR! Duplicate test name!" << eon::style::normal << "\n";
-			//eon::term << "  Location: " << eon::style::yellow << location.file() << eon::style::normal << ":"
-			//	<< eon::style::magenta << location.line() << eon::style::normal << "\n";
 			return false;
-		}
 		TestNames->insert( name );
 		TestsList->push_back( TestRef( name, location, test ) );
 		return true;

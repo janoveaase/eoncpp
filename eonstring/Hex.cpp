@@ -3,6 +3,9 @@
 
 namespace eon
 {
+	EON_INLINE_HEADER( hex );
+	EON_INLINE_HEADER_SUB( hex, digits );
+
 	hex& hex::operator=( const std::string& binary_data )
 	{
 		clear();
@@ -15,7 +18,7 @@ namespace eon
 		}
 		return *this;
 	}
-	EON_CMPTEST( hex, operator_assign, binary_stdstr, EON_EQ, "4139", ( hex() = std::string( "A9" ) ).Value );
+	EON_CMPTEST( hex, operator_assign, binary_stdstr, "4139", EON_EQ, ( hex() = std::string( "A9" ) ).Value );
 
 	hex& hex::operator=( const char* binary_data )
 	{
@@ -28,7 +31,7 @@ namespace eon
 		}
 		return *this;
 	}
-	EON_CMPTEST( hex, operator_assign, binary_char, EON_EQ, "4139", ( hex() = "A9" ).Value );
+	EON_CMPTEST( hex, operator_assign, binary_char, "4139", EON_EQ, ( hex() = "A9" ).Value );
 
 	hex& hex::setHex( const std::string& hex )
 	{
@@ -36,8 +39,8 @@ namespace eon
 		Value = _parseHex( hex );
 		return *this;
 	}
-	EON_CMPTEST( hex, setHex, empty, EON_EQ, "", hex().setHex( "" ).Value );
-	EON_CMPTEST( hex, setHex, nonempty, EON_EQ, "10DE", hex().setHex( "10DE" ).Value );
+	EON_CMPTEST( hex, setHex, empty, "", EON_EQ, hex().setHex( "" ).Value );
+	EON_CMPTEST( hex, setHex, nonempty, "10DE", EON_EQ, hex().setHex( "10DE" ).Value );
 
 
 
@@ -54,7 +57,7 @@ namespace eon
 		}
 		return bin;
 	}
-	EON_CMPTEST( hex, binary, basic, EON_EQ, "a1Z", hex( "a1Z" ).binary() );
+	EON_CMPTEST( hex, binary, basic, "a1Z", EON_EQ, hex( "a1Z" ).binary() );
 
 
 
@@ -68,8 +71,8 @@ namespace eon
 		hex.second += hex.second < 10 ? 0x30 : 0x37;
 		return hex;
 	}
-	EON_CMPTEST( hex, toHex, low, EON_EQ, "48", hex::toHex( 'H' ) );
-	EON_CMPTEST( hex, toHex, high, EON_EQ, "EC", hex::toHex( 236 ) );
+	EON_CMPTEST( hex, toHex, low, "48", EON_EQ, hex::toHex( 'H' ) );
+	EON_CMPTEST( hex, toHex, high, "EC", EON_EQ, hex::toHex( 236 ) );
 
 	byte_t hex::toByte( digits hex ) noexcept
 	{
@@ -77,8 +80,8 @@ namespace eon
 		hex.second -= hex.second >= 0x41 ? 0x37 : 0x30;
 		return hex.first * 16 + hex.second;
 	}
-	EON_CMPTEST( hex, toByte, low, EON_EQ, byte_t( 'H' ), hex::toByte( hex::digits( '4', '8' ) ) );
-	EON_CMPTEST( hex, toByte, high, EON_EQ, byte_t( 236 ), hex::toByte( hex::digits( 'E', 'C' ) ) );
+	EON_CMPTEST( hex, toByte, low, byte_t( 'H' ), EON_EQ, hex::toByte( hex::digits( '4', '8' ) ) );
+	EON_CMPTEST( hex, toByte, high, byte_t( 236 ), EON_EQ, hex::toByte( hex::digits( 'E', 'C' ) ) );
 
 
 
@@ -90,8 +93,8 @@ namespace eon
 		else
 			return _parseNonEmptyHex( hex );
 	}
-	EON_CMPTEST( hex, _parseHex, empty, EON_EQ, "", hex()._parseHex( "" ) );
-	EON_CMPTEST( hex, _parseHex, nonempty, EON_EQ, "10DE", hex()._parseHex( "10DE" ) );
+	EON_CMPTEST( hex, _parseHex, empty, "", EON_EQ, hex()._parseHex( "" ) );
+	EON_CMPTEST( hex, _parseHex, nonempty, "10DE", EON_EQ, hex()._parseHex( "10DE" ) );
 
 	std::string hex::_parseNonEmptyHex( const std::string& hex )
 	{
@@ -108,5 +111,5 @@ namespace eon
 		}
 		return value;
 	}
-	EON_CMPTEST( hex, _parseNonEmptyHex, basic, EON_EQ, "0EFF32", hex()._parseNonEmptyHex( "0EFF32" ) );
+	EON_CMPTEST( hex, _parseNonEmptyHex, basic, "0EFF32", EON_EQ, hex()._parseNonEmptyHex( "0EFF32" ) );
 }

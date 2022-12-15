@@ -20,15 +20,15 @@
 #define __EONTEST_CATCHALL( information )\
 	catch( eon::exception& e ) \
 	{\
-		return ::eonitest::__Result::failureByException( "eon::exception", e.details(), #information );\
+		return ::eonitest::__Result::failureByException( "eon::exception", e.details(), information );\
 	}\
 	catch( std::exception& e ) \
 	{\
-		return ::eonitest::__Result::failureByException( "std::exception", e.what(), #information );\
+		return ::eonitest::__Result::failureByException( "std::exception", e.what(), information );\
 	}\
 	catch( ... ) \
 	{\
-		return ::eonitest::__Result::failureByException( "exception", "unknown", #information );\
+		return ::eonitest::__Result::failureByException( "exception", "unknown", information );\
 	}
 
 // Internal macro for registering a test.
@@ -90,7 +90,7 @@
 		{\
 			return ::eonitest::__Result::success(); \
 		}\
-		__EONTEST_CATCHALL( "Expected different exception \"" #expected_exception "\"!" )\
+		__EONTEST_CATCHALL( "Expected exception \"" #expected_exception "\"!" )\
 	}\
 
 // Internal macro for setting up a test class constructor method.
@@ -128,16 +128,16 @@
 
 
 // Make test succeed if 'finalstep' is less than 'expected'!
-#define EON_LT = "<:"
+#define EON_LT "<:"
 
 // Make test succeed if 'finalstep' is less than or equal to 'expected'!
-#define EON_LE = "<=:"
+#define EON_LE "<=:"
 
 // Make test succeed if 'finalstep' is greater than 'expected'!
-#define EON_GT = ">:"
+#define EON_GT ">:"
 
 // Make test succeed if 'finalstep' is greater than or equal to 'expected'!
-#define EON_GE = ">=:"
+#define EON_GE ">=:"
 
 // Make test succeed if 'finalstep' is equal to 'expected'!
 #define EON_EQ "==:"
@@ -152,32 +152,60 @@
 
 
 #if defined(EON_INLINE_TEST) && defined(EON_INLINE_TEST_PROJECT)
+	
+	// Make inline header tests available for selection!
+#	define EON_INLINE_HEADER( classname )\
+		classname __##classname##_dummy{ classname() }
+
+	// Make inline header tests available for selection!
+#	define EON_INLINE_HEADER_ARGS( classname, constructorargs )\
+		classname __##classname##_dummy{constructorargs}
+
+	// Make inline header tests available for selection!
+#	define EON_INLINE_HEADER_SUB( superclasses, classname )\
+		superclasses::classname __##classname##_dummy
+
+	// Make inline header tests available for selection!
+#	define EON_INLINE_HEADER_SUB_ARGS( superclasses, classname, constructorargs )\
+		superclasses::classname __##classname##_dummy{constructorargs}
+
+#else
+#	define EON_INLINE_HEADER( classname )
+#	define EON_INLINE_HEADER_ARGS( classname, constructorargs )
+#	define EON_INLINE_HEADER_SUB( superclasses, classname )
+#	define EON_INLINE_HEADER_SUB_ARGS( superclasses, classname, constructorargs )
+#endif
+
+
+
+
+#if defined(EON_INLINE_TEST) && defined(EON_INLINE_TEST_PROJECT)
 
 	// Define a single-step unit test where 'finalstep' must produce the value to be compared.
-#	define EON_CMPTEST( classname, methodname, testname, test, expected, finalstep )\
+#	define EON_CMPTEST( classname, methodname, testname, expected, test, finalstep )\
 	class __EONTEST_NAME( classname, methodname, testname ) : public eonitest::__EonTest {\
 		__EONTEST_CONSTRUCT( classname, methodname, testname )\
 		__EON_CMPTEST_BODY( test, expected, , , finalstep )\
 	}; __EONTEST_REGISTER( classname, methodname, testname )
 
 	// Define a two-step unit test where 'finalstep' must produce the value to be compared.
-#	define EON_CMPTEST_2STEP( classname, methodname, testname, step1, test, expected, finalstep )\
+#	define EON_CMPTEST_2STEP( classname, methodname, testname, step1, expected, test, finalstep )\
 	class __EONTEST_NAME( classname, methodname, testname ) : public eonitest::__EonTest {\
 		__EONTEST_CONSTRUCT( classname, methodname, testname )\
 		__EON_CMPTEST_BODY( test, expected, step1, , finalstep )\
 	}; __EONTEST_REGISTER( classname, methodname, testname )
 
 	// Define a three-step unit test where 'finalstep' must produce the value to be compared.
-#	define EON_CMPTEST_3STEP( classname, methodname, testname, step1, step2, test, expected, finalstep )\
+#	define EON_CMPTEST_3STEP( classname, methodname, testname, step1, step2, expected, test, finalstep )\
 	class __EONTEST_NAME( classname, methodname, testname ) : public eonitest::__EonTest {\
 		__EONTEST_CONSTRUCT( classname, methodname, testname )\
 		__EON_CMPTEST_BODY( test, expected, step1, step2, finalstep )\
 	}; __EONTEST_REGISTER( classname, methodname, testname )
 
 #else
-#	define EON_CMPTEST( classname, methodname, testname, test, expected, actual )
-#	define EON_CMPTEST_2STEP( classname, methodname, testname, step1, test, expected, actual )
-#	define EON_CMPTEST_3STEP( classname, methodname, testname, step1, step2, test, expected, actual )
+#	define EON_CMPTEST( classname, methodname, testname, expected, test, actual )
+#	define EON_CMPTEST_2STEP( classname, methodname, testname, step1, expected, test, actual )
+#	define EON_CMPTEST_3STEP( classname, methodname, testname, step1, step2, expected, test, actual )
 #endif
 
 
@@ -250,30 +278,30 @@
 #if defined(EON_INLINE_TEST) && defined(EON_INLINE_TEST_PROJECT)
 
 	// Define a single-step unit test with sandbox where 'finalstep' must produce the value to be compared.
-#	define EON_CMPTEST_SANDBOX( classname, methodname, testname, test, expected, finalstep )\
+#	define EON_CMPTEST_SANDBOX( classname, methodname, testname, expected, test, finalstep )\
 	class __EONTEST_NAME( classname, methodname, testname ) : public eonitest::__EonTestSandbox {\
 		__EONTEST_CONSTRUCT_SANDBOX( classname, methodname, testname )\
 		__EON_CMPTEST_BODY( test, expected, , , finalstep )\
 	}; __EONTEST_REGISTER( classname, methodname, testname )
 
 	// Define a two-step unit test with sandbox where 'finalstep' must produce the value to be compared.
-#	define EON_CMPTEST_SANDBOX_2STEP( classname, methodname, testname, step1, test, expected, finalstep )\
+#	define EON_CMPTEST_SANDBOX_2STEP( classname, methodname, testname, step1, expected, test, finalstep )\
 	class __EONTEST_NAME( classname, methodname, testname ) : public eonitest::__EonTestSandbox {\
 		__EONTEST_CONSTRUCT_SANDBOX( classname, methodname, testname )\
 		__EON_CMPTEST_BODY( test, expected, step1, , finalstep )\
 	}; __EONTEST_REGISTER( classname, methodname, testname )
 
 	// Define a three-step unit test with sandbox where 'finalstep' must produce the value to be compared.
-#	define EON_CMPTEST_SANDBOX_3STEP( classname, methodname, testname, step1, step2, test, expected, finalstep )\
+#	define EON_CMPTEST_SANDBOX_3STEP( classname, methodname, testname, step1, step2, expected, test, finalstep )\
 	class __EONTEST_NAME( classname, methodname, testname ) : public eonitest::__EonTestSandbox {\
 		__EONTEST_CONSTRUCT_SANDBOX( classname, methodname, testname )\
 		__EON_CMPTEST_BODY( test, expected, step1, step2, finalstep )\
 	}; __EONTEST_REGISTER( classname, methodname, testname )
 
 #else
-#	define EON_CMPTEST_SANDBOX( classname, methodname, testname, test, expected, finalstep )
-#	define EON_CMPTEST_SANDBOX_2STEP( classname, methodname, testname, step1, test, expected, finalstep )
-#	define EON_CMPTEST_SANDBOX_3STEP( classname, methodname, testname, step1, step2, test, expected, finalstep )
+#	define EON_CMPTEST_SANDBOX( classname, methodname, testname, expected, test, finalstep )
+#	define EON_CMPTEST_SANDBOX_2STEP( classname, methodname, testname, step1, expected, test, finalstep )
+#	define EON_CMPTEST_SANDBOX_3STEP( classname, methodname, testname, step1, step2, expected, test, finalstep )
 #endif
 
 
