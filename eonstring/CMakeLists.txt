@@ -3,6 +3,7 @@ project(EonString LANGUAGES CXX)
 message(STATUS " - EonString")
 
 set(STRING_HEADERS
+	Locale.h
 	String.h
 	StringIterator.h
 	Substring.h
@@ -17,11 +18,25 @@ set(STRING_HEADERS
 	ByteSerializer.h
 	Stringifier.h
 	StringifierDefs.h
+	GlobPattern.h
 )
 set(STRING_SOURCES
+	Locale.cpp
 	String.cpp
+	StringAsNumber.cpp
+	StringAssign.cpp
+	StringConstruct.cpp
+	StringCopyTransform.cpp
+	StringIteration.cpp
+	StringModifying.cpp
+	StringStatic.cpp
+	StringSearching.cpp
 	StringIterator.cpp
 	Substring.cpp
+	SubstringReadOnly.cpp
+	SubstringAsNumber.cpp
+	SubstringComparing.cpp
+	SubstringSearching.cpp
 	UniChar.cpp
 	Name.cpp
 	NameData.cpp
@@ -30,6 +45,7 @@ set(STRING_SOURCES
 	Hex.cpp
 	Serializer.cpp
 	Stringifier.cpp
+	GlobPattern.cpp
 )
 
 if(WIN32)

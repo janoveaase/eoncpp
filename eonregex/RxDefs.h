@@ -7,6 +7,8 @@
 
 namespace eon
 {
+	EON_NAME( complete );
+
 	namespace rx
 	{
 		enum class NodeType

@@ -1,15 +1,16 @@
 #include "ToHtml.h"
-#include <eontypes/String.h>
+
+
 
 namespace eon
 {
-	string ToHtml::convert( const DataTuple& edoc )
+	string ToHtml::convert( const Tuple& edoc )
 	{
 		string html = "<div class=\"eon_frame\">\n";
 		for( auto& elm : edoc )
 		{
-			if( elm.type() == name_data )
-				_convert( *(const DataTuple*)elm.value(), false, html );
+			if( elm.type().isTuple() )
+				_convert( elm.value<Tuple>(), false, html );
 		}
 		for( auto toc = TocInserts.rbegin(); toc != TocInserts.rend(); ++toc )
 			_insertToc( toc->NumChar, toc->NumByte, toc->Level, html );
@@ -77,7 +78,7 @@ namespace eon
 		return str;
 	}
 
-	string ToHtml::makeDocument( const DataTuple& edoc, string title, const string& doc_css )
+	string ToHtml::makeDocument( const Tuple& edoc, string title, const string& doc_css )
 	{
 		string str;
 		str << "<!DOCTYPE html>\n";
@@ -115,12 +116,12 @@ namespace eon
 
 
 
-	void ToHtml::_convert( const DataTuple& dt, bool is_element, string& html )
+	void ToHtml::_convert( const Tuple& dt, bool is_element, string& html )
 	{
 		using std::placeholders::_1;
 		using std::placeholders::_2;
-		std::function<void (const DataTuple&, string&)> func = std::bind( &ToHtml::_convertH1, this, _1, _2 );
-		std::map<name_t, std::function<void (const DataTuple&, string& html)>> converters{
+		std::function<void (const Tuple&, string&)> func = std::bind( &ToHtml::_convertH1, this, _1, _2 );
+		std::map<name_t, std::function<void (const Tuple&, string& html)>> converters{
 			{ name_title, std::bind( &ToHtml::_convertTitle, this, _1, _2 ) },
 			{ name_h1, std::bind( &ToHtml::_convertH1, this, _1, _2 ) },
 			{ name_h2, std::bind( &ToHtml::_convertH2, this, _1, _2 ) },
@@ -138,7 +139,7 @@ namespace eon
 		};
 		if( !dt.exists( name_type ) )
 			return;
-		name_t type = dt.value<name_t>( name_type );
+		auto type = dt.get<name_t>( name_type );
 		auto converter = converters.find( type );
 		if( converter != converters.end() )
 		{
@@ -166,42 +167,44 @@ namespace eon
 		return html;
 	}
 
-	void ToHtml::_convertTitle( const DataTuple& dt, string& html )
+	void ToHtml::_convertTitle( const Tuple& dt, string& html )
 	{
 		if( dt.exists( name_value ) )
 		{
-			if( dt.at( name_value ).type() == name_string )
+			if( dt.attribute( name_value ).type() == name_string )
 			{
 				html << "<div class=\"eon_title\" id=\"";
-				html << _encode( dt.value<string>( name_value ).replace( " ", "_" ) );
-				html << "\">" << _encode( dt.value<string>( name_value ) );
+				html << _encode( dt.get<string>( name_value ).replace( " ", "_" ) );
+				html << "\">" << _encode( dt.get<string>( name_value ) );
 				html << "</div>";
-				if( !dt.hasFlag( name_no_indexing ) )
-					Headers.push_back( Header( dt.value<string>( name_value ), 1 ) );
+				if( !dt.flag( name_no_indexing ) )
+					Headers.push_back( Header( dt.get<string>( name_value ), 1 ) );
 			}
 		}
 	}
-	void ToHtml::_convertH( const DataTuple& dt, int level, string& html )
+	void ToHtml::_convertH( const Tuple& dt, int level, string& html )
 	{
 		if( dt.exists( name_value ) )
 		{
-			if( dt.at( name_value ).type() == name_string )
+			if( dt.attribute( name_value ).type() == name_string )
 			{
 				html << "<h" << level << " class=\"eon_h" << level << "\" id=\"";
-				html << _encode( dt.value<string>( name_value ).replace( " ", "_" ) );
-				html << "\">" << _encode( dt.value<string>( name_value ) );
+				html << _encode( dt.get<string>( name_value ).replace( " ", "_" ) );
+				html << "\">" << _encode( dt.get<string>( name_value ) );
 				html << "</h" << level << ">";
-				if( !dt.hasFlag( name_no_indexing ) )
-					Headers.push_back( Header( dt.value<string>( name_value ), level ) );
+				if( !dt.flag( name_no_indexing ) )
+					Headers.push_back( Header( dt.get<string>( name_value ), level ) );
 			}
 		}
 	}
 
-	void ToHtml::_convertList( const DataTuple& dt, string& html )
+	void ToHtml::_convertList( const Tuple& dt, string& html )
 	{
-		if( !dt.exists( name_list ) || !dt.exists( name_value ) || dt.at( name_value).type() != name_data )
+		if( !dt.exists( name_list )
+			|| !dt.exists( name_value )
+			|| dt.attribute( name_value ).type() != name_tuple )
 			return;
-		name_t type = dt.value<name_t>( name_list );
+		name_t type = dt.get<name_t>( name_list );
 		_endl( html );
 		if( type == name_bullet )
 			html << "<ul style=\"list-style-type:disc;\">\n";
@@ -209,13 +212,13 @@ namespace eon
 			html << "<ul style=\"list-style-type:square;\">\n";
 		else
 			html << "<ol>\n";
-		auto& value = dt.value<DataTuple>( name_value );
-		for( auto& value : value )
+		auto& value = dt.get<Tuple>( name_value );
+		for( auto& element : value )
 		{
-			if( value.type() != name_data )
+			if( element.type() != name_tuple )
 				continue;
 			html << "  <li>";
-			_convert( *(DataTuple*)value.value(), true, html );
+			_convert( element.value<Tuple>(), true, html );
 			html << "</li>\n";
 		}
 		if( type == name_enum )
@@ -224,55 +227,55 @@ namespace eon
 			html << "</ul>";
 	}
 
-	void ToHtml::_convertText( const DataTuple& dt, string& html )
+	void ToHtml::_convertText( const Tuple& dt, string& html )
 	{
 		if( !dt.exists( name_value ) )
 			return;
-		if( dt.at( name_value ).type() == name_string )
-			_convertPlainText( dt.value<string>( name_value ), html );
-		else if( dt.at( name_value ).type() == name_data )
-			_convertTextElements( dt.value<DataTuple>( name_value ), html );
+		if( dt.attribute( name_value ).type() == name_string )
+			_convertPlainText( dt.get<string>( name_value ), html );
+		else if( dt.attribute( name_value ).type() == name_tuple )
+			_convertTextElements( dt.get<Tuple>( name_value ), html );
 	}
-	void ToHtml::_convertParagraph( const DataTuple& dt, string& html )
+	void ToHtml::_convertParagraph( const Tuple& dt, string& html )
 	{
 		if( !dt.exists( name_value ) )
 			return;
 		html << "<p class=\"eon_paragraph\">\n  ";
-		if( dt.at( name_value ).type() == name_string )
-			_convertPlainText( dt.value<string>( name_value ), html );
-		else if( dt.at( name_value ).type() == name_data )
-			_convertTextElements( dt.value<DataTuple>( name_value ), html );
+		if( dt.attribute( name_value ).type() == name_string )
+			_convertPlainText( dt.get<string>( name_value ), html );
+		else if( dt.attribute( name_value ).type() == name_tuple )
+			_convertTextElements( dt.get<Tuple>( name_value ), html );
 		_endl( html );
 		html << "</p>";
 	}
-	void ToHtml::_convertTextElements( const DataTuple& dt, string& html, bool insert_definitions )
+	void ToHtml::_convertTextElements( const Tuple& dt, string& html, bool insert_definitions )
 	{
 		for( auto& elm : dt )
 		{
-			if( elm.type() == name_data )
+			if( elm.type() == name_tuple )
 			{
-				auto& value = *(const DataTuple*)elm.value();
-				if( value.exists( name_type ) && value.at( name_type ).type() == name_name && value.exists( name_value ) )
+				auto& value = elm.value<Tuple>();
+				if( value.exists( name_type ) && value.attribute( name_type ).type() == name_name && value.exists( name_value ) )
 				{
-					auto& value_type = value.at( name_value ).type();
+					auto& value_type = value.attribute( name_value ).type();
 					if( value_type == name_string )
 					{
-						name_t type = value.value<name_t>( name_type );
+						name_t type = value.get<name_t>( name_type );
 						if( type == name_text )
-							_convertPlainText( value.value<string>( name_value ), html, insert_definitions );
+							_convertPlainText( value.get<string>( name_value ), html, insert_definitions );
 						else if( type == name_emphasized )
-							_convertEmphasizedText( value.value<string>( name_value ), html );
+							_convertEmphasizedText( value.get<string>( name_value ), html );
 						else if( type == name_quoted )
-							_convertQuotedText( value.value<string>( name_value ), html );
+							_convertQuotedText( value.get<string>( name_value ), html );
 					}
-					else if( value_type == name_data )
-						_convertTextElements( value.value<DataTuple>( name_value ), html, insert_definitions );
+					else if( value_type == name_tuple )
+						_convertTextElements( value.get<Tuple>( name_value ), html, insert_definitions );
 				}
 				else
 				{
-					name_t type = value.value<name_t>( name_type );
+					name_t type = value.get<name_t>( name_type );
 					if( type == name_reference
-						&& value.exists( name_target ) && value.at( name_target ).type() == name_string )
+						&& value.exists( name_target ) && value.attribute( name_target ).type() == name_string )
 						_convertReference( value, html );
 					else if( type == name_newline )
 						html << "<br />\n  ";
@@ -335,10 +338,10 @@ namespace eon
 		_convertPlainText( text, html, false );
 		html << "\"</span>";
 	}
-	void ToHtml::_convertReference( const DataTuple& dt, string& html )
+	void ToHtml::_convertReference( const Tuple& dt, string& html )
 	{
 		static regex http_pattern{ R"((http(s)?)|ftp://)" };
-		string target = _encode( dt.value<string>( name_target ) );
+		string target = _encode( dt.get<string>( name_target ) );
 		html << "<a href=\"";
 		if( !http_pattern.match( target ) )
 		{
@@ -346,80 +349,80 @@ namespace eon
 			target = target.replace( " ", "_" );
 		}
 		html << target << "\" class=\"eon_reference\">";
-		if( dt.exists( name_caption ) && dt.at( name_caption ).type() == name_string )		
-			_convertPlainText( dt.value<string>( name_caption ), html, false );
+		if( dt.exists( name_caption ) && dt.attribute( name_caption ).type() == name_string )		
+			_convertPlainText( dt.get<string>( name_caption ), html, false );
 		else
 			_convertPlainText( target, html, false );
 		html << "</a>";
 	}
 
-	void ToHtml::_convertNote( const DataTuple& dt, string& html )
+	void ToHtml::_convertNote( const Tuple& dt, string& html )
 	{
 		if( dt.exists( name_value ) )
 			_convertShout( dt, "note", html );
 	}
-	void ToHtml::_convertWarning( const DataTuple& dt, string& html )
+	void ToHtml::_convertWarning( const Tuple& dt, string& html )
 	{
 		if( dt.exists( name_value ) )
 			_convertShout( dt, "warning", html );
 	}
-	void ToHtml::_convertTodo( const DataTuple& dt, string& html )
+	void ToHtml::_convertTodo( const Tuple& dt, string& html )
 	{
 		if( dt.exists( name_value ) )
 			_convertShout( dt, "todo", html );
 	}
-	void ToHtml::_convertTip( const DataTuple& dt, string& html )
+	void ToHtml::_convertTip( const Tuple& dt, string& html )
 	{
 		if( dt.exists( name_value ) )
 			_convertShout( dt, "tip", html );
 	}
-	void ToHtml::_convertShout( const DataTuple& dt, string shout, string& html )
+	void ToHtml::_convertShout( const Tuple& dt, string shout, string& html )
 	{
 		html << "<div class=\"eon_shout\">\n";
 		html << "  <div class=\"eon_" + shout + "\">" << shout.upper() << "!</div>\n";
 		html << "  <div class=\"eon_" + shout + "_text\">";
-		if( dt.at( name_value ).type() == name_string )
-			_convertPlainText( dt.value<string>( name_value ), html );
-		else if( dt.at( name_value ).type() == name_data )
-			_convertTextElements( *(DataTuple*)dt.at( name_value ).value(), html );
+		if( dt.attribute( name_value ).type() == name_string )
+			_convertPlainText( dt.get<string>( name_value ), html );
+		else if( dt.attribute( name_value ).type() == name_tuple )
+			_convertTextElements( dt.attribute( name_value ).value<Tuple>(), html );
 		html << "</div>\n</div>";
 	}
 
-	void ToHtml::_convertDefinition( const DataTuple& dt, string& html )
+	void ToHtml::_convertDefinition( const Tuple& dt, string& html )
 	{
-		if( !dt.exists( name_phrase ) || dt.at( name_phrase ).type() != name_string
+		if( !dt.exists( name_phrase ) || dt.attribute( name_phrase ).type() != name_string
 			|| !dt.exists( name_value ) || (
-				dt.at( name_value ).type() != name_string && dt.at( name_value ).type() != name_data ) )
+				dt.attribute( name_value ).type() != name_string && dt.attribute( name_value ).type() != name_tuple ) )
 			return;
 		html << "<div class=\"eon_define\"";
-		if( !dt.hasFlag( name_anonymous ) && !dt.hasFlag( name_quoted ) )
+		if( !dt.flag( name_anonymous ) && !dt.flag( name_quoted ) )
 		{
-			Definitions.push_back( Definition( dt.value<string>( name_phrase ), dt.value<string>( name_text ) ) );
-			html << " id=\"" << dt.value<string>( name_phrase ).replace( " ", "_" ) << "\"";
+			Definitions.push_back( Definition( dt.get<string>( name_phrase ), dt.get<string>( name_text ) ) );
+			html << " id=\"" << dt.get<string>( name_phrase ).replace( " ", "_" ) << "\"";
 		}
 		html << ">\n";
 		html << "  <div class=\"eon_phrase\"><span class=\"eon_phrase_";
-		if( dt.hasFlag( name_anonymous ) )
+		if( dt.flag( name_anonymous ) )
 			html << "anonymous";
-		else if( dt.hasFlag( name_quoted ) )
+		else if( dt.flag( name_quoted ) )
 			html << "quoted";
 		else
 			html << "normal";
-		html << "\">" << _encode( dt.value<string>( name_phrase ) ) << "</span> :</div>\n";
+		html << "\">" << _encode( dt.get<string>( name_phrase ) ) << "</span> :</div>\n";
 		html << "  <div class=\"eon_definition\">";
-		if( dt.at( name_value ).type() == name_string )
-			_convertPlainText( dt.value<string>( name_value ), html, false );
-		else if( dt.at( name_value ).type() == name_data )
-			_convertTextElements( dt.value<DataTuple>( name_value ), html, false );
+		if( dt.attribute( name_value ).type() == name_string )
+			_convertPlainText( dt.get<string>( name_value ), html, false );
+		else if( dt.attribute( name_value ).type() == name_tuple )
+			_convertTextElements( dt.get<Tuple>( name_value ), html, false );
 		html << "</div>\n";
 		html << "</div>";
 	}
 
-	void ToHtml::_convertInsert( const DataTuple& dt, string& html )
+	void ToHtml::_convertInsert( const Tuple& dt, string& html )
 	{
-		if( !dt.exists( name_insert ) || dt.at( name_insert ).type() != name_name )
+		if( !dt.exists( name_insert ) || dt.attribute( name_insert ).type() != name_name )
 			return;
-		name_t type = dt.value<name_t>( name_insert );
+		name_t type = dt.get<name_t>( name_insert );
 		if( type == name_hidden )
 			return;
 		html << "<div class=\"eon_insert_frame\">\n";
@@ -435,7 +438,7 @@ namespace eon
 			_convertImage( dt, html );
 		html << "</div>\n";
 	}
-	void ToHtml::_convertCode( const DataTuple& dt, string& html )
+	void ToHtml::_convertCode( const Tuple& dt, string& html )
 	{
 		html << "<div class=\"eon_insert_header_line\">";
 		html << "<span class=\"eon_insert_lead\">Code:</span>";
@@ -443,7 +446,7 @@ namespace eon
 		html << "</div>\n";
 		_convertInsertBody( dt, "code", html );
 	}
-	void ToHtml::_convertExample( const DataTuple& dt, string& html )
+	void ToHtml::_convertExample( const Tuple& dt, string& html )
 	{
 		html << "<div class=\"eon_insert_header_line\">";
 		html << "<span class=\"eon_insert_lead\">Example!</span>";
@@ -451,7 +454,7 @@ namespace eon
 		html << "</div>\n";
 		_convertInsertBody( dt, "example", html );
 	}
-	void ToHtml::_convertQuote( const DataTuple& dt, string& html )
+	void ToHtml::_convertQuote( const Tuple& dt, string& html )
 	{
 		html << "<div class=\"eon_insert_header_line\">";
 		html << "<span class=\"eon_insert_lead\">Quote!</span>";
@@ -459,18 +462,18 @@ namespace eon
 		html << "</div>\n";
 		_convertInsertBody( dt, "quote", html );
 	}
-	void ToHtml::_convertToc( const DataTuple& dt, string& html )
+	void ToHtml::_convertToc( const Tuple& dt, string& html )
 	{
 		html << "<div class=\"eon_insert_header_line\">";
 		_convertInsertHeader( dt, { { name_title, "eon_insert_title" } }, html );
 		html << "</div>\n";
 		html << "  <div class=\"eon_toc\"><";
 		TocInserts.push_back( TocInsert( html.last(), dt.exists( name_level )
-			? static_cast<int>( dt.value<int_t>( name_level ) ) : 4 ) );
+			? static_cast<int>( dt.get<int_t>( name_level ) ) : 4 ) );
 		html << "/div>\n";
 		_convertInsertBody( dt, "insert_subtext", html );
 	}
-	void ToHtml::_convertImage( const DataTuple& dt, string& html )
+	void ToHtml::_convertImage( const Tuple& dt, string& html )
 	{
 		html << "<div class=\"eon_insert_header_line\">";
 		_convertInsertHeader( dt, { { name_title, "eon_insert_title" } }, html );
@@ -478,21 +481,21 @@ namespace eon
 		if( dt.exists( name_source ) )
 		{
 			html << "  <div class=\"eon_image\"";
-			if( dt.exists( name_align ) && dt.at( name_align ).type() == name_name )
-				html << " style=\"float:" << str( dt.value<name_t>( name_align ) ) << ";\"";
-			html << "><img src=\"" << dt.value<string>( name_source ) << "\" ";
-			if( dt.exists( name_title ) && dt.at( name_title ).type() == name_string )
-				html << "alt=\"" << _encode( dt.value<string>( name_title ) ) << "\" ";
+			if( dt.exists( name_align ) && dt.attribute( name_align ).type() == name_name )
+				html << " style=\"float:" << str( dt.get<name_t>( name_align ) ) << ";\"";
+			html << "><img src=\"" << dt.get<string>( name_source ) << "\" ";
+			if( dt.exists( name_title ) && dt.attribute( name_title ).type() == name_string )
+				html << "alt=\"" << _encode( dt.get<string>( name_title ) ) << "\" ";
 			html << "/></div>\n";
 		}
 		_convertInsertBody( dt, "insert_subtext", html );
 	}
-	void ToHtml:: _convertInsertHeader( const DataTuple& dt, std::list<std::pair<name_t, string>> details, string& html )
+	void ToHtml:: _convertInsertHeader( const Tuple& dt, std::list<std::pair<name_t, string>> details, string& html )
 	{
 		bool have_any{ false };
 		for( auto& detail : details )
 		{
-			have_any = dt.exists( detail.first ) && dt.at( detail.first ).type() == name_string;
+			have_any = dt.exists( detail.first ) && dt.attribute( detail.first ).type() == name_string;
 			if( have_any )
 				break;
 		}
@@ -501,12 +504,12 @@ namespace eon
 
 		for( auto& detail : details )
 		{
-			if( dt.exists( detail.first ) && dt.at( detail.first ).type() == name_string )
-				html << "<span class=\"" << detail.second << "\">" << _encode( dt.value<string>( detail.first ) )
+			if( dt.exists( detail.first ) && dt.attribute( detail.first ).type() == name_string )
+				html << "<span class=\"" << detail.second << "\">" << _encode( dt.get<string>( detail.first ) )
 				<< "</span>";
 		}
 	}
-	void ToHtml::_convertInsertBody( const DataTuple& dt, string div_class, string& html )
+	void ToHtml::_convertInsertBody( const Tuple& dt, string div_class, string& html )
 	{
 		if( dt.exists( name_value ) )
 		{
@@ -516,21 +519,21 @@ namespace eon
 			html << "<" << ( code ? "pre" : "div" ) << " class=\"eon_" << div_class << "\">";
 			if( !code )
 				html << "\n";
-			if( dt.at( name_value ).type() == name_string )
+			if( dt.attribute( name_value ).type() == name_string )
 			{
 				if( code )
-					html << "\n" << dt.value<string>( name_value );
+					html << "\n" << dt.get<string>( name_value );
 				else
-					html << "    " << _encode( dt.value<string>( name_value ) );
+					html << "    " << _encode( dt.get<string>( name_value ) );
 			}
-			else if( dt.at( name_value ).type() == name_data )
+			else if( dt.attribute( name_value ).type() == name_tuple )
 			{
-				auto& values = dt.value<DataTuple>( name_value );
+				auto& values = dt.get<Tuple>( name_value );
 				bool first = true;
 				for( auto& val : values )
 				{
 					if( code )
-						html << "\n" << ( (StringInstance*)val.value() )->value();
+						html << "\n" << val.value<string>();
 					else
 					{
 						if( first )
@@ -538,7 +541,7 @@ namespace eon
 						else
 							html << "<br />\n";
 						if( val.type() == name_string )
-							html << "    " << _encode( ( (StringInstance*)val.value() )->value() );
+							html << "    " << _encode( val.value<string>() );
 					}
 				}
 			}

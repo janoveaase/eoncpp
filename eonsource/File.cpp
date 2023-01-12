@@ -11,7 +11,7 @@ namespace eon
 				throw BadName();
 			Name = name;
 #ifdef EON_WINDOWS
-			Data = std::ifstream( Name.wstr(), std::ios_base::in | std::ios_base::binary );
+			Data = std::ifstream( Name.stdwstr(), std::ios_base::in | std::ios_base::binary );
 #else
 			Data = std::ifstream( Name.stdstr(), std::ios_base::in | std::ios_base::binary );
 #endif
@@ -36,7 +36,7 @@ namespace eon
 				if( Data.fail() )
 					throw EndOfSource();
 			}
-				
+
 			Pos pos = start_point;
 			for( ; static_cast<size_t>( Data.tellg() ) < NumBytes && num_characters > 0; --num_characters )
 			{
@@ -50,7 +50,7 @@ namespace eon
 						break;
 				}
 				if( state != UTF8_ACCEPT )
-					throw InvalidUTF8( "Not a valid UTF-8 file" );					
+					throw InvalidUTF8( "Not a valid UTF-8 file" );
 				if( cp == NewlineChr )
 				{
 					if( pos.Line == LineLengths.size() )
@@ -129,6 +129,20 @@ namespace eon
 			}
 			return cp;
 		}
+		int File::byte( index_t pos ) noexcept
+		{
+			if( pos >= NumBytes )
+				return -1;
+			if( pos != Data.tellg() )
+			{
+				if( Data.fail() )
+					Data.clear();
+				Data.seekg( pos, std::ifstream::beg );
+				if( Data.fail() )
+					return -1;
+			}
+			return Data.get();
+		}
 
 		string File::str( Pos start, Pos end ) noexcept
 		{
@@ -139,6 +153,18 @@ namespace eon
 			string str;
 			for( auto p = start; p != end; p = push( p, 1 ) )
 				str += chr( p );
+			return str;
+		}
+
+		std::string File::bytes( Pos start, Pos end ) noexcept
+		{
+			if( end.bytePos() == 0 )
+				end.BytePos = NumBytes;
+			if( start.bytePos() >= NumBytes || end <= start )
+				return std::string();
+			std::string str;
+			for( auto p = start; p != end; p = push( p, 1 ) )
+				str += byte( p );
 			return str;
 		}
 	}

@@ -128,7 +128,7 @@ namespace eon
 		// Line of elements
 		struct Line
 		{
-			Line() = delete;
+			Line() {};
 			inline Line( index_t indentation ) { Indentation = indentation; }
 
 			inline bool empty() const noexcept { return Elements.empty(); }

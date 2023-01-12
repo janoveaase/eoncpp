@@ -19,6 +19,6 @@ namespace eonitest
 		eon::string elapsed() const;
 
 	private:
-		std::chrono::steady_clock::time_point Time;
+		std::chrono::high_resolution_clock::time_point Time;
 	};
 }

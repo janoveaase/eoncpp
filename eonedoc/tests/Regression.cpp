@@ -13,10 +13,10 @@ namespace eon
 		auto act = strf.generateString();
 		auto exp{
 			"data(\n"
-			"  (type=h1, value=\"Header1\"),\n"
-			"  (type=h2, value=\"Header2\"),\n"
-			"  (type=h3, value=\"Header 3\"),\n"
-			"  (type=h4, value=\"Header #4\"))"};
+			"  (type=h1, value=\"Header1\"),"
+			" (type=h2, value=\"Header2\"),"
+			" (type=h3, value=\"Header 3\"),"
+			" (type=h4, value=\"Header #4\"))"};
 		WANT_EQ( exp, act );
 	}
 
@@ -28,11 +28,10 @@ namespace eon
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp{
-			"data((type=list, list=bullet,\n"
-			"  value:\n"
-			"    (type=text, value=\"Item 1\"),\n"
-			"    (type=text, value=\"Item 2\"),\n"
-			"    (type=text, value=\"Item 3\")))" };
+			"data(\n"
+			"  (type=list, list=bullet,\n"
+			"    value:\n"
+			"      (type=text, value=\"Item 1\"), (type=text, value=\"Item 2\"), (type=text, value=\"Item 3\")))" };
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, dash_list )
@@ -43,11 +42,10 @@ namespace eon
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp{
-			"data((type=list, list=dash,\n"
-			"  value:\n"
-			"    (type=text, value=\"Item 1\"),\n"
-			"    (type=text, value=\"Item 2\"),\n"
-			"    (type=text, value=\"Item 3\")))" };
+			"data(\n"
+			"  (type=list, list=dash,\n"
+			"    value:\n"
+			"      (type=text, value=\"Item 1\"), (type=text, value=\"Item 2\"), (type=text, value=\"Item 3\")))" };
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, enum_list )
@@ -58,11 +56,10 @@ namespace eon
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp{
-			"data((type=list, list=enum,\n"
-			"  value:\n"
-			"    (type=text, value=\"Item 1\"),\n"
-			"    (type=text, value=\"Item 2\"),\n"
-			"    (type=text, value=\"Item 3\")))" };
+			"data(\n"
+			"  (type=list, list=enum,\n"
+			"    value:\n"
+			"      (type=text, value=\"Item 1\"), (type=text, value=\"Item 2\"), (type=text, value=\"Item 3\")))" };
 		WANT_EQ( exp, act );
 	}
 
@@ -72,15 +69,14 @@ namespace eon
 		auto output = doc.parse( "NOTE: This is a note!\nWARNING: A warning\nTODO: Do this!\nTIP: Nice tip!\n"
 			"NOTE: Can span\n  multiple lines!" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp{
 			"data(\n"
-			"  (type=note, value=\"This is a note!\"),\n"
-			"  (type=warning, value=\"A warning\"),\n"
-			"  (type=todo, value=\"Do this!\"),\n"
-			"  (type=tip, value=\"Nice tip!\"),\n"
-			"  (type=note, value=\"Can span multiple lines!\"))" };
+			"  (type=note, value=\"This is a note!\"), (type=warning, value=\"A warning\"),\n"
+			"  (type=todo, value=\"Do this!\"), (type=tip, value=\"Nice tip!\"), (type=note,\n"
+			"  value=\"Can span multiple lines!\"))" };
 		WANT_EQ( exp, act );
 	}
 
@@ -91,16 +87,19 @@ namespace eon
 			"  two words: Example of two word definition\n  multiline:\n    Line 1\n    Line 2\n"
 			"  !anonymous def: One\n  \"double quoted\":\n    Indented and anonymous" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
 			"data(\n"
-			"  (type=definition, phrase=\"alpha\", text=\"The first letter in the Greek alphabet\",\n"
-			"    value=\"The first letter in the Greek alphabet\"),\n"
-			"  (type=definition, phrase=\"two words\", text=\"Example of two word definition\", value=\"Example of two word definition\"),\n"
-			"  (type=definition, phrase=\"multiline\", text=\"Line 1 Line 2\", value=\"Line 1 Line 2\"),\n"
-			"  (type=definition, anonymous, phrase=\"anonymous def\", value=\"One\"),\n"
-			"  (type=definition, quoted, phrase=\"double quoted\", value=\"Indented and anonymous\"))";
+			"  (type=definition, phrase=\"alpha\",\n"
+			"  text=\"The first letter in the Greek alphabet\",\n"
+			"  value=\"The first letter in the Greek alphabet\"), (type=definition,\n"
+			"  phrase=\"two words\", text=\"Example of two word definition\",\n"
+			"  value=\"Example of two word definition\"), (type=definition, phrase=\"multiline\",\n"
+			"  text=\"Line 1 Line 2\", value=\"Line 1 Line 2\"), (type=definition, anonymous,\n"
+			"  phrase=\"anonymous def\", value=\"One\"), (type=definition, quoted,\n"
+			"  phrase=\"double quoted\", value=\"Indented and anonymous\"))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, definition2 )
@@ -114,6 +113,7 @@ namespace eon
 			"  B:\n"
 			"    A B!" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
@@ -121,8 +121,9 @@ namespace eon
 			"  (type=paragraph,\n"
 			"    value:\n"
 			"      (type=text, value=\"Plain text.\")),\n"
-			"  (type=definition, quoted, phrase=\"{A}\", value=\"Match element exactly A number of times.\"),\n"
-			"  (type=definition, phrase=\"B\", text=\"A B!\", value=\"A B!\"))";
+			"  (type=definition, quoted, phrase=\"{A}\",\n"
+			"  value=\"Match element exactly A number of times.\"), (type=definition,\n"
+			"  phrase=\"B\", text=\"A B!\", value=\"A B!\"))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, definition3 )
@@ -132,14 +133,17 @@ namespace eon
 			"  \"@<A>(B)\":\n"
 			"    Match B (a sub-expression) and record using the group name A. Example: \"@<eonname>(\\w+{name})\"." );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
-			"data((type=definition, quoted, phrase=\"@<A>(B)\",\n"
-			"  value:\n"
-			"    (type=text, value=\"Match B (a sub-expression) and record using the group name A. Example: \"),\n"
-			"    (type=quoted, value=\"@<eonname>(\\\\w+{name})\"),\n"
-			"    (type=text, value=\".\")))";
+			"data(\n"
+			"  (type=definition, quoted, phrase=\"@<A>(B)\",\n"
+			"    value:\n"
+			"      (type=text,\n"
+			"      value=\"\n"
+			"      Match B (a sub-expression) and record using the group name A. Example: \"),\n"
+			"      (type=quoted, value=\"@<eonname>(\\w+{name})\"), (type=text, value=\".\")))";
 		WANT_EQ( exp, act );
 	}
 
@@ -154,18 +158,21 @@ namespace eon
 			"  --image source=nice.png align=right A nice image-->Probably a non-existing image<--\n"
 			"  --hidden Don't peek!-->This text is hidden!<--\n" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
 			"data(\n"
-			"  (type=insert, insert=code, lang=\"C++\", title=\"A code sample\", value=\"One-liner\"),\n"
-			"  (type=insert, insert=example, title=\"Something amazing\",\n"
+			"  (type=insert, insert=code, lang=\"C++\", title=\"A code sample\",\n"
+			"  value=\"One-liner\"), (type=insert, insert=example, title=\"Something amazing\",\n"
 			"    value:\n"
 			"      \"This is a line.\", \"Another line.\"),\n"
 			"  (type=insert, insert=quote, source=\"Someone famous\", value=\"The quote!\"),\n"
-			"  (type=insert, insert=toc, level=2, title=\"Table of Contents\", value=\"Text below\"),\n"
-			"  (type=insert, insert=image, source=\"nice.png\", align=right, title=\"A nice image\", value=\"Probably a non-existing image\"),\n"
-			"  (type=insert, insert=hidden, title=\"Don't peek!\", value=\"This text is hidden!\"))";
+			"  (type=insert, insert=toc, level=2, title=\"Table of Contents\",\n"
+			"  value=\"Text below\"), (type=insert, insert=image, source=\"nice.png\",\n"
+			"  align=right, title=\"A nice image\", value=\"Probably a non-existing image\"),\n"
+			"  (type=insert, insert=hidden, title=\"Don't peek!\",\n"
+			"  value=\"This text is hidden!\"))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, insert2 )
@@ -192,17 +199,16 @@ namespace eon
 		edoc doc;
 		auto output = doc.parse( "Plain text\nMore plain text.\n\nNew paragraph!" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp{
 			"data(\n"
 			"  (type=paragraph,\n"
 			"    value:\n"
-			"      (type=text, value=\"Plain text\"),\n"
-			"      (type=text,\n"
+			"      (type=text, value=\"Plain text\"), (type=text,\n"
 			"        value:\n"
-			"          (type=newline),\n"
-			"          (type=text, value=\"More plain text.\"))),\n"
+			"          (type=newline), (type=text, value=\"More plain text.\"))),\n"
 			"  (type=paragraph,\n"
 			"    value:\n"
 			"      (type=text, value=\"New paragraph!\")))" };
@@ -213,33 +219,29 @@ namespace eon
 		edoc doc;
 		auto output = doc.parse( "*BOLD*\nA *bold* move with *bold* text.\nalpha !*beta* *gamma* * delta *epsilon*\n not*bold*" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
-			"data((type=paragraph,\n"
-			"  value:\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=emphasized, value=\"BOLD\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"A \"),\n"
-			"        (type=emphasized, value=\"bold\"),\n"
-			"        (type=text, value=\" move with \"),\n"
-			"        (type=emphasized, value=\"bold\"),\n"
-			"        (type=text, value=\" text.\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"alpha *beta* \"),\n"
-			"        (type=emphasized, value=\"gamma\"),\n"
-			"        (type=text, value=\" * delta \"),\n"
-			"        (type=emphasized, value=\"epsilon\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\" not*bold*\"))))";
+			"data(\n"
+			"  (type=paragraph,\n"
+			"    value:\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=emphasized, value=\"BOLD\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"A \"), (type=emphasized,\n"
+			"          value=\"bold\"), (type=text, value=\" move with \"), (type=emphasized,\n"
+			"          value=\"bold\"), (type=text, value=\" text.\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"alpha *beta* \"), (type=emphasized,\n"
+			"          value=\"gamma\"), (type=text, value=\" * delta \"), (type=emphasized,\n"
+			"          value=\"epsilon\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\" not*bold*\"))))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, emphasize_1 )
@@ -250,13 +252,12 @@ namespace eon
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
-			"data((type=paragraph,\n"
-			"  value:\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=text, value=\"(\"),\n"
-			"        (type=emphasized, value=\"BOLD\"),\n"
-			"        (type=text, value=\")\"))))";
+			"data(\n"
+			"  (type=paragraph,\n"
+			"    value:\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=text, value=\"(\"), (type=emphasized, value=\"BOLD\"), (type=text, value=\")\"))))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, quote )
@@ -265,30 +266,26 @@ namespace eon
 		auto output = doc.parse(
 			"\"QUOTED\"\nA \"quoted\" text with \" quoted contents\".\nalpha \"beta\" \"gamma  delta \"epsilon\"" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
-			"data((type=paragraph,\n"
-			"  value:\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=quoted, value=\"QUOTED\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"A \"),\n"
-			"        (type=quoted, value=\"quoted\"),\n"
-			"        (type=text, value=\" text with \"),\n"
-			"        (type=quoted, value=\" quoted contents\"),\n"
-			"        (type=text, value=\".\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"alpha \"),\n"
-			"        (type=quoted, value=\"beta\"),\n"
-			"        (type=text, value=\" \"),\n"
-			"        (type=quoted, value=\"gamma  delta \"),\n"
-			"        (type=text, value=\"epsilon\\\"\"))))";
+			"data(\n"
+			"  (type=paragraph,\n"
+			"    value:\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=quoted, value=\"QUOTED\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"A \"), (type=quoted,\n"
+			"          value=\"quoted\"), (type=text, value=\" text with \"), (type=quoted,\n"
+			"          value=\" quoted contents\"), (type=text, value=\".\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"alpha \"), (type=quoted,\n"
+			"          value=\"beta\"), (type=text, value=\" \"), (type=quoted,\n"
+			"          value=\"gamma  delta \"), (type=text, value=\"epsilon\\\"\"))))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, reference )
@@ -299,32 +296,31 @@ namespace eon
 			"A [reference] text with [key:references in it].\nalpha ![noref] ![nokey:noreference]\n"
 			"A [http:http://somewhere.com] reference." );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
-			"data((type=paragraph,\n"
-			"  value:\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=reference, target=\"REFERENCE\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"A \"),\n"
-			"        (type=reference, target=\"reference\"),\n"
-			"        (type=text, value=\" text with \"),\n"
-			"        (type=reference, caption=\"key\", target=\"references in it\"),\n"
-			"        (type=text, value=\".\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"alpha [noref] [nokey:noreference]\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"A \"),\n"
-			"        (type=reference, caption=\"http\", target=\"http://somewhere.com\"),\n"
-			"        (type=text, value=\" reference.\"))))";
+			"data(\n"
+			"  (type=paragraph,\n"
+			"    value:\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=reference, target=\"REFERENCE\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"A \"), (type=reference,\n"
+			"          target=\"reference\"), (type=text, value=\" text with \"),\n"
+			"          (type=reference, caption=\"key\", target=\"references in it\"),\n"
+			"          (type=text, value=\".\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text,\n"
+			"          value=\"alpha [noref] [nokey:noreference]\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"A \"), (type=reference,\n"
+			"          caption=\"http\", target=\"http://somewhere.com\"), (type=text,\n"
+			"          value=\" reference.\"))))";
 		WANT_EQ( exp, act );
 	}
 	TEST( EdocTest, http )
@@ -333,26 +329,25 @@ namespace eon
 		auto output = doc.parse(
 			"ftp://here.we.are\nA http://link.com with https://some.or-other?thing&todo+here.\n!http://nolink.com" );
 		Stringifier strf;
+		strf.hardLineWidth( 80 );
 		output.str( strf );
 		auto act = strf.generateString();
 		auto exp =
-			"data((type=paragraph,\n"
-			"  value:\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=reference, target=\"ftp://here.we.are\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"A \"),\n"
-			"        (type=reference, target=\"http://link.com\"),\n"
-			"        (type=text, value=\" with \"),\n"
-			"        (type=reference, target=\"https://some.or-other?thing&todo+here\"),\n"
-			"        (type=text, value=\".\")),\n"
-			"    (type=text,\n"
-			"      value:\n"
-			"        (type=newline),\n"
-			"        (type=text, value=\"http://nolink.com\"))))";
+			"data(\n"
+			"  (type=paragraph,\n"
+			"    value:\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=reference, target=\"ftp://here.we.are\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"A \"), (type=reference,\n"
+			"          target=\"http://link.com\"), (type=text, value=\" with \"),\n"
+			"          (type=reference, target=\"https://some.or-other?thing&todo+here\"),\n"
+			"          (type=text, value=\".\")),\n"
+			"      (type=text,\n"
+			"        value:\n"
+			"          (type=newline), (type=text, value=\"http://nolink.com\"))))";
 		WANT_EQ( exp, act );
 	}
 
@@ -711,7 +706,7 @@ namespace eon
 			">> Another top level section\n"
 			"We can add a link to https://wikipedia.org, or we can add the same link with a link [caption:https://wikipedia.org].\n"
 		};
-		DataTuple dt;
+		Tuple dt;
 		REQUIRE_NO_EXCEPT( dt = edoc().parse( input ) ) << "Failed to parse EDOC!";
 		file output{ path( sandbox() ) / "output.html" };
 		REQUIRE_NO_EXCEPT( output.save( ToHtml().makeDocument( dt, "This is a test" ) ) );

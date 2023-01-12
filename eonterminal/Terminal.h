@@ -38,10 +38,12 @@ namespace eon
 		quote,          // dark blue    light yellow
 		reference,      // dark yellow  default
 		code,           // dark red     light gray
-		left,			// yellow       default
-		right,			// cyan         default
-		left_value,     // black        light yellow
-		right_value,    // black		light cyan
+		key_1,			// yellow       default
+		key_2,			// cyan         default
+		key_3,			// green        default
+		value_1,		// black        light yellow
+		value_2,		// black        light cyan
+		value_3,		// black        light green
 	};
 
 
@@ -170,7 +172,7 @@ namespace eon
 
 		//* Output string using current style
 		Terminal& operator<<( string data );
-		inline Terminal& operator<<( name_t name ) { return *this << eon::str( name ); }
+		Terminal& operator<<( name_t name );
 		inline Terminal& operator<<( const char* data ) { return *this << eon::string( data ); }
 		inline Terminal& operator<<( const unsigned char* data ) { return *this << eon::string( data ); }
 		inline Terminal& operator<<( const std::string& data ) { return *this << eon::string( data ); }
@@ -202,7 +204,7 @@ namespace eon
 
 
 
-		
+
 		///////////////////////////////////////////////////////////////////////
 		//
 		// Attributes

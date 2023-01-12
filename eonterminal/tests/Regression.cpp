@@ -37,11 +37,11 @@ namespace eon
 		term << "reference:  " << style::reference << " The quick brown fox jumped over the lazy dog "
 			<< style::normal << "\n";
 		term << "code:       " << style::code << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "left:       " << style::left << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "right:      " << style::right << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
-		term << "left_value: " << style::left_value << " The quick brown fox jumped over the lazy dog " << style::normal
+		term << "left:       " << style::key_1<< " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "right:      " << style::key_2 << " The quick brown fox jumped over the lazy dog " << style::normal << "\n";
+		term << "left_value: " << style::value_1 << " The quick brown fox jumped over the lazy dog " << style::normal
 			<< "\n";
-		term << "right_value:" << style::right_value << " The quick brown fox jumped over the lazy dog " << style::normal
+		term << "right_value:" << style::value_2 << " The quick brown fox jumped over the lazy dog " << style::normal
 			<< "\n";
 	}
 

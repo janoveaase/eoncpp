@@ -1,5 +1,5 @@
 #pragma once
-#include <eontypes/DataTuple.h>
+#include <eontypesystem/Tuple.h>
 #include "Edoc.h"
 
 
@@ -80,20 +80,20 @@ namespace eon
 		//   eon_toc2          : A toc element/line 'div' at indentation level 2
 		//   eon_toc3          : A toc element/line 'div' at indentation level 3
 		//   eon_toc4          : A toc element/line 'div' at indentation level 4
-		string convert( const DataTuple& edoc );
+		string convert( const Tuple& edoc );
 
 		// Get Æon default style sheet (CSS)
 		string css();
 
 		// Generate a complete HTML document
 		// Parameters:
-		//   edoc  : DataTuple containing EDOC documentation.
+		//   edoc  : Tuple containing EDOC documentation.
 		//   title : Document title.
 		//   css   : Name of style sheet to use (path should be relative to
 		//           where the HTML document is to be saved). If empty, the Æon
 		//           default style sheet will be inserted into the header of
 		//           the document.
-		string makeDocument( const DataTuple& edoc, string title, const string& doc_css = "" );
+		string makeDocument( const Tuple& edoc, string title, const string& doc_css = "" );
 
 
 
@@ -104,44 +104,44 @@ namespace eon
 		//
 	private:
 
-		void _convert( const DataTuple& dt, bool is_element, string& html );
+		void _convert( const Tuple& dt, bool is_element, string& html );
 
 		inline void _endl( string& html ) { if( !html.empty() && !html.endsWith( NewlineChr ) ) html << "\n"; }
 		string _encode( const string& str );
 
-		void _convertTitle( const DataTuple& dt, string& html );
-		inline void _convertH1( const DataTuple& dt, string& html ) { _convertH( dt, 1, html ); }
-		inline void _convertH2( const DataTuple& dt, string& html ) { _convertH( dt, 2, html ); }
-		inline void _convertH3( const DataTuple& dt, string& html ) { _convertH( dt, 3, html ); }
-		inline void _convertH4( const DataTuple& dt, string& html ) { _convertH( dt, 4, html ); }
-		void _convertH( const DataTuple& dt, int level, string& html );
+		void _convertTitle( const Tuple& dt, string& html );
+		inline void _convertH1( const Tuple& dt, string& html ) { _convertH( dt, 1, html ); }
+		inline void _convertH2( const Tuple& dt, string& html ) { _convertH( dt, 2, html ); }
+		inline void _convertH3( const Tuple& dt, string& html ) { _convertH( dt, 3, html ); }
+		inline void _convertH4( const Tuple& dt, string& html ) { _convertH( dt, 4, html ); }
+		void _convertH( const Tuple& dt, int level, string& html );
 
-		void _convertList( const DataTuple& dt, string& html );
+		void _convertList( const Tuple& dt, string& html );
 
-		void _convertText( const DataTuple& dt, string& html );
-		void _convertParagraph( const DataTuple& dt, string& html );
-		void _convertTextElements( const DataTuple& dt, string& html, bool insert_definitions = true );
+		void _convertText( const Tuple& dt, string& html );
+		void _convertParagraph( const Tuple& dt, string& html );
+		void _convertTextElements( const Tuple& dt, string& html, bool insert_definitions = true );
 		void _convertPlainText( string text, string& html, bool insert_definitions = true );
 		void _convertEmphasizedText( const string& text, string& html );
 		void _convertQuotedText( const string& text, string& html );
-		void _convertReference( const DataTuple& dt, string& html );
+		void _convertReference( const Tuple& dt, string& html );
 
-		void _convertNote( const DataTuple& dt, string& html );
-		void _convertWarning( const DataTuple& dt, string& html );
-		void _convertTodo( const DataTuple& dt, string& html );
-		void _convertTip( const DataTuple& dt, string& html );
-		void _convertShout( const DataTuple& dt, string shout, string& html );
+		void _convertNote( const Tuple& dt, string& html );
+		void _convertWarning( const Tuple& dt, string& html );
+		void _convertTodo( const Tuple& dt, string& html );
+		void _convertTip( const Tuple& dt, string& html );
+		void _convertShout( const Tuple& dt, string shout, string& html );
 
-		void _convertDefinition( const DataTuple& dt, string& html );
+		void _convertDefinition( const Tuple& dt, string& html );
 
-		void _convertInsert( const DataTuple& dt, string& html );
-		void _convertCode( const DataTuple& dt, string& html );
-		void _convertExample( const DataTuple& dt, string& html );
-		void _convertQuote( const DataTuple& dt, string& html );
-		void _convertToc( const DataTuple& dt, string& html );
-		void _convertImage( const DataTuple& dt, string& html );
-		void _convertInsertHeader( const DataTuple& dt, std::list<std::pair<name_t, string>> details, string& html );
-		void _convertInsertBody( const DataTuple& dt, string div_class, string& html );
+		void _convertInsert( const Tuple& dt, string& html );
+		void _convertCode( const Tuple& dt, string& html );
+		void _convertExample( const Tuple& dt, string& html );
+		void _convertQuote( const Tuple& dt, string& html );
+		void _convertToc( const Tuple& dt, string& html );
+		void _convertImage( const Tuple& dt, string& html );
+		void _convertInsertHeader( const Tuple& dt, std::list<std::pair<name_t, string>> details, string& html );
+		void _convertInsertBody( const Tuple& dt, string div_class, string& html );
 
 		void _insertToc( index_t num_char, index_t num_byte, int level, string& html );
 

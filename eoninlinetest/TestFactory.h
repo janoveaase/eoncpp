@@ -9,8 +9,10 @@
 //
 namespace eonitest
 {
+	class TestBase;
+	using TestPtr = std::shared_ptr<TestBase>;
+
 	class __EonTestBase;
-	using __EonTestPtr = std::shared_ptr<__EonTestBase>;
 
 	// Factory class for creating test object
 	class FactoryMain
@@ -18,16 +20,15 @@ namespace eonitest
 	public:
 		FactoryMain() = default;
 		virtual ~FactoryMain() = default;
-		virtual __EonTestPtr createTest() = 0;
+		virtual TestPtr create() = 0;
 	};
 
 	// Factory class for specific test.
 	template<typename T>
-	class TestFactory : public FactoryMain
+	class TstFactory : public FactoryMain
 	{
 	public:
-		TestFactory() = default;
-		__EonTestPtr createTest() override {
-			return std::make_shared<T>(); }
+		TstFactory() = default;
+		TestPtr create() override { return std::make_shared<T>(); }
 	};
 }

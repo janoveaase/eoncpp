@@ -1,32 +1,51 @@
 #include "TestBase.h"
 #include "Timer.h"
+#include <eonstring/GlobPattern.h>
 
 
 
 void usage( const std::filesystem::path& prog )
 {
-	eon::term << "Usage: " << eon::style::cyan << prog.c_str() << eon::style::normal << " ";
-	eon::term << eon::style::weak << "[" << eon::style::yellow << "--class" << eon::style::normal << "="
-		<< eon::style::yellow << "<name>" << eon::style::weak << "]" << eon::style::normal;
-	eon::term << " " << eon::style::weak << "[" << eon::style::yellow << "--method" << eon::style::normal << "="
-		<< eon::style::yellow << "<name>" << eon::style::weak << "]" << eon::style::normal;
-	eon::term << " " << eon::style::weak << "[" << eon::style::yellow << "--test" << eon::style::normal << "="
-		<< eon::style::yellow << "<name>" << eon::style::weak << "]" << eon::style::normal;
+	auto cwd = std::filesystem::current_path();
+	auto c = cwd.begin(), p = prog.begin();
+	for( ; c != cwd.end() && p != prog.end() && *c == *p; ++c, ++p )
+		;
+	std::filesystem::path exe;
+	for( ; p != prog.end(); ++p )
+		exe /= *p;
+	eon::term << "Usage: " << eon::style::cyan << exe.c_str() << eon::style::normal << " ";
+
+	eon::term << eon::style::weak << "[" << eon::style::yellow << "-c" << eon::style::normal << "="
+		<< eon::style::yellow << "<class name>" << eon::style::weak << "]" << eon::style::normal;
+	eon::term << eon::style::weak << "[" << eon::style::yellow << "-f" << eon::style::normal << "="
+		<< eon::style::yellow << "<function name>" << eon::style::weak << "]" << eon::style::normal;
+	eon::term << eon::style::weak << "[" << eon::style::yellow << "-t" << eon::style::normal << "="
+		<< eon::style::yellow << "<test name>" << eon::style::weak << "]" << eon::style::normal;
+
 	eon::term << "\n";
 	eon::term << eon::style::strong << "Options:" << eon::style::normal << "\n";
-	eon::term << "  " << eon::style::yellow << "--class" << eon::style::normal
-		<< "  : Name of class to run tests for. Default is to run for all classes!\n";
-	eon::term << "  " << eon::style::yellow << "--method" << eon::style::normal
-		<< " : Name of method to run tests for. Default is to run for all methods!\n";
-	eon::term << "  " << eon::style::yellow << "--test" << eon::style::normal
-		<< "   : Name of test to run (for specified class(es) and method(s)).\n";
-	eon::term << "             Default is to run all tests!\n";
+	eon::term << "  " << eon::style::yellow << "-c" << eon::style::normal
+		<< " : Name of class to run tests for. Default is " << eon::style::weak << "\""
+		<< eon::style::yellow << "*" << eon::style::weak << "\"" << eon::style::normal << "!\n";
+	eon::term << "  " << eon::style::yellow << "-f" << eon::style::normal
+		<< " : Name of function/method to run tests for. Default is " << eon::style::weak << "\""
+		<< eon::style::yellow << "*" << eon::style::weak << "\"" << eon::style::normal << "!\n";
+	eon::term << "  " << eon::style::yellow << "-t" << eon::style::normal
+		<< " : Name of test to run (for specified class(es) and function(s)). Default is " << eon::style::weak << "\""
+		<< eon::style::yellow << "*" << eon::style::weak << "\"" << eon::style::normal << "!\n";
+
+	eon::term << "All names can contain wildcards '" << eon::style::code << "*" << eon::style::normal << "' and '"
+		<< eon::style::code << "?" << eon::style::normal << "'! (Match zero or more arbitrary ";
+	eon::term << "characters and match exactly one arbitrary character respectively.)\n";
+	eon::term << eon::style::note << "NOTE:" << eon::style::normal << " Will ignore case when matching names!\n";
 }
 
 class Args
 {
 public:
 	std::filesystem::path Exe;
+	eon::string Cls, Func, Tst;
+
 	eon::string Class;
 	eon::string Method;
 	eon::string Test;
@@ -49,12 +68,14 @@ Args processArgs( int argc, const char* argv[] )
 			args.Result = -1;
 			break;
 		}
-		else if( arg.startsWith( "--class=" ) )
-			args.Class = arg.substr( arg.begin() + 8 );
-		else if( arg.startsWith( "--method=" ) )
-			args.Method = arg.substr( arg.begin() + 9 );
-		else if( arg.startsWith( "--test=" ) )
-			args.Test = arg.substr( arg.begin() + 7 );
+
+		else if( arg.startsWith( "-c=" ) )
+			args.Cls = arg.substr( arg.begin() + 3 );
+		else if( arg.startsWith( "-f=" ) )
+			args.Func = arg.substr( arg.begin() + 3 );
+		else if( arg.startsWith( "-t=" ) )
+			args.Tst = arg.substr( arg.begin() + 3 );
+
 		else
 		{
 			eon::term << eon::style::error << "ERROR: Invalid argument!" << eon::style::normal << "\n";
@@ -66,53 +87,91 @@ Args processArgs( int argc, const char* argv[] )
 	return args;
 }
 
-eonitest::__EonTestPtr createTest( eonitest::__EonTestBase::TestRef& test ) noexcept
+eonitest::TestPtr create( eonitest::TestBase::TestRef& test ) noexcept
 {
 	try
 	{
-		return test.Factory->createTest();
+		return test.Factory->create();
 	}
 	catch( ... )
 	{
-		return eonitest::__EonTestPtr();
+		return eonitest::TestPtr();
 	}
 }
 
-eonitest::__Result runTest( eonitest::__EonTestBase::TestRef& test ) noexcept
+
+eonitest::TestPtr run( eonitest::TestBase::TestRef& test ) noexcept
 {
-	eonitest::__EonTestPtr test_obj;
-	try {
-		test_obj = test.Factory->createTest(); }
-	catch( ... ) { }
+	eonitest::TestPtr test_obj;
+	try
+	{
+		test_obj = test.Factory->create();
+	}
+	catch( ... ) {}
 	if( !test_obj )
-		return eonitest::__Result::failedToConstruct();
+		return test_obj;
 
 	try
 	{
-		return test_obj->_runEonTest_();
+		eon::locale base_eon_locale = eon::locale::get();
+		std::locale base_std_locale;
+		bool success = test_obj->runTest();
+		std::locale::global( base_std_locale );
+		eon::locale::set( base_eon_locale );
 	}
 	catch( eon::exception& e )
 	{
-		return eonitest::__Result::failureByException( "eon::exception", e.details() );
+		test_obj->Details.Success = false;
+		test_obj->Details.Log << eonitest::style::error << "ERROR!" << " Got an eon::exception!" << '\n';
+		test_obj->Details.Log << "  " << eonitest::style::key << "Name"
+			<< eonitest::style::value << eon::str( e.name() ) << '\n';
+		test_obj->Details.Log << "  " << eonitest::style::key << "Info" << eonitest::style::value << e.info() << '\n';
 	}
 	catch( std::exception& e )
 	{
-		eon::string details = typeid( e ).name();
-		eon::string what = e.what();
-		details += what.trim();
-		return eonitest::__Result::failureByException( "std::exception", details );
+		test_obj->Details.Success = false;
+		test_obj->Details.Log << eonitest::style::error << "ERROR!" << " Got an std::exception!" << '\n';
+		eon::string type = typeid( e ).name();
+		eon::string what = eon::string( e.what() ).trim();
+		test_obj->Details.Log << "  " << eonitest::style::key << "Type"
+			<< eonitest::style::value << type << '\n';
+		if( !what.empty() )
+			test_obj->Details.Log << "  " << eonitest::style::key << "What" << eonitest::style::value << what << '\n';
 	}
 	catch( ... )
 	{
-		return eonitest::__Result::failureByException( "exception", "Unknown" );
+		test_obj->Details.Success = false;
+		test_obj->Details.Log << eonitest::style::error << "ERROR!" << " Got an unknown exception!" << '\n';
 	}
+	return test_obj;
 }
 
-void reportTestStart( const eonitest::__EonTestName& name )
+
+void reportSpecifications( eon::string cls_name, eon::string func_name, eon::string tst_name )
 {
-	eon::term << "Class=" << eon::style::green << name.className() << eon::style::normal;
-	eon::term << " Method=" << eon::style::blue << name.methodName() << eon::style::normal;
-	eon::term << " Test=" << eon::style::yellow << name.testName() << eon::style::normal;
+	if( cls_name == "*" )
+		cls_name = "";
+	if( func_name == "*" )
+		func_name = "";
+	if( tst_name == "*" )
+		tst_name = "";
+	if( cls_name.empty() && func_name.empty() && tst_name.empty() )
+		return;
+	eon::term << "Running only tests matching";
+	if( !cls_name.empty() )
+		eon::term << eon::style::weak << " class=" << eon::style::strong << cls_name;
+	if( !func_name.empty() )
+		eon::term << eon::style::weak << " function=" << eon::style::strong << func_name;
+	if( !tst_name.empty() )
+		eon::term << eon::style::weak << " test=" << eon::style::strong << tst_name;
+	eon::term << eon::style::normal << "!\n\n";
+}
+
+void reportTestStart( const eonitest::TestName& name )
+{
+	eon::term << eon::style::weak << "Class=" << eon::style::strong << name.ClsName << eon::style::normal;
+	eon::term << eon::style::weak << " Func=" << eon::style::strong << name.FuncName << eon::style::normal;
+	eon::term << eon::style::weak << " Test=" << eon::style::strong << name.TstName << eon::style::normal;
 	if( name.length() < 50 )
 		eon::term << eon::string().padRight( 50 - name.length() );
 }
@@ -122,75 +181,54 @@ void reportTestOK()
 	eon::term << eon::style::success << " OK " << eon::style::normal << "\n";
 }
 
-void reportTestFail( const ::eonitest::__Result& result, const ::eonitest::__EonLocation& location )
+void reportTestFail( const eonitest::TestDetails& details, const eonitest::TestLocation& location )
 {
 	eon::term << eon::style::error << "FAIL" << eon::style::normal << "\n";
-	eon::term << "  Location : " << eon::style::yellow << location.file() << eon::style::normal << ":"
-		<< eon::style::magenta << location.line() << eon::style::normal << "\n";
-	if( result.constructError() )
-		eon::term << "  Failed to construct test!\n";
-	else if( result.exceptionError() )
+	eon::term << "  " << eon::style::strong << "Location  : " << eon::style::yellow << location.File << eon::style::normal
+		<< ":" << eon::style::magenta << location.NumLine << eon::style::normal << "\n";
+	for( auto& line : details.Log.Lines )
 	{
-		eon::term << "  Got unexpected exception!\n";
-		eon::term << "  Type   : " << eon::style::cyan << result.ExceptionType << eon::style::normal << "\n";
-		eon::term << "  Details: " << eon::style::code << result.ExceptionDetails << eon::style::normal << "\n";
-		if( !result.Details.empty() )
-			eon::term << "  " << result.Details << "\n";
-	}
-	else if( result.noThrowError() )
-	{
-		eon::term << "  Expected exception but none were thrown!\n";
-		eon::term << "  Expected : " << eon::style::cyan << result.ExceptionDetails << eon::style::normal << "\n";
-		if( !result.Details.empty() )
-			eon::term << "  " << result.Details << "\n";
-	}
-	else if( result.trewError() )
-	{
-		eon::term << "  Expected exception not to be thrown but it was!\n";
-		eon::term << "  Exception: " << eon::style::cyan << result.ExceptionDetails << eon::style::normal << "\n";
-	}
-	else if( result.missingOpError() )
-		eon::term << "  Missing valid test operation!";
-	else
-	{
-		eon::term << "  Operation: " << eon::style::left << result.ExpectedExpr << eon::style::normal
-			<< " " << eon::style::strong << result.OperatorName << eon::style::normal << " "
-			<< eon::style::right << result.ActualExpr << eon::style::normal << "\n";
-		eon::term << "  " << result.ExpectedExpr << " = \""
-			<< eon::style::left_value << result.ExpectedVal << eon::style::normal << "\"\n";
-		eon::term << "  " << result.ActualExpr << " = \""
-			<< eon::style::right_value << result.ActualVal << eon::style::normal << "\"\n";
-		if( !result.Details.empty() )
-			eon::term << "  " << result.Details << "\n";
+		for( auto& item : line.Items )
+			eon::term << item.Style << item.Item;
+		eon::term << eon::style::normal << "\n";
 	}
 }
 
-size_t runTests( eon::string classname, eon::string methodname, eon::string testname, std::list<eonitest::__EonTestName>& failed )
+size_t runTests( eon::string cls_name, eon::string func_name, eon::string tst_name, std::list<eonitest::TestName>& failed )
 {
-	if( !eonitest::__EonTestBase::TestsList || eonitest::__EonTestBase::TestsList->empty() )
+	if( !eonitest::TestBase::TestsList || eonitest::TestBase::TestsList->empty() )
 		return 0;
 
+	reportSpecifications( cls_name, func_name, tst_name );
+	eon::globpattern cls( cls_name.empty() ? "*" : cls_name );
+	cls.ignoreCase();
+	eon::globpattern func( func_name.empty() ? "*" : func_name );
+	func.ignoreCase();
+	eon::globpattern tst( tst_name.empty() ? "*" : tst_name );
+	tst.ignoreCase();
 	size_t total = 0;
-	for( auto& test : *eonitest::__EonTestBase::TestsList )
+	for( auto& test : *eonitest::TestBase::TestsList )
 	{
-		if( !classname.empty() && classname.iCompare( test.Name.className() ) != 0 )
+		if( !cls.match( test.Name.ClsName ) )
 			continue;
-		if( !methodname.empty() && methodname.iCompare( test.Name.methodName() ) != 0 )
+		if( !func.match( test.Name.FuncName ) )
 			continue;
-		if( !testname.empty() && testname.iCompare( test.Name.testName() ) != 0 )
+		if( !tst.match( test.Name.TstName ) )
 			continue;
 
 		++total;
 		reportTestStart( test.Name );
 		eon::string error;
 		eonitest::Timer timer;
-		auto result = runTest( test );
+		auto test_ptr = run( test );
+		if( !test_ptr )
+			continue;
 		eon::term << " " << eon::style::magenta << timer.elapsed() << eon::style::normal << " ";
-		if( result )
+		if( test_ptr->Details.Success )
 			reportTestOK();
 		else
 		{
-			reportTestFail( result, test.Location );
+			reportTestFail( test_ptr->Details, test.Location );
 			failed.push_back( test.Name );
 		}
 	}
@@ -205,12 +243,13 @@ int main( int argc, const char* argv[] )
 	if( args.Result != 0 )
 		return args.Result < 0 ? 0 : args.Result;
 
-	std::list<eonitest::__EonTestName> failed;
+	std::list<eonitest::TestName> failed;
 	eonitest::Timer timer;
-	auto total = runTests( args.Class, args.Method, args.Test, failed );
+	auto total = runTests( args.Cls, args.Func, args.Tst, failed );
 	auto duration = timer.elapsed();
 	if( total > 0 )
-		eon::term << "Running all tests took: " << eon::style::magenta << duration << eon::style::normal << "\n";
+		eon::term << "Running " << eon::style::magenta << total << eon::style::normal << " test"
+		<< ( total > 1 ? "s" : "" ) << " tests took: " << eon::style::magenta << duration << eon::style::normal << "\n";
 
 	if( total == 0 )
 	{
@@ -227,9 +266,9 @@ int main( int argc, const char* argv[] )
 		eon::term << "\n" << eon::style::error << "The following tests failed:" << eon::style::normal << "\n";
 		for( auto& name : failed )
 			eon::term << eon::style::red << "  - " << eon::style::normal
-			<< "Class=" << eon::style::cyan << name.className() << eon::style::normal
-			<< " Method=" << eon::style::cyan << name.methodName() << eon::style::normal
-			<< " Test=" << eon::style::cyan << name.testName() << eon::style::normal
+			<< eon::style::weak << "Class=" << eon::style::strong << name.ClsName << eon::style::normal
+			<< eon::style::weak << " Function=" << eon::style::strong << name.FuncName << eon::style::normal
+			<< eon::style::weak << " Test=" << eon::style::strong << name.TstName << eon::style::normal
 			<< "\n";
 		eon::term << "\n";
 		return 4;

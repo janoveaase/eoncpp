@@ -1,4 +1,5 @@
 #include "FileBuffer.h"
+#include <eoninlinetest/InlineTest.h>
 
 #include <fcntl.h>
 #ifdef EON_WINDOWS
@@ -65,7 +66,7 @@ namespace eon
 				perm |= _S_IWRITE;
 				break;
 		}
-		auto error = _wsopen_s( &Handle, Path.str().wstr().c_str(), mode, sharing, perm );
+		auto error = _wsopen_s( &Handle, Path.str().stdwstr().c_str(), mode, sharing, perm );
 		if( error != 0 )
 			throw filesys::OpenError( "File: " + Path.str() + "\nError: " + errnoMessage().stdstr() );
 		Buffer = new char[ BufferCapacity ];

@@ -3,8 +3,7 @@
 #include "RxDefs.h"
 #include "RxData.h"
 #include "Quantifier.h"
-#include <eonstack/Stack.h>
-//#include <stack>
+#include <eoncontainers/Stack.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////

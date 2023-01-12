@@ -72,23 +72,42 @@ namespace eon
 		if( chr == NewlineChr )
 			return CurMatch.numChars() == 1 ? name_newline : no_name;
 
-		auto f1 = CharMap.find( chr );
-		if( f1 != CharMap.end() && ( CurMatchName == no_name || CurMatchName == f1->second.first ) )
+		// Try as many characters as possible to match a sequence
+		if( LongestSeq > 0 )
 		{
-			if( f1->second.second == Match::sequence || CurMatch.numChars() == 1 )
-				return f1->second.first;
+			source::Ref source = CurMatch;
+			source.start( CurMatch.last() );
+			for( index_t i = 1; i < LongestSeq && source.pushEnd(); ++i )
+				;
+			for( ; source.numChars() > 0; source.pullEnd() )
+			{
+				auto f1 = SeqMap.find( source.str() );
+				if( f1 != SeqMap.end() )
+				{
+					if( CurMatchName == no_name )
+					{
+						CurMatch.pushEnd( source.numChars() - 1 );
+						return f1->second;
+					}
+					else
+						break;
+				}
+			}
 		}
 
-		auto f2 = CatMap.find( Characters::get().category( chr ) );
-		if( f2 != CatMap.end() && ( CurMatchName == no_name || CurMatchName == f2->second.first ) )
+		auto f2 = CharMap.find( chr );
+		if( f2 != CharMap.end() && ( CurMatchName == no_name || CurMatchName == f2->second.first ) )
 		{
 			if( f2->second.second == Match::sequence || CurMatch.numChars() == 1 )
 				return f2->second.first;
 		}
 
-		auto f3 = SeqMap.find( CurMatch.str() );
-		if( f3 != SeqMap.end() )
-			return f3->second;
+		auto f3 = CatMap.find( Characters::get().category( chr ) );
+		if( f3 != CatMap.end() && ( CurMatchName == no_name || CurMatchName == f3->second.first ) )
+		{
+			if( f3->second.second == Match::sequence || CurMatch.numChars() == 1 )
+				return f3->second.first;
+		}
 
 		return no_name;
 	}

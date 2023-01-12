@@ -4,6 +4,9 @@
 
 namespace eon
 {
+	EON_NAME( key );
+	EON_NAME( value );
+
 	TEST( RegExTest, parse_ok_01 )
 	{
 		regex expr;

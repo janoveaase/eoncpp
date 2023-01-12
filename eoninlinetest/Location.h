@@ -10,18 +10,14 @@
 //
 namespace eonitest
 {
-	// Class for source location.
-	class __EonLocation
+	class TestLocation
 	{
 	public:
-		__EonLocation() = default;
-		inline __EonLocation( eon::string file, eon::string line ) { File = std::move( file ); Line = std::move( line ); }
-
-		inline const eon::string& file() const noexcept { return File; }
-		inline const eon::string& line() const noexcept { return Line; }
-
-	private:
+		TestLocation() = default;
+		inline TestLocation( eon::string file, eon::string num_line ) noexcept {
+			File = std::move( file ); NumLine = std::move( num_line ); }
+	public:
 		eon::string File;
-		eon::string Line;
+		eon::string NumLine;
 	};
 }

@@ -1,4 +1,5 @@
 #include "Path.h"
+#include <eoninlinetest/InlineTest.h>
 
 
 namespace eon
@@ -10,9 +11,10 @@ namespace eon
 		else
 			return str();
 	}
-	EON_CMPTEST( path, systemStr, unix, "/one/two/three", EON_EQ, path( "/one/two/three" ).systemStr( name( "unix" ) ) );
-	EON_CMPTEST( path, systemStr, windows,
-		"C:\\one\\two\\three", EON_EQ, path( "C:/one/two/three" ).systemStr( name_windows ) );
+	EON_TEST( path, systemStr, unix,
+		EON_EQ( "/one/two/three", path( "/one/two/three" ).systemStr( name( "unix" ) ) ) );
+	EON_TEST( path, systemStr, windows,
+		EON_EQ( "C:\\one\\two\\three", path( "C:/one/two/three" ).systemStr( name_windows ) ) );
 
 
 
@@ -26,10 +28,18 @@ namespace eon
 		else
 			return _parse( Full + other.Full );
 	}
-	EON_XTEST_3STEP( path, operator_concatenate_elm, except, filesys::BadPath, path a( "/one" ), path b( "/two" ), a /= b );
-	EON_NOXTEST_3STEP( path, operator_concatenate_elm, no_except, path a( "/one" ), path b( "two" ), a /= b );
-	EON_CMPTEST_3STEP( path, operator_concatenate_elm, basic,
-		path a( "/one" ), path b( "two" ), "/one/two", EON_EQ, ( a /= b ).str() );
+	EON_TEST_3STEP( path, operator_concatenate_elm, except,
+		path a( "/one" ),
+		path b( "/two" ),
+		EON_RAISE( a /= b, filesys::BadPath ) );
+	EON_TEST_3STEP( path, operator_concatenate_elm, no_except,
+		path a( "/one" ),
+		path b( "two" ),
+		EON_NO_X( a /= b ) );
+	EON_TEST_3STEP( path, operator_concatenate_elm, basic,
+		path a( "/one" ),
+		path b( "two" ),
+		EON_EQ( "/one/two", ( a /= b ).str() ) );
 
 
 
@@ -43,11 +53,18 @@ namespace eon
 		else
 			return _ext( part );
 	}
-	EON_XTEST_2STEP( path, ext, except, filesys::BadPath, path a( "/one/" ), a.ext( "ext" ) );
-	EON_NOXTEST_2STEP( path, ext, no_except, path a( "/one" ), a.ext( "ext" ) );
-	EON_CMPTEST_2STEP( path, ext, multi_ext, path a( "one/two" ), "one/two.ext1.ext2", EON_EQ, a.ext( "ext1.ext2" ).str() );
-	EON_CMPTEST_2STEP( path, ext, replace_ext,
-		path a( "one/two.ext1" ), "one/two.ext2", EON_EQ, a.ext( "ext2" ).str() );
+	EON_TEST_2STEP( path, ext, except,
+		path a( "/one/" ),
+		EON_RAISE( a.ext( "ext" ), filesys::BadPath ) );
+	EON_TEST_2STEP( path, ext, no_except,
+		path a( "/one" ),
+		EON_NO_X( a.ext( "ext" ) ) );
+	EON_TEST_2STEP( path, ext, multi_ext,
+		path a( "one/two" ),
+		EON_EQ( "one/two.ext1.ext2", a.ext( "ext1.ext2" ).str() ) );
+	EON_TEST_2STEP( path, ext, replace_ext,
+		path a( "one/two.ext1" ),
+		EON_EQ( "one/two.ext2", a.ext( "ext2" ).str() ) );
 
 
 

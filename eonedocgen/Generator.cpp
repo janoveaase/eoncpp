@@ -73,13 +73,12 @@ namespace doc
 			return 4;
 		}
 
-		type::Handler::init();
 		for( auto& source : Sources )
 		{
 			if( Verbose )
 				term << "Parsing " << style::magenta << "source" << style::normal << " file: " << style::yellow
 				<< source.str() << style::normal << "\n";
-			DataTuple dt;
+			Tuple dt;
 			try
 			{
 				dt = edoc().parse( file( source ) );
@@ -119,7 +118,7 @@ namespace doc
 		}
 	}
 
-	void Generator::_generateHtml( DataTuple& dt, path source, path target )
+	void Generator::_generateHtml( Tuple& dt, path source, path target )
 	{
 		if( Verbose )
 			term << "  Generating HTML\n";
@@ -139,14 +138,16 @@ namespace doc
 		}
 	}
 	
-	void Generator::_generateEdt( DataTuple& dt, path source, path target )
+	void Generator::_generateEdt( Tuple& dt, path source, path target )
 	{
 		if( Verbose )
 			term << "  Generating EDT\n";
 		try
 		{
 			target.ext( "edt" );
-			edt( dt ).save( target );
+			Stringifier strf;
+			dt.str( strf );
+			file( target ).save( strf.generateString() );
 			if( Verbose )
 				term << "  Created " << style::cyan << "target" << style::normal << " file: " << style::yellow
 				<< target.str() << style::normal << "!\n";

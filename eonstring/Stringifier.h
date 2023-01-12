@@ -2,6 +2,7 @@
 
 #include "String.h"
 #include "StringifierDefs.h"
+#include <eonexcept/Exception.h>
 
 
 
@@ -11,6 +12,15 @@
 //
 namespace eon
 {
+	// Exception thrown when adding an end-block without having previously added
+	// a start-block.
+	EONEXCEPT( MismatchedEndBlock );
+
+	// Exception thrown when trying to generate string data where start-block
+	// are unmatched by end-blocks.
+	EONEXCEPT( MismatchedStartBlock );
+
+
 	///////////////////////////////////////////////////////////////////////////
 	//
 	// "Stringifying" is generating human-readable (mostly) string/text data
@@ -39,10 +49,12 @@ namespace eon
 		//
 		// Adding Elements
 		//
-		// If the "before" argument is included then if element is to be added
-		// just after a "before" element, add it before. If multiple elements
-		// match the "before" type specified, move before them as well.
-		// This will ignore hard line-feeds.
+		// NOTE about "before" argument:
+		//   Use this when you add an element B after element A, but you want B
+		//   to appear before A in output. (Name 'A' as "before" argument.)
+		//   If there are multiple elements of type A in a row, then B will be
+		//   moved before all of them, not just the last one added.
+		//   This will ignore hard line-feeds.
 		//
 	public:
 
@@ -93,10 +105,19 @@ namespace eon
 			_add( stringify::Type::end_grp2, std::move( value ), before ); return *this; }
 
 		// Start a block (hard lf + indented set of lines)
-		inline Stringifier& start_block() { hard_lf(); ++Indentation; _add( stringify::Type::start_block ); return *this; }
+		inline Stringifier& start_block() {
+			hard_lf(); ++Indentation; ++Blocks; _add( stringify::Type::start_block ); return *this; }
 		// End a block (indentation back to normal + hard lf)
-		inline Stringifier& end_block() { bool lf = CurLine < Lines.size(); _add( stringify::Type::end_block );
-			if( lf ) hard_lf(); --Indentation; return *this; }
+		Stringifier& end_block() {
+			if( --Blocks < 0 )
+				throw MismatchedEndBlock();
+			bool lf = CurLine < Lines.size();
+			--Indentation;
+			_add( stringify::Type::end_block );
+			if( lf )
+				hard_lf();
+			return *this;
+		}
 
 		// Start a "chapter", empty line before (except when at start) and after (except when at end)
 		inline Stringifier& start_chapt() { _add( stringify::Type::start_chapt ); return *this; }
@@ -172,9 +193,11 @@ namespace eon
 
 
 		// Get output as a vector of lines
+		// Throws eon::MismatchedStartBlock if there are start-blocks not matched by end-blocks!
 		std::vector<string> generateLines() const;
 
 		// Get output as a string
+		// Throws eon::MismatchedStartBlock if there are start-blocks not matched by end-blocks!
 		inline string generateString() const { return string( "\n" ).join( generateLines() ); }
 
 
@@ -186,24 +209,59 @@ namespace eon
 		//
 	private:
 
+		using element_iterator = std::vector<stringify::ElementPtr>::const_iterator;
+
+		class GeneratorData
+		{
+		public:
+			GeneratorData() = delete;
+			inline GeneratorData( const std::vector<stringify::Line>& lines ) { Lines = &lines; }
+
+			void startLineIteration() noexcept;
+			inline bool atEndLine() const noexcept { return CurLine == Lines->end(); }
+			void nextLine();
+			inline bool atEndElement() const noexcept { return atEndLine() || CurElm == CurLine->Elements.end(); }
+
+			inline stringify::Element& element() const { return **CurElm; }
+
+			inline element_iterator firstElement() const noexcept { return CurLine->Elements.begin(); }
+			inline element_iterator& curElement() noexcept { return CurElm; }
+			inline void curElement( element_iterator pos ) noexcept { CurElm = pos; }
+			inline element_iterator endElement() const noexcept { return CurLine->Elements.end(); }
+			inline bool isEndElement( element_iterator pos ) const noexcept { return pos == CurLine->Elements.end(); }
+
+		private:
+			const std::vector<stringify::Line>* Lines{ nullptr };
+			std::vector<stringify::Line>::const_iterator CurLine;
+			element_iterator CurElm;
+		public:
+			std::vector<string> Output;
+			index_t Indentation{ 0 };
+			stringify::Line Line;
+			bool LongLineSplit{ false };
+		};
+
 		inline void _add( stringify::Type type, stringify::Type before = stringify::Type::none ) {
 			_add( type, string(), before ); }
 		void _add( stringify::Type type, string&& value, stringify::Type before = stringify::Type::none );
+		bool _addBefore( stringify::Type type, string& value, stringify::Type before );
+		bool _addBefore( stringify::Type type, string& value, stringify::Type before, index_t pos );
 
-		std::vector<stringify::ElementPtr>::const_iterator _fillLine( const std::vector<stringify::ElementPtr>& line,
-			std::vector<stringify::ElementPtr>::const_iterator probe, index_t indentation ) const noexcept;
-		std::vector<stringify::ElementPtr>::const_iterator _findSplit(
-			std::vector<stringify::ElementPtr>::const_iterator begin,
-			std::vector<stringify::ElementPtr>::const_iterator end ) const noexcept;
-		std::vector<stringify::ElementPtr>::const_iterator _findSplit( stringify::Type type, stringify::Type type_block,
-			std::vector<stringify::ElementPtr>::const_iterator begin,
-			std::vector<stringify::ElementPtr>::const_iterator end ) const noexcept;
+
+		void _processLine( GeneratorData& data ) const;
+		bool _haveSomething( GeneratorData& data, element_iterator end ) const;
+		void _doHardLineSplit( GeneratorData& data, element_iterator end ) const;
+		void _processLineElements( GeneratorData& data, element_iterator end ) const;
+		bool _processLineSplit( GeneratorData& data, element_iterator end ) const;
+
+		element_iterator _fillLine( GeneratorData& data ) const noexcept;
+		element_iterator _findSplit( element_iterator begin, element_iterator end ) const noexcept;
+		element_iterator _findSplit(
+			stringify::Type type, stringify::Type type_block, element_iterator begin, element_iterator end ) const noexcept;
 		
-		void _splitHard( const stringify::Element& value, std::vector<string>& output, index_t indentation ) const;
+		void _splitHard( const stringify::Element& value, GeneratorData& data ) const;
 		eon::string::iterator _findStringSplitPoint( eon::string::iterator beg, eon::string::iterator end ) const;
-		void _output( std::vector<stringify::ElementPtr>::const_iterator begin,
-			std::vector<stringify::ElementPtr>::const_iterator end, std::vector<string>& output,
-			index_t indentation ) const;
+		void _output( GeneratorData& data, element_iterator end ) const;
 
 
 
@@ -218,5 +276,6 @@ namespace eon
 		std::vector<stringify::Line> Lines;
 		index_t CurLine{ 0 };
 		index_t Indentation{ 0 };
+		int Blocks{ 0 };
 	};
 }

@@ -18,14 +18,11 @@ namespace eon
 			return found->second;
 		}
 		Names.push_back( new string( std::move( str ) ) );
-#ifdef _DEBUG
 		name_t id( Names.size() );
-#else
-		auto id = static_cast<name_t>( Names.size() );
-#endif
 		Lookup[ Names[ Names.size() - 1 ] ] = id;
 		return id;
 	}
+
 	bool NameData::validName( const string& str ) noexcept
 	{
 		if( str.empty() )
@@ -52,11 +49,7 @@ namespace eon
 			return found->second;
 		}
 		Names.push_back( new string( std::move( str ) ) );
-#ifdef _DEBUG
 		name_t id( Names.size() );
-#else
-		auto id = static_cast<name_t>( Names.size() );
-#endif
 		Lookup[ Names[ Names.size() - 1 ] ] = id;
 		return id;
 	}

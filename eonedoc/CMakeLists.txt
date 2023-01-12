@@ -24,9 +24,7 @@ set_target_properties(
 )
 set_property(TARGET EonEdoc PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonEdoc PUBLIC EonString EonRegex EonExcept EonFileSys
-	EonTypes
-)
+target_link_libraries(EonEdoc PUBLIC EonString EonRegex EonExcept EonFileSys EonTypeSystem )
 target_include_directories(EonEdoc PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
 )

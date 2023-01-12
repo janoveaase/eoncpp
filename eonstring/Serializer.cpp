@@ -5,12 +5,12 @@ namespace eon
 {
 	void serializer::_encode( bool value, std::string& bytes )
 	{
-		bytes += "B!";
+		bytes += "b!";
 		bytes += ( value ? "1" : "0" );
 	}
 	void serializer::_encode( byte_t value, std::string& bytes )
 	{
-		bytes += "b!";
+		bytes += "B!";
 		bytes += hex::toHex( value ).stdstr();
 	}
 	void serializer::_encode( char_t value, std::string& bytes )
@@ -69,7 +69,7 @@ namespace eon
 	}
 	void serializer::_encode( const std::string& value, std::string& bytes )
 	{
-		bytes += "b+";
+		bytes += "B+";
 		for( auto c : value )
 		{
 			if( c == '\\' )
@@ -97,7 +97,7 @@ namespace eon
 	}
 	void serializer::_encode( const char* value, std::string& bytes )
 	{
-		bytes += "b+";
+		bytes += "B+";
 		for( auto c = value; *c != '\0'; ++c )
 		{
 			if( *c == '\\' )
@@ -139,7 +139,7 @@ namespace eon
 		for( ; pos != end && *pos != record_sep; ++pos )
 			num += *pos;
 		++pos;
-		return num.toInt();
+		return num.toIntT();
 	}
 	short_t serializer::_decodeShort( std::string::const_iterator& pos, std::string::const_iterator end )
 	{
@@ -148,7 +148,7 @@ namespace eon
 		for( ; pos != end && *pos != record_sep; ++pos )
 			num += *pos;
 		++pos;
-		return num.toShort();
+		return num.toShortT();
 	}
 	long_t serializer::_decodeLong( std::string::const_iterator& pos, std::string::const_iterator end )
 	{
@@ -157,7 +157,7 @@ namespace eon
 		for( ; pos != end && *pos != record_sep; ++pos )
 			num += *pos;
 		++pos;
-		return num.toLong();
+		return num.toLongT();
 	}
 	flt_t serializer::_decodeFloat( std::string::const_iterator& pos, std::string::const_iterator end )
 	{
@@ -166,7 +166,7 @@ namespace eon
 		for( ; pos != end && *pos != record_sep; ++pos )
 			num += *pos;
 		++pos;
-		return num.toFloat();
+		return num.toFltT();
 	}
 	low_t serializer::_decodeLow( std::string::const_iterator& pos, std::string::const_iterator end )
 	{
@@ -175,7 +175,7 @@ namespace eon
 		for( ; pos != end && *pos != record_sep; ++pos )
 			num += *pos;
 		++pos;
-		return num.toLow();
+		return num.toLowT();
 	}
 	high_t serializer::_decodeHigh( std::string::const_iterator& pos, std::string::const_iterator end )
 	{
@@ -184,7 +184,7 @@ namespace eon
 		for( ; pos != end && *pos != record_sep; ++pos )
 			num += *pos;
 		++pos;
-		return num.toHigh();
+		return num.toHighT();
 	}
 	index_t serializer::_decodeIndex( std::string::const_iterator& pos, std::string::const_iterator end )
 	{
@@ -270,10 +270,10 @@ namespace eon
 		{
 			switch( t1 )
 			{
-				case 'B':
+				case 'b':
 					act_type = *pos == '!' ? name_bool : *pos == '+' ? name_bits : no_name;
 					break;
-				case 'b':
+				case 'B':
 					act_type = *pos == '!' ? name_byte : *pos == '+' ? name_bytes : no_name;
 					break;
 				case 'c':

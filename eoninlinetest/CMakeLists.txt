@@ -4,21 +4,20 @@ message(STATUS " - EonInlineTest")
 
 set(INLINETEST_HEADERS
 	InlineTest.h
-	Macros.h
-	Value.h
+	TestMacros.h
+	Details.h
 	TestFactory.h
 	TestBase.h
 	Timer.h
-	Result.h
 	TestName.h
 	Location.h
-	TestOptions.h
+	ValueAsString.h
 )
 set(INLINETEST_SOURCES
 	Main.cpp
+	Details.cpp
 	TestBase.cpp
 	Timer.cpp
-	TestOptions.cpp
 )
 
 if(WIN32)

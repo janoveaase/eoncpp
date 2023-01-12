@@ -4,11 +4,11 @@
 #include <eonexcept/Exception.h>
 #include <eonstring/String.h>
 #include <eonterminal/Terminal.h>
-#include "Macros.h"
 #include "TestFactory.h"
-#include "Value.h"
-#include "Result.h"
 #include "TestName.h"
+#include "Details.h"
+#include "Location.h"
+#include "ValueAsString.h"
 
 
 
@@ -19,117 +19,59 @@
 namespace eonitest
 {
 	// Super-class for all tests.
-	class __EonTestBase
+	class TestBase
 	{
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Construction
-		//
 	public:
+		TestBase() = delete;
+		inline TestBase( TestName name ) noexcept { Details.Name = std::move( name ); }
+		inline bool runTest() { test_body(); return Details.Success; }
 
-		// No default construction!
-		__EonTestBase() = delete;
-
-		// Construct with a specific test name.
-		inline __EonTestBase( __EonTestName name ) { Name = std::move( name ); }
-
-
-
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Definitions
-		//
 	public:
 
 		// A test reference, to be stored and used when a specific test is to be run.
 		struct TestRef
 		{
-			__EonTestName Name;
-			__EonLocation Location;
-			FactoryMain* Factory{ nullptr };
 			TestRef() = default;
-			inline TestRef( __EonTestName name, __EonLocation location, FactoryMain* factory ) {
+			inline TestRef( TestName name, TestLocation location, FactoryMain* factory ) noexcept {
 				Name = std::move( name ); Location = std::move( location ); Factory = factory; }
+			TestName Name;
+			TestLocation Location;
+			FactoryMain* Factory{ nullptr };
 		};
 
-
-
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Execution
-		//
-	public:
-
-		// Run test and return result.
-		inline __Result _runEonTest_() { return test_body(); }
-
-
 	protected:
+		virtual void test_body() = 0;
 
-		// Sub-classes must override this method for the actual test body.
-		virtual __Result test_body() = 0;
-
-		// Sub-classes must override this method and return an empty string if ready to run, error message if not.
 		virtual eon::string canRun() const = 0;
 
-		__Result _runCompare(
-			const __Value& expected,
-			const eon::string& cmp_operator,
-			const __Value& actual,
-			eon::string expected_expr,
-			eon::string actual_expr ) const;
-
-
-
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Static methods.
-		//
 	public:
+		static bool registerTest( TestName name, TestLocation location, FactoryMain* test );
 
-		// Register a new test
-		static bool _registerEonTest_( __EonTestName name, __EonLocation location, FactoryMain* test );
-
-
-
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Attributes
-		//
-	protected:
-		__EonTestName Name;
+	public:
+		TestDetails Details;
 
 	public:
 		static std::unique_ptr<std::list<TestRef>> TestsList;
-		static std::unique_ptr<std::set<__EonTestName>> TestNames;
+		static std::unique_ptr<std::set<TestName>> TestNames;
 	};
 
-
-
 	// Super-class for tests without sandbox.
-	class __EonTest : public __EonTestBase
+	class EonTest : public TestBase
 	{
 	public:
-		__EonTest() = delete;
-		__EonTest( __EonTestName name ) : __EonTestBase( name ) {}
+		EonTest() = delete;
+		EonTest( TestName name ) : TestBase( name ) {}
 		eon::string canRun() const override { return eon::string::Empty; }
 	};
 
-
 	// Super-class for tests with sandbox.
-	class __EonTestSandbox : public __EonTestBase
+	class EonTestSandbox : public TestBase
 	{
 	public:
-		__EonTestSandbox() = delete;
-		__EonTestSandbox( __EonTestName name ) : __EonTestBase( name ){ _prepareSandboxDir(); }
-		virtual ~__EonTestSandbox() {}
-
+		EonTestSandbox() = delete;
+		EonTestSandbox( TestName name ) : TestBase( name ) { _prepareSandboxDir(); }
+		virtual ~EonTestSandbox() {}
 		eon::string canRun() const override { return sandboxDir().empty() ? "Could not create sandbox!" : ""; }
-
 		const std::filesystem::path& sandboxDir() const noexcept { return SandboxDir; }
 		const eon::string& sandboxDirStr() const noexcept { return SandboxDirStr; }
 
@@ -144,4 +86,39 @@ namespace eonitest
 		std::filesystem::path SandboxDir;
 		eon::string SandboxDirStr;
 	};
+
+
+
+
+	// Class for constructing self-deleting non-copyable arrays of primitive type values.
+	// (Constructing e.g., a "const unsigned char[4] = { 'a', 'b', 'c', 'd' }"
+	// does not work well in macros.)
+	template<typename primitive_T>
+	class PrimitiveArray
+	{
+	public:
+		inline PrimitiveArray() { Array = new primitive_T[ 1 ]; Array[ 0 ] = 0; }
+		inline PrimitiveArray( std::initializer_list<primitive_T> elements )
+		{
+			Array = new primitive_T[ elements.size() + 1 ];
+			size_t i = 0;
+			for( auto element : elements )
+				Array[ i++ ] = element;
+		}
+		PrimitiveArray( const PrimitiveArray& other ) = delete;
+		inline PrimitiveArray( PrimitiveArray&& other ) noexcept { Array = other.Array; other.Array = nullptr; }
+		~PrimitiveArray() { if( Array != nullptr ) delete[] Array; }
+
+		PrimitiveArray& operator=( const PrimitiveArray& ) = delete;
+		PrimitiveArray& operator=( PrimitiveArray&& other ) = delete;
+
+		inline const primitive_T* value() const noexcept { return Array; }
+
+	private:
+		primitive_T* Array{ nullptr };
+	};
+
+
+	// Work-around for when "unsigned char" is not working in test macros.
+	using uchar_t = unsigned char;
 }

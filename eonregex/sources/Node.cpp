@@ -345,7 +345,7 @@ namespace eon
 			if( PreAnchoring & Anchor::word )
 			{
 				// Must be at start of input or after space/punctuation.
-				if( !data.pos().numChar() == 0 && data.prev() != NullChr
+				if( data.pos().numChar() == 0 && data.prev() != NullChr
 					&& !string::isSeparator( data.prev() ) && !string::isPunctuation( data.prev() ) )
 					return false;
 			}

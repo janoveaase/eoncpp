@@ -10,28 +10,20 @@
 //
 namespace eonitest
 {
-	// Class for unique test name.
-	class __EonTestName
+	struct TestName
 	{
 	public:
-		__EonTestName() = default;
-		inline __EonTestName( eon::string classname, eon::string methodname, eon::string testname ) {
-			ClassName = std::move( classname ); MethodName = std::move( methodname ); TestName = std::move( testname ); }
+		TestName() = default;
+		inline TestName( eon::string cls_name, eon::string func_name, eon::string tst_name ) noexcept {
+			ClsName = std::move( cls_name ); FuncName = std::move( func_name ); TstName = std::move( tst_name ); }
 
-		inline const eon::string& className() const noexcept { return ClassName; }
-		inline const eon::string& methodName() const noexcept { return MethodName; }
-		inline const eon::string& testName() const noexcept { return TestName; }
-
-		// inline eon::string str() const { return ClassName + " " + MethodName + "." + TestName; }
-		inline size_t length() const noexcept { return ClassName.numChars() + MethodName.numChars() + TestName.numChars(); }
-
-		inline bool operator<( const __EonTestName& other ) const noexcept {
-			return ClassName != other.ClassName ? ClassName < other.ClassName
-				: ( MethodName != other.MethodName ? MethodName < other.MethodName : TestName < other.TestName ); }
-
-	private:
-		eon::string ClassName;
-		eon::string MethodName;
-		eon::string TestName;
+		inline size_t length() const noexcept { return ClsName.numChars() + FuncName.numChars() + TstName.numChars(); }
+		inline bool operator<( const TestName& other ) const noexcept {
+			return ClsName != other.ClsName ? ClsName < other.ClsName
+				: ( FuncName != other.FuncName ? FuncName < other.FuncName : TstName < other.TstName ); }
+	public:
+		eon::string ClsName;
+		eon::string FuncName;
+		eon::string TstName;
 	};
 }

@@ -3,15 +3,13 @@
 #include <eonparser/DefineRules.h>
 #include <eonparser/NumericalRules.h>
 #include <eonparser/NamePathRule.h>
-#include <eontypes/Primitives.h>
-#include <eontypes/StandardTypes.h>
-#include <eontypes/TypeTupleObj.h>
 
 
 namespace eon
 {
-	DataTuple edoc::parse( const eon::string& input_edoc )
+	Tuple edoc::parse( const eon::string& input_edoc )
 	{
+		Output = tuple::data();
 		if( Source.empty() )
 			Source = "input string";
 		Input = input_edoc.splitSequential<std::vector<string>>( NewlineChr );
@@ -85,14 +83,14 @@ namespace eon
 	{
 		string title = CurLine->slice( 2, -3 ).trim();
 		bool no_indexing = title.startsWith( '!' );
-		DataTuple dt;
+		auto dt = tuple::data();
 		if( no_indexing )
 			title = title.substr( title.begin() + 1 );
-		dt.addName( name_type, name( "title" ) );
+		dt.addName( name_title );
 		if( no_indexing )
 			dt.addName( name_no_indexing );
-		dt.addRaw( name_value, title );
-		Output.addRaw( std::move( dt ) );
+		dt.add( name_value, std::move( title ) );
+		Output.addTuple( std::move( dt ) );
 		++CurLine;
 	}
 	void edoc::_parseHeader()
@@ -109,16 +107,16 @@ namespace eon
 			auto match = patterns[ i - 1 ].match( *CurLine );
 			if( match )
 			{
-				DataTuple dt;
+				auto dt = tuple::data();
 				string title = match.group( name_text );
 				bool no_indexing = title.startsWith( '!' );
 				if( no_indexing )
 					title = title.substr( title.begin() + 1 );
-				dt.addName( name_type, name( "h" + string( i ) ) );
+				dt.add( name_type, name( "h" + string( i ) ) );
 				if( no_indexing )
 					dt.addName( name_no_indexing );
-				dt.addRaw( name_value, title );
-				Output.addRaw( std::move( dt ) );
+				dt.add( name_value, std::move( title ) );
+				Output.add( std::move( dt ) );
 				break;
 			}
 		}
@@ -136,25 +134,25 @@ namespace eon
 		else
 			_lead << R"((\d+)|#)";
 		regex lead{ _lead + " " };
-		DataTuple dt;
+		auto dt = tuple::data();
 		dt.addName( name_type, name_list );
 		dt.addName( name_list, type );
-		DataTuple value;
+		auto value = tuple::data();
 		do
 		{
-			DataTuple elm;
+			auto elm = tuple::data();
 			elm.addName( name_type, name_text );
 			_processText( string( CurLine->substr( CurLine->begin() + 4 ).trim() ), elm, true );
-			value.addRaw( std::move( elm ) );
+			value.add( std::move( elm ) );
 		} while( ++CurLine != Input.end() && lead.match( *CurLine ) );
-		dt.addRaw( name_value, std::move( value ) );
-		Output.addRaw( std::move( dt ) );
+		dt.add( name_value, std::move( value ) );
+		Output.add( std::move( dt ) );
 	}
 
 	void edoc::_parseExclamation( name_t type )
 	{
 		_endPara();
-		DataTuple dt;
+		auto dt = tuple::data();
 		dt.addName( name_type, type );
 		string value = CurLine->substr( CurLine->findFirst( ColonChr ).begin() + 2 ).trim();
 		while( ++CurLine != Input.end() && CurLine->startsWith( "  " ) )
@@ -164,13 +162,13 @@ namespace eon
 			value += CurLine->trim();
 		}
 		_processText( std::move( value ), dt, true );
-		Output.addRaw( std::move( dt ) );
+		Output.add( std::move( dt ) );
 	}
 
 	void edoc::_parseDefinition()
 	{
 		_endPara();
-		DataTuple dt;
+		auto dt = tuple::data();
 		dt.addName( name_type, name_definition );
 		bool custom_text = true;
 		auto beg = CurLine->begin() + 2;
@@ -198,7 +196,7 @@ namespace eon
 			phrase = CurLine->substr( beg, colon.begin() ).trim();
 			value = CurLine->substr( colon.end() ).trim();
 		}
-		dt.addRaw( name_phrase, phrase );
+		dt.add( name_phrase, std::move( phrase ) );
 		while( ++CurLine != Input.end() && CurLine->startsWith( "    " ) )
 		{
 			if( !value.empty() )
@@ -206,9 +204,9 @@ namespace eon
 			value += CurLine->trim();
 		}
 		if( custom_text )
-			dt.addRaw( name_text, value );
+			dt.add( name_text, string( value ) );
 		_processText( std::move( value ), dt, true );
-		Output.addRaw( std::move( dt ) );
+		Output.add( std::move( dt ) );
 	}
 
 	void edoc::_parseInsert()
@@ -228,7 +226,7 @@ namespace eon
 	}
 	bool edoc::_parseInsertElements( substring& elements )
 	{
-		DataTuple dt;
+		auto dt = tuple::data();
 
 		dt.addName( name_type, name_insert );
 		if( _parseInsertCode( elements, dt ) )
@@ -246,7 +244,7 @@ namespace eon
 		else
 			return false;
 	}
-	bool edoc::_parseInsertCode( substring& elements, DataTuple& dt )
+	bool edoc::_parseInsertCode( substring& elements, Tuple& dt )
 	{
 		static regex pattern{ R"(code @<lang>(\S+)\s*,?\s+(@<title>(\S.*))?)" };
 		auto end_of_details = elements.findFirst( substring( "-->" ) );
@@ -254,13 +252,13 @@ namespace eon
 		if( match )
 		{
 			dt.addName( name_insert, name_code );
-			dt.addRaw( name_lang, string( match.group( name_lang ) ) );
-			dt.addRaw( name_title, string( match.group( name_title ) ) );
+			dt.add( name_lang, string( match.group( name_lang ) ) );
+			dt.add( name_title, string( match.group( name_title ) ) );
 			return true;
 		}
 		return false;
 	}
-	bool edoc::_parseInsertExample( substring& elements, DataTuple& dt )
+	bool edoc::_parseInsertExample( substring& elements, Tuple& dt )
 	{
 		static regex pattern{ R"(example +@<title>(\S.*))" };
 		auto end_of_details = elements.findFirst( substring( "-->" ) );
@@ -268,12 +266,12 @@ namespace eon
 		if( match )
 		{
 			dt.addName( name_insert, name_example );
-			dt.addRaw( name_title, string( match.group( name_title ) ) );
+			dt.add( name_title, string( match.group( name_title ) ) );
 			return true;
 		}
 		return false;
 	}
-	bool edoc::_parseInsertQuote( substring& elements, DataTuple& dt )
+	bool edoc::_parseInsertQuote( substring& elements, Tuple& dt )
 	{
 		static regex pattern{ R"(quote +@<source>(\S.*))" };
 		auto end_of_details = elements.findFirst( substring( "-->" ) );
@@ -281,12 +279,12 @@ namespace eon
 		if( match )
 		{
 			dt.addName( name_insert, name_quote );
-			dt.addRaw( name_source, string( match.group( name_source ) ) );
+			dt.add( name_source, string( match.group( name_source ) ) );
 			return true;
 		}
 		return false;
 	}
-	bool edoc::_parseInsertToc( substring& elements, DataTuple& dt )
+	bool edoc::_parseInsertToc( substring& elements, Tuple& dt )
 	{
 		static regex pattern{ R"(toc +(level=@<level>(\d) +)?@<title>(\S.*))" };
 		auto end_of_details = elements.findFirst( substring( "-->" ) );
@@ -295,13 +293,13 @@ namespace eon
 		{
 			dt.addName( name_insert, name_toc );
 			if( match.group( name_level ) )
-				dt.addRaw( name_level, static_cast<int_t>( match.group( name_level ).toInt() ) );
-			dt.addRaw( name_title, string( match.group( name_title ) ) );
+				dt.add( name_level, static_cast<int_t>( match.group( name_level ).toInt() ) );
+			dt.add( name_title, string( match.group( name_title ) ) );
 			return true;
 		}
 		return false;
 	}
-	bool edoc::_parseInsertImage( substring& elements, DataTuple& dt )
+	bool edoc::_parseInsertImage( substring& elements, Tuple& dt )
 	{
 		static regex pattern{ R"(image +source=(@<source>(\S+)|(\"@<source>([^\"]+)\"))( +align=@<align>(\w+{name}))? +@<title>(\S.*))" };
 		auto end_of_details = elements.findFirst( substring( "-->" ) );
@@ -309,15 +307,15 @@ namespace eon
 		if( match )
 		{
 			dt.addName( name_insert, name_image );
-			dt.addRaw( name_source, string( match.group( name_source ) ) );
+			dt.add( name_source, string( match.group( name_source ) ) );
 			if( match.group( name_align ) )
 				dt.addName( name_align, name( string( match.group( name_align ) ) ) );
-			dt.addRaw( name_title, string( match.group( name_title ) ) );
+			dt.add( name_title, string( match.group( name_title ) ) );
 			return true;
 		}
 		return false;
 	}
-	bool edoc::_parseInsertHidden( substring& elements, DataTuple& dt )
+	bool edoc::_parseInsertHidden( substring& elements, Tuple& dt )
 	{
 		static regex pattern{ R"(hidden +@<title>(\S.*))" };
 		auto end_of_details = elements.findFirst( substring( "-->" ) );
@@ -325,12 +323,12 @@ namespace eon
 		if( match )
 		{
 			dt.addName( name_insert, name_hidden );
-			dt.addRaw( name_title, string( match.group( name_title ) ) );
+			dt.add( name_title, string( match.group( name_title ) ) );
 			return true;
 		}
 		return false;
 	}
-	bool edoc::_parseInsertContents( DataTuple& dt, string::iterator end_of_elements )
+	bool edoc::_parseInsertContents( Tuple& dt, string::iterator end_of_elements )
 	{
 		auto next_line = CurLine->substr( end_of_elements ).trim();
 		std::vector<string> lines{ "" };
@@ -371,16 +369,16 @@ namespace eon
 		if( !lines[ cur_line ].empty() )
 			++cur_line;
 		if( cur_line == 1 )
-			dt.addRaw( name_value, std::move( lines[ 0 ] ) );
+			dt.add( name_value, std::move( lines[ 0 ] ) );
 		else if( cur_line > 1 )
 		{
-			DataTuple value;
+			auto value = tuple::data();
 			for( size_t i = 0; i < cur_line; ++i )
-				value.addRaw( std::move( lines[ i ] ) );
-			dt.addRaw( name_value, std::move( value ) );
+				value.add( std::move( lines[ i ] ) );
+			dt.add( name_value, std::move( value ) );
 		}
 		if( !dt.empty() )
-			Output.addRaw( std::move( dt ) );
+			Output.add( std::move( dt ) );
 		return true;
 	}
 
@@ -389,15 +387,15 @@ namespace eon
 		bool first = false;
 		if( ParaState == State::clear )
 		{
-			Para = DataTuple();
+			Para = tuple::data();
 			Para.addName( name_type, name_paragraph );
-			Para.addRaw( name_value, DataTuple() );
+			Para.add( name_value, tuple::data() );
 			ParaState = State::started;
 			first = true;
 		}
 
-		auto& values = Para.value<DataTuple>( name_value );
-		DataTuple dt;
+		auto& values = Para.get<Tuple>( name_value );
+		auto dt = tuple::data();
 		dt.addName( name_type, name_text );
 
 		string line;
@@ -413,7 +411,7 @@ namespace eon
 		} while( ++CurLine != Input.end() );
 
 		_processText( std::move( line ), dt, first );
-		values.addRaw( std::move( dt ) );
+		values.add( std::move( dt ) );
 		++CurLine;
 	}
 	void edoc::_patchHttp( std::list<std::pair<string, name_t>>& elements )
@@ -573,7 +571,7 @@ namespace eon
 		}
 	}
 
-	void edoc::_processText( string&& text, DataTuple& dt, bool first )
+	void edoc::_processText( string&& text, Tuple& dt, bool first )
 	{
 		std::list<std::pair<string, name_t>> elements{ { std::move( text ), name_text } };
 		_patchQuote( elements );
@@ -582,28 +580,28 @@ namespace eon
 		_patchEmphasize( elements );
 
 		if( elements.size() == 1 && elements.begin()->second == name_text && first )
-			dt.addRaw( name_value, std::move( elements.begin()->first ) );
+			dt.add( name_value, std::move( elements.begin()->first ) );
 		else
 		{
-			DataTuple sub_values;
+			auto sub_values = tuple::data();
 			if( !first )
 			{
-				DataTuple value;
+				auto value = tuple::data();
 				value.addName( name_type, name_newline );
-				sub_values.addRaw( std::move( value ) );
+				sub_values.add( std::move( value ) );
 			}
 			for( auto& elm : elements )
 			{
-				DataTuple value;
+				auto value = tuple::data();
 				if( elm.second == name_text || elm.second == name_quoted || elm.second == name_emphasized )
 				{
 					value.addName( name_type, elm.second );
-					value.addRaw( name_value, std::move( elm.first ) );
+					value.add( name_value, std::move( elm.first ) );
 				}
 				else if( elm.second == name_http )
 				{
 					value.addName( name_type, name_reference );
-					value.addRaw( name_target, std::move( elm.first ) );
+					value.add( name_target, std::move( elm.first ) );
 				}
 				else if( elm.second == name_reference )
 				{
@@ -611,23 +609,23 @@ namespace eon
 					auto colon = elm.first.findFirst( ColonChr );
 					if( colon )
 					{
-						value.addRaw( name_caption,
+						value.add( name_caption,
 							string( elm.first.substr( elm.first.begin(), colon.begin() ) ) );
-						value.addRaw( name_target, string( elm.first.substr( colon.end() ) ) );
+						value.add( name_target, string( elm.first.substr( colon.end() ) ) );
 					}
 					else
-						value.addRaw( name_target, string( elm.first ) );
+						value.add( name_target, string( elm.first ) );
 				}
-				sub_values.addRaw( std::move( value ) );
+				sub_values.add( std::move( value ) );
 			}
-			dt.addRaw( name_value, std::move( sub_values ) );
+			dt.add( name_value, std::move( sub_values ) );
 		}
 	}
 
 	void edoc::_endPara()
 	{
 		if( ParaState == State::started )
-			Output.addRaw( std::move( Para ) );
+			Output.add( std::move( Para ) );
 		ParaState = State::clear;
 	}
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include <eonedoc/Edoc.h>
-#include <eonedt/Edt.h>
 #include <eonedoc/ToHtml.h>
 #include <eonfilesys/FileSys.h>
 
@@ -55,8 +54,8 @@ namespace doc
 
 		void _scanSources( path sourcedir );
 
-		void _generateHtml( DataTuple& dt, path source, path target );
-		void _generateEdt( DataTuple& dt, path source, path target );
+		void _generateHtml( Tuple& dt, path source, path target );
+		void _generateEdt( Tuple& dt, path source, path target );
 
 
 

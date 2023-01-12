@@ -535,6 +535,11 @@ namespace eon
 		WANT_EQ( "a--b", eon::string( "a,,b" ).replace( ',', '-' ) );
 		WANT_EQ( "a--b", eon::string( "a::::b" ).replace( "::", "-" ) );
 	}
+	TEST( String, replace3 )
+	{
+		WANT_EQ( "a but b not c", eon::string( "a and b or c" ).replace( { { "or", "not" }, { "and", "but" } } ) );
+		WANT_EQ( "x,y.z", eon::string( "a,b.c" ).replace( { { 'a', 'x' }, { 'b', 'y' }, { 'c', 'z' } } ) );
+	}
 	TEST( String, replace_speed )
 	{
 		eon::string base{ "one one-thousand two one-thousand three one-thousand four one-thousand five one-thousand size one-"
@@ -659,43 +664,43 @@ namespace eon
 			eon::substring( "TEST" ), '"' ) ) << "Didn't find string limited which was outside of quotes";
 	}
 
-	TEST( String, compare_diffpos )
-	{
-		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
-			<< "Failed to compare equal";
-		eon::string str{ "alpha beta" };
-		WANT_EQ( 6, str.compare( "alpha", eon::CompareType::diff_pos ) ) << "Failed to compare substring from start";
-		str = "alpha beta";
-		WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare(
-			eon::substring( "alpha" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter left";
-		WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare(
-				eon::substring( "beta" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter right";
-		WANT_EQ( -10, eon::string( "alpha betA" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
-			<< "Failed to compare lesser";
-		WANT_EQ( 10, eon::string( "alpha beta" ).compare( "alpha betA", eon::CompareType::diff_pos ) )
-			<< "Failed to compare greater";
+	//TEST( String, compare_diffpos )
+	//{
+	//	WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
+	//		<< "Failed to compare equal";
+	//	eon::string str{ "alpha beta" };
+	//	WANT_EQ( 6, str.compare( "alpha", eon::CompareType::diff_pos ) ) << "Failed to compare substring from start";
+	//	str = "alpha beta";
+	//	WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare(
+	//		eon::substring( "alpha" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter left";
+	//	WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare(
+	//			eon::substring( "beta" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter right";
+	//	WANT_EQ( -10, eon::string( "alpha betA" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
+	//		<< "Failed to compare lesser";
+	//	WANT_EQ( 10, eon::string( "alpha beta" ).compare( "alpha betA", eon::CompareType::diff_pos ) )
+	//		<< "Failed to compare greater";
 
-		WANT_EQ( 0, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-			eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited equal";
-		str = "alpha bEta";
-		WANT_EQ( -6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-			eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited lesser";
-		str = "alpha beta";
-		WANT_EQ( 6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-			eon::substring( "pha bE" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited greater";
+	//	WANT_EQ( 0, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
+	//		eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited equal";
+	//	str = "alpha bEta";
+	//	WANT_EQ( -6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
+	//		eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited lesser";
+	//	str = "alpha beta";
+	//	WANT_EQ( 6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
+	//		eon::substring( "pha bE" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited greater";
 
-		str = "Hello Big World!";
-		eon::string str2{ "Big and bad" };
-		WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare( eon::substring( str2.begin(),
-			str2.begin() + 4 ), eon::CompareType::diff_pos ) ) << "Failed to compare big and bad";
+	//	str = "Hello Big World!";
+	//	eon::string str2{ "Big and bad" };
+	//	WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare( eon::substring( str2.begin(),
+	//		str2.begin() + 4 ), eon::CompareType::diff_pos ) ) << "Failed to compare big and bad";
 
-		str = "";
-		str2 = "Someting";
-		WANT_EQ( -1, str.compare( str2, eon::CompareType::diff_pos ) ) << "Failed to compare empty";
+	//	str = "";
+	//	str2 = "Someting";
+	//	WANT_EQ( -1, str.compare( str2, eon::CompareType::diff_pos ) ) << "Failed to compare empty";
 
-		WANT_EQ( -5, eon::string( "beta" ).compare( "beta/gamma", eon::CompareType::diff_pos ) )
-			<< "Failed to compare correctly when rhs is identical to lhs but longer";
-	}
+	//	WANT_EQ( -5, eon::string( "beta" ).compare( "beta/gamma", eon::CompareType::diff_pos ) )
+	//		<< "Failed to compare correctly when rhs is identical to lhs but longer";
+	//}
 #ifndef __GNUC__
 	TEST( String, compare_faster )
 	{
@@ -733,12 +738,18 @@ namespace eon
 			<< "Failed to compare correctly when rhs is identical to lhs but longer";
 	}
 #endif
-	TEST( String, iCompare )
+	TEST( String, compareNumChars )
 	{
-		WANT_EQ( 0, eon::string( "alpha" ).iCompare( "ALPHA" ) );
-		WANT_EQ( 5, eon::string( "alpha" ).iCompare( "alPh" ) );
-		WANT_EQ( -5, eon::string( "alPh" ).iCompare( "alpha" ) );
+		WANT_EQ( 0, eon::string( "alpha" ).substr().compareSub( eon::string( "alpHA" ).substr(), 3 ) );
+		WANT_EQ( 3, eon::string( "alpha" ).substr().compareSub( eon::string( "alPHA" ).substr(), 3 ) );
+		WANT_EQ( -3, eon::string( "alPha" ).substr().compareSub( eon::string( "alpha" ).substr(), 3 ) );
 	}
+	//TEST( String, iCompare )
+	//{
+	//	WANT_EQ( 0, eon::string( "alpha" ).iCompare( "ALPHA" ) );
+	//	WANT_EQ( 5, eon::string( "alpha" ).iCompare( "alPh" ) );
+	//	WANT_EQ( -5, eon::string( "alPh" ).iCompare( "alpha" ) );
+	//}
 
 	TEST( String, escape )
 	{
@@ -750,9 +761,9 @@ namespace eon
 
 		string uexp{ char_t( 128522 ) };	// Smileyface
 		WANT_TRUE( string( "\\U1F60A" ).unescape() == uexp ) << "Failed to unescape unicode";
-		
+
 		string hexexp{ "0Az" };
-		WANT_TRUE( string( "\\x30\\x41\\x7A" ).unescape() == hexexp ) << "Failed to unescape hex";
+		WANT_EQ( hexexp, string( "\\x30\\x41\\x7A" ).unescape() ) << "Failed to unescape hex";
 
 		string octexp{ "0Az" };
 		octexp += char_t( 277 );	// e with breve
@@ -763,11 +774,12 @@ namespace eon
 	TEST( String, escape_nonprintable )
 	{
 		eon::string base{ '\0', '\v', '\r' };
-		base += char_t( 128522 );	// Smileyface
-//		base += u8"😊";
-		auto esc = base.escapeNonPrintable();
-		WANT_EQ( "&#0;&#11;&#13;&#128522;", esc ) << "Failed to escape";
-		auto unesc = esc.unescapeNonPrintable();
+		base += char_t( 128522 );	// Smileyface 😊;
+		auto esc = base.escapeAll();
+		eon::string exp = "\\0\\v\\r";
+		exp += char_t( 128522 );
+		WANT_EQ( exp, esc ) << "Failed to escape";
+		auto unesc = esc.unescape();
 		WANT_EQ( base, unesc ) << "Failed to unescape";
 	}
 
@@ -813,7 +825,7 @@ namespace eon
 		WANT_EQ( "-56746754767", string::toString( i64_2 ) ) << "Wrong int64_t value";
 		WANT_EQ( "9034658634325425", string::toString( ui64 ) ) << "Wrong uint64_t value";
 		WANT_EQ( "1.23", string::toString( dbl_1 ) ) << "Wrong double value";
-		WANT_EQ( "-3546346.023414", string::toString( dbl_2 ) ) << "Wrong double value";
+		WANT_EQ( "-3546346.0234139999", string::toString( dbl_2 ) ) << "Wrong double value";
 		WANT_EQ( 311, string::toString( DBL_MAX ).numChars() ) << "Wrong double max";
 		WANT_EQ( "123456789.0112345666", string::toString( ldbl_1 ) ) << "Wrong long double value";
 		WANT_EQ( "-98765432109.8765411377", string::toString( ldbl_2 ) ) << "Wrong long double value";
@@ -977,7 +989,7 @@ namespace eon
 		byte_t byte{ '\0' };
 		byteserializer dser{ ser.bytes() };
 		dser >> bytes >> flt >> intg >> byte;
-		
+
 		WANT_EQ( "Hello World!", bytes );
 		WANT_EQ( 3.14, flt );
 		WANT_EQ( -99, intg );

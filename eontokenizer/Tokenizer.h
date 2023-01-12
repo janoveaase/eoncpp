@@ -80,6 +80,7 @@ namespace eon
 
 		//* Make the specified sequence of characters a token
 		inline void registerSequenceToken( name_t type_name, string&& sequence ) {
+			if( sequence.numChars() > LongestSeq ) LongestSeq = sequence.numChars();
 			SeqMap[ std::move( sequence ) ] = type_name; }
 
 		//* Make any sequence of letters, ascii numerals and underscore a 'name'
@@ -132,6 +133,7 @@ namespace eon
 		std::unordered_map<char_t, std::pair<name_t, Match>> CharMap;
 		std::map<charcat, std::pair<name_t, Match>> CatMap;
 		std::unordered_map<string, name_t> SeqMap;
+		index_t LongestSeq{ 0 };
 		std::vector<Token> Tokens;
 	};
 };

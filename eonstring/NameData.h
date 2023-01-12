@@ -25,13 +25,8 @@ namespace eon
 		NameData() = default;
 		~NameData() { std::lock_guard<std::mutex> lock( Lock ); for( auto elm : Names ) delete elm; }
 
-#if defined( _DEBUG ) || defined( EON_SUN )
 		inline const string& str( const name_t& name ) { std::lock_guard<std::mutex> lock( Lock );
-			return ( name > no_name && name.Value <= Names.size() ) ? *Names[ name.Value - 1 ] : NullStr; }
-#else
-		inline const string& str( const name_t& name ) { std::lock_guard<std::mutex> lock( Lock );
-			return ( name > no_name && name <= Names.size() ) ? *Names[ name - 1 ] : NullStr; }
-#endif
+			return ( name > no_name && name.value() <= Names.size() ) ? *Names[ name.value() - 1 ] : NullStr; }
 
 		name_t name( string&& str ) noexcept;
 		name_t compilerName( string&& str );

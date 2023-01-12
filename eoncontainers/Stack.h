@@ -1,127 +1,183 @@
 #pragma once
+#include <eonexcept/Exception.h>
 #include "Vector.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  Eon Stack Class - eon::stack
+	// Exception thrown when trying to access a stack element that doesn't exist
+	EONEXCEPT( NoElement );
 
-	  Differs from std::stack in that you can read and modify (but not delete)
-	  elements not at the top of the stack. (Simplification of std::stack 
-	  with custom container.)
-	**************************************************************************/
-	template<typename T>
+
+
+
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// Eon Stack Class - eon::stack
+	//
+	// This class is like std::stack, but also grants access to elements below
+	// the top, as well as iteration.
+	// A std::vector is used as underlying structure.
+	//
+	template<class T>
 	class stack
 	{
-		using key_type = T;
-		using mapped_type = T;
-		using value_type = T;
-		using reference = T&;
-		using const_reference = const T&;
-
-
-
-
-		/**********************************************************************
-		  Construction
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Construction
+		//
 	public:
 
 		stack() = default;
-		inline stack( const stack& other ) { Elements = other.Elements; }
-		inline stack( stack&& other ) noexcept { Elements = std::move( other.Elements ); }
-		template<class InputIt>
-		inline stack( InputIt beg, InputIt end ) { Elements.assign( beg, end ); }
-		inline stack( std::initializer_list<T> elements ) { Elements.assign( elements ); }
+		inline stack( const stack& other ) { Data = other.Data; }
+		inline stack( stack&& other ) noexcept { Data = std::move( other.Data ); }
+
+		inline stack( std::initializer_list<T> elements ) { Data = elements; }
+
+		virtual ~stack() = default;
 
 
 
 
-		/**********************************************************************
-		  Assignment operators
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Modifier Methods
+		//
 	public:
 
-		inline stack& operator=( const stack& other ) { Elements = other.Elements; return *this; }
-		inline stack& operator=( stack&& other ) noexcept { Elements = std::move( other.Elements ); return *this; }
-		inline stack& operator=( std::initializer_list<T> elements ) { Elements = elements; }
+		// Replace elements by copying another stack
+		inline stack& operator=( const stack& other ) { Data = other.Data; return *this; }
+
+		// Replace elements by taking ownership of the elements of another stack
+		inline stack& operator=( stack&& other ) noexcept { Data = std::move( other.Data ); return *this; }
+
+		// Copy the elements of the other stack onto the top of this
+		// The ordering of the elements will be maintained.
+		inline stack& operator+=( const stack& other ) {
+			for( auto& elm : other.Data ) Data.append( elm ); return *this; }
+
+		// Take ownership of the elements of the other stack, but put on top of this
+		// The ordering of the elements will be maintained.
+		inline stack& operator+=( stack&& other ) {
+			for( auto& elm : other.Data ) Data.append( std::move( elm ) ); other.clear(); return *this; }
+
+
+		// Reserve space for a specific number of elements
+		inline void reserve( size_t capacity ) { Data.reserve( capacity ); }
+
+		// Clear all elements
+		void clear() noexcept { Data.clear(); }
 
 
 
 
-		/**********************************************************************
-		  Element access
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Read-only Methods
+		//
 	public:
 
-		inline reference top() { return Elements.back(); }
-		inline const_reference top() const { return Elements.back(); }
+		// Check if empty
+		inline bool empty() const noexcept { return Data.empty(); }
 
-		// Positive positions count from the top of the stack (meaning 0=top),
-		// while negative count from the bottom (meaning -1=bottom).
-		inline reference at( int64_t pos ) { return Elements.at( -( ++pos ) ); }
-		inline const_reference at( int64_t pos ) const { return Elements.at( -( ++pos ) ); }
+		// Use as boolean
+		// Returns true if not empty!
+		inline operator bool() const noexcept { return !Data.empty(); }
+
+		// Get number of stack elements
+		inline size_t size() const noexcept { return Data.numElements(); }
+
+		// Get current capacity
+		inline size_t capacity() const noexcept { return Data.capacity(); }
 
 
 
 
-		/**********************************************************************
-		  Capacity
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//		
+		// Stack Operations
+		//
 	public:
 
-		inline bool empty() const noexcept { return Elements.empty(); }
-		inline size_t size() const noexcept { return Elements.size(); }
+		// Push an element onto the top of the stack
+		inline void push( const T& element ) { Data.append( element ); }
+		inline void push( T&& element ) { Data.append( std::move( element ) ); }
 
-		inline size_t max_size() const noexcept { return Elements.max_size(); }
+		// Access the top element
+		// Throws [eon::NoElement] if stack is empty!
+		inline const T& top() const { return at( 0 ); }
+		inline T& top() { return at( 0 ); }
 
-		inline void reserve( size_t new_capacity ) { Elements.reserve( new_capacity ); }
-		inline size_t capacity() const noexcept { return Elements.capacity(); }
+		// Access the bottom element
+		// Throws [eon::NoElement] if stack is empty!
+		inline const T& bottom() const { return at( Data.size() - 1 ); }
+		inline T& bottom() { return at( Data.lastPos() ); }
 
-		inline void shrink_to_fit() { Elements.shrink_to_fit(); }
+		// Access an element by index
+		// An argument value of zero is the same as calling top()!
+		// Throws [eon::NoElement] if stack is empty!
+		inline const T& at( size_t steps_from_top ) const {
+			if( _end() >= steps_from_top ) return Data[ _end() - steps_from_top ]; else throw NoElement(); }
+		inline T& at( size_t steps_from_top ) {
+			if( _end() >= steps_from_top ) return Data[ _end() - steps_from_top ]; else throw NoElement(); }
+
+		// Pop the top element
+		inline void pop() noexcept { if( !Data.empty() ) Data.pop(); }
 
 
 
 
-		/**********************************************************************
-		  Modifiers
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Iteration
+		//
 	public:
 
-		inline void clear() noexcept { Elements.clear(); }
+		using iterator = typename std::vector<T>::iterator;
+		using const_iterator = typename std::vector<T>::const_iterator;
+		using reverse_iterator = typename std::vector<T>::reverse_iterator;
+		using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
 
-		inline void push( const_reference element ) { Elements.push_back( element ); }
-		inline void pop() { Elements.pop_back(); }
+		inline iterator begin() noexcept { return Data.begin(); }
+		inline iterator end() noexcept { return Data.end(); }
 
-		inline void resize( size_t new_size ) { Elements.resize( new_size ); }
-		inline void resize( size_t new_size, const_reference value ) { Elements.resize( new_size, value ); }
+		inline const_iterator begin() const noexcept { return Data.begin(); }
+		inline const_iterator end() const noexcept { return Data.end(); }
+		inline const_iterator cbegin() const noexcept { return Data.begin(); }
+		inline const_iterator cend() const noexcept { return Data.end(); }
 
-		inline void swap( stack<T>& other ) noexcept { Elements.swap( other.Elements ); }
+		inline reverse_iterator rbegin() noexcept { return Data.rbegin(); }
+		inline reverse_iterator rend() noexcept { return Data.rend(); }
 
-
-
-
-		/**********************************************************************
-		  Comparison
-		**********************************************************************/
-	public:
-
-		inline bool operator==( const stack<T>& other ) const noexcept { return Elements == other.Elements; }
-		inline bool operator!=( const stack<T>& other ) const noexcept { return Elements != other.Elements; }
-		inline bool operator<( const stack<T>& other ) const noexcept { return Elements < other.Elements; }
-		inline bool operator<=( const stack<T>& other ) const noexcept { return Elements <= other.Elements; }
-		inline bool operator>( const stack<T>& other ) const noexcept { return Elements > other.Elements; }
-		inline bool operator>=( const stack<T>& other ) const noexcept { return Elements >= other.Elements; }
+		inline const_reverse_iterator rbegin() const noexcept { return Data.rbegin(); }
+		inline const_reverse_iterator rend() const noexcept { return Data.rend(); }
+		inline const_reverse_iterator crbegin() const noexcept { return Data.rbegin(); }
+		inline const_reverse_iterator crend() const noexcept { return Data.rend(); }
 
 
 
 
-
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Helpers
+		//
 	private:
-		vector<T> Elements;
+
+		inline size_t _end() const noexcept { return Data.lastPos(); }
+
+
+
+		
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Attributes
+		//
+	private:
+
+		vector<T> Data;
 	};
 }

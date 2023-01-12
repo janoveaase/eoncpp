@@ -71,5 +71,16 @@ namespace eon
 				string::iterator( Data.c_str(), Data.numBytes(), Data.numChars(),
 					Data.c_str() + end.bytePos(), end.charPos() ) );
 		}
+
+		std::string String::bytes( Pos start, Pos end ) noexcept
+		{
+			if( end.bytePos() == 0 )
+			{
+				auto last = Data.last();
+				end.BytePos = last.numByte() + 1;
+				end.CharPos = last.numChar() + 1;
+			}
+			return Data.stdstr().substr( start.bytePos(), end.bytePos() - start.bytePos() );
+		}
 	}
 }

@@ -1,5 +1,6 @@
 #include "Dir.h"
 #include "File.h"
+#include <eoninlinetest/InlineTest.h>
 
 
 namespace eon
