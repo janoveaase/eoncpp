@@ -13,7 +13,7 @@ set(EON_TESTS_DIR "eontests" CACHE PATH "Where to install tests under EON_INSTAL
 set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Postfix to debug builds")
 
 set(EON_BUILD_TESTS ON CACHE BOOL "Include tests in build?")
-set(EON_INLINE_TESTS OFF CACHE BOOL "Include inline unit tests in build?")
+set(EON_INLINE_TESTS ON CACHE BOOL "Include inline unit tests in build?")
 set(EON_BUILD_FILESYS ON CACHE BOOL "Include the File System package")
 set(EON_BUILD_TYPESYSTEM ON CACHE BOOL "Include the Type System package")
 #set(EON_BUILD_EDT OFF CACHE BOOL "Build the Eon Data Tuple package")
