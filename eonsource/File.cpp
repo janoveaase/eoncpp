@@ -19,7 +19,7 @@ namespace eon
 				throw BadName();
 
 			Data.seekg( 0, std::ifstream::end );
-			NumBytes = Data.tellg();
+			NumBytes = static_cast<size_t>( Data.tellg() );
 			Data.seekg( 0, std::ifstream::beg );
 		}
 

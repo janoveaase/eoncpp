@@ -280,16 +280,20 @@ namespace eon
 		inline low_t toLowT( const locale* custom_locale = nullptr ) const noexcept {
 			return static_cast<low_t>( toHighT( custom_locale ) ); }
 
-		// Convert unsigned integer string into index_t (64-bit unsigned integer).
+		// Convert unsigned integer string into index_t.
 		// Assumes [numeralsOnly] or [isUInt] is true. (Will not check!)
-		index_t toIndex() const noexcept;
+		inline index_t toIndex() const noexcept { return static_cast<index_t>( toUInt64() ); }
 
 
 		// Convert to int32_t by casting from int_t.
-		inline int32_t toInt32() const { return static_cast<int32_t>( toIntT() ); }
+		inline int32_t toInt32() const noexcept { return static_cast<int32_t>( toIntT() ); }
 
 		// Convert to int64_t by casting from long_t.
-		inline int64_t toInt64() const { return static_cast<int64_t>( toLongT() ); }
+		inline int64_t toInt64() const noexcept { return static_cast<int64_t>( toLongT() ); }
+
+		// Convert to uint64_t.
+		// Assumes [numeralsOnly] or [isUInt] is true. (Will not check!)
+		uint64_t toUInt64() const noexcept;
 
 		// Convert to double by casting from flt_t.
 		// Will use 'custom_locale' if specified and the default Eon locale if not!
@@ -303,9 +307,6 @@ namespace eon
 
 		// Convert to uint32_t by casting from index_t.
 		inline uint32_t toUInt32() const { return static_cast<uint32_t>( toIndex() ); }
-
-		// Convert to uint64_t by casting from index_t.
-		inline uint64_t toUInt64() const { return static_cast<uint64_t>( toIndex() ); }
 
 		// Convert to size_t by casting from index_t.
 		inline size_t toSize() const { return static_cast<size_t>( toIndex() ); }
@@ -728,7 +729,7 @@ namespace eon
 
 			string_iterator i = Beg, other_i = other.Beg;
 			int pos{ 1 }, cmp_val{ 0 };
-			for( ; i != End && other_i != other.end() && pos <= num_chars; ++i, ++other_i, ++pos )
+			for( ; i != End && other_i != other.end() && static_cast<index_t>( pos ) <= num_chars; ++i, ++other_i, ++pos )
 			{
 				cmp_val = cmp( *i, *other_i );
 				if( cmp_val != 0 )

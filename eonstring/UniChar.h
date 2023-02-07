@@ -22,6 +22,13 @@
 #if defined( __linux__ ) || defined( __linux ) || defined( linux ) || defined( __gnu_linux__ )
 #	define EON_LINUX
 #endif
+#if INTPTR_MAX == INT64_MAX
+#	define EON_64BIT
+#	define stoidx std::stoull
+#elif INTPTR_MAX == INT32_MAX
+#	define EON_32BIT
+#	define stoidx std::stoul
+#endif
 
 
 

@@ -1006,7 +1006,7 @@ namespace eon
 		flt_t float1{ -9999999.999 }, float2{ 0.0 }, float3{ 9999999.999 };
 		low_t low1{ -FLT_MAX }, low2{ 0.0 }, low3{ FLT_MAX };
 		high_t high1{ -99999999999.999999 }, high2{ 0.0 }, high3{ 99999999999.999999 };
-		index_t idx1{ 0 }, idx2{ UINT64_MAX };
+		index_t idx1{ 0 }, idx2{ INDEX_MAX };
 		name_t name1{ name_action }, name2{ no_name };
 		// bits bits1 ...
 		std::string bytes1{ "ABC" }, bytes2{ "" };

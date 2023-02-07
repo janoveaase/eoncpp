@@ -223,7 +223,7 @@ namespace eon
 			data.Output.push_back( std::move( line ) );
 			if( beg == value.Value.begin() )
 				++data.Indentation;
-			total += split_point - beg;
+			total += static_cast<index_t>( split_point - beg );
 			beg = split_point;
 		}
 	}

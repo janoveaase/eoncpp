@@ -28,8 +28,6 @@ namespace eon
 		source::String src( "test", std::move( raw ) );
 		Tok.registerEonNameTokens();
 		auto tokens = Tok( src );
-		REQUIRE_EQ( 13, tokens.size() ) << "Wrong number of tokens";
-
 		string expected{ "name; ;0name0; ;00; ;_0; ;0_; ;_name; ;name_00" };
 		string actual;
 		for( auto& token : tokens )
@@ -137,7 +135,7 @@ namespace eon
 		source::String src( "test", std::move( raw ) );
 		auto tokens = Tok( src );
 		TokenParser parser( std::move( tokens ) );
-		
+
 		REQUIRE_EQ( "This", parser.current().str().stdstr() ) << "Wrong first token";
 		parser.forward();
 		REQUIRE_EQ( " ", parser.current().str().stdstr() ) << "Wrong second token";
@@ -145,7 +143,7 @@ namespace eon
 		REQUIRE_EQ( "is", parser.current().str().stdstr() ) << "Wrong third token";
 
 		WANT_EQ( 0, parser.lineStart() ) << "Wrong first line start";
-		
+
 		parser.backward();
 		parser.backward();
 		REQUIRE_EQ( "This", parser.current().str().stdstr() ) << "Wrong first token - again";

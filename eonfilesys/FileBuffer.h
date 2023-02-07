@@ -144,8 +144,8 @@ namespace eon
 		filesys::mode Mode{ filesys::mode::input };
 		bool Eof{ false };
 		char* Buffer{ nullptr };
-		int BufferCapacity{ 4096 };
-		int BufferSize{ 0 };
+		size_t BufferCapacity{ 4096 };
+		size_t BufferSize{ 0 };
 		size_t BufPos{ 0 };
 	};
 }

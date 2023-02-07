@@ -31,8 +31,10 @@ namespace eon
 		// Construct a name from an int - which will be converted into an unsigned 32 bit integer.
 		explicit inline name_t( int value ) noexcept { Value = static_cast<uint32_t>( value ); }
 
+#if INTPTR_MAX == INT64_MAX
 		// Construct a name from a size_t - which will be converted into an unsigned 32 bit integer.
 		explicit inline name_t( size_t value ) noexcept { Value = static_cast<uint32_t>( value ); }
+#endif
 
 		// Copy another name
 		inline name_t( const name_t& other ) noexcept { Value = other.Value; }

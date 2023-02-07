@@ -219,7 +219,7 @@ namespace eon
 		void Node::_matchAny( Stack& matches )
 		{
 			// Goble as much as we can
-			int gobbled{ 0 };
+			index_t gobbled{ 0 };
 			while( matches.size() <= Quant.maxQ() && matches.top()() )
 			{
 				matches.push( matches.top() );

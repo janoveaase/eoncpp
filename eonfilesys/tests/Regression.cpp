@@ -191,11 +191,11 @@ namespace eon
 #endif
 		directory root = path( sandbox() );
 		directory target = root.dpath() / "alpha" / "beta" / "gamma" / "delta" / "epsilon";
-		
+
 		std::chrono::steady_clock clock;
 		size_t successes = 0, failures = 0;
 		auto start = clock.now();
-		for( int i = 0; i < iterations; ++i )
+		for( size_t i = 0; i < iterations; ++i )
 		{
 			try
 			{
@@ -227,9 +227,9 @@ namespace eon
 
 		std::chrono::steady_clock clock;
 		size_t successes = 0, failures = 0;
-		int sum = 0;
+		size_t sum = 0;
 		auto start = clock.now();
-		for( int i = 0; i < iterations; ++i )
+		for( size_t i = 0; i < iterations; ++i )
 		{
 			try
 			{

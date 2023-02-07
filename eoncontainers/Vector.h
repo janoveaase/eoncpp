@@ -45,7 +45,7 @@ namespace eon
 					return *this -= -elements;
 				else if( Owner && elements > 0 && Pos != SIZE_MAX )
 				{
-					if( Owner->NumElements - Pos < elements )
+					if( Owner->NumElements - Pos < static_cast<size_t>( elements ) )
 						Pos += elements;
 					else
 						Pos = SIZE_MAX;
@@ -60,7 +60,7 @@ namespace eon
 				{
 					if( Pos == SIZE_MAX )
 						Pos = Owner->NumElements;
-					if( Pos >= elements )
+					if( Pos >= static_cast<size_t>( elements ) )
 						Pos -= elements;
 					else
 						Pos = 0;

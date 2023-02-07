@@ -306,9 +306,9 @@ namespace eon
 	EON_TEST( substring, toLowT, UTF8,
 		EON_EQ( low_t( 12.34 ), substring( u8"١۲.߃४" ).toLowT() ) );
 
-	index_t substring::toIndex() const noexcept
+	uint64_t substring::toUInt64() const noexcept
 	{
-		index_t value = 0;
+		uint64_t value = 0;
 		for( auto chr : *this )
 		{
 			value *= 10;
@@ -317,11 +317,11 @@ namespace eon
 		return value;
 	}
 	EON_TEST( substring, toIndex, empty,
-		EON_EQ( 0, substring( "" ).toIndex() ) );
+		EON_EQ( 0, substring( "" ).toUInt64() ) );
 	EON_TEST( substring, toIndex, ASCII,
-		EON_EQ( 1234, substring( "1234" ).toIndex() ) );
+		EON_EQ( 1234, substring( "1234" ).toUInt64() ) );
 	EON_TEST( substring, toIndex, UTF8,
-		EON_EQ( 1234, substring( u8"١۲߃४" ).toIndex() ) );
+		EON_EQ( 1234, substring( u8"١۲߃४" ).toUInt64() ) );
 
 	EON_TEST( substring, toInt32, empty,
 		EON_EQ( 0, substring( "" ).toInt32() ) );

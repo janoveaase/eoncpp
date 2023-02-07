@@ -154,7 +154,11 @@ namespace eon
 		if( num_source_chars == no_index )
 			_utf8CharacterCount();
 
+#ifdef EON_64BIT
 		NumChar = std::stoull( match[ 2 ].str() );
+#else
+		NumChar = std::stoul( match[ 2 ].str() );
+#endif
 		if( NumChar > NumSourceChars )
 			throw WrongSource( "Invalid character position specified in iterator format to decode!\n"
 				"  Format (\"<byte-pos>:<char-pos>\"): \"" + iterator_format + "\"\n"

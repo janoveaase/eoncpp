@@ -218,8 +218,13 @@ namespace eon
 		EON_EQ( "0", string( index_t( 0 ) ) ) );
 	EON_TEST( string, string, index_t_positive,
 		EON_EQ( "99", string( index_t( 99 ) ) ) );
+#ifdef EON_64BIT
 	EON_TEST( string, string, index_t_max,
-		EON_EQ( "18446744073709551615", string( index_t( UINT64_MAX ) ) ) );
+		EON_EQ( "18446744073709551615", string( index_t( SIZE_MAX ) ) ) );
+#else
+	EON_TEST( string, string, index_t_max,
+		EON_EQ( "4294967295", string( index_t( SIZE_MAX ) ) ) );
+#endif
 
 	EON_TEST( string, string, flt_t_zero,
 		EON_EQ( "0.0", string( flt_t( 0.0 ) ) ) );

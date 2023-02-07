@@ -224,7 +224,7 @@ namespace eon
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<b32_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (index_t)a1, Qualifier::none ) );
+				args.values().push( Attribute::newExplicit<b32_t>( (b32_t)a1, name_b32, Qualifier::none ) );
 				return sig_t::norm; } };
 
 		struct IndexB64Construct : public Action {
@@ -238,7 +238,7 @@ namespace eon
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<b64_t>();
 				args.values().pop();
-				args.values().push( Attribute::newExplicit<index_t>( (index_t)a1, name_index, Qualifier::none ) );
+				args.values().push( Attribute::newExplicit<b64_t>( (b64_t)a1, name_b64, Qualifier::none ) );
 				return sig_t::norm; } };
 
 

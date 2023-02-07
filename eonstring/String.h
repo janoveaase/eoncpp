@@ -201,8 +201,12 @@ namespace eon
 		// Construct as string representation of the input [std::uint16_t].
 		inline explicit string( uint16_t value ) { *this = toString( value ); }
 
+#if INTPTR_MAX == INT64_MAX
 		// Construct as string representation of the input [std::uint32_t].
 		inline explicit string( uint32_t value ) { *this = toString( value ); }
+#else
+		inline explicit string( uint64_t value ) { *this = toString( value ); }
+#endif
 
 		// Construct as string representation of the input [long].
 		inline explicit string( long value ) { *this = toString( value ); }

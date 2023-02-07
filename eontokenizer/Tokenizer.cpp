@@ -102,11 +102,14 @@ namespace eon
 				return f2->second.first;
 		}
 
-		auto f3 = CatMap.find( Characters::get().category( chr ) );
-		if( f3 != CatMap.end() && ( CurMatchName == no_name || CurMatchName == f3->second.first ) )
+		auto cat = Characters::get().category( chr );
+		for( auto& pos_cat : CatMap )
 		{
-			if( f3->second.second == Match::sequence || CurMatch.numChars() == 1 )
-				return f3->second.first;
+			if( pos_cat.first && cat && ( CurMatchName == no_name || CurMatchName == pos_cat.second.first ) )
+			{
+				if( pos_cat.second.second == Match::sequence || CurMatch.numChars() == 1 )
+					return pos_cat.second.first;
+			}
 		}
 
 		return no_name;

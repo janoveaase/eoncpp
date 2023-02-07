@@ -190,7 +190,7 @@ namespace eon
 
 	void filebuffer::_readBuffer()
 	{
-		auto bytes = _read( Handle, Buffer, BufferCapacity );
+		auto bytes = _read( Handle, Buffer, static_cast<unsigned int>( BufferCapacity ) );
 		if( bytes >= 0 )
 			BufferSize = bytes;
 		else

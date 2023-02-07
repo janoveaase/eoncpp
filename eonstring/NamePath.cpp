@@ -70,7 +70,7 @@ namespace eon
 	int namepath::compare( const namepath& other ) const noexcept
 	{
 		int i = 1;
-		for( ; i <= Value.size() && i <= other.Value.size(); ++i )
+		for( ; static_cast<index_t>( i ) <= Value.size() && static_cast<index_t>( i ) <= other.Value.size(); ++i )
 		{
 			auto cmp = eon::str( Value[ i - 1 ] ).compare( eon::str( other.Value[ i - 1 ] ) );
 			if( cmp < 0 )

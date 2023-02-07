@@ -686,7 +686,7 @@ namespace eon
 				{
 					if( !digit.empty() )
 					{
-						min = std::stoull( digit );
+						min = stoidx( digit );
 						max = min;
 					}
 					param.advance();
@@ -708,7 +708,7 @@ namespace eon
 			}
 			if( !digit.empty() )
 			{
-				min = std::stoull( digit );
+				min = stoidx( digit );
 				digit.clear();
 			}
 			while( param )
@@ -716,7 +716,7 @@ namespace eon
 				if( param() == '}' )
 				{
 					if( !digit.empty() )
-						max = std::stoull( digit );
+						max = stoidx( digit );
 					param.advance();
 					return true;
 				}
