@@ -2339,6 +2339,8 @@ namespace eon
 		string _unescape(
 			const substring& area, string output, const std::unordered_map<char_t, char_t>& singletons ) const;
 
+		void _wstrToUtf8( const wchar_t* start, const wchar_t* end );
+
 		template<typename container>
 		static index_t _findDecimalSeparator( container& char_digits, char_t decimal_separator ) noexcept
 		{

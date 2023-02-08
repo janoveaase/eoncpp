@@ -1,7 +1,6 @@
 #pragma once
 #include "UniChar.h"
 #include <memory>
-#include <codecvt>
 #include <iostream>
 #include <functional>
 #include <exception>

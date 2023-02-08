@@ -211,10 +211,25 @@ namespace eon
 	EON_TEST( string, string, wchar_unicode,
 		EON_EQ( u8"€Øá", string( L"€Øá" ) ) );
 
+	void string::_wstrToUtf8( const wchar_t* start, const wchar_t* end )
+	{
+		Bytes.clear();
+		NumChars = 0;
+		uint32_t value{ 0 };
+		const char* bytes = (char*)&value;
+		for( auto wc = start; wc != end; ++wc )
+		{
+			auto num_bytes = string_iterator::unicodeToBytes( *wc, value );
+			for( index_t i = 0; i < num_bytes; ++i )
+				Bytes += bytes[ i ];
+			++NumChars;
+		}
+	}
+
 	string& string::operator=( const std::wstring& stdwstr )
 	{
-		static std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-		return *this = conv.to_bytes( stdwstr );
+		_wstrToUtf8( stdwstr.c_str(), stdwstr.c_str() + stdwstr.size() );
+		return *this;
 	}
 	EON_TEST( string, operator_asgn, wstring_empty,
 		EON_EQ( string(), string() = std::wstring( L"" ) ) );
@@ -225,8 +240,8 @@ namespace eon
 
 	string& string::operator=( const wchar_t* cstr )
 	{
-		static std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-		return *this = conv.to_bytes( cstr );
+		_wstrToUtf8( cstr, cstr + wcslen( cstr ) );
+		return *this;
 	}
 	EON_TEST( string, operator_asgn, whar_empty,
 		EON_EQ( string(), string() = L"" ) );
@@ -244,8 +259,10 @@ namespace eon
 
 	std::wstring string::stdwstr() const
 	{
-		static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-		return conv.from_bytes( Bytes );
+		std::wstring output;
+		for( auto c = begin(); c != end(); ++c )
+				output += static_cast<wchar_t>( *c );
+		return output;
 	}
 	EON_TEST( string, stdwstr, empty,
 		EON_EQ( L"", string().stdwstr() ) );
@@ -255,7 +272,7 @@ namespace eon
 		EON_EQ( L"€Øá", string( u8"€Øá" ).stdwstr() ) );
 
 	EON_TEST( string, operator_plsasgn, wstring_empty_empty,
-		EON_EQ( string(), string( ) += std::wstring() ) );
+		EON_EQ( string(), string() += std::wstring() ) );
 	EON_TEST( string, operator_plsasgn, wstring_empty,
 		EON_EQ( "abc", string( "abc" ) += std::wstring() ) );
 	EON_TEST( string, operator_plsasgn, wstring_ascii,
