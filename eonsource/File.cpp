@@ -13,7 +13,7 @@ namespace eon
 #ifdef EON_WINDOWS
 			Data = std::ifstream( Name.stdwstr(), std::ios_base::in | std::ios_base::binary );
 #else
-			Data = std::ifstream( Name.stdstr(), std::ios_base::in | std::ios_base::binary );
+			Data = std:move( std::ifstream( Name.stdstr(), std::ios_base::in | std::ios_base::binary ) );
 #endif
 			if( !Data )
 				throw BadName();
