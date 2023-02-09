@@ -141,7 +141,7 @@ namespace eon
 			******************************************************************/
 
 			//* Default constructor, no source reference
-			Reporter() noexcept = default;
+			Reporter() = default;
 
 
 			//* Default destructor
