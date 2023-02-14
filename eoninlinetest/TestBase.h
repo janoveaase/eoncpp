@@ -90,6 +90,62 @@ namespace eonitest
 
 
 
+	// Binary comparison methods
+	class BinaryOp
+	{
+	public:
+		static inline bool eq( const char* a, const char* b ) { return eon::string( a ) == eon::string( b ); }
+		template<typename T1>
+		static inline bool eq( const T1& a, const char* b ) { return eon::string( a ) == eon::string( b ); }
+		template<typename T2>
+		static inline bool eq( const char* a, const T2& b ) { return eon::string( a ) == eon::string( b ); }
+		template<typename T1, typename T2>
+		static inline bool eq( const T1& a, const T2& b ) { return a == b; }
+
+		static inline bool ne( const char* a, const char* b ) { return eon::string( a ) != eon::string( b ); }
+		template<typename T1>
+		static inline bool ne( const T1& a, const char* b ) { return eon::string( a ) != eon::string( b ); }
+		template<typename T2>
+		static inline bool ne( const char* a, const T2& b ) { return eon::string( a ) != eon::string( b ); }
+		template<typename T1, typename T2>
+		static inline bool ne( const T1& a, const T2& b ) { return a != b; }
+
+		static inline bool lt( const char* a, const char* b ) { return eon::string( a ) < eon::string( b ); }
+		template<typename T1>
+		static inline bool lt( const T1& a, const char* b ) { return eon::string( a ) < eon::string( b ); }
+		template<typename T2>
+		static inline bool lt( const char* a, const T2& b ) { return eon::string( a ) < eon::string( b ); }
+		template<typename T1, typename T2>
+		static inline bool lt( const T1& a, const T2& b ) { return a < b; }
+
+		static inline bool le( const char* a, const char* b ) { return eon::string( a ) <= eon::string( b ); }
+		template<typename T1>
+		static inline bool le( const T1& a, const char* b ) { return eon::string( a ) <= eon::string( b ); }
+		template<typename T2>
+		static inline bool le( const char* a, const T2& b ) { return eon::string( a ) <= eon::string( b ); }
+		template<typename T1, typename T2>
+		static inline bool le( const T1& a, const T2& b ) { return a <= b; }
+
+		static inline bool gt( const char* a, const char* b ) { return eon::string( a ) > eon::string( b ); }
+		template<typename T1>
+		static inline bool gt( const T1& a, const char* b ) { return eon::string( a ) > eon::string( b ); }
+		template<typename T2>
+		static inline bool gt( const char* a, const T2& b ) { return eon::string( a ) > eon::string( b ); }
+		template<typename T1, typename T2>
+		static inline bool gt( const T1& a, const T2& b ) { return a > b; }
+
+		static inline bool ge( const char* a, const char* b ) { return eon::string( a ) >= eon::string( b ); }
+		template<typename T1>
+		static inline bool ge( const T1& a, const char* b ) { return eon::string( a ) >= eon::string( b ); }
+		template<typename T2>
+		static inline bool ge( const char* a, const T2& b ) { return eon::string( a ) >= eon::string( b ); }
+		template<typename T1, typename T2>
+		static inline bool ge( const T1& a, const T2& b ) { return a >= b; }
+	};
+
+
+
+
 	// Class for constructing self-deleting non-copyable arrays of primitive type values.
 	// (Constructing e.g., a "const unsigned char[4] = { 'a', 'b', 'c', 'd' }"
 	// does not work well in macros.)

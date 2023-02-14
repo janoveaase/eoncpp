@@ -45,10 +45,7 @@
 		<< utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
-	if( typeid( l ) == typeid( const char* ) && typeid( r ) == typeid( const char* ) )\
-		Details.Success = ::eon::string( l ) == ::eon::string( r );\
-	else\
-		Details.Success = ( l == r );\
+	Details.Success = eonitest::BinaryOp::eq( l, r );\
 	if( !Details.Success )\
 	{\
 		Details.Log << "  " << eonitest::style::key_1 << "Left value" << eonitest::style::value_1\
@@ -66,10 +63,7 @@
 		<< utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
-	if( typeid( l ) == typeid( const char* ) && typeid( r ) == typeid( const char* ) )\
-		Details.Success = ::eon::string( l ) != ::eon::string( r );\
-	else\
-		Details.Success = ( l != r );\
+	Details.Success = eonitest::BinaryOp::ne( l, r );\
 	if( !Details.Success )\
 	{\
 		Details.Log << "  " << eonitest::style::key_1 << "Left value" << eonitest::style::value_1\
@@ -87,10 +81,7 @@
 		<< utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
-	if( typeid( l ) == typeid( const char* ) && typeid( r ) == typeid( const char* ) )\
-		Details.Success = ::eon::string( l ) < ::eon::string( r );\
-	else\
-		Details.Success = ( l < r );\
+	Details.Success = eonitest::BinaryOp::lt( l, r );\
 	if( !Details.Success )\
 	{\
 		Details.Log << "  " << eonitest::style::key_1 << "Left value" << eonitest::style::value_1\
@@ -108,10 +99,7 @@
 		<< utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
-	if( typeid( l ) == typeid( const char* ) && typeid( r ) == typeid( const char* ) )\
-		Details.Success = ::eon::string( l ) <= ::eon::string( r );\
-	else\
-		Details.Success = ( l <= r );\
+	Details.Success = eonitest::BinaryOp::le( l, r );\
 	if( !Details.Success )\
 	{\
 		Details.Log << "  " << eonitest::style::key_1 << "Left value" << eonitest::style::value_1\
@@ -129,10 +117,7 @@
 		<< utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
-	if( typeid( l ) == typeid( const char* ) && typeid( r ) == typeid( const char* ) )\
-		Details.Success = ::eon::string( l ) > ::eon::string( r );\
-	else\
-		Details.Success = ( l > r );\
+	Details.Success = eonitest::BinaryOp::gt( l, r );\
 	if( !Details.Success )\
 	{\
 		Details.Log << "  " << eonitest::style::key_1 << "Left value" << eonitest::style::value_1\
@@ -150,10 +135,7 @@
 		<< utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
-	if( typeid( l ) == typeid( const char* ) && typeid( r ) == typeid( const char* ) )\
-		Details.Success = ::eon::string( l ) >= ::eon::string( r );\
-	else\
-		Details.Success = ( l >= r );\
+	Details.Success = eonitest::BinaryOp::ge( l, r );\
 	if( !Details.Success )\
 	{\
 		Details.Log << "  " << eonitest::style::key_1 << "Left value" << eonitest::style::value_1\
