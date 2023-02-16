@@ -50,28 +50,21 @@ namespace eon
 			//
 		public:
 
-			// Get number of bytes in source
-			inline size_t numBytes() const noexcept override { return NumBytes; }
+			inline size_t numBytesInSource() const noexcept override { return NumBytes; }
 
-			// Get position a number of characters (not bytes!) ahead
-			// Throws [eon::source::EndOfSource] if already at the end
-			// Returns moved position - which may be less than num_characters
-			//         from the start point if end of source was reached.
-			Pos push( Pos start_point, size_t num_characters ) override;
+			// Given a base position and an offset (in characaters, not bytes!),
+			// get a source::Pos object for that offset.
+			// If 'offset_chars' refers to a character before start or after
+			// end of source, it will be adjusted to fit.
+			// Returns 'base_position' if 'offset_chars' is adjusted to zero!
+			Pos getPosAtOffset( Pos base_position, int offset_chars = 1 ) override;
 
-			// Get position a number of characters (not bytes!) prior to the
-			// start point, but not at or before end point
-			// NOTE: The end point must be before the start point!
-			// Throws [eon::source::EndOfSource] if already at the end point
-			// Returns moved position - which may be less than num_characters
-			//         from the start point if end of source was reached.
-			Pos pull( Pos start_point, Pos end_point, size_t num_characters ) override;
+			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+			inline bool match( const Pos& start, const Pos& end, const eon::string& value ) const noexcept override {
+				return ( (File*)this )->str( start, end ) == value; }
 
-			// Check if the specified portion of the source matches exactly
-			// with the given string value
-			inline bool match( const eon::string& value, Pos start, Pos end ) const noexcept override {
-				return ((File*)this)->str( start, end ) == value; }
-			bool match( const char* value, Pos start, Pos end ) const noexcept override {
+			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+			bool match( const Pos& start, const Pos& end, const char* value ) const noexcept override {
 				return ( (File*)this )->str( start, end ) == value; }
 
 			// Get characater at specified position
@@ -90,6 +83,21 @@ namespace eon
 			// Get bytes at specified area.
 			// Returns empty if not a valid area or the entire area is outside the scope of the source!
 			std::string bytes( Pos start, Pos end ) noexcept override;
+
+
+
+
+			///////////////////////////////////////////////////////////////////
+			//
+			// Helpers
+			//
+		PRIVATE:
+
+			void _forward( Pos& pos, index_t num_chars );
+			void _backward( Pos& pos, index_t num_chars );
+
+			void _scanFile();
+
 
 
 

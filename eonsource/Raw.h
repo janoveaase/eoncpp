@@ -1,6 +1,7 @@
 #pragma once
 #include "SourcePos.h"
 #include <eonstring/String.h>
+#include <eoninlinetest/InlineTest.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,62 +31,38 @@ namespace eon
 		//
 		// Eon Raw Source Class - eon::source::raw
 		//
-		// Super-class for various source types, typically to be parsed/scanned
+		// Super-class for various source types, typically to be parsed/scanned.
 		//
 		class Raw
 		{
-		public:
-			///////////////////////////////////////////////////////////////////
-			//
-			// Construction
-			//
-
-			// Default constructor for empty source
-			Raw() = default;
-
-
-			// Default destruction
-			virtual ~Raw() = default;
-
-
-
 			///////////////////////////////////////////////////////////////////
 			//
 			// Read-only Methods
 			//
 		public:
 
-			// Get source name
-			inline const string& name() const noexcept { return Name; };
+			inline const string& sourceName() const noexcept { return Name; };
 
-			// Get number of bytes in source
-			virtual size_t numBytes() const noexcept = 0;
+			virtual size_t numBytesInSource() const noexcept = 0;
 
-			// Get position a number of characters (not bytes!) ahead
-			// Throws [eon::source::EndOfSource] if already at the end
-			// Returns moved position - which may be less than num_characters
-			//         from the start point if end of source was reached.
-			virtual Pos push( Pos start_point, size_t num_characters ) = 0;
+			// Given a base position and an offset (in characaters, not bytes!),
+			// get a source::Pos object for that offset.
+			// If 'offset_chars' refers to a character before start or after
+			// end of source, it will be adjusted to fit.
+			// Returns 'base_position' if 'offset_chars' is adjusted to zero!
+			virtual Pos getPosAtOffset( Pos base_position, int offset_chars = 1 ) = 0;
 
-			// Get position a number of characters (not bytes!) prior to the
-			// start point, but not at or before end point
-			// NOTE: The end point must be before the start point!
-			// Throws [eon::source::EndOfSource] if already at the end point
-			// Returns moved position - which may be less than num_characters
-			//         from the start point if end of source was reached.
-			virtual Pos pull( Pos start_point, Pos end_point, size_t num_characters ) = 0;
+			// Check if specified position is after the last element in the source.
+			inline bool afterLast( const Pos& pos ) const noexcept { return pos.BytePos >= numBytesInSource(); }
 
-			// Check if specified position is at (or beyond) the end of source
-			// End of source is defined to be one byte beyond last character!
-			inline bool atEnd( const Pos& pos ) const noexcept { return pos.bytePos() >= numBytes(); }
+			// Check if specified position is at or after start and before or at end of the source.
+			inline bool isValid( const Pos& pos ) const noexcept { return pos.BytePos <= numBytesInSource(); }
 
-			// Check if specified position is beyond the end of the source
-			inline bool beyondEnd( const Pos& pos ) const noexcept { return pos.bytePos() > numBytes(); }
+			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+			virtual bool match( const Pos& start, const Pos& end, const eon::string& value ) const noexcept = 0;
 
-			// Check if the specified portion of the source matches exactly
-			// with the given string value
-			virtual bool match( const eon::string& value, Pos start, Pos end ) const noexcept = 0;
-			virtual bool match( const char* value, Pos start, Pos end ) const noexcept = 0;
+			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+			virtual bool match( const Pos& start, const Pos& end, const char* value ) const noexcept = 0;
 
 			// Get characater at specified position
 			// Returns [eon::nochar] if at or beyond source end!
@@ -95,14 +72,16 @@ namespace eon
 			// Returns -1 if at or beyond source end!
 			virtual int byte( index_t pos ) noexcept = 0;
 
-			// Get string at specified area
-			// Returns empty string if not a valid area or the entire area is
-			// outside the scope of the source!
+			// Convert the specified portion of 'this' source into a string value.
+			// The returned string will be empty if the portion is invalid or
+			// entirely outside the scope of the source.
 			virtual string str( Pos start, Pos end ) noexcept = 0;
 
-			// Get bytes at specified area.
-			// Returns empty if not a valid area or the entire area is outside the scope of the source!
+			// Convert the specified portion of 'this' source into a bytes value.
+			// The returned std::string will be empty if the portion is invalid
+			// or entirely outside the scope of the source.
 			virtual std::string bytes( Pos start, Pos end ) noexcept = 0;
+
 
 
 
@@ -110,10 +89,10 @@ namespace eon
 			//
 			// Attributes
 			//
-		protected:
+		PROTECTED:
 
 			string Name;
-			std::vector<size_t> LineLengths;	// In number of characters
+			std::vector<size_t> NumCharsOnLines;
 		};
 	}
 }

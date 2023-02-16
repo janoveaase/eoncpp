@@ -10,76 +10,76 @@ namespace eon
 	{
 		string str{ "This is a 2 line test\nLine #2!" };
 		source::String src( "test", std::move( str ) );
-		WANT_EQ( "test", src.name().stdstr() ) << "Wrong name!";
+		WANT_EQ( "test", src.sourceName() ) << "Wrong name!";
 		source::Pos beg;
-		WANT_EQ( 0, beg.line() );
-		WANT_EQ( 0, beg.posOnLine() );
-		WANT_EQ( 0, beg.charPos() );
-		WANT_EQ( 0, beg.bytePos() );
+		WANT_EQ( 0, beg.Line );
+		WANT_EQ( 0, beg.PosOnLine );
+		WANT_EQ( 0, beg.CharPos );
+		WANT_EQ( 0, beg.BytePos );
 		WANT_EQ( 'T', src.chr( beg ) ) << "Wrong first character!";
-		
-		auto next = src.push( beg, 1 );
-		WANT_EQ( 0, next.line() );
-		WANT_EQ( 1, next.posOnLine() );
-		WANT_EQ( 1, next.charPos() );
-		WANT_EQ( 1, next.bytePos() );
+
+		auto next = src.getPosAtOffset( beg, 1 );
+		WANT_EQ( 0, next.Line );
+		WANT_EQ( 1, next.PosOnLine );
+		WANT_EQ( 1, next.CharPos );
+		WANT_EQ( 1, next.BytePos );
 		WANT_EQ( 'h', src.chr( next ) ) << "Wrong second character!";
 
-		auto eol = src.push( beg, 21 );
-		WANT_EQ( 0, eol.line() );
-		WANT_EQ( 21, eol.posOnLine() );
-		WANT_EQ( 21, eol.charPos() );
-		WANT_EQ( 21, eol.bytePos() );
+		auto eol = src.getPosAtOffset( beg, 21 );
+		WANT_EQ( 0, eol.Line );
+		WANT_EQ( 21, eol.PosOnLine );
+		WANT_EQ( 21, eol.CharPos );
+		WANT_EQ( 21, eol.BytePos );
 		WANT_EQ( "This is a 2 line test", src.str( beg, eol ).stdstr() ) << "Wrong first line!";
 
-		auto l2 = src.push( eol, 1 );
-		WANT_EQ( 1, l2.line() );
-		WANT_EQ( 0, l2.posOnLine() );
-		WANT_EQ( 22, l2.charPos() );
-		WANT_EQ( 22, l2.bytePos() );
+		auto l2 = src.getPosAtOffset( eol, 1 );
+		WANT_EQ( 1, l2.Line );
+		WANT_EQ( 0, l2.PosOnLine );
+		WANT_EQ( 22, l2.CharPos );
+		WANT_EQ( 22, l2.BytePos );
 		WANT_EQ( 'L', src.chr( l2 ) );
 
-		auto eos = src.push( l2, 99 );
-		WANT_EQ( 1, eos.line() );
-		WANT_EQ( 8, eos.posOnLine() );
-		WANT_EQ( 30, eos.charPos() );
-		WANT_EQ( 30, eos.bytePos() );
+		auto eos = src.getPosAtOffset( l2, 99 );
+		WANT_EQ( 1, eos.Line );
+		WANT_EQ( 8, eos.PosOnLine );
+		WANT_EQ( 30, eos.CharPos );
+		WANT_EQ( 30, eos.BytePos );
 		WANT_EQ( "Line #2!", src.str( l2, eos ).stdstr() ) << "Wrong second line!";
 
-		WANT_EXCEPT( src.push( eos, 1 ), source::EndOfSource ) << "Didn't throw at end of source!";
+		WANT_EXCEPT( src.getPosAtOffset( eos, 1 ), source::EndOfSource ) << "Didn't throw at end of source!";
 
-		auto first = src.pull( next, beg, 1 );
-		WANT_EQ( 0, first.line() );
-		WANT_EQ( 0, first.posOnLine() );
-		WANT_EQ( 0, first.charPos() );
-		WANT_EQ( 0, first.bytePos() );
+		auto first = src.getPosAtOffset( next, -1 );
+		WANT_EQ( 0, first.Line );
+		WANT_EQ( 0, first.PosOnLine );
+		WANT_EQ( 0, first.CharPos );
+		WANT_EQ( 0, first.BytePos );
 		WANT_EQ( 'T', src.chr( first ) );
 
-		auto pos = src.pull( eos, next, 8 );
-		WANT_EQ( 1, pos.line() );
-		WANT_EQ( 0, pos.posOnLine() );
-		WANT_EQ( 22, pos.charPos() );
-		WANT_EQ( 22, pos.bytePos() );
+		auto pos = src.getPosAtOffset( eos, -8 );
+		WANT_EQ( 1, pos.Line );
+		WANT_EQ( 0, pos.PosOnLine );
+		WANT_EQ( 22, pos.CharPos );
+		WANT_EQ( 22, pos.BytePos );
 		WANT_EQ( 'L', src.chr( pos ) );
 
-		pos = src.pull( l2, beg, 1 );
-		WANT_EQ( 0, pos.line() );
-		WANT_EQ( 21, pos.posOnLine() );
-		WANT_EQ( 21, pos.charPos() );
-		WANT_EQ( 21, pos.bytePos() );
+		pos = src.getPosAtOffset( l2, -1 );
+		WANT_EQ( 0, pos.Line );
+		WANT_EQ( 21, pos.PosOnLine );
+		WANT_EQ( 21, pos.CharPos );
+		WANT_EQ( 21, pos.BytePos );
 		WANT_EQ( '\n', src.chr( pos ) );
 
-		pos = src.pull( eos, beg, 9 );
-		WANT_EQ( 0, pos.line() );
-		WANT_EQ( 21, pos.posOnLine() );
-		WANT_EQ( 21, pos.charPos() );
-		WANT_EQ( 21, pos.bytePos() );
+		pos = src.getPosAtOffset( eos, -9 );
+		WANT_EQ( 0, pos.Line );
+		WANT_EQ( 21, pos.PosOnLine );
+		WANT_EQ( 21, pos.CharPos );
+		WANT_EQ( 21, pos.BytePos );
 
-		pos = src.push( pos, 1 );
-		WANT_EQ( 1, pos.line() );
-		WANT_EQ( 0, pos.posOnLine() );
-		WANT_EQ( 22, pos.charPos() );
-		WANT_EQ( 22, pos.bytePos() );
+		pos = src.getPosAtOffset( pos, 1 );
+		WANT_EQ( 1, pos.Line );
+		WANT_EQ( 0, pos.PosOnLine );
+		WANT_EQ( 22, pos.CharPos );
+		WANT_EQ( 22, pos.BytePos );
 
 		auto raw2 = src.reclaim();
 		WANT_EQ( "This is a 2 line test\nLine #2!", raw2.stdstr() )
@@ -89,77 +89,77 @@ namespace eon
 	{
 		REQUIRE_TRUE( prepareTestFile( "This is a 2 line test\nLine #2!" ) );
 		source::File src( TestFile );
-		WANT_EQ( TestFile, src.name().stdstr() ) << "Wrong name!";
+		WANT_EQ( TestFile, src.sourceName() ) << "Wrong name!";
 		source::Pos beg;
-		WANT_EQ( 0, beg.line() );
-		WANT_EQ( 0, beg.posOnLine() );
-		WANT_EQ( 0, beg.charPos() );
-		WANT_EQ( 0, beg.bytePos() );
+		WANT_EQ( 0, beg.Line );
+		WANT_EQ( 0, beg.PosOnLine );
+		WANT_EQ( 0, beg.CharPos );
+		WANT_EQ( 0, beg.BytePos );
 		WANT_EQ( 'T', src.chr( beg ) ) << "Wrong first character!";
 
-		auto next = src.push( beg, 1 );
-		WANT_EQ( 0, next.line() );
-		WANT_EQ( 1, next.posOnLine() );
-		WANT_EQ( 1, next.charPos() );
-		WANT_EQ( 1, next.bytePos() );
+		auto next = src.getPosAtOffset( beg, 1 );
+		WANT_EQ( 0, next.Line );
+		WANT_EQ( 1, next.PosOnLine );
+		WANT_EQ( 1, next.CharPos );
+		WANT_EQ( 1, next.BytePos );
 		WANT_EQ( 'h', src.chr( next ) ) << "Wrong second character!";
 
-		auto eol = src.push( beg, 21 );
-		WANT_EQ( 0, eol.line() );
-		WANT_EQ( 21, eol.posOnLine() );
-		WANT_EQ( 21, eol.charPos() );
-		WANT_EQ( 21, eol.bytePos() );
+		auto eol = src.getPosAtOffset( beg, 21 );
+		WANT_EQ( 0, eol.Line );
+		WANT_EQ( 21, eol.PosOnLine );
+		WANT_EQ( 21, eol.CharPos );
+		WANT_EQ( 21, eol.BytePos );
 		WANT_EQ( '\n', src.chr( eol ) ) << "Wrong eol character!";
 		WANT_EQ( "This is a 2 line test", src.str( beg, eol ).stdstr() ) << "Wrong first line!";
 
-		auto l2 = src.push( eol, 1 );
-		WANT_EQ( 1, l2.line() );
-		WANT_EQ( 0, l2.posOnLine() );
-		WANT_EQ( 22, l2.charPos() );
-		WANT_EQ( 22, l2.bytePos() );
+		auto l2 = src.getPosAtOffset( eol, 1 );
+		WANT_EQ( 1, l2.Line );
+		WANT_EQ( 0, l2.PosOnLine );
+		WANT_EQ( 22, l2.CharPos );
+		WANT_EQ( 22, l2.BytePos );
 		WANT_EQ( 'L', src.chr( l2 ) );
 
-		auto eos = src.push( l2, 99 );
-		WANT_EQ( 1, eos.line() );
-		WANT_EQ( 8, eos.posOnLine() );
-		WANT_EQ( 30, eos.charPos() );
-		WANT_EQ( 30, eos.bytePos() );
+		auto eos = src.getPosAtOffset( l2, 99 );
+		WANT_EQ( 1, eos.Line );
+		WANT_EQ( 8, eos.PosOnLine );
+		WANT_EQ( 30, eos.CharPos );
+		WANT_EQ( 30, eos.BytePos );
 		WANT_EQ( "Line #2!", src.str( l2, eos ).stdstr() ) << "Wrong second line!";
 
-		WANT_EXCEPT( src.push( eos, 1 ), source::EndOfSource ) << "Didn't throw at end of source!";
+		WANT_EXCEPT( src.getPosAtOffset( eos, 1 ), source::EndOfSource ) << "Didn't throw at end of source!";
 
-		auto first = src.pull( next, beg, 1 );
-		WANT_EQ( 0, first.line() );
-		WANT_EQ( 0, first.posOnLine() );
-		WANT_EQ( 0, first.charPos() );
-		WANT_EQ( 0, first.bytePos() );
+		auto first = src.getPosAtOffset( next, -1 );
+		WANT_EQ( 0, first.Line );
+		WANT_EQ( 0, first.PosOnLine );
+		WANT_EQ( 0, first.CharPos );
+		WANT_EQ( 0, first.BytePos );
 		WANT_EQ( 'T', src.chr( first ) );
 
-		auto pos = src.pull( eos, next, 8 );
-		WANT_EQ( 1, pos.line() );
-		WANT_EQ( 0, pos.posOnLine() );
-		WANT_EQ( 22, pos.charPos() );
-		WANT_EQ( 22, pos.bytePos() );
+		auto pos = src.getPosAtOffset( eos, -8 );
+		WANT_EQ( 1, pos.Line );
+		WANT_EQ( 0, pos.PosOnLine );
+		WANT_EQ( 22, pos.CharPos );
+		WANT_EQ( 22, pos.BytePos );
 		WANT_EQ( 'L', src.chr( pos ) );
 
-		pos = src.pull( l2, beg, 1 );
-		WANT_EQ( 0, pos.line() );
-		WANT_EQ( 21, pos.posOnLine() );
-		WANT_EQ( 21, pos.charPos() );
-		WANT_EQ( 21, pos.bytePos() );
+		pos = src.getPosAtOffset( l2, -1 );
+		WANT_EQ( 0, pos.Line );
+		WANT_EQ( 21, pos.PosOnLine );
+		WANT_EQ( 21, pos.CharPos );
+		WANT_EQ( 21, pos.BytePos );
 		WANT_EQ( '\n', src.chr( pos ) );
 
-		pos = src.pull( eos, beg, 9 );
-		WANT_EQ( 0, pos.line() );
-		WANT_EQ( 21, pos.posOnLine() );
-		WANT_EQ( 21, pos.charPos() );
-		WANT_EQ( 21, pos.bytePos() );
+		pos = src.getPosAtOffset( eos, -9 );
+		WANT_EQ( 0, pos.Line );
+		WANT_EQ( 21, pos.PosOnLine );
+		WANT_EQ( 21, pos.CharPos );
+		WANT_EQ( 21, pos.BytePos );
 
-		pos = src.push( pos, 1 );
-		WANT_EQ( 1, pos.line() );
-		WANT_EQ( 0, pos.posOnLine() );
-		WANT_EQ( 22, pos.charPos() );
-		WANT_EQ( 22, pos.bytePos() );
+		pos = src.getPosAtOffset( pos, 1 );
+		WANT_EQ( 1, pos.Line );
+		WANT_EQ( 0, pos.PosOnLine );
+		WANT_EQ( 22, pos.CharPos );
+		WANT_EQ( 22, pos.BytePos );
 	}
 
 
@@ -177,34 +177,34 @@ namespace eon
 		source::Ref ref( src );
 		WANT_EQ( "1:1", ref.startStr().stdstr() );
 
-		ref.pushStart( 5 );
+		ref.moveStart( 5 );
 		WANT_EQ( "1:6", ref.startStr().stdstr() );
 		WANT_EQ( "is a 2 line test\nLine #2!", ref.str().stdstr() );
 
-		ref.end( src.push( ref.start(), 16 ) );
+		ref.end( src.getPosAtOffset( ref.start(), 16 ) );
 		WANT_EQ( "is a 2 line test", ref.str().stdstr() );
 
-		ref.pushEnd( 7 );
-		ref.pushStart( 12 );
+		ref.moveEnd( 7 );
+		ref.moveStart( 12 );
 		WANT_EQ( "test\nLine #", ref.str().stdstr() );
 	}
 	TEST( SourceRef, file )
 	{
 		REQUIRE_TRUE( prepareTestFile( "This is a 2 line test\nLine #2!" ) );
 		source::File src( TestFile );
-		WANT_EQ( TestFile, src.name().stdstr() ) << "Wrong name!";
+		WANT_EQ( TestFile, src.sourceName() ) << "Wrong name!";
 		source::Ref ref( src );
 		WANT_EQ( "1:1", ref.startStr().stdstr() );
 
-		ref.pushStart( 5 );
+		ref.moveStart( 5 );
 		WANT_EQ( "1:6", ref.startStr().stdstr() );
 		WANT_EQ( "is a 2 line test\nLine #2!", ref.str().stdstr() );
 
-		ref.end( src.push( ref.start(), 16 ) );
+		ref.end( src.getPosAtOffset( ref.start(), 16 ) );
 		WANT_EQ( "is a 2 line test", ref.str().stdstr() );
 
-		ref.pushEnd( 7 );
-		ref.pushStart( 12 );
+		ref.moveEnd( 7 );
+		ref.moveStart( 12 );
 		WANT_EQ( "test\nLine #", ref.str().stdstr() );
 	}
 

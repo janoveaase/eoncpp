@@ -51,8 +51,8 @@ namespace eon
 			//
 		public:
 
-			// Reclaim the source data string
-			// This will effectively clear 'this' source
+			// Reclaim the source data string.
+			// This will effectively clear 'this' source!
 			inline string&& reclaim() noexcept { Name.clear(); return std::move( Data ); }
 
 
@@ -64,41 +64,34 @@ namespace eon
 			//
 		public:
 
-			// Get number of bytes in source
-			inline size_t numBytes() const noexcept override { return Data.numBytes(); }
+			inline size_t numBytesInSource() const noexcept override { return Data.numBytes(); }
 
-			// Get position a number of characters (not bytes!) ahead
-			// Throws [eon::source::EndOfSource] if already at the end
-			// Returns moved position - which may be less than num_characters
-			//         from the start point if end of source was reached.
-			Pos push( Pos start_point, size_t num_characters ) override;
+			// Given a base position and an offset (in characaters, not bytes!),
+			// get a source::Pos object for that offset.
+			// If 'offset_chars' refers to a character before start or after
+			// end of source, it will be adjusted to fit.
+			// Returns 'base_position' if 'offset_chars' is adjusted to zero!
+			Pos getPosAtOffset( Pos base_position, int offset_chars = 1 ) override;
 
-			// Get position a number of characters (not bytes!) prior to the
-			// start point, but not at or before end point
-			// NOTE: The end point must be before the start point!
-			// Throws [eon::source::EndOfSource] if already at the end point
-			// Returns moved position - which may be less than num_characters
-			//         from the start point if end of source was reached.
-			Pos pull( Pos start_point, Pos end_point, size_t num_characters ) override;
+			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+			inline bool match( const Pos& start, const Pos& end, const eon::string& value ) const noexcept override {
+				return Data.substr( start.CharPos, end.CharPos - start.CharPos ) == value.substr(); }
 
-			// Check if the specified portion of the source matches exactly
-			// with the given string value
-			inline bool match( const eon::string& value, Pos start, Pos end ) const noexcept override {
-				return Data.substr( start, end ) == value.substr(); }
-			inline bool match( const char* value, Pos start, Pos end ) const noexcept override {
-				return Data.substr( start, end ) == substring( value ); }
+			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+			bool match( const Pos& start, const Pos& end, const char* value ) const noexcept override {
+				return Data.substr( start.CharPos, end.CharPos - start.CharPos ) == substring( value ); }
 
-			// Get characater at specified position
+			// Get characater at specified position.
 			// Returns [eon::nochar] if at or beyond source end!
 			inline char_t chr( const Pos& pos ) noexcept override {
-				return *string::iterator( Data.c_str(), Data.numBytes(), Data.numChars(),
-					Data.c_str() + pos.bytePos(), pos.charPos() ); }
+				return *string::iterator(
+					Data.c_str(), Data.numBytes(), Data.numChars(), Data.c_str() + pos.BytePos, pos.CharPos ); }
 
 			// Get byte at specified position
 			// Returns -1 if at or beyond source end!
-			inline int byte( index_t pos ) noexcept override { return Data.byte( pos ); }
+			inline int byte( index_t pos ) noexcept override { return pos < Data.numBytes() ? Data.byte( pos ) : -1; }
 
-			// Get string at specified area
+			// Get string at specified area.
 			// Returns empty string if not a valid area or the entire area is
 			// outside the scope of the source!
 			string str( Pos start, Pos end ) noexcept override;
@@ -109,14 +102,29 @@ namespace eon
 
 
 
+
+			///////////////////////////////////////////////////////////////////
+			//
+			// Helpers
+			//
+		PRIVATE:
+
+			void _forward( Pos& pos, index_t num_chars );
+			void _backward( Pos& pos, index_t num_chars );
+
+			void _scanString();
+
+
+
+
 			///////////////////////////////////////////////////////////////////
 			//
 			// Attributes
 			//
-		private:
+		PRIVATE:
 
 			string Data;
-			std::vector<size_t> LineLengths;
+			std::vector<size_t> NumCharsOnLines;
 		};
 	}
 }
