@@ -16,30 +16,44 @@ namespace eon
 		Tokenizer Tok;
 		void prepare()
 		{
-			Tok.registerEonNameTokens( false );
-			Tok.registerTokenChar( name_space, ' ', Tokenizer::Match::sequence );
-			Tok.registerTokenChar( name( "tab" ), '\t', Tokenizer::Match::sequence );
-			Tok.registerSequenceToken( name_operator, "+" );
-			Tok.registerSequenceToken( name_operator, "-" );
-			Tok.registerSequenceToken( name_operator, "=" );
-			Tok.registerSequenceToken( name_operator, "+=" );
-			Tok.registerSequenceToken( name_operator, "+=" );
-			Tok.registerTokenChars( name_symbol, "<>{}!@#$%&/?*/^~,:;", Tokenizer::Match::single );
-			Tok.registerTokenChar( name_point, '.', Tokenizer::Match::sequence );
-			Tok.registerTokenChar( name_backslash, '\\', Tokenizer::Match::single );
-			Tok.registerTokenChar( name_doublequote, '"', Tokenizer::Match::single );
-			Tok.registerTokenChar( name_singlequote, '\'', Tokenizer::Match::single );
-			Tok.registerTokenCharcat( name_digits, charcat::number_ascii_digit, Tokenizer::Match::sequence );
-			Tok.registerTokenChar( name_underscore, '_', Tokenizer::Match::sequence );
-			Tok.registerTokenCharcat( name_letters, charcat::letter_lowercase, Tokenizer::Match::sequence );
-			Tok.registerTokenCharcat( name_letters, charcat::letter_uppercase, Tokenizer::Match::sequence );
-			Tok.registerTokenCharcat( name_letters, charcat::letter_titlecase, Tokenizer::Match::sequence );
-			Tok.registerTokenCharcat( name_letters, charcat::letter_modifier, Tokenizer::Match::sequence );
-			Tok.registerTokenCharcat( name_letters, charcat::letter_other, Tokenizer::Match::sequence );
-			Tok.registerTokenChar( name_open, '(', Tokenizer::Match::single );
-			Tok.registerTokenChar( name_close, ')', Tokenizer::Match::single );
-			Tok.registerTokenChar( name_open_square, '[', Tokenizer::Match::single );
-			Tok.registerTokenChar( name_close_square, ']', Tokenizer::Match::single );
+			Tok.registerSingleCharSequenceAsToken( ' ', name_space );
+			Tok.registerSingleCharSequenceAsToken( '\t', name( "tab" ) );
+			Tok.registerSingleCharAsToken( '+', name_operator );
+			Tok.registerSingleCharAsToken( '-', name_operator );
+			Tok.registerSingleCharAsToken( '=', name_operator );
+			Tok.registerCharSequenceAsToken( "+=", name_operator );
+			Tok.registerCharSequenceAsToken( "-=", name_operator );
+			Tok.registerAnySingleCharAsToken( "<>{}!@#$%&/?*/^~,:;", name_symbol );
+			Tok.registerSingleCharSequenceAsToken( '.', name_point );
+			Tok.registerSingleCharAsToken( '\\', name_backslash );
+			Tok.registerSingleCharAsToken( '"', name_doublequote );
+			Tok.registerSingleCharAsToken( '\'', name_singlequote );
+			Tok.registerCharSequenceAsToken( charcat::number_ascii_digit, name_digits );
+			Tok.registerSingleCharSequenceAsToken( '_', name_underscore );
+			Tok.registerCharSequenceAsToken( charcat::letter_lowercase, name_letters );
+			Tok.registerCharSequenceAsToken( charcat::letter_uppercase, name_letters );
+			Tok.registerCharSequenceAsToken( charcat::letter_titlecase, name_letters );
+			Tok.registerCharSequenceAsToken( charcat::letter_modifier, name_letters );
+			Tok.registerCharSequenceAsToken( charcat::letter_other, name_letters );
+			Tok.registerSingleCharAsToken( '(', name_open );
+			Tok.registerSingleCharAsToken( ')', name_close );
+			Tok.registerSingleCharAsToken( '[', name_open_square );
+			Tok.registerSingleCharAsToken( ']', name_close_square );
+		}
+		string simpleJoin( const std::vector<Token>& tokens ) const { return _join( tokens, true ); }
+		string fullJoin( const std::vector<Token>& tokens ) const { return _join( tokens, false ); }
+		string _join( const std::vector<Token>& tokens, bool simple ) const
+		{
+			string result;
+			for( auto& token : tokens )
+			{
+				if( !result.empty() )
+					result += "|";
+				if( !simple )
+					result << eon::str( token.type() ) << "=";
+				result << token.str();
+			}
+			return result;
 		}
 	};
 	class TokenParserTest : public TokenizerTest {};

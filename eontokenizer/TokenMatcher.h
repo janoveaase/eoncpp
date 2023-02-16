@@ -2,62 +2,64 @@
 #include "TokenParser.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  Eon Token Matcher Class - eon::TokenMatcher
-
-	  The token matcher works with [eon::TokenParser] and can identify
-	  sequences of tokens based on a sequence pattern setup.
-
-	  The pattern is defined as a string. Enclose each element to be matched in
-	  parenthesis.
-	  The following can be placed inside an element:
-
-	  <name>   : Name of the token type to match. This should match a name
-	             registered with the [eon::Tokenizer] used to generate the
-				 tokens, and/or the [eon::ReTokenizer] that has modified the
-				 tokens, prior to [eon::TokenParser] getting them.
-			     Note that it might more efficient to match both <name> and
-				 <string> rather than just <string> only.
-	  <string> : A single-quoted string to be matched. If the string starts
-	             with a star "*", the match the end of the string, and if it
-				 ends with one, match the start of the string.
-
-	  If an element should be treated as optional, prefix it with a question
-	  mark.
-	  If an element should be matched, but not advanced (matched again), prefix
-	  it with an ampersand.
-	  If an element should not match (to match), prefix it with an exclamation
-	  point.
-	  If two or more elements should be treated as options (where only one need
-	  to match), put "opt" in front and enclose them in parenthesis.
-	  If two or more elements should be matched in sequence (where one or more
-	  may be optional or contain options), put "seq" in front and enclose them
-	  in parenthesis.
-
-	  Example: "(letters '*to') ?opt((space) (tab)) seq((digits '9*') ?seq((symbol '.')(digits))) (symbol '!')"
-	    Match sequence of tokens where token number:
-	      1. Consists of letters only and ends with "to"
-	      2. May or may not be a space or a tab token
-	      3. Is a sequence of tokens where the first consists of digits
-		     starting with 9, optionally followed by point and more digits.
-	      4. Is the symbol "!"
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// Eon Token Matcher Class - eon::TokenMatcher
+	//
+	// The token matcher works with [eon::TokenParser] and can identify
+	// sequences of tokens based on a sequence pattern.
+	//
+	// The pattern is defined as a string, each element to be matched is
+	// enclosed by parenthesis.
+	// The following can be placed inside an element:
+	//
+	// <name>   : Name of the token type to match. This should match a name
+	//            registered with the [eon::Tokenizer] used to generate the
+	//            tokens, and/or the [eon::ReTokenizer] that has modified the
+	//            tokens, prior to [eon::TokenParser] getting them.
+	//            Note that it might be more efficient to match both <name> and
+	//            <string> rather than just <string> only.
+	// <string> : A single-quoted string to be matched. If the string starts
+	//            with a star "*", the match the end of the string, and if it
+	//            ends with one, match the start of the string.
+	//
+	// Speceial prefixes:
+	//  ? : Element is optional.
+	//  & : Match element but do not advance to the next.
+	//  ! : Do not match element and do not advance to the next.
+	//  - : Match anything except this element and advance to the next.
+	//
+	// Functions:
+	//  opt(<elements>) : Out of two or more elements, match one of them.
+	//  seq(<elements>) : Two or more elements to be matched in sequence.
+	// Elements within functions can also be functions.
+	//
+	// Example: "(letters '*to') ?opt((space) (tab)) seq((digits '9*') ?seq((symbol '.')(digits))) (symbol '!')"
+	//   Match sequence of tokens where token number ... :
+	//     1. Consists of letters only and ends with "to".
+	//     2. May or may not be a space or a tab token.
+	//     3. Is a sequence of tokens where the first consists of digits
+	//        starting with 9, optionally followed by point and more digits.
+	//     4. Is the symbol "!".
+	//
 	class TokenMatcher
 	{
-		/**********************************************************************
-		  Construction
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Construction
+		//
 	public:
 
-		//* Default construction, void matcher
+		// Default construction, void matcher
 		TokenMatcher() = default;
 
-		//* Construct matcher for a sequence pattern
+		// Construct matcher for a sequence pattern
 		EONEXCEPT( InvalidPattern );
 		inline TokenMatcher( string pattern ) { Pattern.Root = true; Pattern.parse( pattern.begin() ); }
 
@@ -74,15 +76,16 @@ namespace eon
 
 
 
-		/**********************************************************************
-		  Matching
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Matching
+		//
 
-		//* Check if this matcher is empty (no pattern)
+		// Check if this matcher is empty (no pattern)
 		inline operator bool() const noexcept { return !Pattern.empty(); }
 
-		//* Check if the specified [eon::TokenParser] is matching the pattern
-		//* of this matcher at its current position.
+		// Check if the specified [eon::TokenParser] is matching the pattern
+		// of this matcher at its current position.
 		bool match( TokenParser& parser ) const noexcept;
 
 
@@ -92,34 +95,43 @@ namespace eon
 		//
 		// Element classes
 		//
-	private:
+	PRIVATE:
+
+		enum class flags
+		{
+			none = 0x00,
+			optional = 0x01,
+			negate = 0x02,
+			advance = 0x04
+		};
+		inline friend flags operator|( flags a, flags b ) noexcept {
+			return static_cast<flags>( static_cast<int>( a ) | static_cast<int>( b ) ); }
+		inline friend bool operator&&( flags a, flags b ) noexcept {
+			return static_cast<bool>( static_cast<int>( a ) & static_cast<int>( b ) ); }
+
+
+		static inline bool isNameChar( char_t c ) noexcept {
+			return Characters::get().isLetter( c ) || Characters::get().isNumberAsciiDigit( c ) || c == '_'; }
+		static inline bool isSpaceChar( char_t c ) noexcept { return c == SpaceChr || c == TabChr || c == NewlineChr; }
+		static string::iterator parseName( string::iterator i, name_t& name );
 
 		struct Element
 		{
-			Element() { Chars = &Characters::get(); }
-			virtual ~Element() = default;
-
-			Element& operator=( const Element& other ) noexcept {
-				Optional = other.Optional; Advance = other.Advance; Negate = other.Negate; return *this; }
+			Element& operator=( const Element& other ) noexcept { Flags = other.Flags; return *this; }
 
 			virtual string::iterator parse( string::iterator i ) = 0;
 			virtual Element* clone() const = 0;
 			virtual bool match( TokenParser& parser ) const noexcept = 0;
 
+			inline bool optional() const noexcept { return Flags && flags::optional; }
+			inline bool negate() const noexcept { return Flags && flags::negate; }
+			inline bool advance() const noexcept { return Flags && flags::advance; }
+
 			virtual bool isData() const noexcept { return false; }
 			virtual bool isOptions() const noexcept { return false; }
 			virtual bool isSequence() const noexcept { return false; }
 
-			string::iterator parseName( string::iterator i, name_t& name );
-
-			inline bool isNameChar( char_t c ) const noexcept {
-				return Chars->isLetter( c ) || Chars->isNumberAsciiDigit( c ) || c == '_'; }
-			inline bool isSpaceChar( char_t c ) const noexcept { return c == SpaceChr || c == TabChr || c == NewlineChr; }
-
-			bool Optional{ false };
-			bool Advance{ true };
-			bool Negate{ false };
-			const Characters* Chars{ nullptr };
+			flags Flags{ flags::advance };
 		};
 
 		struct DataElement : public Element
@@ -129,24 +141,39 @@ namespace eon
 			inline DataElement( DataElement&& other ) noexcept { *this = std::move( other ); }
 			virtual ~DataElement() = default;
 
+			enum class OpenEnded
+			{
+				none,
+				start,
+				end
+			};
+
 			inline DataElement& operator=( const DataElement& other ) {
-				Type = other.Type; Str = other.Str; StrEnd = other.StrEnd; *static_cast<Element*>( this ) = other;
+				Type = other.Type; Str = other.Str; Open = other.Open; *static_cast<Element*>( this ) = other;
 				return *this; }
 			inline DataElement& operator=( DataElement&& other ) noexcept {
-				Type = other.Type; other.Type = no_name; Str = std::move( other.Str ); StrEnd = other.StrEnd;
-				other.StrEnd = 0; *static_cast<Element*>( this ) = other; return *this; }
+				Type = other.Type; other.Type = no_name; Str = std::move( other.Str ); Open = other.Open;
+				other.Open = OpenEnded::none; *static_cast<Element*>( this ) = other; return *this; }
 
 			string::iterator parse( string::iterator i ) override;
+			bool _parse( string::iterator& i );
 			inline Element* clone() const override { return new DataElement( *this ); }
 			bool match( TokenParser& parser ) const noexcept override;
+			bool _matchStr( TokenParser& parser ) const noexcept;
 
 			inline bool isData() const noexcept override { return true; }
 
 			string::iterator _parseStr( string::iterator i );
+			string::iterator _parseStartedStr( string::iterator i );
+			inline bool _openEndedStart( string::iterator i ) const noexcept { return *i == '*'; }
+			inline bool _openEndedEnd( string::iterator i ) const noexcept {
+				if( *i == '*' ) { auto next = i + 1; return next && *next == SglQuoteChr; } return false; }
+			string::iterator _parseStrContents( string::iterator i );
+			string::iterator _parseStrEscaped( string::iterator i );
 
 			name_t Type{ no_name };
 			string Str;
-			int StrEnd{ 0 };	// -1=start, 1=end
+			OpenEnded Open{ OpenEnded::none };
 		};
 
 		struct ContainerElement : public Element
@@ -166,7 +193,28 @@ namespace eon
 			inline bool empty() const noexcept { return Elements.empty(); }
 
 			string::iterator parse( string::iterator i ) override;
-			
+
+			struct Parser
+			{
+				Parser() = default;
+				inline Parser( string::iterator pos, std::list<Element*>& elements, bool& root ) {
+					I = pos; Pos = pos; Elements = &elements; Root = &root; }
+				string::iterator parse();
+				inline bool _skipSpace() noexcept { if( isSpaceChar( *I ) ) { ++I; return true; } return false; }
+				bool _parseFlag() noexcept;
+				inline bool _endOfElement() noexcept { if( *I == ')' ) { ++I; return true; } return false; }
+				inline bool _parseName() {
+					if( isNameChar( *I ) ) { Pos = I; I = parseName( I, ElmType ); return true; } return false; }
+				bool _parseNewElement();
+				void _createNewElement();
+
+				flags ParseFlags{ flags::advance };
+				name_t ElmType{ no_name };
+				string::iterator Pos, I;
+				std::list<Element*>* Elements{ nullptr };
+				bool* Root{ nullptr };
+			};
+
 			std::list<Element*> Elements;
 			bool Root{ false };
 		};
@@ -202,6 +250,7 @@ namespace eon
 
 			inline Element* clone() const override { return new SequenceElement( *this ); }
 			bool match( TokenParser& parser ) const noexcept override;
+			bool _matchSequence( TokenParser& parser ) const noexcept;
 
 			inline bool isSequence() const noexcept override { return true; }
 		};

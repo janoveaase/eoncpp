@@ -2,127 +2,134 @@
 #include "Token.h"
 
 
-/******************************************************************************
-  The 'eon' namespace encloses all public functionality
-******************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+//
+// The 'eon' namespace encloses all public functionality
+//
 namespace eon
 {
-	/**************************************************************************
-	  Eon Token Parser Class - eon::TokenParser
-
-	  The token parser takes possession of a 'std::vector<[eon::Token]>' object
-	  and allows you to scan forwards and backwards as you move through the
-	  tokens, determining what is what and enable you to interpret them into a
-	  specific context.
-	**************************************************************************/
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// Eon Token Parser Class - eon::TokenParser
+	//
+	// The token parser takes posession of a raw 'std::vector<[eon::Token]>'
+	// object (created by [eon::Tokenizer]), and allows scanning forward and
+	// backward as while iterating the tokens, allowing for a more precise
+	// identification of token types and sequences based on their context.
+	//
 	class TokenParser
 	{
-		/**********************************************************************
-		  Construction
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Construction
+		//
 	public:
 
-		//* Default construction, void parser
+		// Default construction, void parser.
 		TokenParser() = default;
 
-		//* Construct parser for a specific set of tokens
-		//* NOTE: The ownership of the tokens is transferred to the parser.
-		//*       When the parser is done, they can be reclaimed.
+		// Construct parser for a specific set of tokens.
+		// NOTE: The ownership of the tokens is transferred to the parser.
+		//       When the parser is done, they can be reclaimed if necessary.
 		inline TokenParser( std::vector<Token>&& tokens ) noexcept { Tokens = std::move( tokens ); }
 
-		//* Cannot copy-construct a token parser
+		// Cannot copy-construct a token parser.
 		TokenParser( const TokenParser& ) = delete;
 
-		//* Take ownership of the data of another token parser
+		// Take ownership of the data of another token parser.
 		inline TokenParser( TokenParser&& other ) noexcept { *this = std::move( other ); }
 
-		//* Default destruction
+		// Default destruction.
 		virtual ~TokenParser() = default;
 
 
 
 
-		/**********************************************************************
-		  Modifier Methods
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Modifier Methods
+		//
 
-		//* Take ownership of the data of another token parser
+		// Discard current data and take ownership of those of another token parser.
 		inline TokenParser& operator=( TokenParser&& other ) noexcept {
-			Tokens = std::move( other.Tokens ); Cur = other.Cur; other.Cur = 0; return *this; }
+			Tokens = std::move( other.Tokens ); View = other.View; other.View = 0; return *this; }
 
-		//* Reclaim the tokens (makes the parser void)
-		inline std::vector<Token>&& reclaim() noexcept { Cur = 0; return std::move( Tokens ); }
+		// Reclaim the tokens (makes the parser void).
+		inline std::vector<Token>&& reclaim() noexcept { View = 0; return std::move( Tokens ); }
 
 
-		//* Move current [eon::Token] one step forward
-		//* Returns true if still at a valid token, false if reached the end.
+		// Move 'token view' one or more steps forward.
+		// Returns true unless zero or too many steps.
 		inline bool forward( size_t steps = 1 ) noexcept {
-			if( Tokens.size() - Cur >= steps ) Cur += steps; else Cur = Tokens.size(); return Cur < Tokens.size(); }
+			if( Tokens.size() - View < steps ) return false; View += steps; return true; }
 
-		//* Move current [eon::Token] on step backward
-		//* Returns true if the move was successful, false if already at the
-		//* beginning of the vector.
-		inline bool backward( size_t steps = 1 ) noexcept {
-			if( Cur == 0 ) return false; else if( Cur >= steps ) Cur -= steps; else Cur = 0; return true; }
+		// Move 'token view' one or more steps backward.
+		// Returns true unless zero or too many steps.
+		inline bool backward( size_t steps = 1 ) noexcept { if( View < steps ) return false; View -= steps; return true; }
 
 
-		//* Skip to next [eon::Token] if current is of the named type
-		//* Returns true if skipped
-		inline bool skipIf( name_t type ) noexcept { if( *this && current().is( type ) ) {
-			++Cur; return true; } return false; }
+		// Move 'token view' to the next token if the currently viewed token is of the named type.
+		// Returns true if moved.
+		inline bool forwardIf( name_t type ) noexcept { return *this && viewed().is( type ) && forward(); }
 
-		//* Skip to the end of the current [eon::Token]'s line
-		inline void skipToEol() noexcept { for( ; *this && !current().is( name_newline ); ++Cur ); }
+		// Move 'token view' to the first newline token (end of line in source).
+		inline void moveToEol() noexcept { for( ; *this && !viewed().is( name_newline ); ++View ); }
 
-		//* Skip to the start of the next line
-		inline void skipPastEol() noexcept {
-			for( ; *this; ++Cur ) { if( current().is( name_newline ) ) { ++Cur; break; } } }
+		// Move 'token view' to the first token on the next line in the source.
+		// NOTE: This can be another newline if the next line is empty!
+		inline void movePastEol() noexcept {
+			for( ; *this; ++View ) { if( viewed().is( name_newline ) ) { ++View; break; } } }
 
-		//* Set position of (new) current [eon::Token]
-		inline void pos( size_t pos ) noexcept { Cur = pos; }
-
-		//* Access the source
-		inline source::Ref& currentSource() { return Tokens[ Cur ].source(); }
+		// Move 'token view' to the token at the specified position within the tokens vector.
+		// Returns true unless the new view position is out of range!
+		// NOTE: Setting to one past the last element is legal!
+		inline bool setView( size_t pos ) noexcept { if( pos > Tokens.size() ) return false; View = pos; return true; }
 
 
 
 
-		/**********************************************************************
-		  Read-only Methods
-		**********************************************************************/
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Read-only Methods
+		//
 
-		//* Check if there is a valid 'current [eon::Token]'
-		inline operator bool() const noexcept { return Cur < Tokens.size(); }
+		// Check if there 'token view' is for a token in the tokens vector.
+		inline operator bool() const noexcept { return View < Tokens.size(); }
 
-		//* Get current [eon::Token]
-		inline const Token& current() const { return Tokens[ Cur ]; }
+		// Get currently viewed token.
+		// WARNING: The 'token view' must be less than [size()]!
+		inline const Token& viewed() const { return Tokens[ View ]; }
 
-		//* Check if an [eon::Token] exists up to several steps ahead from the
-		//* current
-		inline bool exists(size_t steps_ahead = 1) const noexcept { return Cur + steps_ahead < Tokens.size(); }
+		// Check if there is a token at the specified number of steps forward
+		// (positive argument) or backward (negative argument) of the current
+		// 'token view'.
+		inline bool exists( int steps = 1 ) const noexcept {
+			return steps < 0 ? static_cast<size_t>( -steps ) <= View
+				: View + static_cast<size_t>( steps ) < Tokens.size(); }
 
-		//* Get a [eon::Token] ahead of current
-		inline const Token& ahead( size_t steps_ahead = 1 ) const { return at( Cur + steps_ahead ); }
+		// Peek at a token a number of steps ahead of 'token view'.
+		// NOTE: Use [exists(int)] to make sure there is such a token!
+		inline const Token& peekAhead( size_t steps = 1 ) const { return peek( View + steps ); }
 
-		//* Get [eon::Token] at specified 'pos'ition in the vector
-		inline const Token& at( size_t pos ) const { return Tokens[ pos ]; }
+		// Peek at a token a number of steps behind of 'token view'.
+		// NOTE: Use [exists(int)] to make sure there is such a token!
+		inline const Token& peekBehind( size_t steps = 1 ) const { return peek( View - steps ); }
 
-		//* Get total number of tokens
-		inline size_t size() const noexcept { return Tokens.size(); }
+		// Peek at a token in a specific position in the tokens vector.
+		// WARNING: The position must be less than [size()]!
+		inline const Token& peek( size_t pos ) const { return Tokens[ pos ]; }
 
-		//* Get [eon::Token] immediately prior to current
-		inline const Token& prior() const { return Tokens[ Cur - 1 ]; }
-
-		//* Get the last [eon::Token] (of all) in the token sequence
+		// Peek at the token at the very end of the tokens vector.
 		inline const Token& last() const { return Tokens[ Tokens.size() - 1 ]; }
 
-		//* Get position of first [eon::Token] on current token's line - use
-		//* last line if reached the end
+		// Get the position of the first token that is on the same line in the source as the currently viewed.
 		size_t lineStart() const;
 
+		// Get position of currently viewed token.
+		inline size_t viewedPos() const noexcept { return View; }
 
-		//* Get position of current [eon::Token]
-		inline size_t pos() const noexcept { return Cur; }
+		// Get total number of tokens in tokens vector.
+		inline size_t size() const noexcept { return Tokens.size(); }
 
 
 
@@ -131,8 +138,9 @@ namespace eon
 		//
 		// Attributes
 		//
-	private:
+	PRIVATE:
+
 		std::vector<Token> Tokens;
-		size_t Cur{ 0 };
+		size_t View{ 0 };
 	};
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include <eonsource/SourceRef.h>
 #include <eonstring/Name.h>
+#include <eoninlinetest/InlineTest.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,16 +28,16 @@ namespace eon
 		//
 	public:
 
-		// Default construction, invalid token
+		// Default construction, invalid token.
 		Token() = default;
 
-		// Copy the 'other' token
+		// Copy the 'other' token.
 		inline Token( const Token& other ) noexcept { *this = other; }
 
-		// Construct token for a source reference and character category
+		// Construct token for a source reference and character category.
 		inline Token( source::Ref source, name_t type ) noexcept { Src = source; Type = type; }
 
-		// Default destructor
+		// Default destructor.
 		~Token() = default;
 
 
@@ -48,16 +49,16 @@ namespace eon
 		//
 	public:
 
-		// Copy the 'other' token
+		// Copy the 'other' token.
 		inline Token& operator=( const Token& other ) noexcept { Src = other.Src; Type = other.Type; return *this; }
 
-		// Extend token's source to the given end position
+		// Extend token's source to the given end position.
 		inline bool extend( source::Pos pos ) noexcept {
-			return pos > Src.end() && !Src.source().beyondEnd( pos ) ? Src.end( pos ) : false; }
+			return pos > Src.end() && Src.source().isValid( pos ) ? Src.end( pos ) : false; }
 
-		// Extend token's source to the given end position and specify a new type
-		inline bool extendType( source::Pos pos, name_t type_name ) noexcept {
-			Type = type_name; return pos > Src.end() && !Src.source().beyondEnd( pos ) ? Src.end( pos ) : false; }
+		// Extend token's source to the given end position and specify a new type.
+		inline bool extendWithNewType( source::Pos pos, name_t type_name ) noexcept {
+			if( extend( pos ) ) { Type = type_name; return true; } return false; }
 
 
 
@@ -68,44 +69,44 @@ namespace eon
 		//
 	public:
 
-		// Check if the token contains anything
+		// Check if the token contains something.
 		inline operator bool() const noexcept { return static_cast<bool>( Src ); }
+
+		// Check if the token contains nothing.
 		inline bool empty() const noexcept { return Src.empty(); }
 
-		// Access the full source reference of the token
+		// Get immutable reference to the source of the token.
 		inline const source::Ref& source() const noexcept { return Src; }
+
+		// Get mutable reference to the source of the token.
 		inline source::Ref& source() noexcept { return Src; }
 
-		// Access the token type [eon::name] of the token
+		// Access the token type [eon::name] of the token.
 		inline name_t type() const noexcept { return Type; }
 
-		// Check for an explicit type [eon::name]
+		// Check for an explicit type [eon::name].
 		inline bool is( name_t type ) const noexcept { return Type == type; }
 
-		// Check if this token's characters matches exactly those of the
-		// specified string
+		// Check if this token's characters matches exactly those of the specified string.
 		inline bool match( const string& str ) const { return str.numChars() == Src.numChars() && str == Src.str(); }
 
-		// Check if this token's characters matches exactly those of the
-		// specified C-string
+		// Check if this token's characters matches exactly those of the specified C-string.
 		inline bool match( const char* cstr ) const { return match( string( cstr ) ); }
 
-		// Check if this token's character sequence starts with the same
-		// characters as the specified substring
+		// Check if this token's character sequence starts with the same characters as the specified substring.
 		inline bool startsWith( const string& str ) { return Src.str().startsWith( str ); }
 
-		// Check if this token's character sequence ends with the same
-		// characters as the specified substring
+		// Check if this token's character sequence ends with the same characters as the specified substring.
 		inline bool endsWith( const string& str ) { return Src.str().endsWith( str ); }
 
-		// Check if this token contains only this character
+		// Check if this token contains only this character.
 		inline bool containsOnly( char_t c ) const noexcept {
 			auto str = Src.str(); return !str.empty() && !str.findFirstNotOf( string( c ).substr() ); }
 
-		// Get token string
+		// Get token string.
 		inline string str() const noexcept { return Src.str(); }
 
-		// Get token as bytes
+		// Get token as bytes.
 		inline std::string bytes() const noexcept { return Src.bytes(); }
 
 
