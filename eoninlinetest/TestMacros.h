@@ -21,7 +21,7 @@
 #define utf8( value ) u8 ## value
 
 #	define EON_TRUE( expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "expression" << eonitest::style::normal\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "expression" << eonitest::style::normal\
 		<< " evaluates to " << eonitest::style::item_2 << "true" << "." << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "Expression" << eonitest::style::value << utf8( #expression ) << '\n';\
 	Details.Success = static_cast<bool>( expression );\
@@ -29,7 +29,7 @@
 		Details.Log << "  " << eonitest::style::key_1 << "Value" << eonitest::style::value_1 << "false" << '\n'
 
 #	define EON_FALSE( expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "expression" << eonitest::style::normal\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "expression" << eonitest::style::normal\
 		<< " evaluates to " << eonitest::style::item_2 << "false" << "." << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "Expression" << eonitest::style::value << utf8( #expression ) << '\n';\
 	Details.Success = !static_cast<bool>( expression );\
@@ -37,7 +37,7 @@
 		Details.Log << "  " << eonitest::style::key_1 << "Value" << eonitest::style::value_1 << "true" << '\n'
 
 #	define EON_EQ( left_expression, right_expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "left" << eonitest::style::item << " == "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " == "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
 		<< utf8( #left_expression ) << '\n';\
@@ -55,7 +55,7 @@
 	}
 
 #	define EON_NE( left_expression, right_expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "left" << eonitest::style::item << " != "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " != "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
 		<< utf8( #left_expression ) << '\n';\
@@ -73,7 +73,7 @@
 	}
 
 #	define EON_LT( left_expression, right_expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "left" << eonitest::style::item << " < "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " < "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
 		<< utf8( #left_expression ) << '\n';\
@@ -91,7 +91,7 @@
 	}
 
 #	define EON_LE( left_expression, right_expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "left" << eonitest::style::item << " <= "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " <= "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
 		<< utf8( #left_expression ) << '\n';\
@@ -109,7 +109,7 @@
 	}
 
 #	define EON_GT( left_expression, right_expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "left" << eonitest::style::item << " > "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " > "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
 		<< utf8( #left_expression ) << '\n';\
@@ -127,7 +127,7 @@
 	}
 
 #	define EON_GE( left_expression, right_expression )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "left" << eonitest::style::item << " >= "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " >= "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
 		<< utf8( #left_expression ) << '\n';\
@@ -145,7 +145,7 @@
 	}
 
 #	define EON_RANGE( lower, actual_value, upper )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "lower" << eonitest::style::item << " <= "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "lower" << eonitest::style::item << " <= "\
 		<< eonitest::style::item_2 << "value" << eonitest::style::item << " <= "\
 		<< eonitest::style::item_3 << "upper" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "lower" << eonitest::style::value << utf8( #lower ) << '\n';\
@@ -166,7 +166,7 @@
 	}
 
 #	define EON_RAISE( expression, expected_exception )\
-	Details.Log << "Testing " << eonitest::style::item_1 << "expression" << eonitest::style::item << " throws "\
+	Details.Log << "Testing that " << eonitest::style::item_1 << "expression" << eonitest::style::item << " throws "\
 		<< eonitest::style::item_2 << "exception" << ":" << '\n';\
 	try\
 	{\
@@ -312,6 +312,22 @@
 		test_expression;\
 	}
 
+#	define TEST_BODY_4STEP( step1, step2, step3, test_expression )\
+	void test_body() override\
+	{\
+		auto error = canRun();\
+		if( !error.empty() )\
+		{\
+			Details.Success = false;\
+			Details.Log << eonitest::style::error << "FATAL ERROR!" << " Failed to construct test." << '\n';\
+			Details.Log << error << '\n';\
+		}\
+		step1;\
+		step2;\
+		step3;\
+		test_expression;\
+	}
+
 	// Define a single-step test where the specified test expression (first and
 	// only step) must evaluate to true.
 	// Test expressions must be one of the EON macros: EON_TRUE, EON_FALSE,
@@ -421,6 +437,26 @@
 		TEST_BODY_3STEP( step1, step2, test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
+	// Define a four-step test with sandbox where the specified test
+	// expression (fourth step) must evaluate to true.
+	// Test expressions must be one of the EON macros: EON_TRUE, EON_FALSE,
+	// EON_EQ, EON_NE, EON_LT, EON_LE, EON_GT, EON_GE, EON_RAISE, and EON_NO_X.
+	// Write test over five lines:
+	// 1. EON_TEST( myclass, myfunc, mytest,
+	// 2.     step1;
+	// 3.     step2;
+	// 4.     step3;
+	// 5.     EON_EQ( expected, actual ) );
+#	define EON_TEST_4STEP_SANDBOX( class_name, function_name, test_name, step1, step2, step3, test_expression )\
+	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
+	{\
+	public:\
+		TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
+	private:\
+		TEST_BODY_4STEP( step1, step2, step3, test_expression )\
+	}; EON_REGISTER_TEST( class_name, function_name, test_name )
+
 #else
 
 	// Private declaration in inline test context.
@@ -489,6 +525,18 @@
 	// 3.     step2;
 	// 4.     EON_EQ( expected, actual ) );
 #	define EON_TEST_3STEP_SANDBOX( class_name, function_name, test_name, step1, step2, test_expression )
+
+	// Define a four-step test with sandbox where the specified test
+	// expression (fourth step) must evaluate to true.
+	// Test expressions must be one of the EON macros: EON_TRUE, EON_FALSE,
+	// EON_EQ, EON_NE, EON_LT, EON_LE, EON_GT, EON_GE, EON_RAISE, and EON_NO_X.
+	// Write test over five lines:
+	// 1. EON_TEST( myclass, myfunc, mytest,
+	// 2.     step1;
+	// 3.     step2;
+	// 4.     step3;
+	// 5.     EON_EQ( expected, actual ) );
+#	define EON_TEST_4STEP_SANDBOX( class_name, function_name, test_name, step1, step2, step3, test_expression )
 
 #endif
 

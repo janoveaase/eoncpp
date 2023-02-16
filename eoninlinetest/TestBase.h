@@ -72,15 +72,49 @@ namespace eonitest
 		EonTestSandbox( TestName name ) : TestBase( name ) { _prepareSandboxDir(); }
 		virtual ~EonTestSandbox() {}
 		eon::string canRun() const override { return sandboxDir().empty() ? "Could not create sandbox!" : ""; }
+
+		// Get sandbox directory path.
 		const std::filesystem::path& sandboxDir() const noexcept { return SandboxDir; }
+
+		// Get sandbox directory path as a eon::string.
 		const eon::string& sandboxDirStr() const noexcept { return SandboxDirStr; }
+
+		// Check if file or directory where the name is a path relative to the sandbox directory exists.
+		// NOTE: Name cannot contain ".."!
+		bool exists( eon::string name ) const noexcept;
+
+		// Create a directory where the name is a path relative to the sandbox directory.
+		// Returns true if created, false if invalid name.
+		// NOTE: Name cannot contain ".."!
+		bool makeDir( eon::string name ) const;
+
+		// Save string data to a file where the name is a path relative to the sandbox directory.
+		// If the file exists, it will be truncated!
+		// NOTE: Name cannot contain ".."!
+		void saveFile( eon::string name, eon::string contents ) const;
+
+		// Load string data from a file where the name is a path relative to the sandbox directory.
+		// Returns empty string if file does not exist!
+		// NOTE: Name cannot contain ".."!
+		eon::string loadFile( eon::string name ) const;
+
+		// Delete file where the name is a path relative to the sandbox directory.
+		// Returns true if deleted, false if no such file.
+		// NOTE: Name cannot contain ".."!
+		bool deleteFile( eon::string name ) const;
+
+		// Delete directory (and all its contents) where the name is a path relative to the sandbox directory.
+		// Returns true if deleted, false if no such directory.
+		// NOTE: Name cannot contain ".."!
+		bool deleteDir( eon::string name ) const;
+
 
 	private:
 		void _prepareSandboxDir() noexcept;
 		bool _ensureNewDir( std::filesystem::path& path ) noexcept;
-		bool _enum( std::filesystem::path& path );
-		bool _removeDir( const std::filesystem::path& path ) noexcept;
-		bool _makeDir( const std::filesystem::path& path ) noexcept;
+		bool _enum( std::filesystem::path& path ) const;
+		bool _removeDir( const std::filesystem::path& path ) const noexcept;
+		bool _makeDir( const std::filesystem::path& path ) const noexcept;
 
 	private:
 		std::filesystem::path SandboxDir;
