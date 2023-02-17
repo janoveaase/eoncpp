@@ -278,6 +278,12 @@ namespace eontest
 		{
 			_TestExe = exe;
 			try { prepare(); }
+			catch( eon::exception& e )
+			{
+				Failed = true;
+				eon::term << "Failure in 'prepare' method of test!\n";
+				eon::term << "Throws: " << e.details() << "\n";
+			}
 			catch( std::exception& e )
 			{
 				Failed = true;
@@ -505,7 +511,7 @@ namespace eontest
 			eon::term << "Expected value should not be equal to actual!\n";
 			return false;
 		}
-		
+
 		inline bool _testLt( const eon::string& expected, const char* actual, const char* exp_expr, const char* act_expr ) {
 			return _testLt( expected.stdstr(), std::string( actual ), exp_expr, act_expr ); }
 		inline bool _testLt( const char* expected, const eon::string& actual, const char* exp_expr, const char* act_expr ) {
@@ -552,7 +558,7 @@ namespace eontest
 			eon::term << "Expected value should be less than actual!\n";
 			return false;
 		}
-		
+
 		inline bool _testLe( const eon::string& expected, const char* actual, const char* exp_expr, const char* act_expr ) {
 			return _testLe( expected.stdstr(), std::string( actual ), exp_expr, act_expr ); }
 		inline bool _testLe( const char* expected, const eon::string& actual, const char* exp_expr, const char* act_expr ) {
@@ -599,7 +605,7 @@ namespace eontest
 			eon::term << "Expected value should be less than or equal to actual!\n";
 			return false;
 		}
-		
+
 		inline bool _testGt( const eon::string& expected, const char* actual, const char* exp_expr, const char* act_expr ) {
 			return _testGt( expected.stdstr(), std::string( actual ), exp_expr, act_expr ); }
 		inline bool _testGt( const char* expected, const eon::string& actual, const char* exp_expr, const char* act_expr ) {
@@ -646,7 +652,7 @@ namespace eontest
 			eon::term << "Expected value should be greater than actual!\n";
 			return false;
 		}
-		
+
 		inline bool _testGe( const eon::string& expected, const char* actual, const char* exp_expr, const char* act_expr ) {
 			return _testGe( expected.stdstr(), std::string( actual ), exp_expr, act_expr ); }
 		inline bool _testGe( const char* expected, const eon::string& actual, const char* exp_expr, const char* act_expr ) {
