@@ -27,36 +27,14 @@ namespace eon
 		//
 	public:
 
-		// Construct a void tuple - a place-holder
+		// Construct a void tuple - a place-holder.
 		inline Tuple() { _populateData(); }
 
-		// Construct an empty tuple
-		// If tuple type is 'static', "optional", 'dynamic', or 'data' then the permissions
-		// argument is ignored and permissions set to default for that tuple type!
-		Tuple( name_t tuple_type_name, TuplePerm permissions = TuplePerm::all_normal, Tuple* parent = nullptr );
-
-		// Construct tuple with named and unnamed attributes
-		// If tuple type is 'plain', 'dynamic', or 'data' then the permissions
-		// argument is ignored and permissions set to default for that tuple type!
-		Tuple( name_t tuple_type_name, std::initializer_list<AttributePair> attributes,
-			TuplePerm permissions = TuplePerm::all_normal, Tuple* parent = nullptr );
-
-		// Construct tuple with named and unnamed attributes.
-		// If tuple type is 'plain', 'dynamic', or 'data' then the permissions
-		// argument is ignored and permissions set to default for that tuple type!
-		Tuple( name_t tuple_type_name, std::vector<AttributePair> attributes,
-			TuplePerm permissions = TuplePerm::all_normal, Tuple* parent = nullptr );
-
-		// Construct optional tuple
-		Tuple( TypeTuple optional_tuple_attributes );
-
-		// Copy another tuple
+		// Construct as a copy of another tuple.
 		inline Tuple( const Tuple& other ) { *this = other; }
 
-		// Take ownership of other tuple
+		// Construct by taking ownership of another tuple's contents.
 		inline Tuple( Tuple&& other ) noexcept { *this = std::move( other ); }
-
-		~Tuple() = default;
 
 
 
@@ -67,20 +45,20 @@ namespace eon
 		//
 	public:
 
-		// Discard all details and copy those of another tuple.
+		// Discard contents and copy that of another tuple.
 		Tuple& operator=( const Tuple& other );
 
-		// Discard all details and take ownership of those of another tuple.
+		// Discard contents and take ownership of that of another tuple.
 		Tuple& operator=( Tuple&& other ) noexcept;
 
-		// Copy attributes from 'other', named for named, otherwise position for position.
+		// Copy attributes from 'other', named attributes are copied by name refernece, unnamed by position.
 		// NOTE: 'other' must be compatible with 'this'!
 		// WARNING: No checking is done for compatibility!
 		Tuple& copyAttributes( const Tuple& other );
 
 
-		// Clear all attributes (and stored actions).
-		// Throws eon::type::AccessDenied if no 'remove' permission!
+		// Discard contents. (Attributes - and stored actions.)
+		// Throws [eon::type::AccessDenied] if no 'remove' permission!
 		void clear() noexcept {
 			_assertRemPerm(); Attributes.clear(); NamedAttributes.clear(); Actions.clear(); ActionsByName.clear(); }
 
@@ -93,13 +71,13 @@ namespace eon
 		//
 	public:
 
-		// The Boolean value of a tuple is true if the tuple is not empty.
+		// A tuple is 'true' if it contains something, 'false' if not.
 		inline operator bool() const noexcept { return !empty(); }
 
-		// Check if tuple is empty (has not attributes and no actions).
+		// Check if tuple is empty (has no attributes and no actions).
 		inline bool empty() const noexcept { return Attributes.empty() && Actions.empty(); }
 
-		
+
 		// Get tuple type.
 		inline const TypeTuple& type() const noexcept { return Type; }
 
@@ -157,13 +135,13 @@ namespace eon
 		// Add an unnamed tuple attribute.
 		// Throws eon::type::AccessDenied if no 'add' permission or value not legal for data tuple!
 		inline Tuple& addTuple(
-			const Tuple& value, type::Qualifier qualifier = type::Qualifier::none, source::Ref source = source::Ref() ) {
+			const Tuple& value, type::Qualifier qualifier = type::Qualifier::_none, source::Ref source = source::Ref() ) {
 			return addTuple( Tuple( value ), qualifier, source ); }
 
 		// Add an unnamed tuple attribute.
 		// Throws eon::type::AccessDenied if no 'add' permission or value not legal for data tuple!
 		inline Tuple& addTuple(
-			Tuple&& value, type::Qualifier qualifier = type::Qualifier::none, source::Ref source = source::Ref() ) {
+			Tuple&& value, type::Qualifier qualifier = type::Qualifier::_none, source::Ref source = source::Ref() ) {
 			return add( Attribute::newTuple( std::move( value ), qualifier, source ) ); }
 
 		// Add a named tuple attribute
@@ -172,7 +150,7 @@ namespace eon
 		inline Tuple& addTuple(
 			name_t name,
 			const Tuple& value,
-			type::Qualifier qualifier = type::Qualifier::none,
+			type::Qualifier qualifier = type::Qualifier::_none,
 			source::Ref source = source::Ref() ) {
 			return addTuple( name, Tuple( value ), qualifier, source ); }
 
@@ -182,19 +160,19 @@ namespace eon
 		inline Tuple& addTuple(
 			name_t name,
 			Tuple&& value,
-			type::Qualifier qualifier = type::Qualifier::none,
+			type::Qualifier qualifier = type::Qualifier::_none,
 			source::Ref source = source::Ref() ) {
 			return add( name, Attribute::newTuple( std::move( value ), qualifier, source ) ); }
 
 		// Add an unnamed name attribute.
 		// Throws eon::type::AccessDenied if no 'add' permission or value not legal for data tuple!
-		inline Tuple& addName( name_t value ) { return add( Attribute::newName( value, type::Qualifier::none ) ); }
+		inline Tuple& addName( name_t value ) { return add( Attribute::newName( value, type::Qualifier::_none ) ); }
 
 		// Add a named name attribute.
 		// Throws eon::type::AccessDenied if no 'add' permission or value not legal for data tuple!
 		// Throws eon::type::DuplicateName if name has already been used!
 		inline Tuple& addName( name_t name, name_t value ) {
-			return add( name, Attribute::newName( value, type::Qualifier::none ) ); }
+			return add( name, Attribute::newName( value, type::Qualifier::_none ) ); }
 
 		// Add an unnamed attribute.
 		// Throws eon::type::AccessDenied if no 'add' permission or value not legal for data tuple!
@@ -309,30 +287,30 @@ namespace eon
 		// Throws eon::type::NotFound if no such attribute!
 		inline Attribute& attribute( index_t attribute_num ) {
 			_assertInRange( attribute_num ); return Attributes[ attribute_num ]; }
-		
+
 		// Get full attribute with specified name, mutable access.
 		// Throws eon::type::NotFound if no such attribute!
 		inline Attribute& attribute( name_t attribute_name ) {
 			auto pos = index( attribute_name ); _assertInRange( pos ); return Attributes[ pos ]; }
-		
+
 		// Get full attribute with specified name, search parent tuple if not found locally, mutable access.
 		// Returns nullptr if not found.
 		Attribute* findAttributeIncludeParent( name_t attribute_name ) noexcept;
-		
+
 		// Get full attribute at specified position, immutable access.
 		// Throws eon::type::NotFound if no such attribute!
 		inline const Attribute& attribute( index_t attribute_num ) const {
 			_assertInRange( attribute_num ); return Attributes[ attribute_num ]; }
-		
+
 		// Get full attribute with specified name, immutable access.
 		// Throws eon::type::NotFound if no such attribute!
 		inline const Attribute& attribute( name_t attribute_name ) const {
 			auto pos = index( attribute_name ); _assertInRange( pos ); return Attributes[ pos ]; }
-		
+
 		// Get full attribute with specified name, search parent tuple if not found locally, immutable access.
 		// Returns nullptr if not found.
 		const Attribute* findAttributeIncludeParent( name_t attribute_name ) const noexcept;
-		
+
 
 		// Check if an unnamed name attribute (flag) with the specified value exists.
 		bool flag( name_t name ) const noexcept;
@@ -351,7 +329,7 @@ namespace eon
 
 		// Attribute iterator for mutable access.
 		using iterator = std::vector<Attribute>::iterator;
-		
+
 		// Attribute iterator for immutable access.
 		using const_iterator = std::vector<Attribute>::const_iterator;
 
@@ -431,6 +409,35 @@ namespace eon
 		// implemented for the specified type and with the specified arguments.
 		std::set<TypeTuple> signatures(
 			name_t action_name, name_t category, name_t type_name, const TypeTuple& args ) const;
+
+
+
+
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Constructors available only to tuple factory classes.
+		//
+	private:
+
+		// Construct an empty tuple.
+		// If tuple type is 'static', "optional", 'dynamic', or 'data' then the permissions
+		// argument is ignored and permissions set to default for that tuple type!
+		Tuple( name_t tuple_type_name, TuplePerm permissions = TuplePerm::all_normal, Tuple* parent = nullptr );
+
+		// Construct tuple with named and unnamed attributes.
+		// If tuple type is 'plain', 'dynamic', or 'data' then the permissions
+		// argument is ignored and permissions set to default for that tuple type!
+		Tuple( name_t tuple_type_name, std::initializer_list<AttributePair> attributes,
+			TuplePerm permissions = TuplePerm::all_normal, Tuple* parent = nullptr );
+
+		// Construct tuple with named and unnamed attributes.
+		// If tuple type is 'plain', 'dynamic', or 'data' then the permissions
+		// argument is ignored and permissions set to default for that tuple type!
+		Tuple( name_t tuple_type_name, std::vector<AttributePair> attributes,
+			TuplePerm permissions = TuplePerm::all_normal, Tuple* parent = nullptr );
+
+		// Construct optional tuple.
+		Tuple( TypeTuple optional_tuple_attributes );
 
 
 
@@ -527,11 +534,13 @@ namespace eon
 			TypeTuple static_type;
 			for( auto& value : attributes )
 			{
-				static_type.add( value.Name, value.Value.type() );
+				if( value.Name == no_name )
+					static_type.add( value.Value.type() );
+				else
+					static_type.set( value.Name, value.Value.type() );
 				_add( name_static, value.Name, std::move( *(Attribute*)&value.Value ) );
 			}
-			Type = TypeTuple::tuple( name_static );
-			Type.add( name_tuple, std::move( static_type ) );
+			Type = typetuple::newStatic( std::move( static_type ) );
 		}
 
 		template<typename T>
@@ -539,7 +548,7 @@ namespace eon
 		{
 			for( auto& value : attributes )
 				_add( tuple_type_name, value.Name, std::move( *(Attribute*)&value.Value ) );
-			Type = TypeTuple::tuple( tuple_type_name );
+			Type = typetuple::_new( tuple_type_name );
 		}
 
 		void _replaceCopyAttributes( const Tuple& other );
@@ -578,5 +587,10 @@ namespace eon
 
 		static std::unordered_set<name_t> LegalForDataTuple;
 		static std::unordered_map<name_t, std::pair<string, string>> StrPrefixPostfixForTypes;
+
+		friend class scope;
+		friend class cache;
+		friend class unit;
+		friend class tuple;
 	};
 }

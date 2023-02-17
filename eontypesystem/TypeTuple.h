@@ -12,12 +12,13 @@ namespace eon
 {
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// Eon Type Tuple class - eon::TypeTuple
+	// Eon Type Tuple class - eon::TypeTuple.
 	//
-	// A type object identifies the type of an Eon object. A type is either simple
-	// (single-name) or complex (a tree structure). For complex types, the first
-	// TypeTuple attribute will be a general type name (such as 'tuple', 'action',
-	// 'lambda', etc.), while the subsequent attributes specifies the type further.
+	// A type tuple identifies the type of an Eon object. A type is either
+	// simple (single-name) or complex (a tree structure). For complex types,
+	// the first attribute will be a general type name (such as 'tuple',
+	// 'action', 'lambda', etc.), while the subsequent attributes specifies the
+	// type further.
 	//
 	// The rule of "First Name":
 	// When getting the TypeTuple (main) name value, we get the single name for
@@ -42,84 +43,19 @@ namespace eon
 	{
 	public:
 
-		// Default constructor for place-holder object
+		// Default constructor for place-holder object.
 		TypeTuple() = default;
 
-		// Construct a single-name type
-		inline TypeTuple( name_t type_name, type::Qualifier qualifier = type::Qualifier::none ) noexcept {
-			NameValue = type_name; Qual = qualifier; }
+		// Construct a single-name type.
+		inline TypeTuple( name_t type_name, type::Qualifier qualifier = type::Qualifier::_none ) noexcept {
+			NameValue = type_name; Qual = qualifier; if( Qual & type::Qualifier::_literal && !(
+				Qual & type::Qualifier::_rvalue ) ) Qual |= type::Qualifier::_rvalue; }
 
-		// Copy another type
+		// Copy another type.
 		inline TypeTuple( const TypeTuple& other ) { *this = other; }
 
-		// Take ownership of another type's details
+		// Take ownership of another type's details.
 		inline TypeTuple( TypeTuple&& other ) noexcept { *this = std::move( other ); }
-
-		virtual ~TypeTuple() = default;
-
-
-
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Factory methods
-		//
-	public:
-
-		// Create type for a tuple.
-		static TypeTuple tuple( name_t tuple_type );
-
-		// Create type for a tuple with name attributes.
-		static TypeTuple tupleOfNames( std::initializer_list<name_t> names );
-
-		// Create type for a tuple with named attributes.
-		// NOTE: Unnamed attributes can be included by specifying eon::no_name as name!
-		static TypeTuple tupleOfNamedAttributes( std::initializer_list<std::pair<name_t, TypeTuple>> attributes );
-
-
-		// Create type for an expression.
-		static TypeTuple expression( TypeTuple&& return_type );
-
-
-		// Create type for an action.
-		static TypeTuple action(
-			name_t type_name,
-			name_t action_name,
-			name_t category,
-			TypeTuple&& return_type,
-			TypeTuple&& arguments );
-
-		// Create type for an action.
-		static TypeTuple action(
-			name_t type_name,
-			name_t action_name,
-			name_t category,
-			TypeTuple&& return_type,
-			const TypeTuple& arguments );
-
-		// Create type for an action.
-		static TypeTuple action(
-			name_t type_name,
-			name_t action_name,
-			name_t category,
-			const TypeTuple& return_type,
-			const TypeTuple& arguments );
-
-		// Create type for an action.
-		static TypeTuple action(
-			name_t type_name,
-			name_t action_name,
-			name_t category,
-			TypeTuple&& return_type,
-			std::initializer_list<std::pair<name_t, TypeTuple>> arguments
-				= std::initializer_list<std::pair<name_t, TypeTuple>>() );
-
-
-		// Create type for a list of unnamed action arguments.
-		static TypeTuple args( std::initializer_list<TypeTuple> attributes );
-
-		// Create type for a list of named action arguments.
-		static TypeTuple args( std::initializer_list<std::pair<name_t, TypeTuple>> attributes );
 
 
 
@@ -139,14 +75,23 @@ namespace eon
 		TypeTuple& operator=( TypeTuple&& other ) noexcept;
 
 
+		// Add or change 'return-type' attribute of the type tuple.
+		// For actions, expressions, and lambdas.
+		inline TypeTuple& returns( name_t type_name ) { return returns( TypeTuple( type_name ) ); }
+		inline TypeTuple& returns( const TypeTuple& return_type ) { return returns( TypeTuple( return_type ) ); }
+		inline TypeTuple& returns( TypeTuple&& return_type ) {
+			_addAttribute( name_return, std::move( return_type ) ); return*this; }
+
+		// Add or change 'arguments' attribute of the type tuple.
+		// For actions and lambdas.
+		inline TypeTuple& arguments( const TypeTuple& args ) { return arguments( TypeTuple( args ) ); }
+		inline TypeTuple& arguments( TypeTuple&& args ) { _addAttribute( name_args, std::move( args ) ); return *this; }
+		TypeTuple& arguments( std::initializer_list<std::pair<name_t, TypeTuple>> args );
+
+
 		// Add an unnamed attribute type specification in the form of a single type name.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
 		inline TypeTuple& add( name_t type_name ) { _ensureSubTuple(); TupleValue.push_back( type_name ); return *this; }
-
-		// Add a named attribute type specification in the form of a single type name.
-		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
-		inline TypeTuple& add( name_t name, name_t type_name ) {
-			if( name != no_name ) NamedAttributes[ name ] = TupleValue.size(); return add( type_name ); }
 
 		// Add an unnamed attribute type specification in the form of another TypeTuple.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
@@ -158,16 +103,26 @@ namespace eon
 		inline TypeTuple& add( const TypeTuple& sub_tuple ) {
 			_ensureSubTuple(); TupleValue.push_back( sub_tuple ); return *this; }
 
-		// Add a named attribute type specification in the form of another TypeTuple.
+		// Set (add if new) a named attribute type specification in the form of a single type name.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
-		inline TypeTuple& add( name_t name, TypeTuple&& sub_tuple ) {
-			_ensureSubTuple(); if( name != no_name ) NamedAttributes[ name ] = TupleValue.size();
-			return add( std::move( sub_tuple ) ); }
+		// Throws [eon::type::InvalidName] if [eon::no_name] is used as name!
+		inline TypeTuple& set( name_t name, name_t type_name ) { return set( name, TypeTuple( type_name ) ); }
 
-		// Add a named attribute type specification in the form of another TypeTuple.
+		// Set (add if new) a named attribute type specification in the form of another TypeTuple.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
-		inline TypeTuple& add( name_t name, const TypeTuple& sub_tuple ) {
-			_ensureSubTuple(); if( name != no_name ) NamedAttributes[ name ] = TupleValue.size(); return add( sub_tuple); }
+		// Throws [eon::type::InvalidName] if [eon::no_name] is used as name!
+		TypeTuple& set( name_t name, TypeTuple&& sub_tuple );
+
+		// Set (add if new) a named attribute type specification in the form of another TypeTuple.
+		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
+		// Throws [eon::type::InvalidName] if [eon::no_name] is used as name!
+		inline TypeTuple& set( name_t name, const TypeTuple& sub_tuple ) {
+			return set( name, TypeTuple( sub_tuple ) ); }
+
+
+		// If the type tuple is not for a static tuple and it contains multiple
+		// attributes, turn it into a static tuple type.
+		void expandSubTuples();
 
 
 
@@ -182,34 +137,34 @@ namespace eon
 
 		// Mark as literal value.
 		// NOTE: This will also mark as rvalue!
-		inline void markLiteral() noexcept { Qual |= type::Qualifier::literl | type::Qualifier::rvalue; }
+		inline void markLiteral() noexcept { Qual |= type::Qualifier::_literal | type::Qualifier::_rvalue; }
 
 		// Check if literal.
-		inline bool literal() const noexcept { return Qual & type::Qualifier::literl; }
+		inline bool literal() const noexcept { return Qual & type::Qualifier::_literal; }
 
 		// Mark as rvalue.
-		inline void markRvalue() noexcept { Qual |= type::Qualifier::rvalue; }
+		inline void markRvalue() noexcept { Qual |= type::Qualifier::_rvalue; }
 
 		// Check if rvalue.
-		inline bool rvalue() const noexcept { return Qual & type::Qualifier::rvalue; }
+		inline bool rvalue() const noexcept { return Qual & type::Qualifier::_rvalue; }
 
 		// Mark as reference
-		inline void markReference() noexcept { Qual |= type::Qualifier::reference; }
+		inline void markReference() noexcept { Qual |= type::Qualifier::_reference; }
 
 		// Check if reference
-		inline bool reference() const noexcept { return Qual & type::Qualifier::reference; }
+		inline bool reference() const noexcept { return Qual & type::Qualifier::_reference; }
 
 		// Mark as link
-		inline void markLink() noexcept { Qual |= type::Qualifier::link; }
+		inline void markLink() noexcept { Qual |= type::Qualifier::_link; }
 
 		// Check if link
-		inline bool link() const noexcept { return Qual & type::Qualifier::link; }
+		inline bool link() const noexcept { return Qual & type::Qualifier::_link; }
 
 		// Mark as optional
-		inline void markOptional() noexcept { Qual |= type::Qualifier::optional; }
+		inline void markOptional() noexcept { Qual |= type::Qualifier::_optional; }
 
 		// Check if optional
-		inline bool optional() const noexcept { return Qual & type::Qualifier::optional; }
+		inline bool optional() const noexcept { return Qual & type::Qualifier::_optional; }
 
 		// Set qualifier
 		inline void qualifier( type::Qualifier qualifier ) noexcept { Qual = qualifier; }
@@ -229,7 +184,7 @@ namespace eon
 		// Check if TypeTuple specifies a type (any type) or nothing (is void/false).
 		inline operator bool() const noexcept { return NameValue != no_name; }
 
-		
+
 		// Get number of attributes.
 		inline index_t numAttributes() const noexcept { return isName() ? 1 : TupleValue.size(); }
 
@@ -239,7 +194,7 @@ namespace eon
 
 		// Check if 'this' is a complex type.
 		inline bool isComplex() const noexcept { return NameValue == name_ttypetuple; }
-		
+
 
 		// Get type name (eon::name_ttypetuple if complex type, eon::no_name if not a type at all).
 		inline name_t nameValue() const noexcept { return NameValue; }
@@ -309,6 +264,11 @@ namespace eon
 		// Get full attribute type for specified name.
 		// Throws eon::type::NotFound if no attribute with that position!
 		inline const TypeTuple& at( name_t attribute_name ) const {
+			_assertInRange( indexOf( attribute_name ) ); return TupleValue[ indexOf( attribute_name ) ]; }
+
+		// Get full attribute type for specified name.
+		// Throws eon::type::NotFound if no attribute with that position!
+		inline TypeTuple& at( name_t attribute_name ) {
 			_assertInRange( indexOf( attribute_name ) ); return TupleValue[ indexOf( attribute_name ) ]; }
 
 
@@ -390,10 +350,10 @@ namespace eon
 		inline friend bool operator>=( name_t a, const TypeTuple& b ) noexcept { return b < a; }
 
 		// Check if 'a' sorts same as 'b' (according to rule of "First Name").
-		inline friend bool operator==( name_t a, const TypeTuple& b ) noexcept { return b != a; }
+		inline friend bool operator==( name_t a, const TypeTuple& b ) noexcept { return b == a; }
 
 		// Check if 'a' sorts before or after 'b' (according to rule of "First Name").
-		inline friend bool operator!=( name_t a, const TypeTuple& b ) noexcept { return b == a; }
+		inline friend bool operator!=( name_t a, const TypeTuple& b ) noexcept { return b != a; }
 
 
 		// Check if this type is compatible with the other.
@@ -434,6 +394,9 @@ namespace eon
 
 		inline void _ensureSubTuple() noexcept { if( NameValue != name_ttypetuple ) NameValue = name_ttypetuple; }
 
+		void _addAttribute( name_t name, TypeTuple&& value );
+		void _addTupleAttribute( name_t name, TypeTuple&& value );
+
 		inline void _assertInRange( index_t attribute_num ) const {
 			if( attribute_num >= TupleValue.size() ) throw type::NotFound(); }
 
@@ -464,8 +427,9 @@ namespace eon
 		//
 		// Attributes
 		//
-	protected:
+	PROTECTED:
 
+		// Hasher object for generating hash values for name values.
 		static std::hash<name_t> NameHasher;
 
 		// A TypeTuple's value can be a single name or a sub-tuple (not both!).
@@ -474,13 +438,14 @@ namespace eon
 		name_t NameValue{ no_name };
 
 		// A type may have qualifiers attached.
-		type::Qualifier Qual{ type::Qualifier::none };
+		type::Qualifier Qual{ type::Qualifier::_none };
 
 		// If sub-tuple, then we have a set of attributes = TypeTuples, and
 		// these can be both unnamed and named.
 		std::vector<TypeTuple> TupleValue;
 		std::unordered_map<name_t, index_t> NamedAttributes;
 
+		// All primitive and basic types.
 		static std::unordered_set<name_t> PrimTypes, BasicTypes;
 	};
 

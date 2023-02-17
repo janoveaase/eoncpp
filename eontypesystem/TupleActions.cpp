@@ -36,7 +36,7 @@ namespace eon
 			name_t lhs_name = args.values().top().value<name_t>();
 			auto lhs = args.scope().findAttributeIncludeParent( lhs_name );
 			lhs->value<Tuple>() = value.value<Tuple>();
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 
@@ -71,7 +71,7 @@ namespace eon
 			name_t lhs_name = args.values().top().value<name_t>();
 			auto lhs = args.scope().findAttributeIncludeParent( lhs_name );
 			lhs->value<Tuple>() = std::move( value.value<Tuple>() );
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 
@@ -107,7 +107,7 @@ namespace eon
 			name_t lhs_name = args.values().top().value<name_t>();
 			auto lhs = args.scope().findAttributeIncludeParent( lhs_name );
 			lhs->value<Tuple>().copyAttributes( value.value<Tuple>() );
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 

@@ -3,17 +3,17 @@
 #include <eontest/Test.h>
 #include <eontypesystem/TupleFactory.h>
 #include <eontypesystem/Expression.h>
-#include <eontypesystem/Bool.h>
-#include <eontypesystem/Byte.h>
-#include <eontypesystem/Char.h>
-#include <eontypesystem/IntTypes.h>
-#include <eontypesystem/FloatTypes.h>
-#include <eontypesystem/Index.h>
-#include <eontypesystem/Name.h>
-#include <eontypesystem/Handle.h>
+#include <eontypesystem/BoolActions.h>
+#include <eontypesystem/ByteActions.h>
+#include <eontypesystem/CharActions.h>
+#include <eontypesystem/IntActions.h>
+#include <eontypesystem/FloatActions.h>
+#include <eontypesystem/IndexActions.h>
+#include <eontypesystem/NameActions.h>
+#include <eontypesystem/HandleActions.h>
 #include <eontypesystem/BytesActions.h>
 #include <eontypesystem/StringActions.h>
-#include <eontypesystem/BitsTypes.h>
+#include <eontypesystem/BitsActions.h>
 #include <eontypesystem/TupleActions.h>
 
 

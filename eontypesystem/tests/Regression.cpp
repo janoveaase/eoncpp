@@ -7,13 +7,17 @@ namespace eon
 	TEST( TypeTupleTest, basic )
 	{
 		TypeTuple a{ name_bool };
-		auto b = TypeTuple::tupleOfNamedAttributes( { { name( "on" ), name_bool } } );
-		auto c = TypeTuple::tupleOfNamedAttributes( {
-			{ no_name, TypeTuple::tupleOfNames( { name_and, name_or } ) },
-			{ name_tuple, TypeTuple::tupleOfNamedAttributes( { { name_action, name_float }, { no_name, name_int } } ) } } );
+		auto b = typetuple::newStatic( { { name( "on" ), name_bool } } );
+		auto c = typetuple::newStatic( {
+			{ nn, typetuple::newStatic( { name_and, name_or } ) },
+			{ name_tuple, typetuple::newStatic( {
+				{ name_action, name_float },
+				{ nn, TypeTuple( name_int ) } } ) } } );
 		WANT_EQ( "T(bool)", a.str() );
-		WANT_EQ( "T(on=bool)", b.str() );
-		WANT_EQ( "T((and, or), tuple=(action=float, int))", c.str() );
+		WANT_EQ( "T(tuple, type=static, value=(on=bool))", b.str() );
+		WANT_EQ(
+			"T(tuple, type=static, value=((tuple, type=static, value=(and, or)), tuple=(tuple, type=static, "
+			"value=(action=float, int))))", c.str() );
 	}
 	TEST( TypeTupleTest, compare )
 	{
@@ -22,20 +26,22 @@ namespace eon
 		WANT_TRUE( t1 == t2 );
 		WANT_TRUE( t2 == t1 );
 		WANT_FALSE( t1 == t3 );
+		WANT_TRUE( t1 == name_bool );
+		WANT_TRUE( name_bool == t1 );
 	}
 	TEST( TypeTupleTest, compatible )
 	{
 		TypeTuple t1{ name_bool };
 		TypeTuple t2{ name_bool };
-		auto t3 = TypeTuple::tupleOfNamedAttributes( {
-			{ no_name, name_bool },
-			{ no_name, name_int },
-			{ no_name, name( "one" ) },
+		auto t3 = typetuple::newStatic( {
+			{ nn, name_bool },
+			{ nn, name_int },
+			{ nn, name( "one" ) },
 			{ name_name, name( "three" ) },
-			{ no_name, name_string } } );
-		auto t4 = TypeTuple::tupleOfNamedAttributes( {
+			{ nn, name_string } } );
+		auto t4 = typetuple::newStatic( {
 			{ name_name, name( "three" ) },
-			{ no_name, name_int } } );
+			{ nn, name_int } } );
 
 		WANT_TRUE( t1.compatibleWith( t2 ) );
 		WANT_TRUE( t2.compatibleWith( t1 ) );
@@ -50,7 +56,7 @@ namespace eon
 	TEST( TupleTest, static_unnamed )
 	{
 		string chars{ u8"bÆ" };
-		auto tup = tuple::statc( {
+		auto tup = tuple::newStatic( {
 			{ false }, { 'b' }, { *chars.begin() }, { *chars.last() },
 			{ static_cast<int_t>( -54 ) }, { static_cast<short_t>( 11 ) }, { static_cast<long_t>( 987654321 ) },
 			{ static_cast<flt_t>( -11.2 ) }, { static_cast<low_t>( 11.1 ) }, { static_cast<high_t>( 999.88 ) },
@@ -60,13 +66,13 @@ namespace eon
 
 		REQUIRE_EXCEPT( tup.add( true ), eon::type::AccessDenied );
 
-		auto exp_type = TypeTuple::tupleOfNamedAttributes( {
-			{ no_name, name_tuple },
-			{ name_type, name_static },
-			{ name_tuple, TypeTuple::tupleOfNames( {
-				name_bool, name_byte, name_char, name_char,
-				name_int, name_short, name_long, name_float, name_low, name_high,
-				name_index, name_name, name_bytes, name_string } ) } } );
+		auto exp_type = typetuple::newStatic( {
+			name_bool, name_byte, name_char, name_char,
+			name_int, name_short, name_long,
+			name_float, name_low, name_high,
+			name_index,
+			name_name,
+			name_bytes, name_string } );
 
 		WANT_EQ( exp_type.str(), tup.type().str() );
 		REQUIRE_EQ( 14, tup.numAttributes() );
@@ -88,7 +94,7 @@ namespace eon
 	TEST( TupleTest, static_named )
 	{
 		string chars{ u8"bÆ" };
-		auto tup = tuple::statc( {
+		auto tup = tuple::newStatic( {
 			{ name_bool, false }, { name_byte, 'b' }, { name_char, *chars.begin() },
 			{ name_int, static_cast<int_t>( -54 ) },
 			{ name_short, static_cast<short_t>( 11 ) }, { name_long, static_cast<long_t>( 987654321 ) },
@@ -98,23 +104,20 @@ namespace eon
 			{ name_name, Attribute( name_action ) },
 			{ name_bytes, std::string( "bytes" ) }, { name_string, string( chars ) } } );
 
-		auto exp_type = TypeTuple::tupleOfNamedAttributes( {
-			{ no_name, name_tuple },
-			{ name_type, name_static },
-			{ name_tuple, TypeTuple::tupleOfNamedAttributes( {
-				{ name_bool, name_bool },
-				{ name_byte, name_byte },
-				{ name_char, name_char },
-				{ name_int, name_int },
-				{ name_short, name_short },
-				{ name_long, name_long },
-				{ name_float, name_float },
-				{ name_low, name_low },
-				{ name_high, name_high },
-				{ name_index, name_index },
-				{ name_name, name_name },
-				{ name_bytes, name_bytes },
-				{ name_string, name_string } } ) } } );
+		auto exp_type = typetuple::newStatic( {
+			{ name_bool, name_bool },
+			{ name_byte, name_byte },
+			{ name_char, name_char },
+			{ name_int, name_int },
+			{ name_short, name_short },
+			{ name_long, name_long },
+			{ name_float, name_float },
+			{ name_low, name_low },
+			{ name_high, name_high },
+			{ name_index, name_index },
+			{ name_name, name_name },
+			{ name_bytes, name_bytes },
+			{ name_string, name_string } } );
 
 		WANT_EQ( exp_type.str(), tup.type().str() );
 		REQUIRE_EQ( 13, tup.numAttributes() );
@@ -134,7 +137,7 @@ namespace eon
 	}
 	TEST( TupleTest, static_str_1 )
 	{
-		auto tup = tuple::statc( { { Attribute( name_and ) },
+		auto tup = tuple::newStatic( { { Attribute( name_and ) },
 			{ Attribute( name_or ) } } );
 		auto act = tup.str();
 		string exp{ "static(and, or)" };
@@ -142,7 +145,7 @@ namespace eon
 	}
 	TEST( TupleTest, static_str_2 )
 	{
-		auto tup = tuple::statc( { { name( "one" ), Attribute( name_and ) },
+		auto tup = tuple::newStatic( { { name( "one" ), Attribute( name_and ) },
 			{ name("two" ), Attribute( name_or ) } } );
 		auto act = tup.str();
 		string exp{ "static(one=and, two=or)" };
@@ -150,12 +153,12 @@ namespace eon
 	}
 	TEST( TupleTest, static_str_3 )
 	{
-		auto tup = tuple::statc( {
-			{ tuple::statc( { { static_cast<byte_t>( 'a' ) }, { string( "string" ) } } ) },
-			{ name( "second" ), tuple::statc( {
-				{ tuple::statc( { { Attribute( name_and ) },
+		auto tup = tuple::newStatic( {
+			{ tuple::newStatic( { { static_cast<byte_t>( 'a' ) }, { string( "string" ) } } ) },
+			{ name( "second" ), tuple::newStatic( {
+				{ tuple::newStatic( { { Attribute( name_and ) },
 					{ Attribute( name_or ) } } ) },
-				{ name( "another" ), tuple::statc( { { Attribute( name_action ) },
+				{ name( "another" ), tuple::newStatic( { { Attribute( name_action ) },
 					{ Attribute( name_at ) } } ) } } ) } } );
 		auto act = tup.str();
 		string exp{
@@ -170,13 +173,15 @@ namespace eon
 	}
 	TEST( TupleTest, static_compare )
 	{
-		auto tup = tuple::statc( {
-			{ Tuple( name_static,
-				{ { static_cast<byte_t>( 'a' ) }, { string( "string" ) } } ) },
-			{ name( "second" ), Tuple( name_static, {
-				{ Tuple( name_static, { { Attribute( name_and ) },
+		auto tup = tuple::newStatic( {
+			{ tuple::newStatic( {
+				{ static_cast<byte_t>( 'a' ) }, { string( "string" ) } } ) },
+			{ name( "second" ), tuple::newStatic( {
+				{ tuple::newStatic( {
+					{ Attribute( name_and ) },
 					{ Attribute( name_or ) } } ) },
-				{ name( "another" ), Tuple( name_static, { { Attribute( name_action ) },
+				{ name( "another" ), tuple::newStatic( {
+					{ Attribute( name_action ) },
 					{ Attribute( name_at ) } } ) } } ) } } );
 		auto act = tup.str();
 		string exp{
@@ -191,13 +196,13 @@ namespace eon
 	}
 	TEST( TupleTest, data_str )
 	{
-		auto txt1 = tuple::data( { { name_type, name( "text" ) }, { name( "value" ), string( "First" ) } } );
-		auto txt2 = tuple::data( { { name_type, name( "text" ) }, { name( "value" ), string( "Second" ) } } );
-		auto grp1 = tuple::data( { { name_type, name( "text" ) } } );
+		auto txt1 = tuple::newData( { { name_type, name( "text" ) }, { name( "value" ), string( "First" ) } } );
+		auto txt2 = tuple::newData( { { name_type, name( "text" ) }, { name( "value" ), string( "Second" ) } } );
+		auto grp1 = tuple::newData( { { name_type, name( "text" ) } } );
 		grp1.addTuple( name( "group1"), txt1 );
-		auto grp2 = tuple::data( { { name_type, name( "text" ) } } );
+		auto grp2 = tuple::newData( { { name_type, name( "text" ) } } );
 		grp2.addTuple( txt2 );
-		auto tup = tuple::data();
+		auto tup = tuple::newData();
 		tup.addTuple( grp1 ).addTuple( grp2 );
 		Stringifier strf;
 		strf.hardLineWidth( 80 );
@@ -216,15 +221,6 @@ namespace eon
 
 
 
-
-	TEST( ExpressionTest, define )
-	{
-		// Variable definitions (only) are permitted inside expressions, but
-		// such variables are local to the scope of the expression only.
-		string str{ "define a as int" };
-		Expression expr;
-		REQUIRE_EXCEPT( expr = Expression( std::move( str ), scope::global() ), InvalidExpression );
-	}
 
 	TEST( ExpressionTest, minimal )
 	{
@@ -363,18 +359,6 @@ namespace eon
 		WANT_EQ( "static(1, 2)", result[ 0 ].value<Tuple>().str() );
 		WANT_EQ( "static('2', x=\"x\")", result[ 1 ].value<Tuple>().str() );
 	}
-	TEST( ExpressionTest, literal_dynamictuple )
-	{
-		string str{ "dynamic(1,2)" };
-		Expression expr;
-		REQUIRE_EXCEPT( expr = Expression( std::move( str ), scope::global() ), InvalidExpression );
-	}
-	TEST( ExpressionTest, literal_datatuple )
-	{
-		string str{ "data(1,2)" };
-		Expression expr;
-		REQUIRE_EXCEPT( expr = Expression( std::move( str ), scope::global() ), InvalidExpression );
-	}
 	TEST( ExpressionTest, literal_typetuple )
 	{
 		string str{ "T(int,float);T(x=int, y=int, z=int);T((int, int),named=(int, int))" };
@@ -384,9 +368,22 @@ namespace eon
 		REQUIRE_NO_EXCEPT( result = expr.execute() );
 		string error;
 		REQUIRE_TRUE( validateResult( result, { name_typetuple, name_typetuple, name_typetuple }, error ) ) << error;
-		WANT_EQ( "T(int, float)", result[ 0 ].value<TypeTuple>().str() );
-		WANT_EQ( "T(x=int, y=int, z=int)", result[ 1 ].value<TypeTuple>().str() );
-		WANT_EQ( "T((int, int), named=(int, int))", result[ 2 ].value<TypeTuple>().str() );
+		WANT_EQ( "T(tuple, type=static, value=(int, float))", result[ 0 ].value<TypeTuple>().str() );
+		WANT_EQ( "T(tuple, type=static, value=(x=int, y=int, z=int))", result[ 1 ].value<TypeTuple>().str() );
+		WANT_EQ(
+			"T(tuple, type=static, value=((tuple, type=static, value=(int, int)), named=(tuple, type=static, "
+			"value=(int, int))))", result[ 2 ].value<TypeTuple>().str() );
+	}
+	TEST( ExpressionTest, literal_statictuple_vs_typetuple )
+	{
+		string str{ "static(1, static(2, three=static(4, 5)));T(int, (int, name=(int, int)))" };
+		Expression expr;
+		REQUIRE_NO_EXCEPT( expr = Expression( std::move( str ), scope::global() ) );
+		std::vector<Attribute> result;
+		REQUIRE_NO_EXCEPT( result = expr.execute() );
+		REQUIRE_EQ( 2, result.size() ) << "Wrong number of return values";
+		auto t1 = result[ 0 ].type().str(), t2 = result[ 1 ].value<TypeTuple>().str();
+		WANT_TRUE( result[ 0 ].type() == result[ 1 ].value<TypeTuple>() );
 	}
 	TEST( ExpressionTest, literal_expression )
 	{
@@ -777,7 +774,7 @@ namespace eon
 	}
 	TEST( ExpressionTest, name_assign )
 	{
-		scope::global().add( name( "a" ), Attribute::newName( eon::name_true, type::Qualifier::none ) );
+		scope::global().add( name( "a" ), Attribute::newName( eon::name_true, type::Qualifier::_none ) );
 		string str{ "a = #false" };
 		Expression expr;
 		REQUIRE_NO_EXCEPT( expr = Expression( std::move( str ), scope::global() ) );

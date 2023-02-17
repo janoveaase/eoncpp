@@ -3,7 +3,7 @@
 #include "Action.h"
 #include "Operators.h"
 #include "Tuple.h"
-#include "TypeTuple.h"
+#include "TypeTupleFactory.h"
 
 
 
@@ -21,172 +21,134 @@ namespace eon
 	{
 		struct BytesCopy : public Action {
 			BytesCopy() : Action(
-				TypeTuple::action(
-					name_bytes, name_copy, name_operator, name_bytes, TypeTuple::args( { name_bytes } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_copy, name_operator ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_bytes } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				args.values().at( 1 ).value<std::string>() = args.values().top().value<std::string>();
 				args.values().pop();
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 		struct BytesTake : public Action {
 			BytesTake() : Action(
-				TypeTuple::action(
-					name_bytes, name_take, name_operator, name_bytes, TypeTuple::args( { name_bytes } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_take, name_operator ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_bytes } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				args.values().at( 1 ).value<std::string>() = std::move( args.values().top().value<std::string>() );
 				args.values().pop();
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 
 		struct BytesConstruct : public Action {
 			BytesConstruct() : Action(
-				TypeTuple::action( name_bytes, name_constructor, name_constructor, name_bytes ) ) {}
+				typetuple::newAction( name_bytes, name_constructor, name_constructor ).returns( name_bytes ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
-				args.values().push( Attribute::newExplicit( std::string(), name_bytes, type::Qualifier::none ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newExplicit( std::string(), name_bytes, type::Qualifier::_none ) );
+				return sig_t::_normal; } };
 
 		struct BytesCopyConstruct : public Action {
 			BytesCopyConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_bytes } ) ) ) {}
+				typetuple::newAction( name_bytes, name_constructor, name_constructor ).returns(
+					name_bytes ).arguments( typetuple::convert( { name_bytes } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesByteConstruct : public Action {
 			BytesByteConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_byte } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_byte } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesCharConstruct : public Action {
 			BytesCharConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_char } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_char } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesIntConstruct : public Action {
 			BytesIntConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_int } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesShortConstruct : public Action {
 			BytesShortConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_short } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_short } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesLongConstruct : public Action {
 			BytesLongConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_long } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments(	typetuple::convert( { name_long } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesFloatConstruct : public Action {
 			BytesFloatConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_float } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_float } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesLowConstruct : public Action {
 			BytesLowConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_low } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_low } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesHighConstruct : public Action {
 			BytesHighConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_high } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_high } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesIndexConstruct : public Action {
 			BytesIndexConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_index } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_index } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesNameConstruct : public Action {
 			BytesNameConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_name } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_name } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 		struct BytesStringConstruct : public Action {
 			BytesStringConstruct() : Action(
-				TypeTuple::action(
-					name_bytes,
-					name_constructor,
-					name_constructor,
-					name_bytes,
-					TypeTuple::args( { name_string } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, name_constructor, name_constructor ).returns(
+						name_bytes ).arguments( typetuple::convert( { name_string } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 
 		struct BytesCompare : public Action {
 			BytesCompare() : Action(
-				TypeTuple::action(
-					name_bytes,
-					symbol_cmp,
-					name_operator,
-					name_int,
-					TypeTuple::args( { name_bytes } ) ) ) {}
+				typetuple::newAction(
+					name_bytes, symbol_cmp, name_operator ).returns(
+						name_int ).arguments( typetuple::convert( { name_bytes } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override;
 		};
 
 
 		struct BytesReset : public Action {
 			BytesReset() : Action(
-				TypeTuple::action( name_bytes, name_reset, name_operator, name_bytes ) ) {}
+				typetuple::newAction( name_bytes, name_reset, name_operator ).returns( name_bytes ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 
 		struct BytesLength : public Action {
 			BytesLength() : Action(
-				TypeTuple::action( name_bytes, name_length, name_firstarg, name_index ) ) {}
+				typetuple::newAction( name_bytes, name_length, name_firstarg ).returns( name_index ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override; };
 
 

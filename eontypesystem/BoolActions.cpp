@@ -1,4 +1,4 @@
-#include "Bool.h"
+#include "BoolActions.h"
 #include "TupleFactory.h"
 
 
@@ -11,32 +11,32 @@ namespace eon
 			auto a2 = args.values().top().value<bool>(); args.values().pop();
 			auto a1 = args.values().top().value<bool>(); args.values().pop();
 			args.values().push(
-				Attribute::newImplicit( static_cast<int_t>( a1 < a2 ? -1 : a2 < a1 ? 1 : 0 ), Qualifier::none ) );
-			return sig_t::norm;
+				Attribute::newImplicit( static_cast<int_t>( a1 < a2 ? -1 : a2 < a1 ? 1 : 0 ), Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BoolAnd::operator()( ActionExeArgs& args ) const
 		{
 			auto a2 = args.values().top().value<bool>(); args.values().pop();
 			auto a1 = args.values().top().value<bool>(); args.values().pop();
-			args.values().push( Attribute::newImplicit( a1 && a2, Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( a1 && a2, Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BoolOr::operator()( ActionExeArgs& args ) const
 		{
 			auto a2 = args.values().top().value<bool>(); args.values().pop();
 			auto a1 = args.values().top().value<bool>(); args.values().pop();
-			args.values().push( Attribute::newImplicit( a1 || a2, Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( a1 || a2, Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BoolXor::operator()( ActionExeArgs& args ) const
 		{
 			auto a2 = args.values().top().value<bool>(); args.values().pop();
 			auto a1 = args.values().top().value<bool>(); args.values().pop();
-			args.values().push( Attribute::newImplicit( a1 != a2, Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( a1 != a2, Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 

@@ -1,49 +1,10 @@
 #include "Tuple.h"
 #include <eonregex/RegEx.h>
+#include "TypeTupleFactory.h"
 
 
 namespace eon
 {
-	Tuple::Tuple( name_t tuple_type_name, TuplePerm permissions, Tuple* parent )
-	{
-		_populateData();
-		Type = TypeTuple::tuple( tuple_type_name );
-		_perm( tuple_type_name, permissions );
-		Parent = parent;
-	}
-
-	Tuple::Tuple( name_t tuple_type_name, std::initializer_list<AttributePair> attributes,
-		TuplePerm permissions, Tuple* parent )
-	{
-		_populateData();
-		if( tuple_type_name == name_static )
-			_constructStatic( attributes );
-		else
-			_constructNonstatic( tuple_type_name, attributes );
-		_perm( tuple_type_name, permissions );
-		Parent = parent;
-	}
-	Tuple::Tuple( name_t tuple_type_name, std::vector<AttributePair> attributes, TuplePerm permissions, Tuple* parent )
-	{
-		_populateData();
-		if( tuple_type_name == name_static )
-			_constructStatic( attributes );
-		else
-			_constructNonstatic( tuple_type_name, attributes );
-		_perm( tuple_type_name, permissions );
-		Parent = parent;
-	}
-	Tuple::Tuple( TypeTuple optional_tuple_attributes )
-	{
-		_populateData();
-		Type = TypeTuple::tuple( name_optional );
-		Type.add( name_tuple, std::move( optional_tuple_attributes ) );
-		_perm( name_optional, TuplePerm::none );
-	}
-
-
-
-
 	Tuple& Tuple::operator=( const Tuple& other )
 	{
 		Type = other.Type;
@@ -83,7 +44,7 @@ namespace eon
 	Tuple& Tuple::addType( const TypeTuple& type )
 	{
 		_assertAddPerm( Type.at( name_type ).nameValue(), type );
-		Attributes.push_back( Attribute::newTypeTuple( type, type::Qualifier::none ) );
+		Attributes.push_back( Attribute::newTypeTuple( type, type::Qualifier::_none ) );
 		if( type == name_tuple )
 			Attributes[ Attributes.size() - 1 ].value<Tuple>().Parent = this;
 		return *this;
@@ -93,7 +54,7 @@ namespace eon
 		_assertAddPerm( Type.at( name_type ).nameValue(), type );
 		if( name != no_name )
 			_addAttributeName( name, type );
-		_addAttributeValue( Attribute::newTypeTuple( type, type::Qualifier::none ) );
+		_addAttributeValue( Attribute::newTypeTuple( type, type::Qualifier::_none ) );
 		return *this;
 	}
 
@@ -167,7 +128,7 @@ namespace eon
 		auto& types = get<Tuple>( name_dottypes );
 		if( types.exists( type ) )
 			throw type::DuplicateName( "Cannot register type: " + eon::str( type ) );
-		types.add( Attribute::newName( type, type::Qualifier::none ) );
+		types.add( Attribute::newName( type, type::Qualifier::_none ) );
 		return *this;
 	}
 
@@ -190,6 +151,7 @@ namespace eon
 	Tuple& Tuple::registerAction( type::Action* action )
 	{
 		_assertActPerm();
+		auto f = Actions.find( action->signature() );
 		if( Actions.find( action->signature() ) != Actions.end() )
 			throw type::DuplicateName( "Cannot register action: " + action->signature().str() );
 		Actions[ action->signature() ] = action;
@@ -227,6 +189,46 @@ namespace eon
 		if( Parent )
 			return Parent->signatures( action_name, type_name, args );
 		return _signatures( action_name, { { name_type, type_name }, { name_category, category } }, &args );
+	}
+
+
+
+
+	Tuple::Tuple( name_t tuple_type_name, TuplePerm permissions, Tuple* parent )
+	{
+		_populateData();
+		Type = typetuple::_new( tuple_type_name );
+		_perm( tuple_type_name, permissions );
+		Parent = parent;
+	}
+
+	Tuple::Tuple(
+		name_t tuple_type_name, std::initializer_list<AttributePair> attributes, TuplePerm permissions, Tuple* parent )
+	{
+		_populateData();
+		if( tuple_type_name == name_static )
+			_constructStatic( attributes );
+		else
+			_constructNonstatic( tuple_type_name, attributes );
+		_perm( tuple_type_name, permissions );
+		Parent = parent;
+	}
+	Tuple::Tuple( name_t tuple_type_name, std::vector<AttributePair> attributes, TuplePerm permissions, Tuple* parent )
+	{
+		_populateData();
+		if( tuple_type_name == name_static )
+			_constructStatic( attributes );
+		else
+			_constructNonstatic( tuple_type_name, attributes );
+		_perm( tuple_type_name, permissions );
+		Parent = parent;
+	}
+	Tuple::Tuple( TypeTuple optional_tuple_attributes )
+	{
+		_populateData();
+		Type = typetuple::_new( name_optional );
+		Type.set( name_tuple, std::move( optional_tuple_attributes ) );
+		_perm( name_optional, TuplePerm::none );
 	}
 
 
@@ -621,7 +623,8 @@ namespace eon
 		return actions;
 	}
 
-	bool Tuple::_matchingSignature( const TypeTuple& signature,
+	bool Tuple::_matchingSignature(
+		const TypeTuple& signature,
 		const std::vector<std::pair<name_t, name_t>>& name_fields,
 		const TypeTuple* args ) const noexcept
 	{
@@ -630,8 +633,17 @@ namespace eon
 			if( signature.at( field.first ) != field.second )
 				return false;
 		}
-		if( args && signature.at( name_args ) != *args )
+		if( args && args->numAttributes() > 0 )
+		{
+			if( !signature.exists( name_args ) )
+				return false;
+			if( signature.at( name_args ) != *args )
+				return false;
+		}
+		else if( signature.exists( name_args ) )
 			return false;
+		//if( args && signature.exists( name_args ) && signature.at( name_args ) != *args )
+		//	return false;
 		return true;
 	}
 }

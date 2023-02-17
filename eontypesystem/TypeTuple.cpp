@@ -1,4 +1,5 @@
 #include "TypeTuple.h"
+#include "TypeTupleFactory.h"
 #include "TypeMap.h"
 #include "Tuple.h"
 
@@ -10,133 +11,73 @@ namespace eon
 
 
 
+	EON_TEST( TypeTuple, TypeTuple, void1,
+		EON_EQ( nn, TypeTuple().NameValue ) );
+	EON_TEST( TypeTuple, TypeTuple, void2,
+		EON_EQ( 0, TypeTuple().TupleValue.size() ) );
+	EON_TEST( TypeTuple, TypeTuple, name,
+		EON_EQ( name_bool, TypeTuple( name_bool ).NameValue ) );
+	EON_TEST( TypeTuple, TypeTuple, no_qualifier,
+		EON_EQ( type::Qualifier::_none, TypeTuple( name_bool ).Qual ) );
+	EON_TEST( TypeTuple, TypeTuple, reference_qualifier,
+		EON_EQ( type::Qualifier::_reference, TypeTuple( name_bool, type::Qualifier::_reference ).Qual ) );
+	EON_TEST( TypeTuple, TypeTuple, literal_qualifier,	// literal is also rvalue!
+		EON_EQ(
+			type::Qualifier::_literal | type::Qualifier::_rvalue,
+			TypeTuple( name_bool, type::Qualifier::_literal ).Qual ) );
+
+
+
+
+	EON_TEST_3STEP( TypeTuple, operator_asgn, name_copy1,
+		TypeTuple other( name_bool, type::Qualifier::_literal ),
+		TypeTuple obj = other,
+		EON_EQ( name_bool, obj.NameValue ) );
+	EON_TEST_3STEP( TypeTuple, operator_asgn, name_copy2,
+		TypeTuple other( name_bool, type::Qualifier::_literal ),
+		TypeTuple obj = other,
+		EON_EQ( type::Qualifier::_literal | type::Qualifier::_rvalue, obj.Qual ) );
+	EON_TEST_3STEP( TypeTuple, operator_asgn, tuple_copy,
+		TypeTuple other = typetuple::newStatic( { { nn, name_bool }, { name_action, name_int } } ),
+		TypeTuple obj = other,
+		EON_EQ( "T(tuple, type=static, value=(bool, action=int))", obj.str() ) );
+
 	TypeTuple& TypeTuple::operator=( TypeTuple&& other ) noexcept
 	{
 		NameValue = other.NameValue; other.NameValue = no_name;
-		Qual = other.Qual; other.Qual = type::Qualifier::none;
+		Qual = other.Qual; other.Qual = type::Qualifier::_none;
 		TupleValue = std::move( other.TupleValue );
 		NamedAttributes = std::move( other.NamedAttributes );
 		return *this;
 	}
 
-
-
-
-	TypeTuple TypeTuple::tuple( name_t tuple_type )
+	TypeTuple& TypeTuple::arguments( std::initializer_list<std::pair<name_t, TypeTuple>> args )
 	{
-		TypeTuple tup;
-		tup.add( name_tuple );
-		tup.add( name_type, tuple_type );
-		return tup;
+		_addAttribute( name_args, typetuple::convert( args ) );
+		return *this;
 	}
 
-	TypeTuple TypeTuple::tupleOfNames( std::initializer_list<name_t> names )
+	TypeTuple& TypeTuple::set( name_t name, TypeTuple&& sub_tuple )
 	{
-		TypeTuple tup;
-		for( auto name : names )
-			tup.add( name );
-		return tup;
+		if( name == no_name )
+			throw type::InvalidName();
+		_ensureSubTuple();
+		auto found = NamedAttributes.find( name );
+		if( found == NamedAttributes.end() )
+		{
+			NamedAttributes[ name ] = TupleValue.size();
+			TupleValue.push_back( std::move( sub_tuple ) );
+		}
+		else
+			found->second = std::move( sub_tuple );
+		return *this;
 	}
 
-	TypeTuple TypeTuple::tupleOfNamedAttributes( std::initializer_list<std::pair<name_t, TypeTuple>> attributes )
+	void TypeTuple::expandSubTuples()
 	{
-		TypeTuple tup;
-		for( auto& attribute : attributes )
-			tup.add( attribute.first, attribute.second );
-		return tup;
-	}
-
-
-	TypeTuple TypeTuple::expression( TypeTuple&& return_type )
-	{
-		TypeTuple tup;
-		tup.add( name_expression );
-		tup.add( name_return, std::move( return_type ) );
-		return tup;
-	}
-
-	TypeTuple TypeTuple::action(
-		name_t type_name,
-		name_t action_name,
-		name_t category,
-		TypeTuple&& return_type,
-		TypeTuple&& arguments )
-	{
-		TypeTuple tup;
-		tup.add( name_action );
-		tup.add( name_name, action_name );
-		tup.add( name_type, type_name );
-		tup.add( name_category, category );
-		tup.add( name_return, std::move( return_type ) );
-		tup.add( name_args, std::move( arguments ) );
-		return tup;
-	}
-
-	TypeTuple TypeTuple::action(
-		name_t type_name,
-		name_t action_name,
-		name_t category,
-		TypeTuple&& return_type,
-		const TypeTuple& arguments )
-	{
-		TypeTuple tup;
-		tup.add( name_action );
-		tup.add( name_name, action_name );
-		tup.add( name_type, type_name );
-		tup.add( name_category, category );
-		tup.add( name_return, return_type );
-		tup.add( name_args, std::move( arguments ) );
-		return tup;
-	}
-
-	TypeTuple TypeTuple::action(
-		name_t type_name,
-		name_t action_name,
-		name_t category,
-		const TypeTuple& return_type,
-		const TypeTuple& arguments )
-	{
-		TypeTuple tup;
-		tup.add( name_action );
-		tup.add( name_name, action_name );
-		tup.add( name_type, type_name );
-		tup.add( name_category, category );
-		tup.add( name_return, return_type );
-		tup.add( name_args, arguments );
-		return tup;
-	}
-
-	TypeTuple TypeTuple::action(
-		name_t type_name,
-		name_t action_name,
-		name_t category,
-		TypeTuple&& return_type,
-		std::initializer_list<std::pair<name_t, TypeTuple>> arguments )
-	{
-		TypeTuple tup;
-		tup.add( name_action );
-		tup.add( name_name, action_name );
-		tup.add( name_type, type_name );
-		tup.add( name_category, category );
-		tup.add( name_return, std::move( return_type ) );
-		tup.add( name_args, args( arguments ) );
-		return tup;
-	}
-
-	TypeTuple TypeTuple::args( std::initializer_list<TypeTuple> attributes )
-	{
-		TypeTuple tup;
-		for( auto& elm : attributes )
-			tup.add( elm );
-		return tup;
-	}
-
-	TypeTuple TypeTuple::args( std::initializer_list<std::pair<name_t, TypeTuple>> attributes )
-	{
-		TypeTuple tup;
-		for( auto& elm : attributes )
-			tup.add( elm.first, elm.second );
-		return tup;
+		if( numAttributes() < 2 || NameValue == name_tuple )
+			return;
+		*this = typetuple::newStatic( std::move( *this ) );
 	}
 
 
@@ -194,7 +135,7 @@ namespace eon
 		std::unordered_set<index_t> compared_by_name;
 		if( !_equalOnNamedArgs( other, compared_by_name ) )
 			return false;
-		
+
 		// All unnamed attributes must match on position and type
 		return _equalOnUnnamedArgs( other, compared_by_name );
 	}
@@ -203,6 +144,43 @@ namespace eon
 
 
 	const name_t name_ttypetuple{ compilerName( "#typetuple" ) };
+	const name_t name_value{ name( "value" ) };
+
+	void TypeTuple::_addAttribute( name_t name, TypeTuple&& value )
+	{
+		if( name == no_name )
+			TupleValue.push_back( std::move( value ) );
+		else
+		{
+			auto found = NamedAttributes.find( name );
+			if( found != NamedAttributes.end() )
+			{
+				auto& value = TupleValue[ found->second ];
+				value = std::move( value );
+			}
+			else
+			{
+				NamedAttributes[ name ] = TupleValue.size();
+				TupleValue.push_back( std::move( value ) );
+			}
+		}
+	}
+
+	void TypeTuple::_addTupleAttribute( name_t name, TypeTuple&& value )
+	{
+		if( exists( name_type ) && at( name_type ) != name_static )
+			throw type::AccessDenied( "Cannot add attributes to type-tuple for " + at( name_type ).str() + "!" );
+		if( name == name_type && !exists( name_type ) )
+			_addAttribute( name, std::move( value ) );
+		else
+		{
+			if( !exists( name_value ) )
+				_addAttribute( name_value, TypeTuple() );
+			auto& tvalue = at( name_value );
+			tvalue._ensureSubTuple();
+			tvalue._addAttribute( name, std::move( value ) );
+		}
+	}
 
 	void TypeTuple::_toStr( Stringifier& strf, bool top_level ) const
 	{
@@ -298,7 +276,7 @@ namespace eon
 			if( cmp != 0 )
 				return cmp;
 		}
-		return TupleValue.size() < i ? -1 : other.TupleValue.size() < i ? 1 : 0;
+		return TupleValue.size() > i ? 1 : other.TupleValue.size() > i ? -1 : 0;
 	}
 
 	bool TypeTuple::_equalOnNamedArgs(

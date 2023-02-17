@@ -1,5 +1,6 @@
 #include "ExpressionNode.h"
 #include "TupleFactory.h"
+#include "TypeTupleFactory.h"
 
 
 namespace eon
@@ -213,12 +214,12 @@ namespace eon
 			Type = name_int;
 			operator_cmp.Children = std::move( Children );
 			Children.push_back( std::move( operator_cmp ) );
-			Children.push_back( Node::newValue( Attribute::newImplicit( int_t( 0 ), type::Qualifier::rvalue ) ) );
+			Children.push_back( Node::newValue( Attribute::newImplicit( int_t( 0 ), type::Qualifier::_rvalue ) ) );
 		}
 
 		void Node::_insertOriginalOperatorForInt( Tuple& scope )
 		{
-			auto actions = scope.signatures( Name, name_int, TypeTuple::args( { { no_name, name_int } } ) );
+			auto actions = scope.signatures( Name, name_int, typetuple::convert( { { no_name, name_int } } ) );
 			Executor = scope.action( *actions.begin() );
 			Type = name_bool;
 		}

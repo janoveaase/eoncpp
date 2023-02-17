@@ -10,96 +10,96 @@ namespace eon
 		{
 			auto& a1 = args.values().top().value<std::string>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesByteConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<byte_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::string( 1, a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::string( 1, a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesCharConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<char_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( string( a1 ).stdstr(), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( string( a1 ).stdstr(), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesIntConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<int_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesShortConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<short_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesLongConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<long_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesFloatConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<flt_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesLowConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<low_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesHighConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<high_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesIndexConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<index_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( std::to_string( a1 ), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesNameConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<name_t>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( eon::str( a1 ).stdstr(), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( eon::str( a1 ).stdstr(), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t BytesStringConstruct::operator()( ActionExeArgs& args ) const
 		{
 			auto a1 = args.values().top().value<string>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( a1.stdstr(), name_bytes, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( a1.stdstr(), name_bytes, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 
@@ -109,23 +109,23 @@ namespace eon
 			args.values().pop();
 			auto& a1 = args.values().top().value<std::string>();
 			args.values().pop();
-			args.values().push( Attribute::newExplicit( a1.compare( a2 ), name_int, type::Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newExplicit( a1.compare( a2 ), name_int, type::Qualifier::_none ) );
+			return sig_t::_normal;
 		}
-		
+
 
 		sig_t BytesReset::operator()( ActionExeArgs& args ) const
 		{
 			auto& a1 = args.values().top().value<std::string>();
 			a1.clear();
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 		sig_t BytesLength::operator()( ActionExeArgs& args ) const
 		{
 			auto& a1 = args.values().top().value<std::string>();
 			a1.clear();
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 

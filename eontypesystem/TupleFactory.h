@@ -6,102 +6,120 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// The 'eon' namespace encloses all public functionality
+// The 'eon' namespace encloses all public functionality.
 //
 namespace eon
 {
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// The 'eon::scope' namespace encloses scope factory functions
+	// The 'eon::scope' class encloses scope factory functions.
 	//
 	// Note that scopes are a special type of tuples!
 	//
-	namespace scope
+	class scope
 	{
-		// Create/access global scope
-		// First time creates, all calls return the same tuple!
-		Tuple& global();
+	public:
 
-		// Create/access a package scope
-		// One package scope per package, first time creates, all calls return the same tuple!
-		Tuple& package( name_t package_name );
+		// Access the one an only global scope.
+		static Tuple& global();
 
-		// Create a new normal scope
-		Tuple normal( Tuple& parent_scope, std::initializer_list<AttributePair> attributes );
-	}
+		// Access scope for named package.
+		static Tuple& package( name_t package_name );
+
+		// Create a new normal scope.
+		static Tuple normal( Tuple& parent_scope, std::initializer_list<AttributePair> attributes );
+	};
 
 
 
 
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// The 'eon::cache' namespace encloses cache factory functions
+	// The 'eon::cache' clase encloses cache factory functions.
 	//
 	// Note that caches are a special type of tuples!
 	// Caches are created and can only exist in the global scope!
 	//
-	namespace cache
+	class cache
 	{
-		// Create a cache with specified permissions
-		// Throws:
-		//   - eon::type::DuplicateName : Another cache with the same name already exists in the global scope
-		Tuple& cache( name_t name, TuplePerm permissions );
+	public:
 
-		// Create a cache with specified (initial) attributes and specified permissions
-		// Throws:
-		//   - eon::type::DuplicateName : Another cache with the same name already exists in the global scope
-		Tuple& cache( name_t name, std::initializer_list<AttributePair> attributes, TuplePerm permissions );
+		// Create a cache with specified permissions.
+		// Throws [eon::type::DuplicateName] if another cache with the same name already exists in the global scope!
+		static Tuple& create( name_t cache_name, TuplePerm permissions );
 
-		// Access cache with the specified name
-		// Throws:
-		//   - eon::type::NotFound : No such cache
-		Tuple& cache( name_t name );
-	}
+		// Create a cache with specified (initial) attributes and specified permissions.
+		// Throws [eon::type::DuplicateName] if another cache with the same name already exists in the global scope!
+		static Tuple& create( name_t cache_name, std::initializer_list<AttributePair> attributes, TuplePerm permissions );
+
+		// Get cache with specified name.
+		// Throws [eon::type::NotFound] if no cace exists with that name!
+		static Tuple& get( name_t cache_name );
+	};
 
 
 
 
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// The 'eon::construct' namespace encloses Æon construct factory functions
+	// The 'eon::unit' class encloses Æon unit factory functions.
 	//
-	namespace construct
+	class unit
 	{
-		// Create a unit
-		// Throws eon::type::DuplicateName if another unit with the same name already exists in the global scope
-		Tuple& unit( name_t name, std::initializer_list<AttributePair> attributes );
+	public:
 
-		// Access unit
-		// Throws eon::type::NotFound if no such unit
-		Tuple& unit( name_t name );
-	}
+		// Create a new unit with specified attributes.
+		// Throws [eon::type::DuplicateName] if another unit with the same name already exists in the global scope!
+		static Tuple& create( name_t unit_name, std::initializer_list<AttributePair> attributes );
+
+		// Get unit with specified name.
+		// Throws [eon::type::NotFound] if no unit exists with that name!
+		static Tuple& get( name_t unit_name );
+	};
 
 
 
 
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// The 'eon::tuple' namespace encloses normal tuple factory functions
+	// The 'eon::tuple' class encloses normal tuple factory functions.
 	//
-	namespace tuple
+	class tuple
 	{
-		// Create a static tuple
+	public:
+
+		// Create a static tuple.
 		// Once created, attributes can be modified but not added or removed!
-		inline Tuple statc( std::initializer_list<AttributePair> attributes ) { return Tuple( name_static, attributes ); }
+		static inline Tuple newStatic( std::initializer_list<AttributePair> attributes ) {
+			return Tuple( name_static, attributes ); }
 
-		// Create an optional tuple
+		// Create an optional tuple.
 		// Fixed number and type of attributes, but attributes can be without value.
 		// Requires the 'access' construct/operator to access attributes.
-		inline Tuple optional( TypeTuple optional_tuple_attributes ) { return Tuple( optional_tuple_attributes ); }
+		static inline Tuple newOptional( TypeTuple optional_tuple_attributes ) {
+			return Tuple( optional_tuple_attributes ); }
 
-		// Create a dynamic tuple
+		// Create a dynamic tuple.
 		// Once created, attributes can be modified, added, and removed!
-		inline Tuple dynamic( std::initializer_list<AttributePair> attributes = std::initializer_list<AttributePair>() ) {
-			return Tuple( name_dynamic, attributes ); }
+		static inline Tuple newDynamic(
+			std::initializer_list<AttributePair> attributes = std::initializer_list<AttributePair>() ) {
+				return Tuple( name_dynamic, attributes ); }
 
-		// Create a data tuple
+		// Create a data tuple.
 		// Once created, attributes can be modified, added, and removed!
-		inline Tuple data( std::initializer_list<AttributePair> attributes = std::initializer_list<AttributePair>() ) {
-			return Tuple( name_data, attributes ); }
-	}
+		static inline Tuple newData(
+			std::initializer_list<AttributePair> attributes = std::initializer_list<AttributePair>() ) {
+				return Tuple( name_data, attributes ); }
+
+		EONEXCEPT( InvalidTupleType );
+
+		// Create a tupe of the specified type.
+		// Throws [InvalidTupleType] if tuple type is not static, dynamic, or data!
+		static Tuple newCustom(
+			name_t tupletype, std::initializer_list<AttributePair> attributes = std::initializer_list<AttributePair>() );
+
+		// Create a tupe of the specified type.
+		// Throws [InvalidTupleType] if tuple type is not static, dynamic, or data!
+		static Tuple newCustom( name_t tupletype, std::vector<AttributePair> attributes );
+	};
 }

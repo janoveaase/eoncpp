@@ -23,11 +23,11 @@ namespace eon
 		enum class sig_t : uint8_t
 		{
 			undef,
-			norm,
-			brk,
-			cont,
-			ret,
-			raise
+			_normal,
+			_break,
+			_continue,
+			_return,
+			_raise
 		};
 
 
@@ -40,7 +40,7 @@ namespace eon
 
 			Tuple& scope() noexcept { return *Scope; }
 			stack<Attribute>& values() noexcept { return Values; }
-			
+
 		private:
 			Tuple* Scope{ nullptr };
 			stack<Attribute> Values;

@@ -1,5 +1,6 @@
 #include "Expression.h"
 #include "TupleFactory.h"
+#include "TypeTupleFactory.h"
 
 
 namespace eon
@@ -84,51 +85,51 @@ namespace eon
 
 	void Expression::_prepTokenizer( Tokenizer& tokenizer )
 	{
-		tokenizer.registerEonNameTokens( true );
-		tokenizer.registerTokenChar( name_space, ' ', Tokenizer::Match::sequence );
-		tokenizer.registerTokenChar( name_doublequote, '"', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( name_singlequote, '\'', Tokenizer::Match::single );
-		tokenizer.registerTokenCharcat( name_digits, charcat::number_ascii_digit, Tokenizer::Match::sequence );
-		tokenizer.registerTokenChar( name_underscore, '_', Tokenizer::Match::sequence );
-		tokenizer.registerTokenCharcat( name_letters, charcat::letter_lowercase, Tokenizer::Match::sequence );
-		tokenizer.registerTokenCharcat( name_letters, charcat::letter_uppercase, Tokenizer::Match::sequence );
-		tokenizer.registerTokenCharcat( name_letters, charcat::letter_titlecase, Tokenizer::Match::sequence );
-		tokenizer.registerTokenCharcat( name_letters, charcat::letter_modifier, Tokenizer::Match::sequence );
-		tokenizer.registerTokenCharcat( name_letters, charcat::letter_other, Tokenizer::Match::sequence );
-		tokenizer.registerTokenChar( symbol_open_round, '(', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( symbol_close_round, ')', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( name_at, '@', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( name_backslash, '\\', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( name_assign, '=', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( symbol_minus, '-', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( symbol_point, '.', Tokenizer::Match::sequence );
-		tokenizer.registerTokenChar( symbol_colon, ':', Tokenizer::Match::sequence );
-		tokenizer.registerTokenChar( symbol_comma, ',', Tokenizer::Match::single );
-		tokenizer.registerSequenceToken( name( "line_comment" ), "//" );
-		tokenizer.registerSequenceToken( name( "comment_start" ), "/-" );
-		tokenizer.registerSequenceToken( name( "comment_end" ), "-/" );
-		tokenizer.registerTokenChar( symbol_divide, '/', Tokenizer::Match::single );
-		tokenizer.registerTokenChar( symbol_semicolon, ';', Tokenizer::Match::single );
-		tokenizer.registerTokenChars( name_operator, "+*~&|^<>[]", Tokenizer::Match::single );
-		tokenizer.registerSequenceToken( symbol_eq, "==" );
-		tokenizer.registerSequenceToken( symbol_ne, "!=" );
-		tokenizer.registerSequenceToken( symbol_ge, ">=" );
-		tokenizer.registerSequenceToken( symbol_le, "<=" );
-		tokenizer.registerSequenceToken( symbol_plus_assign, "+=" );
-		tokenizer.registerSequenceToken( symbol_minus_assign, "-=" );
-		tokenizer.registerSequenceToken( symbol_multiply_assign, "*=" );
-		tokenizer.registerSequenceToken( symbol_divide_assign, "/=" );
-		tokenizer.registerSequenceToken( symbol_member, "'s" );
-		tokenizer.registerSequenceToken( symbol_lshift, "<<" );
-		tokenizer.registerSequenceToken( symbol_rshift, ">>" );
-		tokenizer.registerSequenceToken( symbol_cmp, "<=>" );
-		tokenizer.registerSequenceToken( name_typetuple, "T(" );
-		tokenizer.registerSequenceToken( name_static, "static(" );
-		tokenizer.registerSequenceToken( name_optional, "optional(" );
-		tokenizer.registerSequenceToken( name_dynamic, "dynamic(" );
-		tokenizer.registerSequenceToken( name_data, "data(" );
-		tokenizer.registerSequenceToken( name_expression, "e(" );
-		tokenizer.registerTokenChar( name_hash, '#', Tokenizer::Match::single );
+		tokenizer.registerEonNamesAsTokens();
+		tokenizer.registerSingleCharSequenceAsToken( ' ', name_space );
+		tokenizer.registerSingleCharAsToken( '"', name_doublequote );
+		tokenizer.registerSingleCharAsToken( '\'', name_singlequote );
+		tokenizer.registerCharSequenceAsToken( charcat::number_ascii_digit, name_digits );
+		tokenizer.registerSingleCharAsToken( '_', name_underscore );
+		tokenizer.registerCharSequenceAsToken( charcat::letter_lowercase, name_letters );
+		tokenizer.registerCharSequenceAsToken( charcat::letter_uppercase, name_letters );
+		tokenizer.registerCharSequenceAsToken( charcat::letter_titlecase, name_letters );
+		tokenizer.registerCharSequenceAsToken( charcat::letter_modifier, name_letters );
+		tokenizer.registerCharSequenceAsToken( charcat::letter_other, name_letters );
+		tokenizer.registerSingleCharAsToken( '(', symbol_open_round );
+		tokenizer.registerSingleCharAsToken( ')', symbol_close_round );
+		tokenizer.registerSingleCharAsToken( '@', name_at );
+		tokenizer.registerSingleCharAsToken( '\\', name_backslash );
+		tokenizer.registerSingleCharAsToken( '=', name_assign );
+		tokenizer.registerSingleCharAsToken( '-', symbol_minus );
+		tokenizer.registerSingleCharSequenceAsToken( '.', symbol_point );
+		tokenizer.registerSingleCharSequenceAsToken( ':', symbol_colon );
+		tokenizer.registerSingleCharAsToken( ',', symbol_comma );
+		tokenizer.registerCharSequenceAsToken( "//", name( "line_comment" ) );
+		tokenizer.registerCharSequenceAsToken( "/-", name( "comment_start" ) );
+		tokenizer.registerCharSequenceAsToken( "-/", name( "comment_end" ) );
+		tokenizer.registerSingleCharAsToken( '/', symbol_divide );
+		tokenizer.registerSingleCharAsToken( ';', symbol_semicolon );
+		tokenizer.registerAnySingleCharAsToken( "+*~&|^<>[]", name_operator );
+		tokenizer.registerCharSequenceAsToken( "==", symbol_eq );
+		tokenizer.registerCharSequenceAsToken( "!=", symbol_ne );
+		tokenizer.registerCharSequenceAsToken( ">=", symbol_ge );
+		tokenizer.registerCharSequenceAsToken( "<=", symbol_le );
+		tokenizer.registerCharSequenceAsToken( "+=", symbol_plus_assign );
+		tokenizer.registerCharSequenceAsToken( "-=", symbol_minus_assign );
+		tokenizer.registerCharSequenceAsToken( "*=", symbol_multiply_assign );
+		tokenizer.registerCharSequenceAsToken( "/=", symbol_divide_assign );
+		tokenizer.registerCharSequenceAsToken( "'s", symbol_member );
+		tokenizer.registerCharSequenceAsToken( "<<", symbol_lshift );
+		tokenizer.registerCharSequenceAsToken( ">>", symbol_rshift );
+		tokenizer.registerCharSequenceAsToken( "<=>", symbol_cmp );
+		tokenizer.registerCharSequenceAsToken( "T(", name_typetuple );
+		tokenizer.registerCharSequenceAsToken( "static(", name_static );
+		tokenizer.registerCharSequenceAsToken( "optional(", name_optional );
+		tokenizer.registerCharSequenceAsToken( "dynamic(", name_dynamic );
+		tokenizer.registerCharSequenceAsToken( "data(", name_data );
+		tokenizer.registerCharSequenceAsToken( "e(", name_expression );
+		tokenizer.registerSingleCharAsToken( '#', name_hash );
 	}
 	void Expression::_prepReTokenizer( ReTokenizer& retokenizer )
 	{
@@ -184,7 +185,7 @@ namespace eon
 	{
 		data.error();
 		data.reporter().error(
-			"Unknown element \"" + data.parser().current().str() + "\"", data.parser().current().source() );
+			"Unknown element \"" + data.parser().viewed().str() + "\"", data.parser().viewed().source() );
 		data.parser().forward();
 	}
 
@@ -214,7 +215,7 @@ namespace eon
 
 	bool Expression::_parseLiteral( ParseData& data )
 	{
-		auto type = data.parser().current().type();
+		auto type = data.parser().viewed().type();
 		if( type == name_bool )
 			return _parseBoolLiteral( data );
 		else if( type == name_byte )
@@ -245,10 +246,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					data.parser().current().str() == "true",
+					data.parser().viewed().str() == "true",
 					name_bool,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -257,10 +258,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					static_cast<byte_t>( *data.parser().current().str().begin() ),
+					static_cast<byte_t>( *data.parser().viewed().str().begin() ),
 					name_byte,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -269,17 +270,17 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					*data.parser().current().str().begin(),
+					*data.parser().viewed().str().begin(),
 					name_char,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
 	bool Expression::_parseIntLiteral( ParseData& data )
 	{
 		// If the size of the literal value exceeds that which int can hold, we make it a long!
-		const long_t value = data.parser().current().str().toLongT();
+		const long_t value = data.parser().viewed().str().toLongT();
 		if( value < EON_INT_MIN || value > EON_INT_MAX )
 		{
 			data.operands().push(
@@ -287,8 +288,8 @@ namespace eon
 					Attribute::newExplicit(
 						value,
 						name_long,
-						type::Qualifier::literl | type::Qualifier::rvalue,
-						data.parser().current().source() ) ) );
+						type::Qualifier::_literal | type::Qualifier::_rvalue,
+						data.parser().viewed().source() ) ) );
 		}
 		else
 		{
@@ -297,8 +298,8 @@ namespace eon
 					Attribute::newExplicit(
 						static_cast<int_t>( value ),
 						name_int,
-						type::Qualifier::literl | type::Qualifier::rvalue,
-						data.parser().current().source() ) ) );
+						type::Qualifier::_literal | type::Qualifier::_rvalue,
+						data.parser().viewed().source() ) ) );
 		}
 		return true;
 	}
@@ -306,7 +307,7 @@ namespace eon
 	bool Expression::_parseFloatLiteral( ParseData& data )
 	{
 		// If the size of the literal value exceeds that which float can hold, we make it a high!
-		const high_t value = data.parser().current().str().toHighT();
+		const high_t value = data.parser().viewed().str().toHighT();
 		if( value < EON_FLOAT_MIN || value > EON_FLOAT_MAX )
 		{
 			data.operands().push(
@@ -314,8 +315,8 @@ namespace eon
 					Attribute::newExplicit(
 						value,
 						name_high,
-						type::Qualifier::literl | type::Qualifier::rvalue,
-						data.parser().current().source() ) ) );
+						type::Qualifier::_literal | type::Qualifier::_rvalue,
+						data.parser().viewed().source() ) ) );
 		}
 		else
 		{
@@ -324,8 +325,8 @@ namespace eon
 					Attribute::newExplicit(
 						static_cast<flt_t>( value ),
 						name_float,
-						type::Qualifier::literl | type::Qualifier::rvalue,
-						data.parser().current().source() ) ) );
+						type::Qualifier::_literal | type::Qualifier::_rvalue,
+						data.parser().viewed().source() ) ) );
 		}
 		return true;
 	}
@@ -335,10 +336,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					data.parser().current().bytes(),
+					data.parser().viewed().bytes(),
 					name_bytes,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -347,10 +348,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					data.parser().current().str(),
+					data.parser().viewed().str(),
 					name_string,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -359,10 +360,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					regex( data.parser().current().str() ),
+					regex( data.parser().viewed().str() ),
 					name_regex,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -371,10 +372,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					namepath( data.parser().current().str().slice( 1, -1 ) ),
+					namepath( data.parser().viewed().str().slice( 1, -1 ) ),
 					name_namepath,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -383,25 +384,25 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					path( data.parser().current().str() ),
+					path( data.parser().viewed().str() ),
 					name_path,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
 
 	bool Expression::_parseOperator( ParseData& data )
 	{
-		auto type = data.parser().current().type();
+		auto type = data.parser().viewed().type();
 		if( type == name_operator )
 			return _processOperator( data );
 		else if( type::Operators::isOperator( type ) )
 			return _processOperatorName( data, type );
 		else if( type == symbol_semicolon )
-			return _processOperator( data, type, data.parser().current().source() );
+			return _processOperator( data, type, data.parser().viewed().source() );
 		else if( type == name_assign )
-			return _processOperator( data, symbol_assign, data.parser().current().source() );
+			return _processOperator( data, symbol_assign, data.parser().viewed().source() );
 
 		return false;
 	}
@@ -409,15 +410,15 @@ namespace eon
 	bool Expression::_processOperator( ParseData& data )
 	{
 		// This is one of: +*=~&|^<>[]
-		name_t op_name = compilerName( data.parser().current().str() );
-		return _processOperator( data, op_name, data.parser().current().source() );
+		name_t op_name = compilerName( data.parser().viewed().str() );
+		return _processOperator( data, op_name, data.parser().viewed().source() );
 	}
 
 	bool Expression::_processOperatorName( ParseData& data, name_t name )
 	{
-		if( compilerName( data.parser().current().str() ) == symbol_minus && data.lastSeen() == Seen::_operator )
+		if( compilerName( data.parser().viewed().str() ) == symbol_minus && data.lastSeen() == Seen::_operator )
 			name = name_unary_minus;
-		return _processOperator( data, name, data.parser().current().source() );
+		return _processOperator( data, name, data.parser().viewed().source() );
 	}
 
 	bool Expression::_processOperator( ParseData& data, name_t op_name, source::Ref op_source )
@@ -448,7 +449,7 @@ namespace eon
 		else
 		{
 			data.error();
-			data.reporter().error( "Unbalanced parenthesis!", data.parser().current().source() );
+			data.reporter().error( "Unbalanced parenthesis!", data.parser().viewed().source() );
 		}
 		data.recordOperatorAsLastSeen();
 		return true;
@@ -461,7 +462,7 @@ namespace eon
 			if( new_op_name == symbol_open_round )
 			{
 				data.error();
-				data.reporter().error( "Unbalanced parenthesis!", data.parser().current().source() );
+				data.reporter().error( "Unbalanced parenthesis!", data.parser().viewed().source() );
 			}
 			else
 				_bindOperator( data );
@@ -481,7 +482,7 @@ namespace eon
 
 	void Expression::_finishExpressionDetails( ParseData& data )
 	{
-		if( data.parser() && data.parser().current().is( symbol_semicolon ) )
+		if( data.parser() && data.parser().viewed().is( symbol_semicolon ) )
 			data.parser().forward();
 		while( !data.operators().empty() )
 			_bindOperator( data );
@@ -586,7 +587,7 @@ namespace eon
 	void Expression::_assignDirect( ParseData& data, expression::Node& lhs, expression::Node& rhs ) const
 	{
 		name_t type = lhs.type().name();
-		auto args = TypeTuple::args( { lhs.type() } );
+		auto args = typetuple::convert( { lhs.type() } );
 		auto action_signature = rhs.type().rvalue()
 			? _findAction( data, name_take, name_operator, type, args )
 			: _findAction( data, type::name_copy, name_operator, type, args );
@@ -665,7 +666,7 @@ namespace eon
 		}
 
 		auto action_signature = _findAction(
-			data, name_assign, name_operator, name_tuple, TypeTuple::args( { name_tuple } ) );
+			data, name_assign, name_operator, name_tuple, typetuple::convert( { name_tuple } ) );
 		if( action_signature )
 			_bindAction( data, lhs, rhs, action_signature );
 	}
@@ -683,11 +684,11 @@ namespace eon
 	void Expression::_assignByConstructor( ParseData& data, expression::Node& lhs, expression::Node& rhs ) const
 	{
 		auto constructor_signature = _findAction(
-			data, name_constructor, name_constructor, lhs.type().name(), TypeTuple::args( { rhs.type() } ) );
+			data, name_constructor, name_constructor, lhs.type().name(), typetuple::convert( { rhs.type() } ) );
 		if( !constructor_signature )
 			return;
 		auto assign_signature = _findAction(
-			data, name_take, name_operator, lhs.type().name(), TypeTuple::args( { lhs.type().name() } ) );
+			data, name_take, name_operator, lhs.type().name(), typetuple::convert( { lhs.type().name() } ) );
 		if( !assign_signature )
 			return;
 
@@ -723,7 +724,7 @@ namespace eon
 		std::vector<name_t> all_options = type::Operators::mapOperator( op_name );
 		if( all_options.empty() )
 		{
-			data.reporter().error( "Internal issue with this operator!", data.parser().current().source() );
+			data.reporter().error( "Internal issue with this operator!", data.parser().viewed().source() );
 			throw InvalidExpression();	// Impossible!?
 		}
 
@@ -766,7 +767,7 @@ namespace eon
 			return _processSequenceOperator( data, remaining_options[ 0 ], std::move( operands ) );
 
 		// We still have multiple options left and must parse the next operand before we can get to the next operator name
-		source::Ref orig_source = data.parser().current().source();
+		source::Ref orig_source = data.parser().viewed().source();
 		_parseNextNonTrivalOperatorOperand( data, remaining_options, operands, seq_no );
 
 		// If at the end of the tokens, we have a syntax error
@@ -790,10 +791,10 @@ namespace eon
 			if( !sequence[ seq_no ].prefix() )
 				continue;
 
-			auto next_type = data.parser().ahead().type();
+			auto next_type = data.parser().peekAhead().type();
 			if( next_type == sequence[ seq_no ].Op
-				|| ( next_type == name_name && name( data.parser().ahead().str() ) == sequence[ seq_no ].Op )
-				|| ( next_type == name_operator && compilerName( data.parser().ahead().str() ) == sequence[ 1 ].Op ) )
+				|| ( next_type == name_name && name( data.parser().peekAhead().str() ) == sequence[ seq_no ].Op )
+				|| ( next_type == name_operator && compilerName( data.parser().peekAhead().str() ) == sequence[ 1 ].Op ) )
 			{
 				data.parser().forward();
 				return option;
@@ -818,7 +819,7 @@ namespace eon
 		ParseData& data, std::vector<name_t>& all_options, index_t seq_no )
 	{
 		data.error();
-		data.reporter().error( "This operator requires an additional element!", data.parser().current().source() );
+		data.reporter().error( "This operator requires an additional element!", data.parser().viewed().source() );
 		for( auto& option : all_options )
 		{
 			auto& sequence = type::Operators::sequence( option );
@@ -848,11 +849,11 @@ namespace eon
 			auto& sequence = type::Operators::sequence( option );
 			if( seq_no >= sequence.size() )	// Not possible!?
 				continue;
-			auto next_type = data.parser().current().type();
+			auto next_type = data.parser().viewed().type();
 			if( next_type == sequence[ seq_no ].Op
-				|| ( next_type == name_name && name( data.parser().current().str() ) == sequence[ seq_no ].Op )
+				|| ( next_type == name_name && name( data.parser().viewed().str() ) == sequence[ seq_no ].Op )
 				|| ( next_type == name_operator
-					&& compilerName( data.parser().current().str() ) == sequence[ seq_no ].Op ) )
+					&& compilerName( data.parser().viewed().str() ) == sequence[ seq_no ].Op ) )
 				remaining.push_back( option );
 		}
 		return remaining;
@@ -900,7 +901,7 @@ namespace eon
 
 	bool Expression::_parseTuple( ParseData& data )
 	{
-		auto type = data.parser().current().type();
+		auto type = data.parser().viewed().type();
 		if( type == name_static )
 			return _parseTuple( data, type );
 		else if( type == name_typetuple )
@@ -912,16 +913,16 @@ namespace eon
 
 	bool Expression::_parseTuple( ParseData& data, name_t tupletype )
 	{
-		source::Ref source = data.parser().current().source();
+		source::Ref source = data.parser().viewed().source();
 		data.parser().forward();	// Skip tuple identifier
 
 		auto attributes = _parseTupleAttributes( data );
 		if( !data.parser() )
 			return _operandNotProperlyEndedError( data, "Tuple", source, false );
 
-		Tuple tuple( tupletype, std::move( attributes ) );
+		auto tuple = eon::tuple::newCustom( tupletype, std::move( attributes ) );
 		data.operands().push(
-			expression::Node::newValue( Attribute::newTuple( std::move( tuple ), type::Qualifier::rvalue, source ) ) );
+			expression::Node::newValue( Attribute::newTuple( std::move( tuple ), type::Qualifier::_rvalue, source ) ) );
 		return true;
 	}
 
@@ -929,7 +930,7 @@ namespace eon
 	{
 		data.error();
 		data.reporter().error( "Cannot declare " + eon::str( type ) + " tuple inside expression! (Only static tuple!)",
-			data.parser().current().source() );
+			data.parser().viewed().source() );
 		data.parser().forward();
 		// TODO: Move parser past the entire tuple to avoid additional errors about it!
 		return false;
@@ -942,10 +943,10 @@ namespace eon
 		// Each attribute is an expression we must evaluate.
 		// Read attributes until we see a ')'!
 		ParseData data2( data, { ",", ")" } );
-		while( data2.parser() && !data2.parser().current().is( symbol_close_round ) )
+		while( data2.parser() && !data2.parser().viewed().is( symbol_close_round ) )
 		{
 			_parseTupleAttribute( data2, attributes );
-			if( data.parser().current().is( symbol_comma ) )
+			if( data.parser().viewed().is( symbol_comma ) )
 				data.parser().forward();
 		}
 
@@ -965,10 +966,10 @@ namespace eon
 	name_t Expression::_parseTupleAttributeName( ParseData& data )
 	{
 		name_t attrib_name = no_name;
-		if( data.parser().current().is( name_name )
-			&& data.parser().exists() && data.parser().ahead().type() == name_assign )
+		if( data.parser().viewed().is( name_name )
+			&& data.parser().exists() && data.parser().peekAhead().type() == name_assign )
 		{
-			attrib_name = eon::name( data.parser().current().str() );
+			attrib_name = eon::name( data.parser().viewed().str() );
 			data.parser().forward( 2 );
 		}
 		return attrib_name;
@@ -977,18 +978,19 @@ namespace eon
 
 	bool Expression::_parseTypeTuple( ParseData& data )
 	{
-		source::Ref source = data.parser().current().source();
+		source::Ref source = data.parser().viewed().source();
 		auto ttuple = _parseTypeTupleDetails( data );
 		if( !ttuple )
 			return false;
+		ttuple.expandSubTuples();
 		data.operands().push(
-			expression::Node::newValue( Attribute::newTypeTuple( std::move( ttuple ), type::Qualifier::rvalue, source ) ) );
+			expression::Node::newValue( Attribute::newTypeTuple( std::move( ttuple ), type::Qualifier::_rvalue, source ) ) );
 		return true;
 	}
 
 	TypeTuple Expression::_parseTypeTupleDetails( ParseData& data )
 	{
-		source::Ref source = data.parser().current().source();
+		source::Ref source = data.parser().viewed().source();
 		data.parser().forward();	// Skip tuple identifier
 
 		// A type tuple consists of attributes that are either names or parenthesized sub-tuples, and can be either
@@ -1004,19 +1006,19 @@ namespace eon
 
 	void Expression::_parseTypeTupleAttributes( ParseData& data, TypeTuple& ttuple )
 	{
-		while( data.parser() && !data.parser().current().is( symbol_close_round ) )
+		while( data.parser() && !data.parser().viewed().is( symbol_close_round ) )
 		{
 			auto attrib_name = _parseTupleAttributeName( data );
 			_parseTypeTupleAttributeValue( data, attrib_name, ttuple );
 
 			if( !data.parser() )
 				break;
-			if( data.parser().current().is( symbol_comma ) )
+			if( data.parser().viewed().is( symbol_comma ) )
 				data.parser().forward();
-			else if( !data.parser().current().is( symbol_close_round ) )
+			else if( !data.parser().viewed().is( symbol_close_round ) )
 			{
 				data.error();
-				data.reporter().error( "Expected comma or ')' here!", data.parser().current().source() );
+				data.reporter().error( "Expected comma or ')' here!", data.parser().viewed().source() );
 			}
 		}
 	}
@@ -1024,20 +1026,23 @@ namespace eon
 	void Expression::_parseTypeTupleAttributeValue( ParseData& data, name_t attrib_name, TypeTuple& ttuple )
 	{
 		// Do we have a sub-tuple value?
-		if( data.parser().current().is( symbol_open_round ) )
+		if( data.parser().viewed().is( symbol_open_round ) )
 			_parseTypeTupleTupleAttributeValue( data, attrib_name, ttuple );
 
 		// Must be a name
-		else if( data.parser().current().is( name_name ) )
+		else if( data.parser().viewed().is( name_name ) )
 		{
-			ttuple.add( attrib_name, eon::name( data.parser().current().str() ) );
+			if( attrib_name == no_name )
+				ttuple.add( eon::name( data.parser().viewed().str() ) );
+			else
+				ttuple.set( attrib_name, eon::name( data.parser().viewed().str() ) );
 			data.parser().forward();
 		}
 
 		else
 		{
 			data.error();
-			data.reporter().error( "Invalid type tuple attribute!", data.parser().current().source() );
+			data.reporter().error( "Invalid type tuple attribute!", data.parser().viewed().source() );
 			data.parser().forward();
 		}
 	}
@@ -1047,7 +1052,11 @@ namespace eon
 		auto sub = _parseTypeTupleDetails( data );
 		if( sub )
 		{
-			ttuple.add( attrib_name, std::move( sub ) );
+			sub.expandSubTuples();
+			if( attrib_name == no_name )
+				ttuple.add( std::move( sub ) );
+			else
+				ttuple.set( attrib_name, std::move( sub ) );
 			data.parser().forward();
 		}
 	}
@@ -1055,24 +1064,24 @@ namespace eon
 
 	bool Expression::_parseName( ParseData& data )
 	{
-		if( data.parser().current().type() == name_literal )
+		if( data.parser().viewed().type() == name_literal )
 			return _parseNameLiteral( data );
-		else if( data.parser().current().type() != name_name )
+		else if( data.parser().viewed().type() != name_name )
 			return false;
 
 		// NOTE: The name can be: a variable, a name value, an operator or part of an operator, or an action call.
 
-		name_t name = eon::name( data.parser().current().str() );
+		name_t name = eon::name( data.parser().viewed().str() );
 		if( type::Operators::isOperator( name ) )
-			return _processOperator( data, name, data.parser().current().source() );
+			return _processOperator( data, name, data.parser().viewed().source() );
 
 		// If the name is followed by a '(' it must be an action call!
-		if( data.parser().exists() && data.parser().ahead().is( symbol_open_round ) )
+		if( data.parser().exists() && data.parser().peekAhead().is( symbol_open_round ) )
 			return _parseActionCall( data, name );
 
 		// If followed by ' or ", it must be a misspelled prefix
 		if( data.parser().exists()
-			&& ( data.parser().ahead().is( name_string ) || data.parser().ahead().is( name_char ) ) )
+			&& ( data.parser().peekAhead().is( name_string ) || data.parser().peekAhead().is( name_char ) ) )
 			return _misspelledPrefixError( data, name );
 
 		// Can be a variable
@@ -1089,10 +1098,10 @@ namespace eon
 		data.operands().push(
 			expression::Node::newValue(
 				Attribute::newExplicit(
-					name != no_name ? name : eon::name( data.parser().current().str().slice( 1, -1 ) ),
+					name != no_name ? name : eon::name( data.parser().viewed().str().slice( 1, -1 ) ),
 					name_name,
-					type::Qualifier::literl | type::Qualifier::rvalue,
-					data.parser().current().source() ) ) );
+					type::Qualifier::_literal | type::Qualifier::_rvalue,
+					data.parser().viewed().source() ) ) );
 		return true;
 	}
 
@@ -1107,7 +1116,7 @@ namespace eon
 		auto suggestion = suggestions.find( prefix );
 		if( suggestion != suggestions.end() )
 			tip = " Perhaps you meant " + suggestion->second + "?";
-		data.reporter().error( "This is not a supported prefix!" + tip, data.parser().current().source() );
+		data.reporter().error( "This is not a supported prefix!" + tip, data.parser().viewed().source() );
 
 		// We handled this "name" so move on to the next token!
 		return true;
@@ -1116,14 +1125,14 @@ namespace eon
 	bool Expression::_processVariable( ParseData& data, Attribute& variable, name_t name )
 	{
 		data.operands().push( expression::Node::newValue( Attribute( variable ), name ) );
-		data.operands().top().source( data.parser().current().source() );
+		data.operands().top().source( data.parser().viewed().source() );
 		return true;
 	}
 
 
 	bool Expression::_parseActionCall( ParseData& data, name_t action_name )
 	{
-		source::Ref source = data.parser().current().source();
+		source::Ref source = data.parser().viewed().source();
 		data.parser().forward( 2 );		// Skip name + '('
 
 		auto args = _parseActionCallArgs( data );
@@ -1145,7 +1154,7 @@ namespace eon
 		// Each argument is an expression we must evaluate.
 		// Read arguments until we see a ')'!
 		ParseData data2( data, { ",", ")" } );
-		while( data2.parser() && !data2.parser().current().is( symbol_close_round ) )
+		while( data2.parser() && !data2.parser().viewed().is( symbol_close_round ) )
 		{
 			auto arg_name = _parseTupleAttributeName( data2 );
 			if( _parseExpressionDetails( data2 ) )
@@ -1153,12 +1162,22 @@ namespace eon
 				args.Args.push_back( std::move( data2.operands().top() ) );
 				data2.operands().pop();
 				if( args.Args[ args.Args.size() - 1 ].isOperator() )
-					args.ArgTypes.add( arg_name, args.Args[ args.Args.size() - 1 ].type() );
+				{
+					if( arg_name == no_name )
+						args.ArgTypes.add( args.Args[ args.Args.size() - 1 ].type() );
+					else
+						args.ArgTypes.set( arg_name, args.Args[ args.Args.size() - 1 ].type() );
+				}
 				else
-					args.ArgTypes.add( arg_name, args.Args[ args.Args.size() - 1 ].value().type() );
+				{
+					if( arg_name == no_name )
+						args.ArgTypes.add( args.Args[ args.Args.size() - 1 ].value().type() );
+					else
+						args.ArgTypes.set( arg_name, args.Args[ args.Args.size() - 1 ].value().type() );
+				}
 			}
 
-			if( data.parser().current().is( symbol_comma ) )
+			if( data.parser().viewed().is( symbol_comma ) )
 				data.parser().forward();
 		}
 		return args;
@@ -1179,17 +1198,17 @@ namespace eon
 
 	bool Expression::_parseExpression( ParseData& data )
 	{
-		if( !data.parser().current().is( name_expression ) )
+		if( !data.parser().viewed().is( name_expression ) )
 			return false;
 
-		source::Ref source = data.parser().current().source();
+		source::Ref source = data.parser().viewed().source();
 		data.parser().forward();	// Skip 'e('
 		try
 		{
 			Expression expr( data.parser(), *Scope, data.reporter(), { ")" } );
 			data.operands().push(
 				expression::Node::newValue(
-					Attribute::newExplicit( std::move( expr ), name_expression, type::Qualifier::rvalue, source ) ) );
+					Attribute::newExplicit( std::move( expr ), name_expression, type::Qualifier::_rvalue, source ) ) );
 			return true;
 		}
 		catch( ... )

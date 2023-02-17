@@ -1,4 +1,4 @@
-#include "Index.h"
+#include "IndexActions.h"
 #include "TupleFactory.h"
 
 
@@ -11,8 +11,8 @@ namespace eon
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto a1 = args.values().top().value<index_t>(); args.values().pop();
 			args.values().push(
-				Attribute::newImplicit( static_cast<int_t>( a1 < a2 ? -1 : a2 < a1 ? 1 : 0 ), Qualifier::none ) );
-			return sig_t::norm;
+				Attribute::newImplicit( static_cast<int_t>( a1 < a2 ? -1 : a2 < a1 ? 1 : 0 ), Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 
@@ -21,7 +21,7 @@ namespace eon
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto& a1 = args.values().top();
 			a1.value<index_t>() += a2;
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 		sig_t IndexMinusAssign::operator()( ActionExeArgs& args ) const
@@ -29,7 +29,7 @@ namespace eon
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto& a1 = args.values().top();
 			a1.value<index_t>() -= a2;
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 		sig_t IndexMultiplyAssign::operator()( ActionExeArgs& args ) const
@@ -37,7 +37,7 @@ namespace eon
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto& a1 = args.values().top();
 			a1.value<index_t>() *= a2;
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 		sig_t IndexDivideAssign::operator()( ActionExeArgs& args ) const
@@ -45,36 +45,36 @@ namespace eon
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			if( a2 == 0 )
 			{
-				args.values().push( Attribute::newImplicit( name( "division_by_zero" ), Qualifier::none ) );
-				return sig_t::raise;
+				args.values().push( Attribute::newImplicit( name( "division_by_zero" ), Qualifier::_none ) );
+				return sig_t::_raise;
 			}
 			auto& a1 = args.values().top();
 			a1.value<index_t>() /= a2;
-			return sig_t::norm;
+			return sig_t::_normal;
 		}
 
 		sig_t IndexPlus::operator()( ActionExeArgs& args ) const
 		{
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto a1 = args.values().top().value<index_t>();
-			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 + a2 ), Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 + a2 ), Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t IndexMinus::operator()( ActionExeArgs& args ) const
 		{
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto a1 = args.values().top().value<index_t>();
-			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 - a2 ), Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 - a2 ), Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t IndexMultiply::operator()( ActionExeArgs& args ) const
 		{
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			auto a1 = args.values().top().value<index_t>();
-			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 * a2 ), Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 * a2 ), Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 		sig_t IndexDivide::operator()( ActionExeArgs& args ) const
@@ -82,12 +82,12 @@ namespace eon
 			auto a2 = args.values().top().value<index_t>(); args.values().pop();
 			if( a2 == 0 )
 			{
-				args.values().push( Attribute::newImplicit( name( "division_by_zero" ), Qualifier::none ) );
-				return sig_t::raise;
+				args.values().push( Attribute::newImplicit( name( "division_by_zero" ), Qualifier::_none ) );
+				return sig_t::_raise;
 			}
 			auto a1 = args.values().top().value<index_t>();
-			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 / a2 ), Qualifier::none ) );
-			return sig_t::norm;
+			args.values().push( Attribute::newImplicit( static_cast<int_t>( a1 / a2 ), Qualifier::_none ) );
+			return sig_t::_normal;
 		}
 
 

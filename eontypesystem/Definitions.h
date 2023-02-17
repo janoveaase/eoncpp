@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_set>
 #include <limits.h>
+#include <eoninlinetest/InlineTest.h>
 
 
 
@@ -25,6 +26,7 @@ namespace eon
 		EONEXCEPT( WrongType );
 		EONEXCEPT( NotFound );
 		EONEXCEPT( DuplicateName );
+		EONEXCEPT( InvalidName );
 
 		EON_NAME( system );
 		EON_NAME( copy );
@@ -33,12 +35,12 @@ namespace eon
 
 		enum class Qualifier : uint8_t
 		{
-			none = 0x00,
-			literl = 0x01,	// This is also an rvalue
-			rvalue = 0x02,
-			reference = 0x04,
-			link = 0x08,
-			optional = 0x10
+			_none = 0x00,
+			_literal = 0x01,		// This is also an rvalue
+			_rvalue = 0x02,
+			_reference = 0x04,
+			_link = 0x08,
+			_optional = 0x10
 		};
 		inline Qualifier operator|( Qualifier a, Qualifier b ) noexcept {
 			return static_cast<Qualifier>( static_cast<int>( a ) | static_cast<int>( b ) ); }
@@ -74,6 +76,7 @@ namespace eon
 
 
 	extern const eon::name_t name_ttypetuple;
+	extern const eon::name_t name_value;
 
 
 	using b8_t = uint8_t;

@@ -2,6 +2,7 @@
 
 #include "Action.h"
 #include "TupleFactory.h"
+#include "TypeTupleFactory.h"
 
 
 
@@ -20,192 +21,166 @@ namespace eon
 		template<typename T>
 		struct BitsConstruct : public Action {
 			BitsConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ) ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				args.values().push(
 					Attribute::newImplicit(
-						static_cast<T>( 0 ), type::Qualifier::none, type::hint::bits ) ); return sig_t::norm; } };
+						static_cast<T>( 0 ), type::Qualifier::_none, type::hint::bits ) ); return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsCopyConstruct : public Action {
 			BitsCopyConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				const auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsBoolConstruct : public Action {
 			BitsBoolConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_bool } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_bool } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<bool>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 ? 1 : 0 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 ? 1 : 0 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsByteConstruct : public Action {
 			BitsByteConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_byte } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_byte } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<byte_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit<T>( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit<T>( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsCharConstruct : public Action {
 			BitsCharConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_char } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_char } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<char_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsIntConstruct : public Action {
 			BitsIntConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_int } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<int_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsShortConstruct : public Action {
 			BitsShortConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_short } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_short } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<short_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsLongConstruct : public Action {
 			BitsLongConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_long } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_long } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<long_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsFloatConstruct : public Action {
 			BitsFloatConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_float } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_float } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<flt_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsLowConstruct : public Action {
 			BitsLowConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_low } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_low } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<low_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsHighConstruct : public Action {
 			BitsHighConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_high } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_high } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<high_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsIndexConstruct : public Action {
 			BitsIndexConstruct() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_constructor,
-					name_constructor,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_index } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_constructor, name_constructor ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_index } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<index_t>();
 				args.values().pop();
-				args.values().push( Attribute::newImplicit<T>( (T)a1, type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+				args.values().push( Attribute::newImplicit<T>( (T)a1, type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 
 		template<typename T>
 		struct BitsCompare : public Action {
 			BitsCompare() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_cmp,
-					name_operator,
-					name_int,
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_cmp, name_operator ).returns(
+						name_int ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
@@ -214,189 +189,169 @@ namespace eon
 				args.values().push(
 					Attribute::newImplicit(
 						static_cast<int_t>( a1 < a2 ? -1 : a2 < a1 ? 1 : 0 ),
-						type::Qualifier::none,
+						type::Qualifier::_none,
 						type::hint::bits ) );
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 
 		template<typename T>
 		struct BitsPlusAssign : public Action {
 			BitsPlusAssign() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_plus_assign,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_plus_assign, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto& a1 = args.values().top();
 				a1.value<T, type::hint::bits>() += a2;
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsMinusAssign : public Action {
 			BitsMinusAssign() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_minus_assign,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_minus_assign, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto& a1 = args.values().top();
 				a1.value<T, type::hint::bits>() -= a2;
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsMultiplyAssign : public Action {
 			BitsMultiplyAssign() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_multiply_assign,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_multiply_assign, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto& a1 = args.values().top();
 				a1.value<T, type::hint::bits>() *= a2;
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsDivideAssign : public Action {
 			BitsDivideAssign() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_divide_assign,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_divide_assign, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				if( a2 == 0 )
 				{
-					args.values().push( Attribute::newName( name( "division_by_zero" ), type::Qualifier::none ) );
-					return sig_t::raise;
+					args.values().push( Attribute::newName( name( "division_by_zero" ), type::Qualifier::_none ) );
+					return sig_t::_raise;
 				}
 				auto& a1 = args.values().top();
 				a1.value<T, type::hint::bits>() /= a2;
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsPlus : public Action {
 			BitsPlus() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_plus,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_plus, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 + a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 + a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsMinus : public Action {
 			BitsMinus() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_minus,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_minus, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 - a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 - a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsMultiply : public Action {
 			BitsMultiply() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_multiply,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_multiply, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 * a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 * a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsDivide : public Action {
 			BitsDivide() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_divide,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_divide, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				if( a2 == 0 )
 				{
-					args.values().push( Attribute::newName( name( "division_by_zero" ), type::Qualifier::none ) );
-					return sig_t::raise;
+					args.values().push( Attribute::newName( name( "division_by_zero" ), type::Qualifier::_none ) );
+					return sig_t::_raise;
 				}
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 / a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 / a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsMod: public Action {
 			BitsMod() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_mod,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_mod, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				if( a2 == 0 )
 				{
-					args.values().push( Attribute::newName( name( "division_by_zero" ), type::Qualifier::none ) );
-					return sig_t::raise;
+					args.values().push( Attribute::newName( name( "division_by_zero" ), type::Qualifier::_none ) );
+					return sig_t::_raise;
 				}
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 % a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 % a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsPow : public Action {
 			BitsPow() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_pow,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_pow, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
@@ -404,42 +359,38 @@ namespace eon
 				args.values().pop();
 				args.values().push(
 					Attribute::newImplicit(
-						static_cast<T>( std::pow( a1, a2 ) ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+						static_cast<T>( std::pow( a1, a2 ) ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsAtIndex : public Action {
 			BitsAtIndex() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_element,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_index } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_element, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_index } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<index_t>();
 				args.values().pop();
 				if( a2 >= sizeof( T ) )
 				{
-					args.values().push( Attribute::newName( name_not_found, type::Qualifier::none ) );
-					return sig_t::raise;
+					args.values().push( Attribute::newName( name_not_found, type::Qualifier::_none ) );
+					return sig_t::_raise;
 				}
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
 					Attribute::newImplicit(
-						static_cast<T>( a1 & (T)( (T)1 << a2 ) ? 1 : 0 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+						static_cast<T>( a1 & (T)( (T)1 << a2 ) ? 1 : 0 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsAtInt : public Action {
 			BitsAtInt() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_element,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_int } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_element, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<int_t>();
 				args.values().pop();
@@ -450,23 +401,21 @@ namespace eon
 					a2 = sz_t + a2;
 				if( a2 < 0 || a2 >= sz_t )
 				{
-					args.values().push( Attribute::newName( name_not_found, type::Qualifier::none ) );
-					return sig_t::raise;
+					args.values().push( Attribute::newName( name_not_found, type::Qualifier::_none ) );
+					return sig_t::_raise;
 				}
 				args.values().push(
 					Attribute::newImplicit(
-						static_cast<T>( a1 & (T)( (T)1 << a2 ) ? 1 : 0 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+						static_cast<T>( a1 & (T)( (T)1 << a2 ) ? 1 : 0 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsSlice : public Action {
 			BitsSlice() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_slice,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_int }, { no_name, name_int } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_slice, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { { no_name, name_int }, { no_name, name_int } } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a3 = args.values().top().value<int_t>();
 				args.values().pop();
@@ -480,8 +429,8 @@ namespace eon
 					a3 = sz_t + a3;
 				if( a2 < 0 || a2 >= sz_t || a3 < 0 || a3 >= sz_t )
 				{
-					args.values().push( Attribute::newName( name_not_found, type::Qualifier::none ) );
-					return sig_t::raise;
+					args.values().push( Attribute::newName( name_not_found, type::Qualifier::_none ) );
+					return sig_t::_raise;
 				}
 				if( a2 > a3 )
 				{
@@ -492,126 +441,112 @@ namespace eon
 				a3 = sz_t - a3;
 				args.values().push(
 					Attribute::newImplicit(
-						(T)( (T)( (T)( a1 << a3 ) >> a3 ) >> a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+						(T)( (T)( (T)( a1 << a3 ) >> a3 ) >> a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsNot : public Action {
 			BitsNot() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_bitnot,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ) ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitnot, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( ~a1 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( ~a1 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsAnd : public Action {
 			BitsAnd() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_bitand,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitand, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 & a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 & a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsOr : public Action {
 			BitsOr() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_bitor,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitor, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 | a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 | a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsXor : public Action {
 			BitsXor() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_bitxor,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, type::mapCppType( CPPTYPE( T ), type::hint::bits ) } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitxor, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 ^ a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 ^ a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsLShift : public Action {
 			BitsLShift() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_lshift,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_int } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_lshift, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<int_t>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( (T)( a1 << a2 ) ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( (T)( a1 << a2 ) ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsRShift : public Action {
 			BitsRShift() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					symbol_rshift,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					{ { no_name, name_int } } ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_rshift, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
+							typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a2 = args.values().top().value<int_t>();
 				args.values().pop();
 				auto a1 = args.values().top().value<T, type::hint::bits>();
 				args.values().pop();
 				args.values().push(
-					Attribute::newImplicit( static_cast<T>( a1 >> a2 ), type::Qualifier::none, type::hint::bits ) );
-				return sig_t::norm; } };
+					Attribute::newImplicit( static_cast<T>( a1 >> a2 ), type::Qualifier::_none, type::hint::bits ) );
+				return sig_t::_normal; } };
 
 		template<typename T>
 		struct BitsReset : public Action {
 			inline BitsReset() : Action(
-				TypeTuple::action(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ),
-					name_reset,
-					name_operator,
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), {} ) ) {}
+				typetuple::newAction(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_reset, name_operator ).returns(
+						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto& a1 = args.values().top().value<T, type::hint::bits>();
 				a1 = 0;
-				return sig_t::norm; } };
+				return sig_t::_normal; } };
 
 
 		template<typename T>

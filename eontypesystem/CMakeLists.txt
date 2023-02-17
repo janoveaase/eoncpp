@@ -5,21 +5,22 @@ message(STATUS " - EonTypeSystem")
 set(TYPESYSTEM_HEADERS
 	Definitions.h
 	TypeMap.h
-	Bool.h
-	Byte.h
-	Char.h
-	IntTypes.h
-	FloatTypes.h
-	Index.h
-	Name.h
-	Handle.h
-	BitsTypes.h
+	BoolActions.h
+	ByteActions.h
+	CharActions.h
+	IntActions.h
+	FloatActions.h
+	IndexActions.h
+	NameActions.h
+	HandleActions.h
+	BitsActions.h
 	BytesActions.h
 	StringActions.h
 	Expression.h
 	ExpressionNode.h
 	TupleDefs.h
 	TypeTuple.h
+	TypeTupleFactory.h
 	Tuple.h
 	TupleActions.h
 	TupleFactory.h
@@ -30,18 +31,19 @@ set(TYPESYSTEM_HEADERS
 )
 set(TYPESYSTEM_SOURCES
 	TypeMap.cpp
-	Bool.cpp
-	Byte.cpp
-	Char.cpp
-	Index.cpp
-	Name.cpp
-	Handle.cpp
+	BoolActions.cpp
+	ByteActions.cpp
+	CharActions.cpp
+	IndexActions.cpp
+	NameActions.cpp
+	HandleActions.cpp
 	BytesActions.cpp
 	StringActions.cpp
 	Expression.cpp
 	ExpressionNode.cpp
 	TupleDefs.cpp
 	TypeTuple.cpp
+	TypeTupleFactory.cpp
 	Tuple.cpp
 	TupleFactory.cpp
 	TupleActions.cpp
@@ -63,7 +65,7 @@ set_target_properties(
 )
 set_property(TARGET EonTypeSystem PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTypeSystem PUBLIC EonString EonExcept EonRegex EonSource EonFileSys EonContainers EonTokenizer)
+target_link_libraries(EonTypeSystem PUBLIC EonString EonExcept EonRegex EonSource EonFileSys EonContainers EonTokenizer EonInlineTest)
 target_include_directories(EonTypeSystem PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
 )
@@ -82,4 +84,26 @@ endif()
 
 if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
+endif()
+if(EON_INLINE_TESTS)
+	message(STATUS "Including Inline Tests!")
+	add_executable(EonTypeSystemInlineTests ${TYPESYSTEM_HEADERS} ${TYPESYSTEM_SOURCES})
+	target_compile_definitions(EonTypeSystemInlineTests PRIVATE EON_INLINE_TEST_PROJECT)
+	set_target_properties(
+		EonTypeSystemInlineTests
+		PROPERTIES
+			OUTPUT_NAME_DEBUG eon_typesystem_inlinetests
+			OUTPUT_NAME_RELEASE eon_typesystem_inlinetests
+	)
+	set_property(TARGET EonTypeSystemInlineTests PROPERTY CXX_STANDARD 17)
+
+	target_link_libraries(
+		EonTypeSystemInlineTests PUBLIC EonString EonExcept EonRegex EonSource EonFileSys EonContainers EonTokenizer EonInlineTest
+	)
+
+	install(TARGETS EonTypeSystemInlineTests
+		RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
+	)
+
+	target_include_directories(EonTypeSystemInlineTests PUBLIC "${EON_SOURCES_DIR}" "${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}")
 endif()

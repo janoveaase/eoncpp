@@ -150,7 +150,7 @@ namespace eon
 
 			inline void error() noexcept { Errors = true; }
 			inline bool errors() const noexcept { return Errors; }
-			
+
 			inline stack<expression::Node>& operands() noexcept { return Operands; }
 			inline stack<Operator>& operators() noexcept { return Operators; }
 
@@ -189,9 +189,9 @@ namespace eon
 		void _parseSmallExpression( ParseData& data );
 		bool _parseExpressionDetails( ParseData& data );
 		inline bool _endOfLargeExpression( ParseData& data ) {
-			return !data.parser() || data.terminateOn( data.parser().current().str() ); }
+			return !data.parser() || data.terminateOn( data.parser().viewed().str() ); }
 		inline bool _endOfSmallExpression( ParseData& data ) {
-			return _endOfLargeExpression( data ) || data.parser().current().is( symbol_semicolon ); }
+			return _endOfLargeExpression( data ) || data.parser().viewed().is( symbol_semicolon ); }
 
 		void _reportUnknownElementError( ParseData& data );
 
