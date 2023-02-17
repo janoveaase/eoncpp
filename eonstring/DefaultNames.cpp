@@ -51,6 +51,7 @@ namespace eon
 	const name_t name_set = name( "set" );
 	const name_t name_heap = name( "heap" );
 	const name_t name_expression = name( "expression" );
+	const name_t name_lambda = name( "lambda" );
 
 	// Tuples
 	const name_t name_tuple = name( "tuple" );

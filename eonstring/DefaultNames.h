@@ -14,7 +14,7 @@ namespace eon
 	// you still want a no-name/undefined/to-be-decided-later type of name.
 	extern const name_t name_nn;
 
-	
+
 	// Common names that can be accessed at no cost at any time
 	// The string value of each name is the latter part, after the underscore.
 
@@ -63,6 +63,7 @@ namespace eon
 	extern const name_t name_set;
 	extern const name_t name_heap;
 	extern const name_t name_expression;
+	extern const name_t name_lambda;
 
 	// Tuples
 	extern const name_t name_tuple;

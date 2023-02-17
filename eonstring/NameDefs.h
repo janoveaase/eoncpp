@@ -99,6 +99,7 @@ namespace eon
 
 	// The null name
 	static const name_t no_name{ 0 };
+	static const name_t nn{ 0 };
 }
 
 
