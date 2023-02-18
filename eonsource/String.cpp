@@ -156,8 +156,9 @@ namespace eon
 			Pos pos( 0, 0, 0, 0 ),
 			String( "test", "one" )._forward( pos, 10 ),
 			EON_EQ( 3, pos.BytePos ) );
-		EON_TEST( String, _forward, end_of_source,
-			EON_RAISE( String( "test", "one" )._forward( Pos( 4, 4, 0, 4 ), 1 ), EndOfSource ) );
+		EON_TEST_2STEP( String, _forward, end_of_source,
+			Pos pos( 4, 4, 0, 4 ),
+			EON_RAISE( String( "test", "one" )._forward( pos, 1 ), EndOfSource ) );
 
 		void String::_backward( Pos& pos, index_t num_chars )
 		{
