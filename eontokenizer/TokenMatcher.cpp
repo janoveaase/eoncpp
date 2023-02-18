@@ -199,7 +199,7 @@ namespace eon
 		EON_EQ( name_digits, data.Obj.Type ) );
 	EON_TEST_3STEP( TokenMatcher_DataElement, parse, str,
 		DataElementTestData data( "('digits')" ),
-		data.Obj.parse( data.Pos +1 ),
+		data.Obj.parse( data.Pos + 1 ),
 		EON_EQ( "digits", data.Obj.Str ) );
 	EON_TEST_2STEP( TokenMatcher_DataElement, parse, str_missing_closure,
 		DataElementTestData data( "('digits)" ),
@@ -223,9 +223,10 @@ namespace eon
 			throw InvalidPattern( "Unexepected character at position " + string( i.numChar() ) + "!" );
 		return true;
 	}
-	EON_TEST_2STEP( TokenMatcher_DataElement, _parse, closure,
+	EON_TEST_3STEP( TokenMatcher_DataElement, _parse, closure,
 		string source = ")",
-		EON_NO_X( TokenMatcher::DataElement()._parse( source.begin() ) ) );
+		auto pos = source.begin(),
+		EON_NO_X( TokenMatcher::DataElement()._parse( pos ) ) );
 	EON_TEST_3STEP( TokenMatcher_DataElement, _parse, type,
 		DataElementTestData data( "space)" ),
 		data.Obj._parse( data.Pos ),

@@ -78,8 +78,9 @@ namespace eon
 		Sample data,
 		EON_FALSE( data.Obj.empty() ) );
 
-	EON_TEST( Token, source, const_none,
-		EON_FALSE( ((const Token*)&Token())->source() ) );
+	EON_TEST_2STEP( Token, source, const_none,
+		Token obj,
+		EON_FALSE( ( (const Token*)&obj )->source() ) );
 	EON_TEST_2STEP( Token, source, const_non_empty1,
 		Sample data,
 		EON_TRUE( data.cObj().source() ) );

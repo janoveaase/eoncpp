@@ -237,9 +237,10 @@ namespace eon
 			Pos pos( 0, 0, 0, 0 ),
 			File( ( sandboxDir() / "source.txt" ).string() )._forward( pos, 10 ),
 			EON_EQ( 3, pos.BytePos ) );
-		EON_TEST_2STEP_SANDBOX( File, _forward, end_of_source,
+		EON_TEST_3STEP_SANDBOX( File, _forward, end_of_source,
 			saveFile( "source.txt", "one" ),
-			EON_RAISE( File( ( sandboxDir() / "source.txt" ).string() )._forward( Pos( 4, 4, 0, 4 ), 1 ), EndOfSource ) );
+			Pos pos( 4, 4, 0, 4 ),
+			EON_RAISE( File( ( sandboxDir() / "source.txt" ).string() )._forward( pos, 1 ), EndOfSource ) );
 
 		void File::_backward( Pos& pos, index_t num_chars )
 		{
