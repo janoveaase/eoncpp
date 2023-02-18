@@ -47,9 +47,7 @@ namespace eon
 		TypeTuple() = default;
 
 		// Construct a single-name type.
-		inline TypeTuple( name_t type_name, type::Qualifier qualifier = type::Qualifier::_none ) noexcept {
-			NameValue = type_name; Qual = qualifier; if( Qual & type::Qualifier::_literal && !(
-				Qual & type::Qualifier::_rvalue ) ) Qual |= type::Qualifier::_rvalue; }
+		inline TypeTuple( name_t type_name ) noexcept { NameValue = type_name; }
 
 		// Copy another type.
 		inline TypeTuple( const TypeTuple& other ) { *this = other; }
@@ -68,8 +66,8 @@ namespace eon
 
 		// Discard all details and copy those of another type.
 		inline TypeTuple& operator=( const TypeTuple& other ) {
-			NameValue = other.NameValue; Qual = other.Qual; TupleValue = other.TupleValue;
-			NamedAttributes = other.NamedAttributes; return *this; }
+			NameValue = other.NameValue; TupleValue = other.TupleValue; NamedAttributes = other.NamedAttributes;
+			return *this; }
 
 		// Discard all details and take ownership of those of another type.
 		TypeTuple& operator=( TypeTuple&& other ) noexcept;
@@ -123,54 +121,6 @@ namespace eon
 		// If the type tuple is not for a static tuple and it contains multiple
 		// attributes, turn it into a static tuple type.
 		void expandSubTuples();
-
-
-
-
-		///////////////////////////////////////////////////////////////////////
-		//
-		// Qualifiers
-		//
-		// These are included to help the Æon compiler and the Expression class!
-		//
-	public:
-
-		// Mark as literal value.
-		// NOTE: This will also mark as rvalue!
-		inline void markLiteral() noexcept { Qual |= type::Qualifier::_literal | type::Qualifier::_rvalue; }
-
-		// Check if literal.
-		inline bool literal() const noexcept { return Qual & type::Qualifier::_literal; }
-
-		// Mark as rvalue.
-		inline void markRvalue() noexcept { Qual |= type::Qualifier::_rvalue; }
-
-		// Check if rvalue.
-		inline bool rvalue() const noexcept { return Qual & type::Qualifier::_rvalue; }
-
-		// Mark as reference
-		inline void markReference() noexcept { Qual |= type::Qualifier::_reference; }
-
-		// Check if reference
-		inline bool reference() const noexcept { return Qual & type::Qualifier::_reference; }
-
-		// Mark as link
-		inline void markLink() noexcept { Qual |= type::Qualifier::_link; }
-
-		// Check if link
-		inline bool link() const noexcept { return Qual & type::Qualifier::_link; }
-
-		// Mark as optional
-		inline void markOptional() noexcept { Qual |= type::Qualifier::_optional; }
-
-		// Check if optional
-		inline bool optional() const noexcept { return Qual & type::Qualifier::_optional; }
-
-		// Set qualifier
-		inline void qualifier( type::Qualifier qualifier ) noexcept { Qual = qualifier; }
-
-		// Get qualifier
-		inline type::Qualifier qualifier() const noexcept { return Qual; }
 
 
 
@@ -436,9 +386,6 @@ namespace eon
 		// If the latter, the name value will be "#typetuple".
 		// If no value at all, the name value will be eon::no_name.
 		name_t NameValue{ no_name };
-
-		// A type may have qualifiers attached.
-		type::Qualifier Qual{ type::Qualifier::_none };
 
 		// If sub-tuple, then we have a set of attributes = TypeTuples, and
 		// these can be both unnamed and named.

@@ -68,30 +68,30 @@ namespace eon
 	public:
 
 		// Create attribute for specified type without value.
-		static inline Attribute newVoid( TypeTuple type, type::Qualifier qualifier ) {
-			Attribute a; a.Type = type; a.Type.qualifier( qualifier ); return a; }
+		static inline Attribute newVoid( TypeTuple type, type::Qualifier qualifiers ) {
+			Attribute a; a.Type = type; a.Qualifiers = qualifiers; return a; }
 
 		// Create tuple attribute.
-		static Attribute newTuple( Tuple&& value, type::Qualifier qualifier, source::Ref source = source::Ref() );
+		static Attribute newTuple( Tuple&& value, type::Qualifier qualifiers, source::Ref source = source::Ref() );
 
 		// Create name attribute.
-		static Attribute newName( name_t value, type::Qualifier qualifier, source::Ref source = source::Ref() );
+		static Attribute newName( name_t value, type::Qualifier qualifiers, source::Ref source = source::Ref() );
 
 		// Create type-tuple attribute.
-		static Attribute newTypeTuple( TypeTuple&& value, type::Qualifier qualifier, source::Ref source = source::Ref() );
+		static Attribute newTypeTuple( TypeTuple&& value, type::Qualifier qualifiers, source::Ref source = source::Ref() );
 
 		// Create type-tuple attribute.
 		static Attribute newTypeTuple(
-			const TypeTuple& value, type::Qualifier qualifier, source::Ref source = source::Ref() );
+			const TypeTuple& value, type::Qualifier qualifiers, source::Ref source = source::Ref() );
 
 		// Create attribute for value of specified type (no explicit type-deduction!).
 		template<typename T>
 		static Attribute newExplicit(
-			T&& value, name_t value_type, type::Qualifier qualifier, source::Ref source = source::Ref() )
+			T&& value, name_t value_type, type::Qualifier qualifiers, source::Ref source = source::Ref() )
 		{
 			Attribute a;
 			a.Type = value_type;
-			a.Type.qualifier( qualifier );
+			a.Qualifiers = qualifiers;
 			a.Value = new T( std::move( value ) );
 			a.Source = source;
 			return a;
@@ -100,11 +100,11 @@ namespace eon
 		// Create attribute for value of specified type (no explicit type-deduction!).
 		template<typename T>
 		static Attribute newExplicit(
-			const T& value, name_t value_type, type::Qualifier qualifier, source::Ref source = source::Ref() )
+			const T& value, name_t value_type, type::Qualifier qualifiers, source::Ref source = source::Ref() )
 		{
 			Attribute a;
 			a.Type = value_type;
-			a.Type.qualifier( qualifier );
+			a.Qualifiers = qualifiers;
 			a.Value = new T( value );
 			a.Source = source;
 			return a;
@@ -117,7 +117,7 @@ namespace eon
 		template<typename T>
 		static Attribute newImplicit(
 			T&& value,
-			type::Qualifier qualifier,
+			type::Qualifier qualifiers,
 			type::hint type_hint = type::hint::none,
 			source::Ref source = source::Ref() )
 		{
@@ -125,7 +125,8 @@ namespace eon
 			if( type_name == no_name )
 				throw type::AccessDenied();
 			Attribute a;
-			a.Type = type_name; a.Type.qualifier( qualifier );
+			a.Type = type_name;
+			a.Qualifiers = qualifiers;
 			a.Value = new T( std::move( value ) );
 			a.Source = source;
 			return a;
@@ -138,7 +139,7 @@ namespace eon
 		template<typename T>
 		static Attribute newImplicit(
 			const T& value,
-			type::Qualifier qualifier,
+			type::Qualifier qualifiers,
 			type::hint type_hint = type::hint::none,
 			source::Ref source = source::Ref() )
 		{
@@ -146,7 +147,8 @@ namespace eon
 			if( type_name == no_name )
 				throw type::AccessDenied();
 			Attribute a;
-			a.Type = type_name; a.Type.qualifier( qualifier );
+			a.Type = type_name;
+			a.Qualifiers = qualifiers;
 			a.Value = new T( value );
 			a.Source = source;
 			return a;
@@ -221,6 +223,102 @@ namespace eon
 
 		// Stringify value
 		void str( Stringifier& strf ) const;
+
+
+
+
+		///////////////////////////////////////////////////////////////////////
+		//
+		// Qualifiers
+		//
+		// These are included to help the Æon compiler and the Expression class!
+		//
+	public:
+
+		// Mark as owned value.
+		// NOTE: This will unmark borrowed, optional, and pointer qualifiers!
+		inline void markOwned() noexcept { unmarkBorrowed(); unmarkOptional(); Qualifiers |= type::Qualifier::_owned; }
+
+		// Check if owned value.
+		inline bool isOwned() const noexcept { return Qualifiers && type::Qualifier::_owned; }
+
+		// Unmark as owned value.
+		inline void unmarkOwned() noexcept { Qualifiers = Qualifiers & ~type::Qualifier::_owned; }
+
+
+		// Mark as borrowed value.
+		// NOTE: This will unmark optional and pointer qualifiers but not owned!
+		inline void markBorrowed() noexcept { unmarkOptional(); unmarkPointer(); Qualifiers |= type::Qualifier::_borrowed; }
+
+		// Check if borrowed value.
+		inline bool isBorrowed() const noexcept { return Qualifiers && type::Qualifier::_borrowed; }
+
+		// Unmark as borrowed value.
+		inline void unmarkBorrowed() noexcept { Qualifiers = Qualifiers & ~type::Qualifier::_borrowed; }
+
+
+		// Mark as optional value.
+		// NOTE: This will unmark owned, borrowed, and pointer qualifiers!
+		inline void markOptional() noexcept {
+			unmarkOwned(); unmarkBorrowed(); unmarkPointer(); Qualifiers |= type::Qualifier::_optional; }
+
+		// Check if optional value.
+		inline bool isOptional() const noexcept { return Qualifiers && type::Qualifier::_optional; }
+
+		// Unmark as optional value.
+		inline void unmarkOptional() noexcept { Qualifiers = Qualifiers & ~type::Qualifier::_optional; }
+
+
+		// Mark as pointer value.
+		// NOTE: This will unmark owned and borrowed qualifiers but not optional!
+		inline void markPointer() noexcept { unmarkOwned(); unmarkBorrowed(); Qualifiers |= type::Qualifier::_pointer; }
+
+		// Check if pointer value.
+		inline bool isPointer() const noexcept { return Qualifiers && type::Qualifier::_pointer; }
+
+		// Unmark as pointer value.
+		inline void unmarkPointer() noexcept { Qualifiers = Qualifiers & ~type::Qualifier::_pointer; }
+
+
+		// Mark as reference value.
+		inline void markReference() noexcept { Qualifiers |= type::Qualifier::_reference; }
+
+		// Check if reference value.
+		inline bool isReference() const noexcept { return Qualifiers && type::Qualifier::_reference; }
+
+		// Unmark as reference value.
+		inline void unmarkReference() noexcept { Qualifiers = Qualifiers & ~type::Qualifier::_reference; }
+
+
+		// Mark as literal value.
+		// NOTE: This will also mark rvalue qualifier!
+		inline void markLiteral() noexcept { Qualifiers |= type::Qualifier::_literal | type::Qualifier::_rvalue; }
+
+		// Check if literal.
+		inline bool isLiteral() const noexcept { return Qualifiers && type::Qualifier::_literal; }
+
+		// Unmark as literal.
+		// NOTE: This will not unmark rvalue qualifier!
+		inline void unmarkLiteral() noexcept { Qualifiers = Qualifiers & ~type::Qualifier::_literal; }
+
+
+		// Mark as rvalue.
+		// NOTE: This will not unmark literal qualifier!
+		inline void markRvalue() noexcept { Qualifiers |= type::Qualifier::_rvalue; }
+
+		// Check if rvalue.
+		inline bool isRvalue() const noexcept { return Qualifiers && type::Qualifier::_rvalue; }
+
+		// Unmark as literal.
+		// NOTE: This will also unmark literal qualifier!
+		inline void unmarkRvalue() noexcept { unmarkLiteral();  Qualifiers = Qualifiers & ~type::Qualifier::_literal; }
+
+
+		// Set qualifier flags directly.
+		inline void qualifier( type::Qualifier qualifier ) noexcept { Qualifiers = qualifier; }
+
+		// Get qualifier flags directly.
+		inline type::Qualifier qualifier() const noexcept { return Qualifiers; }
 
 
 
@@ -313,7 +411,7 @@ namespace eon
 		TypeTuple Type;
 		source::Ref Source;
 		void* Value{ nullptr };
-		bool Owned{ true };
+		type::Qualifier Qualifiers{ type::Qualifier::_owned };
 
 		static std::unordered_map<name_t, TypeHandlerPtr> TypeHandlers;
 	};

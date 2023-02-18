@@ -11,40 +11,41 @@ namespace eon
 	std::unordered_map<name_t, Attribute::TypeHandlerPtr> Attribute::TypeHandlers;
 
 
-	Attribute Attribute::newTuple( Tuple&& value, type::Qualifier qualifier, source::Ref source )
+	Attribute Attribute::newTuple( Tuple&& value, type::Qualifier qualifiers, source::Ref source )
 	{
 		Attribute a;
-		a.Type = value.type(); a.Type.qualifier( qualifier );
+		a.Type = value.type();
+		a.Qualifiers = qualifiers;
 		a.Value = new Tuple( std::move( value ) );
 		a.Source = source;
 		return a;
 	}
 
-	Attribute Attribute::newName( name_t value, type::Qualifier qualifier, source::Ref source )
+	Attribute Attribute::newName( name_t value, type::Qualifier qualifiers, source::Ref source )
 	{
 		Attribute a;
 		a.Type = name_name;
-		a.Type.qualifier( qualifier );
+		a.Qualifiers = qualifiers;
 		a.Value = new name_t( value );
 		a.Source = source;
 		return a;
 	}
 
-	Attribute Attribute::newTypeTuple( TypeTuple&& value, type::Qualifier qualifier, source::Ref source )
+	Attribute Attribute::newTypeTuple( TypeTuple&& value, type::Qualifier qualifiers, source::Ref source )
 	{
 		Attribute a;
 		a.Type = name_typetuple;
-		a.Type.qualifier( qualifier );
+		a.Qualifiers = qualifiers;
 		a.Value = new TypeTuple( std::move( value ) );
 		a.Source = source;
 		return a;
 	}
 
-	Attribute Attribute::newTypeTuple( const TypeTuple& value, type::Qualifier qualifier, source::Ref source )
+	Attribute Attribute::newTypeTuple( const TypeTuple& value, type::Qualifier qualifiers, source::Ref source )
 	{
 		Attribute a;
 		a.Type = name_typetuple;
-		a.Type.qualifier( qualifier );
+		a.Qualifiers = qualifiers;
 		a.Value = new TypeTuple( value );
 		a.Source = source;
 		return a;
@@ -61,7 +62,8 @@ namespace eon
 		if( handler != TypeHandlers.end() )
 		{
 			Value = handler->second->copy( other.Value );
-			Owned = true;
+			Qualifiers = other.Qualifiers;
+			markOwned();
 		}
 		Source = other.Source;
 		return *this;
@@ -71,8 +73,8 @@ namespace eon
 		_clear();
 		Type = other.Type;
 		Value = other.Value;
+		markReference();
 		Source = other.Source;
-		Owned = false;
 		return *this;
 	}
 	Attribute& Attribute::operator=( Attribute&& other ) noexcept
@@ -81,8 +83,8 @@ namespace eon
 		Type = std::move( other.Type );
 		Value = other.Value;
 		other.Value = nullptr;
-		Owned = other.Owned;
-		other.Owned = true;
+		Qualifiers = other.Qualifiers;
+		other.markOwned();
 		Source = other.Source;
 		return *this;
 	}
@@ -133,7 +135,7 @@ namespace eon
 	{
 		if( Value )
 		{
-			if( Owned )
+			if( isOwned() && !isBorrowed() && !isReference() )
 			{
 				auto handler = TypeHandlers.find( Type.name() );
 				if( handler != TypeHandlers.end() )

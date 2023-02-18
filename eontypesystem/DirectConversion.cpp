@@ -27,7 +27,7 @@ namespace eon
 		bool DirectConversion::legal( name_t target_type, const Node& source ) noexcept
 		{
 			_ensureConverters();
-			
+
 			auto found_source = Converters.find( source.type().name() );
 			if( found_source == Converters.end() )
 				return false;
@@ -69,7 +69,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<short_t>( source.value().value<int_t>() ),
 				name_short,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -78,7 +78,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<long_t>( source.value().value<int_t>() ),
 				name_long,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -87,7 +87,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<flt_t>( source.value().value<int_t>() ),
 				name_float,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -96,7 +96,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<low_t>( source.value().value<int_t>() ),
 				name_low,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -105,7 +105,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<high_t>( source.value().value<int_t>() ),
 				name_high,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -114,7 +114,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<index_t>( source.value().value<int_t>() ),
 				name_index,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -123,7 +123,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<index_t>( source.value().value<long_t>() ),
 				name_index,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -132,7 +132,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<low_t>( source.value().value<flt_t>() ),
 				name_low,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 
@@ -141,7 +141,7 @@ namespace eon
 			return Attribute::newExplicit(
 				static_cast<high_t>( source.value().value<flt_t>() ),
 				name_high,
-				source.type().qualifier(),
+				source.value().qualifier(),
 				source.source() );
 		}
 	}

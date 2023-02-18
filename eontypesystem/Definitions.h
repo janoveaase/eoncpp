@@ -35,19 +35,24 @@ namespace eon
 
 		enum class Qualifier : uint8_t
 		{
-			_none = 0x00,
-			_literal = 0x01,		// This is also an rvalue
-			_rvalue = 0x02,
-			_reference = 0x04,
-			_link = 0x08,
-			_optional = 0x10
+			_none = 0x00,			// No qualifiers.
+			_owned = 0x01,			// Value is owned.
+			_borrowed = 0x02,		// Value is borrowed. (Can co-exist with _owned but takes precedence!)
+			_optional = 0x04,		// Value is optional. (Can be null!)
+			_pointer = 0x08,		// Value is a pointer to an optional value. (The optional value can be null!)
+			_reference = 0x10,		// Value is a reference to another value.
+			_literal = 0x20,		// Value originates as a literal. (This is also an rvalue!)
+			_rvalue = 0x40,			// Value is an rvalue. (Assigning to it is pointless!)
 		};
 		inline Qualifier operator|( Qualifier a, Qualifier b ) noexcept {
 			return static_cast<Qualifier>( static_cast<int>( a ) | static_cast<int>( b ) ); }
 		inline Qualifier& operator|=( Qualifier& a, Qualifier b ) noexcept {
 			return a = static_cast<Qualifier>( static_cast<int>( a ) | static_cast<int>( b ) ); }
-		inline bool operator&( Qualifier a, Qualifier b ) noexcept {
+		inline Qualifier operator&( Qualifier a, Qualifier b ) noexcept {
+			return static_cast<Qualifier>( static_cast<int>( a ) & static_cast<int>( b ) ); }
+		inline bool operator&&( Qualifier a, Qualifier b ) noexcept {
 			return static_cast<bool>( static_cast<int>( a ) & static_cast<int>( b ) ); }
+		inline Qualifier operator~( Qualifier a ) noexcept { return static_cast<Qualifier>( ~static_cast<int>( a ) ); }
 
 #define EON_SHORT_MIN INT16_MIN
 #define EON_SHORT_MAX INT16_MAX

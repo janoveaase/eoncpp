@@ -574,7 +574,7 @@ namespace eon
 
 	bool Expression::_isLvalue( ParseData& data, const expression::Node& operand ) const
 	{
-		if( operand.type().rvalue() )
+		if( operand.value().isRvalue() )
 		{
 			data.error();
 			data.reporter().error( "Cannot assign to an rvalue!", operand.source() );
@@ -588,7 +588,7 @@ namespace eon
 	{
 		name_t type = lhs.type().name();
 		auto args = typetuple::convert( { lhs.type() } );
-		auto action_signature = rhs.type().rvalue()
+		auto action_signature = rhs.value().isRvalue()
 			? _findAction( data, name_take, name_operator, type, args )
 			: _findAction( data, type::name_copy, name_operator, type, args );
 		if( !action_signature )
@@ -705,7 +705,7 @@ namespace eon
 
 	bool Expression::_canConvertDirectly( ParseData& data, const TypeTuple& lhs, const expression::Node& rhs ) const noexcept
 	{
-		if( !rhs.type().literal() )		// Rhs must be a literal value!
+		if( !rhs.value().isLiteral() )		// Rhs must be a literal value!
 			return false;
 		return data.Converter.legal( lhs.name(), rhs );
 	}

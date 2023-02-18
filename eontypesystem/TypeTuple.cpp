@@ -17,26 +17,14 @@ namespace eon
 		EON_EQ( 0, TypeTuple().TupleValue.size() ) );
 	EON_TEST( TypeTuple, TypeTuple, name,
 		EON_EQ( name_bool, TypeTuple( name_bool ).NameValue ) );
-	EON_TEST( TypeTuple, TypeTuple, no_qualifier,
-		EON_EQ( type::Qualifier::_none, TypeTuple( name_bool ).Qual ) );
-	EON_TEST( TypeTuple, TypeTuple, reference_qualifier,
-		EON_EQ( type::Qualifier::_reference, TypeTuple( name_bool, type::Qualifier::_reference ).Qual ) );
-	EON_TEST( TypeTuple, TypeTuple, literal_qualifier,	// literal is also rvalue!
-		EON_EQ(
-			type::Qualifier::_literal | type::Qualifier::_rvalue,
-			TypeTuple( name_bool, type::Qualifier::_literal ).Qual ) );
 
 
 
 
-	EON_TEST_3STEP( TypeTuple, operator_asgn, name_copy1,
-		TypeTuple other( name_bool, type::Qualifier::_literal ),
+	EON_TEST_3STEP( TypeTuple, operator_asgn, name_copy,
+		TypeTuple other( name_bool ),
 		TypeTuple obj = other,
 		EON_EQ( name_bool, obj.NameValue ) );
-	EON_TEST_3STEP( TypeTuple, operator_asgn, name_copy2,
-		TypeTuple other( name_bool, type::Qualifier::_literal ),
-		TypeTuple obj = other,
-		EON_EQ( type::Qualifier::_literal | type::Qualifier::_rvalue, obj.Qual ) );
 	EON_TEST_3STEP( TypeTuple, operator_asgn, tuple_copy,
 		TypeTuple other = typetuple::newStatic( { { nn, name_bool }, { name_action, name_int } } ),
 		TypeTuple obj = other,
@@ -45,7 +33,6 @@ namespace eon
 	TypeTuple& TypeTuple::operator=( TypeTuple&& other ) noexcept
 	{
 		NameValue = other.NameValue; other.NameValue = no_name;
-		Qual = other.Qual; other.Qual = type::Qualifier::_none;
 		TupleValue = std::move( other.TupleValue );
 		NamedAttributes = std::move( other.NamedAttributes );
 		return *this;
