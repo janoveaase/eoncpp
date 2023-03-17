@@ -15,32 +15,32 @@ namespace eon
 				TestState::resetGlobal();
 				Report.defaultTargets();
 				State = parser::State( std::move( source ), Report );
-				Data = std::make_shared<EdfParser::ParserData>( State, scope::global() );
+				Data = std::make_shared<EdfData>( State, scope::global() );
 			}
 			parser::State State;
 			source::Reporter Report;
-			std::shared_ptr<EdfParser::ParserData> Data;
+			std::shared_ptr<EdfData> Data;
 		};
 #endif
 
 
 		expression::Node EdfParser::parse( State& state, Tuple& scope )
 		{
-			ParserData data( state, scope );
+			EdfData data( state, scope );
 			_parse( data, NewlinePolicy::ignore );
 			if( !data.hasErrors() )
 				return expression::Node::newValue(
-					Attribute::newTuple( data.root(), type::Qualifier::_rvalue, data.source() ) );
+					Attribute::newTuple( data.extractRoot(), type::Qualifier::_rvalue, data.source() ) );
 			else
 				return expression::Node();
 		}
 
 		Tuple EdfParser::parseRaw( State& state, Tuple& scope )
 		{
-			ParserData data( state, scope );
+			EdfData data( state, scope );
 			_parse( data, NewlinePolicy::ignore );
 			if( !data.hasErrors() )
-				return data.root();
+				return data.extractRoot();
 			else
 				return tuple::newData();
 		}
@@ -48,112 +48,22 @@ namespace eon
 
 
 
-		EdfParser::ParserData::ParserData( parser::State& state, Tuple& scope )
-		{
-			State = &state;
-			Scope = &scope;
-			if( !tokens().atEnd() && tokens().viewed().is( name_indentation ) )
-				Indentations.push( Indentation::normal( tokens().viewed().str().numChars() ) );
-			else
-				Indentations.push( Indentation::normal( 0 ) );
-		}
-
-		bool EdfParser::ParserData::atIncreasedIndentation( index_t offset ) const noexcept
-		{
-			if( Indentations.empty() )
-				return false;
-			if( !State->Tokens.exists( static_cast<int>( offset ) ) )
-				return false;
-			auto& viewed = State->Tokens.peek( State->Tokens.viewedPos() + offset );
-			if( !viewed.is( name_indentation ) )
-				return false;
-			auto& indent = Indentations.top();
-			if( indent.Forced )
-				return viewed.source().numChars() >= indent.Value;
-			else
-				return viewed.source().numChars() > indent.Value;
-		}
-
-		bool EdfParser::ParserData::atReducedIndentation( index_t offset ) const noexcept
-		{
-			return !Indentations.empty() && State->Tokens.exists( static_cast<int>( offset ) )
-				&& State->Tokens.peek( State->Tokens.viewedPos() + offset ).is( name_indentation )
-				&& State->Tokens.peek( State->Tokens.viewedPos() + offset ).str().numChars() < Indentations.top().Value;
-		}
-
-		bool EdfParser::ParserData::haveSequence( IndentationMatch match_indentation ) const noexcept
-		{
-			auto type = State->Tokens.viewed().type();
-			int next{ 1 };
-			if( !State->Tokens.exists( next ) )
-				return false;
-			if( State->Tokens.peekAhead( next ).is( type ) )
-				return true;
-			if( State->Tokens.peekAhead( next ).is( name_newline ) )
-			{
-				++next;
-				if( State->Tokens.peekAhead( next ).is( name_indentation ) )
-				{
-					index_t indentation = State->Tokens.peekAhead( next ).source().numChars();
-					if( match_indentation == IndentationMatch::same_or_greater && indentation < Indentations.top().Value )
-						return false;
-					else if( match_indentation == IndentationMatch::indented && indentation <= Indentations.top().Value )
-						return false;
-					++next;
-				}
-				else
-				{
-					if( Indentations.top().Value == 0 )
-					{
-						if( match_indentation != IndentationMatch::same_or_greater )
-							return false;
-					}
-				}
-				return State->Tokens.exists( next ) && State->Tokens.peekAhead( next ).is( type );
-			}
-			return false;
-		}
-
-		void EdfParser::ParserData::recordAttributeName()
-		{
-			AttributeName = eon::name( tokens().viewed().str() );
-			NameSource = tokens().viewed().source();
-			tokens().forward();
-		}
-
-		void EdfParser::ParserData::recordNameValueSeparator()
-		{
-			NameSepSource = tokens().viewed().source();
-			tokens().forward();
-		}
-
-
-		bool EdfParser::ParserData::ensureNewLine()
-		{
-			if( State->Tokens.viewed().is( name_newline ) )
-				return true;
-			error( "Expected tuple attributes to follow on indented line below!" );
-			return false;
-		}
-
-		void EdfParser::ParserData::error( eon::string&& message, source::Ref* source )
-		{
-			Errors = true;
-			source::Ref src = source != nullptr ? *source
-				: !State->Tokens.atEnd() ? State->Tokens.viewed().source() : State->Tokens.last().source();
-			State->Report->error( std::move( message ), src );
-		}
-
-
-		void EdfParser::_parse( ParserData& data, NewlinePolicy policy )
+		void EdfParser::_parse( EdfData& data, NewlinePolicy policy )
 		{
 			while( !data.atEndOfBlock() && (
 				policy == NewlinePolicy::ignore || !data.tokens().viewed().is( name_newline ) ) )
+			{
+				if( data.tokens().viewed().is( name_newline ) )
+				{
+					data.tokens().forward();
+					continue;
+				}
 				_parseAttribute( data );
+			}
 		}
 
 
-		void EdfParser::_parseAttribute( ParserData& data )
+		void EdfParser::_parseAttribute( EdfData& data )
 		{
 			// Attributes can be one of the following:
 			// 1. Singleton (including parenthesized subtuples), possibly followed by comma and more singletons.
@@ -163,12 +73,20 @@ namespace eon
 			if( data.tokens().viewed().is( symbol_minus ) )
 				_parseDashAttribute( data );
 			else if( data.isNamedAttribute() )
+			{
+				bool allow_comma = data.tokens().peekAhead().is( symbol_colon );
+				if( !allow_comma )
+					data.pushAllowComma( false );
+				else
+					data.pushAllowComma( true );
 				_parseNamedAttribute( data );
+				data.popAllowComma();
+			}
 			else
 				_parseUnnamedAttributes( data );
 		}
 
-		void EdfParser::_parseDashAttribute( ParserData& data )
+		void EdfParser::_parseDashAttribute( EdfData& data )
 		{
 			data.tokens().forward();	// Skip '-'
 
@@ -194,7 +112,7 @@ namespace eon
 						data.tokens().forward();
 						break;
 					}
-					if( data.atReducedIndentation( 1 ) )
+					if( data.atOffsetIsLowerIndentation( 1 ) )
 						break;
 					if( !data.tokens().forward( 2 ) )	// Skip newline and indentation
 						break;
@@ -206,7 +124,7 @@ namespace eon
 				_parseValue( data );
 		}
 
-		void EdfParser::_parseNamedAttribute( ParserData& data )
+		void EdfParser::_parseNamedAttribute( EdfData& data )
 		{
 			data.recordAttributeName();
 
@@ -217,10 +135,13 @@ namespace eon
 			else
 				_parseNamedSubtuple( data );
 
-			data.skipOptionalComma();
+			if( data.allowComma() || !data.tokens().exists() || data.tokens().peekAhead().is( name_newline ) )
+				data.skipOptionalComma();
+			else if( !data.tokens().atEnd() && data.tokens().viewed().is( symbol_comma ) )
+				data.error( "Comma is not legal here!" );
 		}
 
-		void EdfParser::_parseNamedSingleton( ParserData& data )
+		void EdfParser::_parseNamedSingleton( EdfData& data )
 		{
 			data.recordNameValueSeparator();
 			if( data.tokens().atEnd() )
@@ -259,7 +180,7 @@ namespace eon
 			TestState state( string( "one=\n\n  true" ) ),
 			EON_FALSE( EdfParser().parse( state, scope::global() ).value() ) );
 
-		void EdfParser::_skipLegalNamedSingletonWhitespaces( ParserData& data )
+		void EdfParser::_skipLegalNamedSingletonWhitespaces( EdfData& data )
 		{
 			// Beyond the '=' of a named singleton attribute we can have the following:
 			// 1. <value>
@@ -267,7 +188,7 @@ namespace eon
 			// Anything else if an error!
 			if( data.tokens().viewed().is( name_newline ) )
 			{
-				if( !data.atIncreasedIndentation( 1 ) )
+				if( !data.atOffsetIsGreaterIndentation( 1 ) )
 				{
 					data.error( "Named singleton attribute value must follow on the same line as the name "
 						"or on the next line with indentation!" );
@@ -277,7 +198,7 @@ namespace eon
 			}
 		}
 
-		void EdfParser::_parseNamedSubtuple( ParserData& data )
+		void EdfParser::_parseNamedSubtuple( EdfData& data )
 		{
 			data.recordNameValueSeparator();
 			data.addSubtuple();
@@ -289,7 +210,7 @@ namespace eon
 			{
 				if( !data.ensureNewLine() )				// Must be on a separate line!
 					return;
-				if( !data.atIncreasedIndentation( 1 ) )	// Must be indented
+				if( !data.atOffsetIsGreaterIndentation( 1 ) )	// Must be indented
 					break;
 				data.tokens().forward();				// Skip newline
 
@@ -335,7 +256,7 @@ namespace eon
 			EON_EQ( "data(one=(alpha=(x, y), beta=(1, 2)))",
 				EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		bool EdfParser::_parseSubtupleValue( ParserData& data )
+		bool EdfParser::_parseSubtupleValue( EdfData& data )
 		{
 			data.indent();
 			_parseAttribute( data );
@@ -344,18 +265,18 @@ namespace eon
 		}
 
 
-		void EdfParser::_parseUnnamedAttributes( ParserData& data )
+		void EdfParser::_parseUnnamedAttributes( EdfData& data )
 		{
-			while( true )
+			while( !data.tokens().atEnd() )
 			{
 				_parseValue( data );
-				if( data.tokens().atEnd() || !data.tokens().viewed().is( name_comma ) )
+				data.skipOptionalComma();
+				if( !data.tokens().atEnd() && data.tokens().viewed().is( name_newline ) )
 					break;
-				data.tokens().forward();	// Skip comma
 			}
 		}
 
-		void EdfParser::_parseValue( ParserData& data )
+		void EdfParser::_parseValue( EdfData& data )
 		{
 			auto type = data.tokens().viewed().type();
 			if( type == name_name )
@@ -386,8 +307,6 @@ namespace eon
 				_parseTypeTuple( data );
 			else if( type == symbol_open_round )
 				_parseSubtuple( data );
-			else if( type == name_newline )
-				;	// OK!
 			else
 				data.error( "Unexpected element at this location!" );
 
@@ -405,7 +324,7 @@ namespace eon
 			TestState state( string( "'x'" ) ),
 			EON_EQ( "data('x')", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseIntValue( ParserData& data )
+		void EdfParser::_parseIntValue( EdfData& data )
 		{
 			const long_t value = data.tokens().viewed().str().toLongT();
 			if( value <= EON_INT_MAX )
@@ -420,7 +339,7 @@ namespace eon
 			TestState state( string( "99999999999" ) ),
 			EON_EQ( "data(99999999999)", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseFloatValue( ParserData& data )
+		void EdfParser::_parseFloatValue( EdfData& data )
 		{
 			const high_t value = data.tokens().viewed().str().toHighT();
 			if( value <= EON_FLOAT_MAX )
@@ -432,7 +351,7 @@ namespace eon
 			TestState state( string( "98.76" ) ),
 			EON_EQ( "data(98.76)", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseNameValue( ParserData& data )
+		void EdfParser::_parseNameValue( EdfData& data )
 		{
 			if( data.attributeName() == no_name )
 				data.tuple().addName( eon::name( data.tokens().viewed().str() ) );
@@ -443,17 +362,16 @@ namespace eon
 			TestState state( string( "hello" ) ),
 			EON_EQ( "data(hello)", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseBytesValue( ParserData& data )
+		void EdfParser::_parseBytesValue( EdfData& data )
 		{
 			auto value = data.tokens().viewed().str().stdstr();
-			if( data.haveSequence( IndentationMatch::indented ) )
+			if( _haveInitialRepeatedSequence( data ) )
 			{
 				do
 				{
-					for( data.tokens().forward(); !data.tokens().viewed().is( name_bytes ); data.tokens().forward() )
-						;
+					_skipToRepeated( data );
 					value += data.tokens().viewed().str().stdstr();
-				} while( data.haveSequence( IndentationMatch::same_or_greater ) );
+				} while( _haveSubsequentRepeatedSequence( data ) );
 			}
 			data.tuple().add( data.attributeName(), std::move( value ) );
 		}
@@ -462,17 +380,16 @@ namespace eon
 			TestState state( string( "B\"something\"" ) ),
 			EON_EQ( "data(B\"something\")", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseStringValue( ParserData& data )
+		void EdfParser::_parseStringValue( EdfData& data )
 		{
 			auto value = data.tokens().viewed().str();
-			if( data.haveSequence( IndentationMatch::indented ) )
+			if( _haveInitialRepeatedSequence( data ) )
 			{
 				do
 				{
-					for( data.tokens().forward(); !data.tokens().viewed().is( name_string ); data.tokens().forward() )
-						;
+					_skipToRepeated( data );
 					value += data.tokens().viewed().str();
-				} while( data.haveSequence( IndentationMatch::same_or_greater ) );
+				} while( _haveSubsequentRepeatedSequence( data ) );
 			}
 			data.tuple().add( data.attributeName(), std::move( value ) );
 		}
@@ -489,7 +406,7 @@ namespace eon
 			TestState state( string( "p\"one/two/three\"" ) ),
 			EON_EQ( "data(p\"one/two/three\")", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseExpressionValue( ParserData& data )
+		void EdfParser::_parseExpressionValue( EdfData& data )
 		{
 			static ExpressionParser parser;
 			data.tuple().add( data.attributeName(), parser.parse( data.state(), data.scope(), { ")" } ) );
@@ -498,7 +415,7 @@ namespace eon
 			TestState state( string( "ex(1  +2)" ) ),
 			EON_EQ( "data(ex(1 + 2))", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseTypeTuple( ParserData& data )
+		void EdfParser::_parseTypeTuple( EdfData& data )
 		{
 			static TypeTupleParser parser;
 			data.tuple().add( data.attributeName(), parser.parseRaw( data.state(), data.scope() ) );
@@ -507,7 +424,7 @@ namespace eon
 			TestState state( string( "T(int)" ) ),
 			EON_EQ( "data(T(int))", EdfParser().parse( state, scope::global() ).value().value<Tuple>().str() ) );
 
-		void EdfParser::_parseSubtuple( ParserData& data )
+		void EdfParser::_parseSubtuple( EdfData& data )
 		{
 			source::Ref source = data.tokens().viewed().source();
 			data.tokens().forward();	// Skip leading '('
@@ -528,21 +445,7 @@ namespace eon
 				}
 
 				_parseValue( data );
-
-				// Must have ',' or ')' here!
-				if( !data.tokens().atEnd() )
-				{
-					if( data.tokens().viewed().is( symbol_comma ) )
-					{
-						data.tokens().forward();
-						continue;
-					}
-					else if( !data.tokens().viewed().is( symbol_close_round ) )
-					{
-						data.error( "Expected ',' or ')' here!" );
-						return;
-					}
-				}
+				data.skipOptionalComma();
 			}
 			data.popSubtuple();
 			data.error( "Expected a ')' to complement '(' at " + source.str() + "!" );

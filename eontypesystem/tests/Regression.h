@@ -20,4 +20,5 @@ namespace eon
 {
 	class TypeTupleTest : public eontest::EonTest {};
 	class TupleTest : public eontest::EonTest {};
+	class EdfTest : public eontest::EonTest {};
 }

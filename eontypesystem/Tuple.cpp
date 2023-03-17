@@ -314,16 +314,6 @@ namespace eon
 
 	void Tuple::_str( ToStrData data ) const
 	{
-		// Tuple formatting rules
-		//   1. Start out with formal type (e.g., "static(", "dynamic(", ...)
-		//   2. Non-tuple attributes to be listed on the same line
-		//   3. Unnamed tuple attributes to be listed on new lines
-		//   4. Named tuple attributes to be listed with name + colon on new line, then tuple value on new line after that.
-		//   5. Tuple values of same type as root will only start with "(" - no parenthesis if named value,
-		//      otherwise include type
-		//   6. Non-tuple attributes following a tuple attribute to be listed on same new line after tuple value
-		//   7. End with closing ")"
-
 		_writeTupleStart( data );
 		_writeTupleAttributes( data );
 		_writeTupleEnd( data );
@@ -333,7 +323,6 @@ namespace eon
 		if( _needFormalPrefix( data ) )
 			_writeFormalTuplePrefix( data );
 		else
-//		else if( !data.IndentedBlock )
 			_writeInformalTuplePrefix( data );
 	}
 	bool Tuple::_needFormalPrefix( ToStrData& data ) const
@@ -370,10 +359,6 @@ namespace eon
 	{
 		if( data.EndWithCloseParen )
 			data.strf().end_grp2( ")" );
-		//if( data.IndentedBlock && data.IndentedByAttribute >= 0 )
-		//	data.strf().end_block();
-		//if( data.EndWithCloseParen )
-		//	data.strf().end_grp2( ")", stringify::Type::end_block );
 	}
 	void Tuple::_writeAttribute( ToStrData& data ) const
 	{
@@ -388,69 +373,27 @@ namespace eon
 	}
 	void Tuple::_separateAttributes( ToStrData& data ) const
 	{
-		if( data.First )
-			data.First = false;
+		if( data.FirstAttribute )
+			data.FirstAttribute = false;
 		else
 		{
 			data.strf().punct( "," );
-//			data.strf().punct( ",", stringify::Type::end_block );
 			data.strf().tert_split();
 		}
 	}
 	void Tuple::_writeAttributeTuple( ToStrData& data ) const
 	{
-//		_formatTupleAttributeLine( data );
 		if( data.NamedAttribute )
 			_writeNamedNormalAttributeName( data );
-//			_writeNamedTupleAttributeName( data );
 		auto sub = ToStrData::newSub( data, data.Attrib->value<Tuple>(), data.NamedAttribute );
 		data.Attrib->value<Tuple>()._str( sub );
-//		if( data.NamedAttribute )
-//			data.strf().end_block();
-//		if( data.IndentedBlock && data.IndentedByAttribute > 0 )
-//		{
-//			data.strf().end_block();
-//			data.IndentedBlock = false;
-//		}
-		data.PrevWasTuple = true;
 	}
-/*	void Tuple::_formatTupleAttributeLine( ToStrData& data ) const
-	{
-		if( !data.IndentedBlock )
-		{
-			data.strf().start_block();
-			data.IndentedBlock = true;
-			data.IndentedByAttribute = static_cast<int>( data.AttribNo );
-		}
-		else if( data.NamedAttribute )
-			data.strf().hard_lf();
-	}*/
-/*	void Tuple::_writeNamedTupleAttributeName( ToStrData& data ) const
-	{
-		data.strf().word( eon::str( NamedAttributes.two( data.AttribNo ) ) );
-		data.strf().punct( "=" );
-		data.strf().start_block();
-	}*/
 	void Tuple::_writeNormalAttribute( ToStrData& data ) const
 	{
-//		_formatNormalAttributeLine( data );
 		if( data.NamedAttribute )
 			_writeNamedNormalAttributeName( data );
 		_writeValue( data.strf(), *data.Attrib );
 	}
-/*	void Tuple::_formatNormalAttributeLine( ToStrData& data ) const
-	{
-		if( data.PrevWasTuple )
-		{
-			data.PrevWasTuple = false;
-			if( !data.IndentedBlock )
-			{
-				data.strf().start_block();
-				data.IndentedBlock = true;
-				data.IndentedByAttribute = 0;
-			}
-		}
-	}*/
 	void Tuple::_writeNamedNormalAttributeName( ToStrData& data ) const
 	{
 		data.strf().word( eon::str( NamedAttributes.two( data.AttribNo ) ) );
@@ -497,10 +440,10 @@ namespace eon
 			strf.word( string( attribute.value<std::string>() ) );
 		else if( type == name_string )
 			strf.word( attribute.value<string>().replace( { { "\"", "\\\"" }, { "\n", "\\n" } } ) );
-		//		else if( type == name_real )
-		//			strf.word( string( attribute.value<real_t>() ) );
-		//		else if( type == name_complex )
-		//			strf.word( string( attribute.value<complex_t>() ) );
+		//else if( type == name_real )
+		//	strf.word( string( attribute.value<real_t>() ) );
+		//else if( type == name_complex )
+		//	strf.word( string( attribute.value<complex_t>() ) );
 		else if( type == name_regex )
 			strf.word( attribute.value<regex>().str() );
 		else if( type == name_regex )
@@ -511,22 +454,92 @@ namespace eon
 			strf.word( string( attribute.value<path>().str() ) );
 		else if( type == name_typetuple )
 			attribute.value<TypeTuple>().str( strf );
-		//		else if( type == name_time )
-		//			strf.word( string( attribute.value<time_t>() ) );
-		//		else if( type == name_date )
-		//			strf.word( string( attribute.value<date_t>() ) );
-		//		else if( type == name_timezone )
-		//			strf.word( string( attribute.value<timezone_t>() ) );
-		//		else if( type == name_dst )
-		//			strf.word( string( attribute.value<dst_t>() ) );
-		//		else if( type == name_timespan )
-		//			strf.word( string( attribute.value<timespan_t>() ) );
+		//else if( type == name_time )
+		//	strf.word( string( attribute.value<time_t>() ) );
+		//else if( type == name_date )
+		//	strf.word( string( attribute.value<date_t>() ) );
+		//else if( type == name_timezone )
+		//	strf.word( string( attribute.value<timezone_t>() ) );
+		//else if( type == name_dst )
+		//	strf.word( string( attribute.value<dst_t>() ) );
+		//else if( type == name_timespan )
+		//	strf.word( string( attribute.value<timespan_t>() ) );
 		else if( type == name_expression )
 			strf.word( attribute.value<Expression>().str() );
 
 		if( prefix != StrPrefixPostfixForTypes.end() )
 			strf.append( prefix->second.second );
 	}
+
+
+	void Tuple::_edf( ToStrData data ) const
+	{
+		bool dash_element = data.DashElement;
+		data.DashElement = false;
+		for( data.AttribNo = 0; data.AttribNo < Attributes.size(); ++data.AttribNo )
+		{
+			data.Attrib = &Attributes[ data.AttribNo ];
+			data.NamedAttribute = NamedAttributes.containsTwo( data.AttribNo );
+			_edfAttribute( data );
+			if( dash_element )
+			{
+				if( data.AttribNo == 0 && data.AttribNo < Attributes.size() - 1 )
+					data.strf().start_block();
+				else if( data.AttribNo > 0 && data.AttribNo == Attributes.size() - 1 )
+					data.strf().end_block();
+			}
+		}
+	}
+
+	void Tuple::_edfAttribute( ToStrData data ) const
+	{
+		if( data.NamedAttribute )
+			_edfNamedAttribute( data );
+		else
+			_edfUnnamedAttribute( data );
+
+		data.strf().hard_lf();
+	}
+
+	void Tuple::_edfNamedAttribute( ToStrData data ) const
+	{
+		data.strf().word( eon::str( NamedAttributes.two( data.AttribNo ) ) );
+		if( data.Attrib->type().isTuple() )
+		{
+			data.strf().punct( ":" );
+			data.strf().start_block();
+			_edfAttributeTuple( data );
+			data.strf().end_block();
+		}
+		else
+		{
+			data.strf().op2( "=" );
+			_edfAttributeSingleton( data );
+		}
+	}
+
+	void Tuple::_edfUnnamedAttribute( ToStrData data ) const
+	{
+		data.strf().punct( "-" );
+		data.DashElement = true;
+		if( data.Attrib->type().isTuple() )
+			_edfAttributeTuple( data );
+		else
+			_edfAttributeSingleton( data );
+		data.DashElement = false;
+	}
+
+	void Tuple::_edfAttributeTuple( ToStrData data ) const
+	{
+		auto sub = ToStrData::newSub( data, data.Attrib->value<Tuple>(), data.NamedAttribute );
+		data.Attrib->value<Tuple>()._edf( sub );
+	}
+
+	void Tuple::_edfAttributeSingleton( ToStrData data ) const
+	{
+		_writeValue( data.strf(), *data.Attrib );
+	}
+
 
 	std::unordered_set<name_t> Tuple::LegalForDataTuple;
 	void Tuple::_populateLegalForDataTuple()

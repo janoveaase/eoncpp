@@ -221,4 +221,31 @@ namespace eon
 		//};
 		WANT_EQ( exp, act );
 	}
+
+
+	TEST( EdfTest, basic )
+	{
+		auto txt1 = tuple::newData( { { name_type, name( "text" ) }, { name( "value" ), string( "First" ) } } );
+		auto txt2 = tuple::newData( { { name_type, name( "text" ) }, { name( "value" ), string( "Second" ) } } );
+		auto grp1 = tuple::newData( { { name_type, name( "text" ) } } );
+		grp1.addTuple( name( "group1" ), txt1 );
+		auto grp2 = tuple::newData( { { name_type, name( "text" ) } } );
+		grp2.addTuple( txt2 );
+		auto tup = tuple::newData();
+		tup.addTuple( grp1 ).addTuple( grp2 );
+		Stringifier strf;
+		strf.hardLineWidth( 80 );
+		tup.edf( strf );
+		auto act = strf.generateString();
+		string exp{
+			"- type=text\n"
+			"  group1:\n"
+			"    type=text\n"
+			"    value=\"First\"\n"
+			"- type=text\n"
+			"  - type=text\n"
+			"    value=\"Second\""
+		};
+		WANT_EQ( exp, act );
+	}
 }

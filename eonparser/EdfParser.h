@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TupleParserBase.h"
+#include "EdfParserData.h"
 
 
 
@@ -53,130 +54,55 @@ namespace eon
 			//
 		PRIVATE:
 
-			struct Indentation
-			{
-				static inline Indentation normal( index_t value ) { Indentation ind; ind.Value = value; return ind; }
-				static inline Indentation forced( index_t value ) {
-					Indentation ind; ind.Value = value; ind.Forced = true; return ind; }
-
-				index_t Value{ 0 };
-				bool Forced{ false };
-			};
-
-			enum class IndentationMatch
-			{
-				same_or_greater,
-				indented
-			};
-
-			class ParserData
-			{
-			public:
-				ParserData() = delete;
-				ParserData( parser::State& state, Tuple& scope );
-
-				inline bool isNamedAttribute() {
-					return tokens().viewed().is( name_name ) && tokens().exists()
-						&& tokens().peekAhead().isOneOf( { symbol_assign, symbol_colon } ); }
-
-				inline TokenParser& tokens() { return State->Tokens; }
-
-				inline void indent() {
-					Indentations.push( Indentation::normal( tokens().viewed().str().numChars() ) ); tokens().forward(); }
-				void forceIndent() { Indentations.push( Indentation::forced( Indentations.top().Value + 2 ) ); }
-				bool atIncreasedIndentation( index_t offset = 0 ) const noexcept;
-				bool atReducedIndentation( index_t offset = 0 ) const noexcept;
-				bool atEndOfBlock() const {
-					return State->Tokens.atEnd() || ( State->Tokens.viewed().is( name_indentation )
-						&& State->Tokens.viewed().str().numChars() < Indentations.bottom().Value ); }
-				inline void unindent() { if( !Indentations.empty() ) Indentations.pop(); }
-
-				// Check if we have a sequence where the current token type is repeated,
-				// either without separation or with newline and possibly indentation.
-				bool haveSequence( IndentationMatch match_indentation ) const noexcept;
-
-				// Comma is optional in some cases, this method will skip it if it is there.
-				inline void skipOptionalComma() {
-					if( !State->Tokens.atEnd() && State->Tokens.viewed().is( symbol_comma ) ) State->Tokens.forward(); }
-
-				void recordAttributeName();
-				void recordNameValueSeparator();
-				inline name_t attributeName() const noexcept { return AttributeName; }
-				inline void clearAttributeName() noexcept { AttributeName = no_name; }
-
-				inline void addSubtuple() { Data.top()->addTuple( AttributeName, tuple::newData() ); }
-				inline void pushLastSubtuple() {
-					Data.push( &Data.top()->attribute( Data.top()->numAttributes() - 1 ).value<Tuple>() );
-					AttributeName = no_name; }
-				inline void popSubtuple() { Data.pop(); }
-				inline Tuple& tuple() { return *Data.top(); }
-
-				inline void reportMissingSingletonValue() {
-					Errors = true; State->Report->error(
-						"A value must follow '=' for named singleton attributes!", NameSepSource ); }
-
-				inline parser::State& state() noexcept { return *State; }
-				inline Tuple& scope() noexcept { return *Scope; }
-
-				bool ensureNewLine();
-
-				void error( eon::string&& message, source::Ref* source = nullptr );
-
-				inline bool hasErrors() const noexcept { return Errors; }
-				inline Tuple&& root() noexcept { return std::move( Root ); }
-				inline const source::Ref& source() const noexcept { return Source; }
-
-			private:
-				parser::State* State{ nullptr };
-				Tuple* Scope{ nullptr };
-				Tuple Root{ tuple::newData() };
-				stack<Tuple*> Data{ &Root };
-				source::Ref Source;
-				stack<Indentation> Indentations;
-				name_t AttributeName{ no_name };
-				source::Ref NameSource, NameSepSource;
-				bool Errors{ false };
-			};
-
 			enum class NewlinePolicy
 			{
 				ignore,
 				stop
 			};
 
-			void _parse( ParserData& data, NewlinePolicy policy );
+			void _parse( EdfData& data, NewlinePolicy policy );
 
-			void _parseAttribute( ParserData& data );
-			void _parseDashAttribute( ParserData& data );
-			void _parseNamedAttribute( ParserData& data );
-			void _parseNamedSingleton( ParserData& data );
-			void _skipLegalNamedSingletonWhitespaces( ParserData& data );
-			bool _hasLegalValue( ParserData& data );
-			void _parseNamedSubtuple( ParserData& data );
-			bool _parseSubtupleValue( ParserData& data );
+			void _parseAttribute( EdfData& data );
+			void _parseDashAttribute( EdfData& data );
+			void _parseNamedAttribute( EdfData& data );
+			void _parseNamedSingleton( EdfData& data );
+			void _skipLegalNamedSingletonWhitespaces( EdfData& data );
+			bool _hasLegalValue( EdfData& data );
+			void _parseNamedSubtuple( EdfData& data );
+			bool _parseSubtupleValue( EdfData& data );
 
-			void _parseUnnamedAttributes( ParserData& data );
-			void _parseValue( ParserData& data );
-			inline void _parseBoolValue( ParserData& data ) {
+			void _parseUnnamedAttributes( EdfData& data );
+			void _parseValue( EdfData& data );
+			inline void _parseBoolValue( EdfData& data ) {
 				data.tuple().add( data.attributeName(), data.tokens().viewed().str() == "true" ); }
-			inline void _parseByteValue( ParserData& data ) {
+			inline void _parseByteValue( EdfData& data ) {
 				data.tuple().add( data.attributeName(), static_cast<byte_t>( *data.tokens().viewed().str().begin() ) ); }
-			inline void _parseCharValue( ParserData& data ) {
+			inline void _parseCharValue( EdfData& data ) {
 				data.tuple().add( data.attributeName(), static_cast<char_t>( *data.tokens().viewed().str().begin() ) ); }
-			void _parseIntValue( ParserData& data );
-			void _parseFloatValue( ParserData& data );
-			void _parseNameValue( ParserData& data );
-			void _parseBytesValue( ParserData& data );
-			void _parseStringValue( ParserData& data );
-			inline void _parseRegexValue( ParserData& data ) {
+			void _parseIntValue( EdfData& data );
+			void _parseFloatValue( EdfData& data );
+			void _parseNameValue( EdfData& data );
+			void _parseBytesValue( EdfData& data );
+			void _parseStringValue( EdfData& data );
+			inline void _parseRegexValue( EdfData& data ) {
 				data.tuple().add( data.attributeName(), regex( data.tokens().viewed().str() ) ); }
-			inline void _parseNamepathValue( ParserData& data ) {
+			inline void _parseNamepathValue( EdfData& data ) {
 				data.tuple().add( data.attributeName(), namepath( data.tokens().viewed().str() ) ); }
-			inline void _parsePathValue( ParserData& data ) {
+			inline void _parsePathValue( EdfData& data ) {
 				data.tuple().add( data.attributeName(), path( data.tokens().viewed().str() ) ); }
-			void _parseExpressionValue( ParserData& data );
-			void _parseTypeTuple( ParserData& data );
-			void _parseSubtuple( ParserData& data );
+			void _parseExpressionValue( EdfData& data );
+			void _parseTypeTuple( EdfData& data );
+			void _parseSubtuple( EdfData& data );
+
+			inline bool _haveInitialRepeatedSequence( EdfData& data ) const noexcept {
+				return data.nextIsRepeated() || ( data.nextIsNewline() && data.atOffsetIsGreaterIndentation( 2 )
+					&& data.atOffsetIsRepeated( 3 ) ); }
+			inline bool _haveSubsequentRepeatedSequence( EdfData& data ) const noexcept {
+				return data.nextIsRepeated() || ( data.nextIsNewline() && data.atOffsetIsSameOrGreaterIndentation( 2 )
+					&& data.atOffsetIsRepeated( 3 ) ); }
+			inline void _skipToRepeated( EdfData& data ) const noexcept {
+				auto type = data.tokens().viewed().type();
+				for( data.tokens().forward(); !data.tokens().viewed().is( type ); data.tokens().forward() ); }
 		};
 	}
 }

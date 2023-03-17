@@ -23,6 +23,7 @@ set(PARSER_HEADERS
 	ActionCallParser.h
 	ActionFinder.h
 	EdfParser.h
+	EdfParserData.h
 )
 set(PARSER_SOURCES
 	ParserState.cpp
@@ -45,6 +46,7 @@ set(PARSER_SOURCES
 	ActionCallParser.cpp
 	ActionFinder.cpp
 	EdfParser.cpp
+	EdfParserData.cpp
 )
 
 if(WIN32)

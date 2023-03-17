@@ -79,8 +79,12 @@ namespace eon
 		inline bool empty() const noexcept { return Attributes.empty() && Actions.empty(); }
 
 
-		// Get tuple type.
+		// Get full tuple type.
 		inline const TypeTuple& type() const noexcept { return Type; }
+
+		// Get the name of the kind of tuple 'this' is.
+		// E.g., static, dynamic, data, etc.
+		inline name_t typeOfTuple() const noexcept { return Type.isTuple() ? Type.at( name_type ).name() : no_name; }
 
 
 		// Get "parent" tuple, nullptr if none.
@@ -100,20 +104,26 @@ namespace eon
 		inline bool canHaveActions() const noexcept { return Permissions & TuplePerm::actions; }
 
 
-		// Describe tuple in string format, written into the given Stringifier.
-		// Rules:
-		//   1. '(' immediately after tuple type identifier, no newline. Example: "data("
-		//   2. Value of tuple-attribute with name shall follow indented on next line. Example: "value:\n  (a, b)"
-		//   3. ')' to be added after last item without newlines. Example: "data(sub:\n  (a, b))"
-		//   4. Long lines shall be split as follows:
-		//      1. Split after ',' for highest possible attribute level
-		//      2. Split after '='
-		//      3. Split bytes/string values on space with a backslash at the end of the split line
+		// Describe tuple in compact string format, written into the given Stringifier.
+		// All tuples are enclosed in parenthesis, all named attributes uses '=' between name and value!
+		// Example output: "static('c', names=(name1, name2), pi=3.14))".
 		inline void str( Stringifier& strf ) const { _str( ToStrData::newRoot( strf, *this ) ); }
 
 		// Describe tuple in string format.
 		// Uses str(Stringifier&) to generate the string value!
 		inline string str() const { Stringifier strf; str( strf ); return strf.generateString(); }
+
+
+		// Convert Data Tuple to Eon Data Format string.
+		// Does nothing if 'this' is not a Data Tuple!
+		// Uses a Stringifier to produce the output.
+		inline void edf( Stringifier& strf ) const {
+			if( typeOfTuple() == name_data ) _edf( ToStrData::newRoot( strf, *this ) ); }
+
+		// Convert Data Tuple to Eon Data Format string.
+		// Will return empty string if not a Data Tuple!
+		// Uses a edf(Stringifier&) to produce the output.
+		inline string edf() const { Stringifier strf; edf( strf ); return strf.generateString(); }
 
 
 
@@ -472,11 +482,7 @@ namespace eon
 				Parent = &parent;
 				Level = &tuple;
 				NamedTuple = named_tuple;
-				if( NamedTuple )
-				{
-					IndentedBlock = true;
-					IndentedByAttribute = -1;
-				}
+				DashElement = parent.DashElement;
 			}
 		public:
 
@@ -498,14 +504,12 @@ namespace eon
 			const Tuple* Level{ nullptr };
 			bool NamedTuple{ false };
 		public:
-			bool IndentedBlock{ false };
-			int IndentedByAttribute{ 0 };
+			bool DashElement{ false };
 			bool EndWithCloseParen{ false };
-			bool PrevWasTuple{ false };
 			index_t AttribNo{ 0 };
 			const Attribute* Attrib{ nullptr };
 			bool NamedAttribute{ false };
-			bool First{ true };
+			bool FirstAttribute{ true };
 		};
 
 		void _str( ToStrData data ) const;
@@ -518,12 +522,16 @@ namespace eon
 		void _writeAttribute( ToStrData& data ) const;
 		void _separateAttributes( ToStrData& data ) const;
 		void _writeAttributeTuple( ToStrData& data ) const;
-		//void _formatTupleAttributeLine( ToStrData& data ) const;
-		//void _writeNamedTupleAttributeName( ToStrData& data ) const;
 		void _writeNormalAttribute( ToStrData& data ) const;
-		//void _formatNormalAttributeLine( ToStrData& data ) const;
 		void _writeNamedNormalAttributeName( ToStrData& data ) const;
 		void _writeValue( Stringifier& strf, const Attribute& attribute ) const;
+
+		void _edf( ToStrData data ) const;
+		void _edfAttribute( ToStrData data ) const;
+		void _edfNamedAttribute( ToStrData data ) const;
+		void _edfUnnamedAttribute( ToStrData data ) const;
+		void _edfAttributeTuple( ToStrData data ) const;
+		void _edfAttributeSingleton( ToStrData data ) const;
 
 		static inline void _populateData() { _populateLegalForDataTuple(); _populateStrPrefixPostfixForTypes(); }
 		static void _populateLegalForDataTuple();

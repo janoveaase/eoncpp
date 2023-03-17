@@ -1193,4 +1193,343 @@ namespace eon
 		string exp{ "data(\"This string value is split!\")" };
 		WANT_EQ( exp, act );
 	}
+
+
+	TEST( EdfParserTest, small_edf1 )
+	{
+		string str{
+			"one:\n"
+			"  some_name\n"
+			"  value=\"string\"\n"
+			"  - item1\n"
+			"  - item2"
+		};
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{
+			"one:\n"
+			"  - some_name\n"
+			"  value=\"string\"\n"
+			"  - item1\n"
+			"  - item2"
+		};
+		WANT_EQ( exp, act );
+	}
+
+	TEST( EdfParserTest, small_edf2 )
+	{
+		string str{
+			"item3\n"
+			"- item4:\n"
+			"  'c'\n"
+			"  - B'b'"
+		};
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{
+			"- item3\n"
+			"- item4:\n"
+			"  - 'c'\n"
+			"  - B'b'"
+		};
+		WANT_EQ( exp, act );
+	}
+
+	TEST( EdfParserTest, small_edf3 )
+	{
+		string str{
+			"item5:\n"
+			"  - item6\n"
+			"  - item7:\n"
+			"    type=test\n"
+			"    value=B\"bytes\"\n"
+			"    elements:\n"
+			"      (one, two)"
+		};
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{
+			"item5:\n"
+			"  - item6\n"
+			"  - item7:\n"
+			"    type=test\n"
+			"    value=B\"bytes\"\n"
+			"    elements:\n"
+			"      - - one\n"
+			"        - two"
+		};
+		WANT_EQ( exp, act );
+	}
+
+	TEST( EdfParserTest, small_edf4 )
+	{
+		string str{
+			"- item5:\n"
+			"  - item6\n"
+			"  item7:\n"
+			"    type=test\n"
+			"    value=B\"bytes\"\n"
+			"    elements:\n"
+			"      (one, two)\n"
+			"  item8=55\n"
+			"- item9"
+		};
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{
+			"- item5:\n"
+			"  - item6\n"
+			"  item7:\n"
+			"    type=test\n"
+			"    value=B\"bytes\"\n"
+			"    elements:\n"
+			"      - - one\n"
+			"        - two\n"
+			"  item8=55\n"
+			"- item9"
+		};
+		WANT_EQ( exp, act );
+	}
+
+	TEST( EdfParserTest, large_edf )
+	{
+		string str{
+			"one:\n"
+			"  some_name\n"
+			"  value=\"string\"\n"
+			"  - item1\n"
+			"  - item2\n"
+			"  item3\n"
+			"  - item4:\n"
+			"    'c'\n"
+			"    - B'b'\n"
+			"  - item5:\n"
+			"    - item6\n"
+			"    item7:\n"
+			"      type=test\n"
+			"      value=B\"bytes\"\n"
+			"      elements:\n"
+			"        (one, two)"
+		};
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{
+			"one:\n"
+			"  - some_name\n"
+			"  value=\"string\"\n"
+			"  - item1\n"
+			"  - item2\n"
+			"  - item3\n"
+			"  - item4:\n"
+			"    - 'c'\n"
+			"    - B'b'\n"
+			"  - item5:\n"
+			"    - item6\n"
+			"    item7:\n"
+			"      type=test\n"
+			"      value=B\"bytes\"\n"
+			"      elements:\n"
+			"        - - one\n"
+			"          - two"
+		};
+		WANT_EQ( exp, act );
+	}
+
+
+	// EDF Rule 1 - Attribute separation:
+	// Standard: Each attribute should appear on a separate line without comma-separation.
+	// Legal: Each attribute should appear on a separate line with comma-separation.
+	// Legal: Each attribute can appear on the same line with or without comma-separation.
+	TEST( EdfParserTest, rule1_standard )
+	{
+		string str{ "value1\nvalue2\nvalue3\nvalue4" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- value1\n- value2\n- value3\n- value4" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule1_legal1 )
+	{
+		string str{ "value1,\nvalue2,\nvalue3,\nvalue4" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- value1\n- value2\n- value3\n- value4" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule1_legal2_A )
+	{
+		string str{ "value1, value2,value3,  value4" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- value1\n- value2\n- value3\n- value4" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule1_legal2_B )
+	{
+		string str{ "value1 value2   value3 value4" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- value1\n- value2\n- value3\n- value4" };
+		WANT_EQ( exp, act );
+	}
+
+	// EDF Rule 2 - Named attributes with tuple values:
+	// Standard: Name + 'colon':' on first line, values on subsequent indented lines.
+	TEST( EdfParserTest, rule2_standard )
+	{
+		string str{ "name:\n  value1\n  value2\n  value3" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name:\n  - value1\n  - value2\n  - value3" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule2_illegal_A )
+	{
+		string str{ "name: value" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		WANT_TRUE( act.empty() );
+	}
+	TEST( EdfParserTest, rule2_illegal_B )
+	{
+		string str{ "name:\n\n  value" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		WANT_TRUE( act.empty() );
+	}
+
+	// EDF Rule 3 - Named attributes with non-tuple values:
+	// Standard: Name + 'equals'=' + value on the same line.
+	// Legal: Tuple-value enclosed in parenthesis counts as non-tuple value.
+	// Legal: Name + equals, value on subsequent indented line.
+	TEST( EdfParserTest, rule3_standard )
+	{
+		string str{ "name=value1" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name=value1" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule3_legal_1 )
+	{
+		string str{ "name=(value1, value2)" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name:\n  - value1\n  - value2" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule3_legal_2 )
+	{
+		string str{ "name=\n  value1" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name=value1" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule3_illegal_1 )
+	{
+		string str{ "name=value1, value2" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		WANT_TRUE( act.empty() );
+	}
+	TEST( EdfParserTest, rule3_illegal_2 )
+	{
+		string str{ "name=\n\n  value1" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		WANT_TRUE( act.empty() );
+	}
+
+	// EDF Rule 4 - Unnamed tuple attributes:
+	// Standard: A dash followed by attribute value.
+	// Legal: Dash can be omitted if the value is not a tuple.
+	TEST( EdfParserTest, rule4_standard )
+	{
+		string str{ "name:\n  - value1\n  - value2" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name:\n  - value1\n  - value2" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule4_legal_A )
+	{
+		string str{ "name:\n  value1\n  value2" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name:\n  - value1\n  - value2" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule4_legal_B )
+	{
+		string str{ "name:\n  value1 value2" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name:\n  - value1\n  - value2" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule4_legal_C )
+	{
+		string str{ "name:\n  - (value1, value2)" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "name:\n  - - value1\n    - value2" };
+		WANT_EQ( exp, act );
+	}
+
+	// EDF Rule 5 - Bytes and String values:
+	// Standard: Full value on the same line, enclosed in double quotes( bytes prefixed by 'B' ).
+	// Legal : Leading part of value on first line, fully enclosed in double quotes(bytes prefixed by 'B'),
+	//         remaining parts on subsequent indented lines, each part fully enclosed in double quotes
+	//         (bytes prefixed by 'B').
+	// Legal : Parts of value on same or subsequent indended lines, each part enclosed in double quotes
+	//         (bytes prefixed by 'B').
+	TEST( EdfParserTest, rule5_standard )
+	{
+		string str{ "B\"one two three\"\n\"alpha beta gamma\"" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- B\"one two three\"\n- \"alpha beta gamma\"" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule5_legal_A )
+	{
+		string str{ "B\"one \"\n  B\"two \"\n  B\"three\"\n\"alpha \"\n  \"beta \"\n  \"gamma\"" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- B\"one two three\"\n- \"alpha beta gamma\"" };
+		WANT_EQ( exp, act );
+	}
+	TEST( EdfParserTest, rule5_legal_B )
+	{
+		string str{ "B\"one \" B\"two \"   B\"three\"\n\"alpha \" \"beta \"   \"gamma\"" };
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.edf();
+		string exp{ "- B\"one two three\"\n- \"alpha beta gamma\"" };
+		WANT_EQ( exp, act );
+	}
 }
