@@ -87,6 +87,9 @@ namespace eon
 		// Check for an explicit type [eon::name].
 		inline bool is( name_t type ) const noexcept { return Type == type; }
 
+		// Check for one of several implicit types.
+		inline bool isOneOf( std::set<name_t> types )const noexcept { return types.find( Type ) != types.end(); }
+
 		// Check if this token's characters matches exactly those of the specified string.
 		inline bool match( const string& str ) const { return str.numChars() == Src.numChars() && str == Src.str(); }
 

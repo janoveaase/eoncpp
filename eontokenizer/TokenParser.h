@@ -70,15 +70,15 @@ namespace eon
 
 		// Move 'token view' to the next token if the currently viewed token is of the named type.
 		// Returns true if moved.
-		inline bool forwardIf( name_t type ) noexcept { return *this && viewed().is( type ) && forward(); }
+		inline bool forwardIf( name_t type ) noexcept { return !atEnd() && viewed().is( type ) && forward(); }
 
 		// Move 'token view' to the first newline token (end of line in source).
-		inline void moveToEol() noexcept { for( ; *this && !viewed().is( name_newline ); ++View ); }
+		inline void moveToEol() noexcept { for( ; !atEnd() && !viewed().is( name_newline ); ++View ); }
 
 		// Move 'token view' to the first token on the next line in the source.
 		// NOTE: This can be another newline if the next line is empty!
 		inline void movePastEol() noexcept {
-			for( ; *this; ++View ) { if( viewed().is( name_newline ) ) { ++View; break; } } }
+			for( ; !atEnd(); ++View ) { if( viewed().is( name_newline ) ) { ++View; break; } } }
 
 		// Move 'token view' to the token at the specified position within the tokens vector.
 		// Returns true unless the new view position is out of range!
@@ -93,8 +93,11 @@ namespace eon
 		// Read-only Methods
 		//
 
-		// Check if there 'token view' is for a token in the tokens vector.
-		inline operator bool() const noexcept { return View < Tokens.size(); }
+//		// Check if there 'token view' is for a token in the tokens vector.
+//		inline operator bool() const noexcept { return View < Tokens.size(); }
+
+		// Check if at the end of the token sequence.
+		inline bool atEnd() const noexcept { return View >= Tokens.size(); }
 
 		// Get currently viewed token.
 		// WARNING: The 'token view' must be less than [size()]!

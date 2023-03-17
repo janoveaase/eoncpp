@@ -523,7 +523,7 @@ namespace eon
 		struct IntPow : public Action {
 			IntPow() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ) ), name_pow, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ) ), symbol_pow, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ) ) ).arguments(
 							typetuple::convert( { type::mapCppType( CPPTYPE( T ) ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {

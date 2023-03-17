@@ -21,12 +21,11 @@ namespace eon
 {
 	namespace type
 	{
-		EONEXCEPT( IncompatibleType );
 		EONEXCEPT( AccessDenied );
 		EONEXCEPT( WrongType );
 		EONEXCEPT( NotFound );
 		EONEXCEPT( DuplicateName );
-		EONEXCEPT( InvalidName );
+		EONEXCEPT( NoName );
 
 		EON_NAME( system );
 		EON_NAME( copy );

@@ -84,7 +84,7 @@ namespace eon
 
 		// Clear this expression
 		inline void clear() noexcept { Graph.clear(); Raw.clear(); Flags.clear(); }
-		
+
 
 
 

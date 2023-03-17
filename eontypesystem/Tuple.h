@@ -103,7 +103,7 @@ namespace eon
 		// Describe tuple in string format, written into the given Stringifier.
 		// Rules:
 		//   1. '(' immediately after tuple type identifier, no newline. Example: "data("
-		//   2. Value of tuple-attribute with key shall follow indented on next line. Example: "value:\n  (a, b)"
+		//   2. Value of tuple-attribute with name shall follow indented on next line. Example: "value:\n  (a, b)"
 		//   3. ')' to be added after last item without newlines. Example: "data(sub:\n  (a, b))"
 		//   4. Long lines shall be split as follows:
 		//      1. Split after ',' for highest possible attribute level
@@ -518,10 +518,10 @@ namespace eon
 		void _writeAttribute( ToStrData& data ) const;
 		void _separateAttributes( ToStrData& data ) const;
 		void _writeAttributeTuple( ToStrData& data ) const;
-		void _formatTupleAttributeLine( ToStrData& data ) const;
-		void _writeNamedTupleAttributeName( ToStrData& data ) const;
+		//void _formatTupleAttributeLine( ToStrData& data ) const;
+		//void _writeNamedTupleAttributeName( ToStrData& data ) const;
 		void _writeNormalAttribute( ToStrData& data ) const;
-		void _formatNormalAttributeLine( ToStrData& data ) const;
+		//void _formatNormalAttributeLine( ToStrData& data ) const;
 		void _writeNamedNormalAttributeName( ToStrData& data ) const;
 		void _writeValue( Stringifier& strf, const Attribute& attribute ) const;
 

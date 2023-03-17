@@ -3,27 +3,48 @@ project(EonParser LANGUAGES CXX)
 message(STATUS " - EonParser")
 
 set(PARSER_HEADERS
-	RawParser.h
-	Element.h
-	Parser.h
-	OperatorRules.h
-	BoolLiteralRule.h
-	NamePathRule.h
-	NumericalRules.h
-	DefineRules.h
-	ParseExpression.h
-	ToolBox.h
+	ParserState.h
+	ExpressionParser.h
+	BoolParser.h
+	ByteParser.h
+	CharParser.h
+	IntParser.h
+	FloatParser.h
+	BytesParser.h
+	StringParser.h
+	RegexParser.h
+	NamePathParser.h
+	PathParser.h
+	NameParser.h
+	TupleParserBase.h
+	TupleParser.h
+	TypeTupleParser.h
+	DirectConversion.h
+	ActionCallParser.h
+	ActionFinder.h
+	EdfParser.h
 )
 set(PARSER_SOURCES
-	RawParser.cpp
-	Parser.cpp
-	OperatorRules.cpp
-	BoolLiteralRule.cpp
-	NamePathRule.cpp
-	NumericalRules.cpp
-	DefineRules.cpp
-	ParseExpression.cpp
-	ToolBox.cpp
+	ParserState.cpp
+	ExpressionParser.cpp
+	BoolParser.cpp
+	ByteParser.cpp
+	CharParser.cpp
+	IntParser.cpp
+	FloatParser.cpp
+	BytesParser.cpp
+	StringParser.cpp
+	RegexParser.cpp
+	NamePathParser.cpp
+	PathParser.cpp
+	NameParser.cpp
+	TupleParserBase.cpp
+	TupleParser.cpp
+	TypeTupleParser.cpp
+	DirectConversion.cpp
+	ActionCallParser.cpp
+	ActionFinder.cpp
+	EdfParser.cpp
 )
 
 if(WIN32)
@@ -39,9 +60,19 @@ set_target_properties(
 )
 set_property(TARGET EonParser PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonParser PUBLIC EonString
-	EonSource EonTokenizer EonRegex EonExcept EonFileSys EonTypes
+set(libraries
+	EonString
+	EonExcept
+	EonRegex
+	EonSource
+	EonFileSys
+	EonContainers
+	EonTokenizer
+	EonInlineTest
+	EonExpression
+	EonTypeSystem
 )
+target_link_libraries(EonParser PUBLIC ${libraries})
 target_include_directories(EonParser PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
 )
@@ -61,7 +92,26 @@ endif()
 if(EON_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
+if(EON_INLINE_TESTS)
+	message(STATUS "Including Inline Tests!")
+	add_executable(EonParserInlineTests ${PARSER_HEADERS} ${PARSER_SOURCES})
+	target_compile_definitions(EonParserInlineTests PRIVATE EON_INLINE_TEST_PROJECT)
+	set_target_properties(
+		EonParserInlineTests
+		PROPERTIES
+			OUTPUT_NAME_DEBUG eon_parser_inlinetests
+			OUTPUT_NAME_RELEASE eon_parser_inlinetests
+	)
+	set_property(TARGET EonParserInlineTests PROPERTY CXX_STANDARD 17)
 
-#add_executable(EonParserApp main.cpp)
-#target_link_libraries(EonParserApp EonParser)
-#set_target_properties(EonParserApp PROPERTIES OUTPUT_NAME "eonparser")
+	target_link_libraries(EonParserInlineTests PUBLIC ${libraries})
+
+	install(TARGETS EonParserInlineTests
+		RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"
+	)
+
+	target_include_directories(EonParserInlineTests PUBLIC
+		"${EON_SOURCES_DIR}"
+		"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
+	)
+endif()

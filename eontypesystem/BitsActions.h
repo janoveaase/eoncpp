@@ -349,7 +349,7 @@ namespace eon
 		struct BitsPow : public Action {
 			BitsPow() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_pow, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_pow, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
 							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
@@ -448,7 +448,7 @@ namespace eon
 		struct BitsNot : public Action {
 			BitsNot() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitnot, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_invert, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
 				auto a1 = args.values().top().value<T, type::hint::bits>();
@@ -461,7 +461,7 @@ namespace eon
 		struct BitsAnd : public Action {
 			BitsAnd() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitand, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_mask, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
 							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
@@ -477,7 +477,7 @@ namespace eon
 		struct BitsOr : public Action {
 			BitsOr() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitor, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_union, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
 							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
@@ -493,7 +493,7 @@ namespace eon
 		struct BitsXor : public Action {
 			BitsXor() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_bitxor, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), name_diff, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
 							typetuple::convert( { type::mapCppType( CPPTYPE( T ), type::hint::bits ) } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
@@ -509,7 +509,7 @@ namespace eon
 		struct BitsLShift : public Action {
 			BitsLShift() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_lshift, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_push, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
 							typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {
@@ -525,7 +525,7 @@ namespace eon
 		struct BitsRShift : public Action {
 			BitsRShift() : Action(
 				typetuple::newAction(
-					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_rshift, name_operator ).returns(
+					type::mapCppType( CPPTYPE( T ), type::hint::bits ), symbol_pull, name_operator ).returns(
 						type::mapCppType( CPPTYPE( T ), type::hint::bits ) ).arguments(
 							typetuple::convert( { name_int } ) ) ) {}
 			sig_t operator()( ActionExeArgs& args ) const override {

@@ -6,17 +6,17 @@ namespace eon
 	bool ReTokenizer::RemoveRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
 		auto& pos = parser.viewed().source().start();
-		while( parser && Remove.find( parser.viewed().type() ) != Remove.end() )
+		while( !parser.atEnd() && Remove.find( parser.viewed().type() ) != Remove.end() )
 			parser.forward();
 		return parser.viewed().source().start() != pos;
 	}
 	bool ReTokenizer::EncloseRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( !parser || EncloseStart != parser.viewed().type() || !parser.exists() )
+		if( parser.atEnd() || EncloseStart != parser.viewed().type() || !parser.exists() )
 			return false;
 		auto initial = parser.viewedPos();
 		parser.forward();
-		if( parser )
+		if( !parser.atEnd() )
 		{
 			auto matched = Token( parser.viewed().source(), Name );
 			if( parser.viewed().type() != EncloseEnd )
@@ -37,7 +37,7 @@ namespace eon
 	{
 		bool esc = false;
 		int nesting = 1;
-		while( parser )
+		while( !parser.atEnd() )
 		{
 			if( !esc )
 			{
@@ -75,11 +75,11 @@ namespace eon
 	}
 	bool ReTokenizer::PrefixEncloseRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( !parser || parser.viewed().str() != Prefix || parser.peekAhead().type() != EncloseStart )
+		if( parser.atEnd() || parser.viewed().str() != Prefix || parser.peekAhead().type() != EncloseStart )
 			return false;
 		auto initial = parser.viewedPos();
 		parser.forward( 2 );
-		if( parser )
+		if( !parser.atEnd() )
 		{
 			auto matched = Token( parser.viewed().source(), Name );
 			if( parser.viewed().type() != EncloseEnd )
@@ -105,7 +105,7 @@ namespace eon
 	}
 	bool ReTokenizer::ComboRule::_match( size_t initial, Token matched, TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		while( parser && Combo.find( parser.viewed().type() ) != Combo.end() )
+		while( !parser.atEnd() && Combo.find( parser.viewed().type() ) != Combo.end() )
 		{
 			if( !matched.source() )
 				matched = Token( parser.viewed().source(), Name );
@@ -125,7 +125,7 @@ namespace eon
 	}
 	bool ReTokenizer::PrefixComboRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( !parser || parser.viewed().str() != Prefix )
+		if( parser.atEnd() || parser.viewed().str() != Prefix )
 			return false;
 		auto initial = parser.viewedPos();
 		auto matched = Token( parser.viewed().source(), Name );
@@ -145,7 +145,7 @@ namespace eon
 			parser.forward();
 			while( true )
 			{
-				if( !parser )
+				if( parser.atEnd() )
 				{
 					if( !EndOnA )
 						break;
@@ -178,7 +178,7 @@ namespace eon
 	}
 	bool ReTokenizer::PrefixAlternatingRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( !parser || parser.viewed().str() != Prefix )
+		if( parser.atEnd() || parser.viewed().str() != Prefix )
 			return false;
 		auto initial = parser.viewedPos();
 		auto matched = Token( parser.viewed().source(), Name );
@@ -191,7 +191,7 @@ namespace eon
 		Token matched( parser.viewed().source(), Name );
 		for( auto name : Sequence )
 		{
-			if( parser && parser.viewed().type() == name )
+			if( !parser.atEnd() && parser.viewed().type() == name )
 			{
 				if( !matched.source() )
 					matched = Token( parser.viewed().source(), Name );
@@ -219,7 +219,7 @@ namespace eon
 	}
 	bool ReTokenizer::LiteralNameRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( parser && parser.viewed().is( name_name ) && Names.find( parser.viewed().str() ) != Names.end() )
+		if( !parser.atEnd() && parser.viewed().is( name_name ) && Names.find( parser.viewed().str() ) != Names.end() )
 		{
 			auto matched = Token( parser.viewed().source(), Name );
 			parser.forward();
@@ -231,7 +231,7 @@ namespace eon
 	}
 	bool ReTokenizer::RegexRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( parser && parser.viewed().is( name_name ) && Pattern.match( parser.viewed().str() ) )
+		if( !parser.atEnd() && parser.viewed().is( name_name ) && Pattern.match( parser.viewed().str() ) )
 		{
 			auto source = parser.viewed().source();
 			source.moveEnd( -1 );
@@ -244,7 +244,8 @@ namespace eon
 	}
 	bool ReTokenizer::LinestartRule::match( TokenParser& parser, std::vector<Token>& output ) const noexcept
 	{
-		if( parser && ( parser.viewed().source().start().BytePos == 0 || parser.peekBehind().type() == name_newline ) )
+		if( !parser.atEnd() && (
+			parser.viewed().source().start().BytePos == 0 || parser.peekBehind().type() == name_newline ) )
 		{
 			if( parser.viewed().type() == Linestart )
 			{
@@ -262,7 +263,7 @@ namespace eon
 	std::vector<Token> ReTokenizer::operator()( TokenParser& parser ) const noexcept
 	{
 		std::vector<Token> output;
-		while( parser )
+		while( !parser.atEnd() )
 		{
 			if( !_matchARule( parser, output ) )
 			{

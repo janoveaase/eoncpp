@@ -3,7 +3,7 @@
 #include <eonregex/RegEx.h>
 #include <eonstring/NamePath.h>
 #include <eonfilesys/Path.h>
-#include "Expression.h"
+#include <eonexpression/Expression.h>
 
 
 namespace eon

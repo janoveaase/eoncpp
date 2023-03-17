@@ -16,8 +16,6 @@ set(TYPESYSTEM_HEADERS
 	BitsActions.h
 	BytesActions.h
 	StringActions.h
-	Expression.h
-	ExpressionNode.h
 	TupleDefs.h
 	TypeTuple.h
 	TypeTupleFactory.h
@@ -27,7 +25,6 @@ set(TYPESYSTEM_HEADERS
 	Attribute.h
 	Action.h
 	Operators.h
-	DirectConversion.h
 )
 set(TYPESYSTEM_SOURCES
 	TypeMap.cpp
@@ -39,8 +36,6 @@ set(TYPESYSTEM_SOURCES
 	HandleActions.cpp
 	BytesActions.cpp
 	StringActions.cpp
-	Expression.cpp
-	ExpressionNode.cpp
 	TupleDefs.cpp
 	TypeTuple.cpp
 	TypeTupleFactory.cpp
@@ -49,7 +44,6 @@ set(TYPESYSTEM_SOURCES
 	TupleActions.cpp
 	Attribute.cpp
 	Operators.cpp
-	DirectConversion.cpp
 )
 
 if(WIN32)
@@ -65,7 +59,19 @@ set_target_properties(
 )
 set_property(TARGET EonTypeSystem PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(EonTypeSystem PUBLIC EonString EonExcept EonRegex EonSource EonFileSys EonContainers EonTokenizer EonInlineTest)
+set(libraries
+	EonString
+	EonExcept
+	EonRegex
+	EonSource
+	EonFileSys
+	EonContainers
+	EonTokenizer
+	EonInlineTest
+	EonExpression
+)
+
+target_link_libraries(EonTypeSystem PUBLIC ${libraries})
 target_include_directories(EonTypeSystem PUBLIC "${EON_SOURCES_DIR}"
 	"${EON_INSTALL_DIR}/${EON_INCLUDE_DIR}"
 )
@@ -97,9 +103,7 @@ if(EON_INLINE_TESTS)
 	)
 	set_property(TARGET EonTypeSystemInlineTests PROPERTY CXX_STANDARD 17)
 
-	target_link_libraries(
-		EonTypeSystemInlineTests PUBLIC EonString EonExcept EonRegex EonSource EonFileSys EonContainers EonTokenizer EonInlineTest
-	)
+	target_link_libraries(EonTypeSystemInlineTests PUBLIC ${libraries})
 
 	install(TARGETS EonTypeSystemInlineTests
 		RUNTIME DESTINATION "${EON_INSTALL_DIR}/${EON_TESTS_DIR}"

@@ -78,7 +78,7 @@ namespace eon
 
 			// When a line exceeds the soft line width, primary split points are examined first, then secondary,
 			// then tertiary. If a split point is found before the max line width, the line is split there.
-			index_t SoftLineWidth{ 125 };
+			index_t SoftLineWidth{ 9999 };
 
 			// When a line exceeds the hard line width (even after soft splits), then cut the line at hard - 1 and add a
 			// backslash to the end of the cut line.

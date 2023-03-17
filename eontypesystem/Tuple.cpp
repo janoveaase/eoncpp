@@ -1,5 +1,9 @@
 #include "Tuple.h"
 #include <eonregex/RegEx.h>
+#include <eonstring/NamePath.h>
+#include <eonfilesys/Path.h>
+#include <eonexpression/Expression.h>
+#include "TupleFactory.h"
 #include "TypeTupleFactory.h"
 
 
@@ -260,12 +264,12 @@ namespace eon
 	}
 	void Tuple::_assertRemPerm() const
 	{
-		if( !(Permissions & TuplePerm::remove ) )
+		if( !( Permissions & TuplePerm::remove ) )
 			throw type::AccessDenied( "Tuple does not permit removing attributes: " + Type.at( name_type ).str() );
 	}
 	void Tuple::_assertModPerm() const
 	{
-		if( !(Permissions & TuplePerm::modify ) )
+		if( !( Permissions & TuplePerm::modify ) )
 			throw type::AccessDenied( "Tuple does not permit modifying attributes: " + Type.at( name_type ).str() );
 	}
 	void Tuple::_assertTypPerm() const
@@ -307,6 +311,7 @@ namespace eon
 		Attributes.push_back( std::move( value ) );
 	}
 
+
 	void Tuple::_str( ToStrData data ) const
 	{
 		// Tuple formatting rules
@@ -327,7 +332,8 @@ namespace eon
 	{
 		if( _needFormalPrefix( data ) )
 			_writeFormalTuplePrefix( data );
-		else if( !data.IndentedBlock )
+		else
+//		else if( !data.IndentedBlock )
 			_writeInformalTuplePrefix( data );
 	}
 	bool Tuple::_needFormalPrefix( ToStrData& data ) const
@@ -362,10 +368,12 @@ namespace eon
 	}
 	void Tuple::_writeTupleEnd( ToStrData& data ) const
 	{
-		if( data.IndentedBlock && data.IndentedByAttribute >= 0 )
-			data.strf().end_block();
 		if( data.EndWithCloseParen )
-			data.strf().end_grp2( ")", stringify::Type::end_block );
+			data.strf().end_grp2( ")" );
+		//if( data.IndentedBlock && data.IndentedByAttribute >= 0 )
+		//	data.strf().end_block();
+		//if( data.EndWithCloseParen )
+		//	data.strf().end_grp2( ")", stringify::Type::end_block );
 	}
 	void Tuple::_writeAttribute( ToStrData& data ) const
 	{
@@ -384,27 +392,29 @@ namespace eon
 			data.First = false;
 		else
 		{
-			data.strf().punct( ",", stringify::Type::end_block );
+			data.strf().punct( "," );
+//			data.strf().punct( ",", stringify::Type::end_block );
 			data.strf().tert_split();
 		}
 	}
 	void Tuple::_writeAttributeTuple( ToStrData& data ) const
 	{
-		_formatTupleAttributeLine( data );
+//		_formatTupleAttributeLine( data );
 		if( data.NamedAttribute )
-			_writeNamedTupleAttributeName( data );
+			_writeNamedNormalAttributeName( data );
+//			_writeNamedTupleAttributeName( data );
 		auto sub = ToStrData::newSub( data, data.Attrib->value<Tuple>(), data.NamedAttribute );
 		data.Attrib->value<Tuple>()._str( sub );
-		if( data.NamedAttribute )
-			data.strf().end_block();
-		if( data.IndentedBlock && data.IndentedByAttribute > 0 )
-		{
-			data.strf().end_block();
-			data.IndentedBlock = false;
-		}
+//		if( data.NamedAttribute )
+//			data.strf().end_block();
+//		if( data.IndentedBlock && data.IndentedByAttribute > 0 )
+//		{
+//			data.strf().end_block();
+//			data.IndentedBlock = false;
+//		}
 		data.PrevWasTuple = true;
 	}
-	void Tuple::_formatTupleAttributeLine( ToStrData& data ) const
+/*	void Tuple::_formatTupleAttributeLine( ToStrData& data ) const
 	{
 		if( !data.IndentedBlock )
 		{
@@ -414,21 +424,21 @@ namespace eon
 		}
 		else if( data.NamedAttribute )
 			data.strf().hard_lf();
-	}
-	void Tuple::_writeNamedTupleAttributeName( ToStrData& data ) const
+	}*/
+/*	void Tuple::_writeNamedTupleAttributeName( ToStrData& data ) const
 	{
 		data.strf().word( eon::str( NamedAttributes.two( data.AttribNo ) ) );
-		data.strf().punct( ":" );
+		data.strf().punct( "=" );
 		data.strf().start_block();
-	}
+	}*/
 	void Tuple::_writeNormalAttribute( ToStrData& data ) const
 	{
-		_formatNormalAttributeLine( data );
+//		_formatNormalAttributeLine( data );
 		if( data.NamedAttribute )
 			_writeNamedNormalAttributeName( data );
 		_writeValue( data.strf(), *data.Attrib );
 	}
-	void Tuple::_formatNormalAttributeLine( ToStrData& data ) const
+/*	void Tuple::_formatNormalAttributeLine( ToStrData& data ) const
 	{
 		if( data.PrevWasTuple )
 		{
@@ -440,7 +450,7 @@ namespace eon
 				data.IndentedByAttribute = 0;
 			}
 		}
-	}
+	}*/
 	void Tuple::_writeNamedNormalAttributeName( ToStrData& data ) const
 	{
 		data.strf().word( eon::str( NamedAttributes.two( data.AttribNo ) ) );
@@ -487,28 +497,32 @@ namespace eon
 			strf.word( string( attribute.value<std::string>() ) );
 		else if( type == name_string )
 			strf.word( attribute.value<string>().replace( { { "\"", "\\\"" }, { "\n", "\\n" } } ) );
-//		else if( type == name_real )
-//			strf.word( string( attribute.value<real_t>() ) );
-//		else if( type == name_complex )
-//			strf.word( string( attribute.value<complex_t>() ) );
+		//		else if( type == name_real )
+		//			strf.word( string( attribute.value<real_t>() ) );
+		//		else if( type == name_complex )
+		//			strf.word( string( attribute.value<complex_t>() ) );
 		else if( type == name_regex )
 			strf.word( attribute.value<regex>().str() );
-//		else if( type == name_namepath )
-//			strf.word( string( attribute.value<namepath_t>() ) );
-//		else if( type == name_path )
-//			strf.word( string( attribute.value<path_t>() ) );
-//		else if( type == name_time )
-//			strf.word( string( attribute.value<time_t>() ) );
-//		else if( type == name_date )
-//			strf.word( string( attribute.value<date_t>() ) );
-//		else if( type == name_timezone )
-//			strf.word( string( attribute.value<timezone_t>() ) );
-//		else if( type == name_dst )
-//			strf.word( string( attribute.value<dst_t>() ) );
-//		else if( type == name_timespan )
-//			strf.word( string( attribute.value<timespan_t>() ) );
-//		else if( type == name_expression )
-//			strf.word( string( attribute.value<expression_t>() ) );
+		else if( type == name_regex )
+			strf.word( attribute.value<regex>().str() );
+		else if( type == name_namepath )
+			strf.word( string( attribute.value<namepath>().str() ) );
+		else if( type == name_path )
+			strf.word( string( attribute.value<path>().str() ) );
+		else if( type == name_typetuple )
+			attribute.value<TypeTuple>().str( strf );
+		//		else if( type == name_time )
+		//			strf.word( string( attribute.value<time_t>() ) );
+		//		else if( type == name_date )
+		//			strf.word( string( attribute.value<date_t>() ) );
+		//		else if( type == name_timezone )
+		//			strf.word( string( attribute.value<timezone_t>() ) );
+		//		else if( type == name_dst )
+		//			strf.word( string( attribute.value<dst_t>() ) );
+		//		else if( type == name_timespan )
+		//			strf.word( string( attribute.value<timespan_t>() ) );
+		else if( type == name_expression )
+			strf.word( attribute.value<Expression>().str() );
 
 		if( prefix != StrPrefixPostfixForTypes.end() )
 			strf.append( prefix->second.second );
@@ -526,11 +540,13 @@ namespace eon
 				name_float, name_low, name_high,
 				name_index,
 				name_name,
+				name_bytes,
 				name_string,
 				name_real, name_complex,
 				name_regex,
 				name_namepath,
 				name_path,
+				name_typetuple,
 				name_time, name_date, name_timezone, name_dst, name_timespan,
 				name_expression};
 		}
@@ -558,14 +574,14 @@ namespace eon
 				{ name_real, { "", "r" } },
 				{ name_complex, { "", "i" } },
 				{ name_regex, { "r\"", "\"" } },
-				{ name_namepath, { "@", "" } },
+//				{ name_namepath, { "@", "" } },
 				{ name_path, { "p\"", "\"" } },
 				{ name_time, { "", "" } },
 				{ name_date, { "", "" } },
 				{ name_timezone, { "", "" } },
 				{ name_dst, { "", "" } },
 				{ name_timespan, { "", "" } },
-				{ name_expression, { "e(", ")" } } };
+				{ name_expression, { "ex(", ")" } } };
 		}
 	}
 

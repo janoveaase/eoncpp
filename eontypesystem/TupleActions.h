@@ -39,7 +39,7 @@ namespace eon
 		struct TupleAssign : public Action {
 			inline TupleAssign() : Action(
 				typetuple::newAction(
-					name_tuple, name_assign, name_operator ).returns( name_tuple ).arguments( { name_tuple } ) ) {}
+					name_tuple, symbol_assign, name_operator ).returns( name_tuple ).arguments( { name_tuple } ) ) {}
 			bool canExecute( ActionExeArgs& args, source::Reporter& reporter ) const override;
 			sig_t operator()( ActionExeArgs& args ) const override;
 		};

@@ -47,7 +47,7 @@ namespace eon
 	TypeTuple& TypeTuple::set( name_t name, TypeTuple&& sub_tuple )
 	{
 		if( name == no_name )
-			throw type::InvalidName();
+			throw type::NoName();
 		_ensureSubTuple();
 		auto found = NamedAttributes.find( name );
 		if( found == NamedAttributes.end() )
@@ -125,6 +125,14 @@ namespace eon
 
 		// All unnamed attributes must match on position and type
 		return _equalOnUnnamedArgs( other, compared_by_name );
+	}
+
+	size_t TypeTuple::hash() const noexcept
+	{
+		size_t val = NameHasher( NameValue );
+		for( auto& sub : TupleValue )
+			val = val * 2734561 + sub.hash();
+		return val;
 	}
 
 

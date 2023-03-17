@@ -98,7 +98,7 @@ namespace eon
 
 
 		///////////////////////////////////////////////////////////////////////
-		//		
+		//
 		// Stack Operations
 		//
 	public:
@@ -114,7 +114,7 @@ namespace eon
 
 		// Access the bottom element
 		// Throws [eon::NoElement] if stack is empty!
-		inline const T& bottom() const { return at( Data.size() - 1 ); }
+		inline const T& bottom() const { return at( Data.numElements() - 1 ); }
 		inline T& bottom() { return at( Data.lastPos() ); }
 
 		// Access an element by index
@@ -171,7 +171,7 @@ namespace eon
 
 
 
-		
+
 		///////////////////////////////////////////////////////////////////////
 		//
 		// Attributes

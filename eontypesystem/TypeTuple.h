@@ -103,17 +103,17 @@ namespace eon
 
 		// Set (add if new) a named attribute type specification in the form of a single type name.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
-		// Throws [eon::type::InvalidName] if [eon::no_name] is used as name!
+		// Throws [eon::type::NoName] if [eon::no_name] is used as name!
 		inline TypeTuple& set( name_t name, name_t type_name ) { return set( name, TypeTuple( type_name ) ); }
 
 		// Set (add if new) a named attribute type specification in the form of another TypeTuple.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
-		// Throws [eon::type::InvalidName] if [eon::no_name] is used as name!
+		// Throws [eon::type::NoName] if [eon::no_name] is used as name!
 		TypeTuple& set( name_t name, TypeTuple&& sub_tuple );
 
 		// Set (add if new) a named attribute type specification in the form of another TypeTuple.
 		// NOTE: If 'this' is a single-name type, it will lose that name when attributes are added!
-		// Throws [eon::type::InvalidName] if [eon::no_name] is used as name!
+		// Throws [eon::type::NoName] if [eon::no_name] is used as name!
 		inline TypeTuple& set( name_t name, const TypeTuple& sub_tuple ) {
 			return set( name, TypeTuple( sub_tuple ) ); }
 
@@ -317,8 +317,7 @@ namespace eon
 
 
 		// Get TypeTuple hash value.
-		size_t hash() const noexcept { size_t val = NameHasher( NameValue ); for( auto& sub : TupleValue )
-			val = val * 2734561 + sub.hash(); return val; }
+		size_t hash() const noexcept;
 
 
 

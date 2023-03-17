@@ -41,7 +41,7 @@ namespace eon
 					{ symbol_multiply, OperatorDetails( { symbol_multiply }, 2, Precedence::giga_lo, Precedence::giga_hi ) },
 					{ symbol_divide, OperatorDetails( { symbol_divide }, 2, Precedence::giga_lo, Precedence::giga_hi ) },
 					{ name_mod, OperatorDetails( { name_mod }, 2, Precedence::giga_lo, Precedence::giga_hi ) },
-					{ name_pow, OperatorDetails( { name_pow}, 2, Precedence::tera_hi, Precedence::tera_lo ) },
+					{ symbol_pow, OperatorDetails( { symbol_pow }, 2, Precedence::tera_hi, Precedence::tera_lo ) },
 					{ symbol_cmp, OperatorDetails( { symbol_cmp }, 2, Precedence::hecto_lo, Precedence::hecto_hi ) },
 					{ symbol_eq, OperatorDetails( { symbol_eq }, 2, Precedence::mid_lo, Precedence::mid_hi ) },
 					{ symbol_ne, OperatorDetails( { symbol_ne }, 2, Precedence::mid_lo, Precedence::mid_hi ) },
@@ -80,12 +80,12 @@ namespace eon
 					{ name_and, OperatorDetails( { name_and }, 2, Precedence::micro_lo, Precedence::micro_hi ) },
 					{ name_or, OperatorDetails( { name_or }, 2, Precedence::pico_lo, Precedence::pico_hi ) },
 					{ name_xor, OperatorDetails( { name_xor }, 2, Precedence::nano_lo, Precedence::nano_hi ) },
-					{ symbol_bitnot, OperatorDetails( { OperatorElement( symbol_bitnot, Position::prefix ) }, 1, Precedence::peta_hi, Precedence::peta_lo ) },
-					{ symbol_bitand, OperatorDetails( { symbol_bitand }, 2, Precedence::deci_lo, Precedence::deci_hi ) },
-					{ symbol_bitor, OperatorDetails( { symbol_bitor }, 2, Precedence::milli_lo, Precedence::milli_hi ) },
-					{ symbol_bitxor, OperatorDetails( { symbol_bitxor }, 2, Precedence::centi_lo, Precedence::centi_hi ) },
-					{ symbol_lshift, OperatorDetails( { symbol_lshift }, 2, Precedence::kilo_lo, Precedence::kilo_hi ) },
-					{ symbol_rshift, OperatorDetails( { symbol_rshift }, 2, Precedence::kilo_lo, Precedence::kilo_hi ) },
+					{ name_invert, OperatorDetails( { OperatorElement( name_invert, Position::prefix ) }, 1, Precedence::peta_hi, Precedence::peta_lo ) },
+					{ name_mask, OperatorDetails( { name_mask }, 2, Precedence::deci_lo, Precedence::deci_hi ) },
+					{ name_union, OperatorDetails( { name_union }, 2, Precedence::milli_lo, Precedence::milli_hi ) },
+					{ name_diff, OperatorDetails( { name_diff }, 2, Precedence::centi_lo, Precedence::centi_hi ) },
+					{ symbol_push, OperatorDetails( { symbol_push }, 2, Precedence::kilo_lo, Precedence::kilo_hi ) },
+					{ symbol_pull, OperatorDetails( { symbol_pull }, 2, Precedence::kilo_lo, Precedence::kilo_hi ) },
 
 					{ symbol_pct_of, OperatorDetails( { OperatorElement( symbol_pct ), OperatorElement( name_of, Position::prefix ) }, 2, Precedence::kilo_lo, Precedence::kilo_hi ) },
 					{ symbol_as_pct_of, OperatorDetails( { OperatorElement( name_as ), OperatorElement( symbol_pct, Position::prefix ), OperatorElement( name_of, Position::prefix ) }, 2, Precedence::kilo_lo, Precedence::kilo_hi ) },
@@ -125,7 +125,7 @@ namespace eon
 
 				TypeOperators = {
 					name_reset, name_unary_minus,
-					symbol_plus, symbol_minus, symbol_multiply, symbol_divide, name_mod, name_pow,
+					symbol_plus, symbol_minus, symbol_multiply, symbol_divide, name_mod, symbol_pow,
 					symbol_cmp, symbol_lt, symbol_le, symbol_gt, symbol_ge, symbol_eq, symbol_ne,
 					symbol_plus_assign, symbol_minus_assign, symbol_multiply_assign, symbol_divide_assign,
 					symbol_element, name_in, symbol_slice

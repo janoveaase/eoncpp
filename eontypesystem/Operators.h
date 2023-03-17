@@ -22,7 +22,7 @@ namespace eon
 	EON_SYMBOL( multiply, "*" );
 	EON_SYMBOL( divide, "/" );
 	EON_NAME( mod );
-	EON_NAME( pow );
+	EON_SYMBOL( pow, "^" );
 
 	EON_SYMBOL( cmp, "<=>" );
 	EON_SYMBOL( eq, "==" );
@@ -53,15 +53,13 @@ namespace eon
 
 	EON_NAME( reset );
 	EON_COMPILERNAME( unary_minus, "unary-minus" );
-	EON_SYMBOL( bitnot, "~" );
-	EON_SYMBOL( bitand, "&" );
-	EON_SYMBOL( bitor, "|" );
-	EON_SYMBOL( bitxor, "^" );
-	EON_SYMBOL( lshift, "<<" );
-	EON_SYMBOL( rshift, ">>" );
-	EON_SYMBOL( serialize, "<-" );
-	EON_SYMBOL( deserialize, "->" );
-	
+	EON_NAME( invert );			// Reciprocal, bitwise not, inverse
+	EON_NAME( mask );			// Bitwise and, intersect
+	EON_NAME( union );			// Bitwise or
+	EON_NAME( diff );			// Bitwise xor, difference
+	EON_SYMBOL( push, "<<" );	// Bitwise left shift
+	EON_SYMBOL( pull, ">>" );	// Bitwise right shift
+
 	EON_SYMBOL( pct_of, "%-of" );
 	EON_SYMBOL( pct, "%" );
 	EON_SYMBOL( as_pct_of, "as-%-of" );
@@ -109,7 +107,7 @@ namespace eon
 			enum class Precedence
 			{
 				// Operators: return, bumpcall
-				max_hi = 34, max_lo = 33,				
+				max_hi = 34, max_lo = 33,
 				// Operators: [], type, uid, call, 's
 				exa_hi = 32, exa_lo = 31,
 				// Operators: is, -(unary), not, ~

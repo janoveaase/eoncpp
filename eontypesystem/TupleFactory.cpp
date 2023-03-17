@@ -6,7 +6,7 @@ namespace eon
 	Tuple& scope::global()
 	{
 		static Tuple scope;
-		if( !scope )
+		if( !scope.type() )
 			scope = Tuple( name_scope, TuplePerm::all_normal | TuplePerm::types | TuplePerm::actions );
 		return scope;
 	}

@@ -38,16 +38,16 @@ namespace eon
 	EON_TEST_3STEP( TokenParser, operator_asgn, move1,
 		TestParser old,
 		TokenParser obj = std::move( old.Obj ),
-		EON_FALSE( old.Obj ) );
+		EON_TRUE( old.Obj.atEnd() ) );
 	EON_TEST_3STEP( TokenParser, operator_asgn, move2,
 		TestParser old,
 		TokenParser obj = std::move( old.Obj ),
-		EON_TRUE( obj ) );
+		EON_FALSE( obj.atEnd() ) );
 
 	EON_TEST_3STEP( TokenParser, reclaim, basic,
 		TestParser obj,
 		auto reclaimed = obj.Obj.reclaim(),
-		EON_FALSE( obj.Obj ) );
+		EON_TRUE( obj.Obj.atEnd() ) );
 
 	EON_TEST_2STEP( TokenParser, forward, default1,
 		TestParser obj,
@@ -149,11 +149,11 @@ namespace eon
 
 	EON_TEST_2STEP( TokenParser, operator_bool, true,
 		TestParser obj,
-		EON_TRUE( obj.Obj ) );
+		EON_FALSE( obj.Obj.atEnd() ) );
 	EON_TEST_3STEP( TokenParser, operator_bool, false,
 		TestParser obj( 7 ),
 		obj.Obj.Tokens.erase( obj.Obj.Tokens.begin() + 6 ),
-		EON_FALSE( obj.Obj ) );
+		EON_TRUE( obj.Obj.atEnd() ) );
 
 	EON_TEST_2STEP( TokenParser, viewed, basic,
 		TestParser obj,
