@@ -34,11 +34,14 @@ namespace eon
 			return ( group == Tokenizer::CharacterGrouping::single ) ? "single" : "sequence"; }
 		string charMap()
 		{
-			string result;
+			std::set<string> results;
 			for( auto& elm : Obj.Conf.CharMap )
-				result << next( result ) << elm.first << "=" << eon::str( elm.second.first ) << ":" << grp(
-					elm.second.second );
-			return result;
+			{
+				string result;
+				result << elm.first << "=" << eon::str( elm.second.first ) << ":" << grp( elm.second.second );
+				results.insert( result );
+			}
+			return string( ";" ).join( results );
 		}
 		string charCat( charcat cat ) { return std::to_string( static_cast<int>( cat ) ); }
 		string catMap()
@@ -51,10 +54,14 @@ namespace eon
 		}
 		string seqMap()
 		{
-			string result;
+			std::set<string> results;
 			for( auto& elm : Obj.Conf.SeqMap )
-				result << next( result ) << elm.first << "=" << eon::str( elm.second );
-			return result;
+			{
+				string result;
+				result << elm.first << "=" << eon::str( elm.second );
+				results.insert( result );
+			}
+			return string( ";" ).join( results );
 		}
 		void basicPrep()
 		{
