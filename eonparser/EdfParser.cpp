@@ -216,6 +216,8 @@ namespace eon
 				_parseNamedSingleton( data );
 			else
 				_parseNamedSubtuple( data );
+
+			data.skipOptionalComma();
 		}
 
 		void EdfParser::_parseNamedSingleton( ParserData& data )
@@ -293,6 +295,7 @@ namespace eon
 
 				if( !_parseSubtupleValue( data ) )
 					return;
+				data.skipOptionalComma();
 			}
 			data.popSubtuple();
 		}
@@ -383,6 +386,10 @@ namespace eon
 				_parseTypeTuple( data );
 			else if( type == symbol_open_round )
 				_parseSubtuple( data );
+			else if( type == name_newline )
+				;	// OK!
+			else
+				data.error( "Unexpected element at this location!" );
 
 			data.tokens().forward();
 			data.clearAttributeName();

@@ -1108,6 +1108,22 @@ namespace eon
 		WANT_EQ( exp, act );
 	}
 
+	TEST( EdfParserTest, comma_separation )
+	{
+		string str{
+			"- One:\n"
+			"  - a,\n"
+			"  - b\n"
+			"x=1,\n"
+			"y=2,"
+		};
+		parser::State state( std::move( str ), Report );
+		auto data = parser::EdfParser().parseRaw( state, scope::global() );
+		auto act = data.str();
+		string exp{ "data((One=(a, b)), x=1, y=2)" };
+		WANT_EQ( exp, act );
+	}
+
 	TEST( EdfParserTest, split_bytes1 )
 	{
 		string str{ "B\"This string value \"  B\"is split!\"" };

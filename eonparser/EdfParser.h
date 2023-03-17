@@ -95,6 +95,10 @@ namespace eon
 				// either without separation or with newline and possibly indentation.
 				bool haveSequence( IndentationMatch match_indentation ) const noexcept;
 
+				// Comma is optional in some cases, this method will skip it if it is there.
+				inline void skipOptionalComma() {
+					if( !State->Tokens.atEnd() && State->Tokens.viewed().is( symbol_comma ) ) State->Tokens.forward(); }
+
 				void recordAttributeName();
 				void recordNameValueSeparator();
 				inline name_t attributeName() const noexcept { return AttributeName; }
