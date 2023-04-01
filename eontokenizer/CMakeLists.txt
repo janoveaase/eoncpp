@@ -8,5 +8,4 @@ target_link_libraries(${PROJECT_NAME}
 		EonRegex
 )
 eon_add_inlinetests()
-
-#add_subdirectory(tests)
+eon_add_tests()

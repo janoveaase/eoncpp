@@ -12,6 +12,7 @@ function(eon_add_tests)
 		target_link_libraries(${PROJECT_NAME}Tests PRIVATE ${PROJECT_NAME} EonTest)
 		set_target_properties(${PROJECT_NAME}Tests PROPERTIES FOLDER "Eon/${PROJECT_NAME}")
 		add_test(NAME ${PROJECT_NAME}Tests COMMAND ${PROJECT_NAME}Tests)
+		install(TARGETS ${PROJECT_NAME}Tests DESTINATION testbin)
 	endif()
 endfunction()
 

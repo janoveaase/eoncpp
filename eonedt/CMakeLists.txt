@@ -13,3 +13,4 @@ target_link_libraries(${PROJECT_NAME}
 		EonTypes
 )
 #eon_add_inlinetests()
+eon_add_tests()

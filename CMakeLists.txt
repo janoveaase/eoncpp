@@ -34,9 +34,8 @@ function(eon_add_library)
 	message(STATUS " -> ${PROJECT_NAME}")
 
 	# Usage requirement target for library, inline test project and other downstream targets
-	add_library(${PROJECT_NAME}_common INTERFACE)
-	target_compile_features(${PROJECT_NAME}_common INTERFACE cxx_std_17)
-	target_link_libraries(${PROJECT_NAME}_common INTERFACE EonExcept)
+	add_library(${PROJECT_NAME}_config INTERFACE)
+	target_compile_features(${PROJECT_NAME}_config INTERFACE cxx_std_17)
 
 	add_library(${PROJECT_NAME})
 	file(GLOB cpp *.cpp *.natvis sources/*.cpp sources/*.natvis)
@@ -50,11 +49,18 @@ function(eon_add_library)
 			FILES
 				${hpp}
 	)
-	target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_common )
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_config )
 	target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:HEADER_DIRS> )
 	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Eon/${PROJECT_NAME}")
-
-	eon_add_tests()
+	install(
+		TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_config
+		EXPORT eoncpp
+		FILE_SET HEADERS
+	)
+	install(
+		EXPORT eoncpp
+		DESTINATION cmake
+	)
 endfunction()
 
 add_subdirectory(eontest)

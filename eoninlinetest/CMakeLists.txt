@@ -18,6 +18,7 @@ function(eon_add_inlinetests)
 
 	set_target_properties(${PROJECT_NAME}InlineTests PROPERTIES FOLDER "Eon/${PROJECT_NAME}")
 	add_test(NAME ${PROJECT_NAME}InlineTests COMMAND ${PROJECT_NAME}InlineTests)
+	install(TARGETS ${PROJECT_NAME}InlineTests DESTINATION testbin)
 endfunction()
 
 
