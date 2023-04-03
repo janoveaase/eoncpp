@@ -33,33 +33,30 @@ endif()
 function(eon_add_library)
 	message(STATUS " -> ${PROJECT_NAME}")
 
-	# Usage requirement target for library, inline test project and other downstream targets
-	add_library(${PROJECT_NAME}_config INTERFACE)
-	target_compile_features(${PROJECT_NAME}_config INTERFACE cxx_std_17)
-
 	add_library(${PROJECT_NAME})
-	file(GLOB cpp *.cpp *.natvis sources/*.cpp sources/*.natvis)
-	list(FILTER cpp INCLUDE REGEX "[A-Z][a-zA-Z]+\.cpp" )
-	file(GLOB hpp *.h sources/*.h)
+	file(GLOB sources *.cpp *.natvis)
+	list(FILTER sources INCLUDE REGEX "[A-Z][a-zA-Z]+\.cpp" )
+	file(GLOB public_headers *.h)
 	target_sources(${PROJECT_NAME}
 		PRIVATE
-			${cpp}
+			${sources}
 		PUBLIC FILE_SET HEADERS
 			BASE_DIRS ..
 			FILES
-				${hpp}
+				${public_headers}
 	)
-	target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_config )
-	target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:HEADER_DIRS> )
+	target_include_directories(${PROJECT_NAME}
+		PUBLIC
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+			$<INSTALL_INTERFACE:include>
+	)
+	target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Eon/${PROJECT_NAME}")
+
 	install(
-		TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_config
-		EXPORT eoncpp
+		TARGETS ${PROJECT_NAME}
+		EXPORT EonCpp
 		FILE_SET HEADERS
-	)
-	install(
-		EXPORT eoncpp
-		DESTINATION cmake
 	)
 endfunction()
 
