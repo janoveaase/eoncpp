@@ -5,125 +5,6 @@
 
 namespace eon
 {
-	const substring::fast_compare substring::FastCompare;
-
-	const substring::diff_compare substring::DiffCompare;
-	const substring::icase_compare substring::ICaseCompare;
-
-	const substring::fast_chr_compare substring::FastChrCompare;
-	EON_TEST( substring, fast_chr_compare, lt,
-		EON_EQ( -1, substring::FastChrCompare( char_t( 'a' ), char_t( 'b' ) ) ) );
-	EON_TEST( substring, fast_chr_compare, eq,
-		EON_EQ( 0, substring::FastChrCompare( char_t( 'a' ), char_t( 'a' ) ) ) );
-	EON_TEST( substring, fast_chr_compare, gt,
-		EON_EQ( 1, substring::FastChrCompare( char_t( 'b' ), char_t( 'a' ) ) ) );
-
-	const substring::icase_chr_compare substring::ICaseChrCompare;
-	EON_TEST( substring, icase_chr_compare, lt,
-		EON_EQ( -1, substring::ICaseChrCompare( char_t( 'a' ), char_t( 'B' ) ) ) );
-	EON_TEST( substring, icase_chr_compare, eq,
-		EON_EQ( 0, substring::ICaseChrCompare( char_t( 'a' ), char_t( 'A' ) ) ) );
-	EON_TEST( substring, icase_chr_compare, gt,
-		EON_EQ( 1, substring::ICaseChrCompare( char_t( 'b' ), char_t( 'A' ) ) ) );
-
-	int substring::fast_compare::operator()( const substring& a, const substring& b ) const noexcept
-	{
-		if( a.empty() || b.empty() )
-			return !b.empty() ? -1 : !a.empty() ? 1 : 0;
-		auto cmp = memcmp( a.Beg.Pos, b.Beg.Pos, a.numBytes() < b.numBytes() ? a.numBytes() : b.numBytes() );
-		return cmp != 0 || a.numBytes() == b.numBytes() ? cmp : a.numBytes() < b.numBytes() ? -1 : 1;
-	}
-	EON_TEST( substring, fast_compare, void_void,
-		EON_EQ( 0, substring::FastCompare( substring(), substring() ) ) );
-	EON_TEST( substring, fast_compare, void_empty,
-		EON_EQ( 0, substring::FastCompare( substring(), substring( "" ) ) ) );
-	EON_TEST( substring, fast_compare, empty_void,
-		EON_EQ( 0, substring::FastCompare( substring( "" ), substring() ) ) );
-	EON_TEST( substring, fast_compare, empty_empty,
-		EON_EQ( 0, substring::FastCompare( substring( "" ), substring( "" ) ) ) );
-	EON_TEST( substring, fast_compare, empty_nonempty,
-		EON_EQ( -1, substring::FastCompare( substring( "" ), substring( "abc" ) ) ) );
-	EON_TEST( substring, fast_compare, nonempty_empty,
-		EON_EQ( 1, substring::FastCompare( substring( "abc" ), substring( "" ) ) ) );
-	EON_TEST( substring, fast_compare, lt,
-		EON_EQ( -1, substring::FastCompare( substring( "abc" ), substring( "abd" ) ) ) );
-	EON_TEST( substring, fast_compare, eq,
-		EON_EQ( 0, substring::FastCompare( substring( "abc" ), substring( "abc" ) ) ) );
-	EON_TEST( substring, fast_compare, gt,
-		EON_EQ( 1, substring::FastCompare( substring( "abd" ), substring( "abc" ) ) ) );
-
-	int substring::diff_compare::operator()( const substring& a, const substring& b ) const noexcept
-	{
-		if( a.empty() || b.empty() )
-			return !b.empty() ? -1 : !a.empty() ? 1 : 0;
-		string_iterator a_i = a.Beg, b_i = b.Beg;
-		int pos = 1;
-		for( ; a_i != a.End && b_i != b.end(); ++a_i, ++b_i, ++pos )
-		{
-			if( *a_i < *b_i )
-				return -pos;
-			else if( *b_i < *a_i )
-				return pos;
-		}
-		return a_i == a.End && b_i == b.End ? 0 : a_i != a.End ? pos : -pos;
-	}
-	EON_TEST( substring, diff_compare, void_void,
-		EON_EQ( 0, substring::DiffCompare( substring(), substring() ) ) );
-	EON_TEST( substring, diff_compare, void_empty,
-		EON_EQ( 0, substring::DiffCompare( substring(), substring( "" ) ) ) );
-	EON_TEST( substring, diff_compare, empty_void,
-		EON_EQ( 0, substring::DiffCompare( substring( "" ), substring() ) ) );
-	EON_TEST( substring, diff_compare, empty_empty,
-		EON_EQ( 0, substring::DiffCompare( substring( "" ), substring( "" ) ) ) );
-	EON_TEST( substring, diff_compare, empty_nonempty,
-		EON_EQ( -1, substring::DiffCompare( substring( "" ), substring( "abc" ) ) ) );
-	EON_TEST( substring, diff_compare, nonempty_empty,
-		EON_EQ( 1, substring::DiffCompare( substring( "abc" ), substring( "" ) ) ) );
-	EON_TEST( substring, diff_compare, lt,
-		EON_EQ( -3, substring::DiffCompare( substring( "abc" ), substring( "abd" ) ) ) );
-	EON_TEST( substring, diff_compare, eq,
-		EON_EQ( 0, substring::DiffCompare( substring( "abc" ), substring( "abc" ) ) ) );
-	EON_TEST( substring, diff_compare, gt,
-		EON_EQ( 3, substring::DiffCompare( substring( "abd" ), substring( "abc" ) ) ) );
-
-	int substring::icase_compare::operator()( const substring& a, const substring& b ) const noexcept
-	{
-		if( a.empty() || b.empty() )
-			return !b.empty() ? -1 : !a.empty() ? 1 : 0;
-		string_iterator a_i = a.Beg, b_i = b.Beg;
-		int pos = 1;
-		for( ; a_i != a.End && b_i != b.end(); ++a_i, ++b_i, ++pos )
-		{
-			if( *a_i != *b_i )
-			{
-				auto lw_a = Loc->toLower(
-					static_cast<wchar_t>( *a_i ) ), lw_b = Loc->toLower( static_cast<wchar_t>( *b_i ) );
-				if( lw_a != lw_b )
-					return lw_a < lw_b ? -pos : pos;
-			}
-		}
-		return a_i == a.End && b_i == b.End ? 0 : a_i != a.End ? pos : -pos;
-	}
-	EON_TEST( substring, icase_compare, void_void,
-		EON_EQ( 0, substring::ICaseCompare( substring(), substring() ) ) );
-	EON_TEST( substring, icase_compare, void_empty,
-		EON_EQ( 0, substring::ICaseCompare( substring(), substring( "" ) ) ) );
-	EON_TEST( substring, icase_compare, empty_void,
-		EON_EQ( 0, substring::ICaseCompare( substring( "" ), substring() ) ) );
-	EON_TEST( substring, icase_compare, empty_empty,
-		EON_EQ( 0, substring::ICaseCompare( substring( "" ), substring( "" ) ) ) );
-	EON_TEST( substring, icase_compare, empty_nonempty,
-		EON_EQ( -1, substring::ICaseCompare( substring( "" ), substring( "abc" ) ) ) );
-	EON_TEST( substring, icase_compare, nonempty_empty,
-		EON_EQ( 1, substring::ICaseCompare( substring( "abc" ), substring( "" ) ) ) );
-	EON_TEST( substring, icase_compare, lt,
-		EON_EQ( -3, substring::ICaseCompare( substring( "abc" ), substring( "Abd" ) ) ) );
-	EON_TEST( substring, icase_compare, eq,
-		EON_EQ( 0, substring::ICaseCompare( substring( "abc" ), substring( "Abc" ) ) ) );
-	EON_TEST( substring, icase_compare, gt,
-		EON_EQ( 3, substring::ICaseCompare( substring( "abd" ), substring( "Abc" ) ) ) );
-
-
 	EON_TEST( substring, startsWith, substr_empty_empty,
 		EON_FALSE( substring( "" ).startsWith( substring( "" ) ) ) );
 	EON_TEST( substring, startsWith, substr_empty_nonempty,
@@ -137,7 +18,7 @@ namespace eon
 	EON_TEST( substring, startsWith, substr_case,
 		EON_FALSE( substring( "abcdef" ).startsWith( substring( "ABC" ) ) ) );
 	EON_TEST( substring, startsWith, substr_icase,
-		EON_TRUE( substring( "abcdef" ).startsWith( substring( "ABC" ), substring::ICaseCompare ) ) );
+		EON_TRUE( substring( "abcdef" ).startsWith( substring( "ABC" ), strcmp::icase_utf8::Cmp ) ) );
 
 	EON_TEST( substring, startsWith, char_t_empty_nonempty,
 		EON_FALSE( substring( "" ).startsWith( char_t( 'a' ) ) ) );
@@ -148,7 +29,7 @@ namespace eon
 	EON_TEST( substring, startsWith, char_t_case,
 		EON_FALSE( substring( "abcdef" ).startsWith( char_t( 'A' ) ) ) );
 	EON_TEST( substring, startsWith, char_t_icase,
-		EON_TRUE( substring( "abcdef" ).startsWith( char_t( 'A' ), substring::ICaseChrCompare ) ) );
+		EON_TRUE( substring( "abcdef" ).startsWith( char_t( 'A' ), strcmp::icase_chr::Cmp ) ) );
 
 
 	EON_TEST( substring, endsWith, substr_empty_empty,
@@ -164,7 +45,7 @@ namespace eon
 	EON_TEST( substring, endsWith, substr_case,
 		EON_FALSE( substring( "abcdef" ).endsWith( substring( "DEF" ) ) ) );
 	EON_TEST( substring, endsWith, substr_icase,
-		EON_TRUE( substring( "abcdef" ).endsWith( substring( "DEF" ), substring::ICaseCompare ) ) );
+		EON_TRUE( substring( "abcdef" ).endsWith( substring( "DEF" ), strcmp::icase_utf8::Cmp ) ) );
 
 	EON_TEST( substring, endsWith, char_t_empty_nonempty,
 		EON_FALSE( substring( "" ).endsWith( char_t( 'a' ) ) ) );
@@ -175,7 +56,7 @@ namespace eon
 	EON_TEST( substring, endsWith, char_t_case,
 		EON_FALSE( substring( "abcdef" ).endsWith( char_t( 'F' ) ) ) );
 	EON_TEST( substring, endsWith, char_t_icase,
-		EON_TRUE( substring( "abcdef" ).endsWith( char_t( 'F' ), substring::ICaseChrCompare ) ) );
+		EON_TRUE( substring( "abcdef" ).endsWith( char_t( 'F' ), strcmp::icase_chr::Cmp ) ) );
 
 
 	EON_TEST( substring, compare, void,

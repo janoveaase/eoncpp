@@ -225,7 +225,7 @@ namespace eon
 	{
 		if( Pos == Source && CodepointSize != 0 )
 			return *this;
-		bool must_translate = Pos != Source || Codepoint == 0;
+		bool must_translate = Pos != Source || CodepointSize == 0;
 		Pos = Source;
 		CodepointSize = 0;
 		NumChar = 0;
@@ -620,8 +620,11 @@ namespace eon
 
 	int string_iterator::compare( const string_iterator& other ) const noexcept
 	{
+		// First make sure the source is the same!
 		if( Source != other.Source )
 			return Source < other.Source ? -1 : Source > other.Source ? 1 : 0;
+
+		// If 'this' is at the very end, then 'other'
 		else if( atEnd() )
 			return other.atEnd() ? 0 : 1;
 		else if( other.atEnd() )

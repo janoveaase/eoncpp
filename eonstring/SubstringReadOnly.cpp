@@ -48,7 +48,10 @@ namespace eon
 	{
 		if( !isHighToLow() )
 			return *this;
-		return substring( End + 1, Beg + 1 );
+		if( End.atREnd() )
+			return substring( string_iterator( End ).resetToBegin(), Beg + 1 );
+		else
+			return substring( End + 1, Beg + 1 );
 	}
 	EON_NO_TEST( substring, lowToHigh );
 

@@ -7,6 +7,7 @@ set(STRING_HEADERS
 	String.h
 	StringIterator.h
 	Substring.h
+	Compare.h
 	UniChar.h
 	NameDefs.h
 	Name.h
@@ -37,6 +38,7 @@ set(STRING_SOURCES
 	SubstringAsNumber.cpp
 	SubstringComparing.cpp
 	SubstringSearching.cpp
+	Compare.cpp
 	UniChar.cpp
 	Name.cpp
 	NameData.cpp

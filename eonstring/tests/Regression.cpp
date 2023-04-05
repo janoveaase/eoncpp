@@ -664,77 +664,57 @@ namespace eon
 			eon::substring( "TEST" ), '"' ) ) << "Didn't find string limited which was outside of quotes";
 	}
 
-	//TEST( String, compare_diffpos )
-	//{
-	//	WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
-	//		<< "Failed to compare equal";
-	//	eon::string str{ "alpha beta" };
-	//	WANT_EQ( 6, str.compare( "alpha", eon::CompareType::diff_pos ) ) << "Failed to compare substring from start";
-	//	str = "alpha beta";
-	//	WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare(
-	//		eon::substring( "alpha" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter left";
-	//	WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare(
-	//			eon::substring( "beta" ), eon::CompareType::diff_pos ) ) << "Failed to compare shorter right";
-	//	WANT_EQ( -10, eon::string( "alpha betA" ).compare( "alpha beta", eon::CompareType::diff_pos ) )
-	//		<< "Failed to compare lesser";
-	//	WANT_EQ( 10, eon::string( "alpha beta" ).compare( "alpha betA", eon::CompareType::diff_pos ) )
-	//		<< "Failed to compare greater";
-
-	//	WANT_EQ( 0, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-	//		eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited equal";
-	//	str = "alpha bEta";
-	//	WANT_EQ( -6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-	//		eon::substring( "pha be" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited lesser";
-	//	str = "alpha beta";
-	//	WANT_EQ( 6, eon::substring( str.begin() + 2, str.end() - 2 ).compare(
-	//		eon::substring( "pha bE" ), eon::CompareType::diff_pos ) ) << "Failed to compare limited greater";
-
-	//	str = "Hello Big World!";
-	//	eon::string str2{ "Big and bad" };
-	//	WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare( eon::substring( str2.begin(),
-	//		str2.begin() + 4 ), eon::CompareType::diff_pos ) ) << "Failed to compare big and bad";
-
-	//	str = "";
-	//	str2 = "Someting";
-	//	WANT_EQ( -1, str.compare( str2, eon::CompareType::diff_pos ) ) << "Failed to compare empty";
-
-	//	WANT_EQ( -5, eon::string( "beta" ).compare( "beta/gamma", eon::CompareType::diff_pos ) )
-	//		<< "Failed to compare correctly when rhs is identical to lhs but longer";
-	//}
-#ifndef __GNUC__
-	TEST( String, compare_faster )
+	TEST( String, compare_basic )
 	{
 		WANT_EQ( 0, eon::string( "alpha beta" ).compare( "alpha beta" ) ) << "Failed to compare equal";
 		eon::string str{ "alpha beta" };
-		WANT_EQ( 1, str.compare( "alpha" ) ) << "Failed to compare substring from start";
+		WANT_EQ( 6, str.compare( "alpha" ) ) << "Failed to compare substring from start";
 		str = "alpha beta";
 		WANT_EQ( 0, eon::substring( str.begin(), str.begin() + 5 ).compare( eon::substring( "alpha" ) ) )
 			<< "Failed to compare shorter left";
 		WANT_EQ( 0, eon::substring( str.begin() + 6, str.end() ).compare( eon::substring( "beta" ) ) )
 			<< "Failed to compare shorter right";
-		WANT_EQ( -1, eon::string( "alpha betA" ).compare( "alpha beta" ) ) << "Failed to compare lesser";
-		WANT_EQ( 1, eon::string( "alpha beta" ).compare( "alpha betA" ) ) << "Failed to compare greater";
+		WANT_EQ( -10, eon::string( "alpha betA" ).compare( "alpha beta" ) ) << "Failed to compare lesser";
+		WANT_EQ( 10, eon::string( "alpha beta" ).compare( "alpha betA" ) ) << "Failed to compare greater";
 
-		WANT_EQ( 0,
-			eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) )
+		WANT_EQ( 0, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) )
 			<< "Failed to compare limited equal";
 		str = "alpha bEta";
-		WANT_EQ( -1, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) )
+		WANT_EQ( -6, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha be" ) ) )
 			<< "Failed to compare limited lesser";
 		str = "alpha beta";
-		WANT_EQ( 1, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha bE" ) ) )
+		WANT_EQ( 6, eon::substring( str.begin() + 2, str.end() - 2 ).compare( eon::substring( "pha bE" ) ) )
 			<< "Failed to compare limited greater";
 
 		str = "Hello Big World!";
 		eon::string str2{ "Big and bad" };
-		WANT_EQ( 0, eon::substring( str.begin() + 6, str.begin() + 10 ).compare(
-			eon::substring( str2.begin(), str2.begin() + 4 ) ) ) << "Failed to compare big and bad";
+		WANT_EQ(
+			0,
+			eon::substring( str.begin() + 6, str.begin() + 10 ).compare(
+				eon::substring( str2.begin(), str2.begin() + 4 ) ) ) << "Failed to compare big and bad";
 
 		str = "";
 		str2 = "Someting";
 		WANT_EQ( -1, str.compare( str2 ) ) << "Failed to compare empty";
 
-		WANT_EQ( -1, eon::string( "beta" ).compare( "beta/gamma" ) )
+		WANT_EQ( -5, eon::string( "beta" ).compare( "beta/gamma" ) )
+			<< "Failed to compare correctly when rhs is identical to lhs but longer";
+	}
+#ifndef __GNUC__
+	TEST( String, compare_bytes )
+	{
+		WANT_EQ( 0, eon::string( "alpha beta" ).compareBytes( "alpha beta" ) ) << "Failed to compare equal";
+		eon::string str{ "alpha beta" };
+		WANT_EQ( 1, str.compareBytes( "alpha" ) ) << "Failed to compare substring from start";
+		str = "alpha beta";
+		WANT_EQ( -1, eon::string( "alpha betA" ).compareBytes( "alpha beta" ) ) << "Failed to compare lesser";
+		WANT_EQ( 1, eon::string( "alpha beta" ).compareBytes( "alpha betA" ) ) << "Failed to compare greater";
+
+		str = "";
+		eon::string str2 = "Someting";
+		WANT_EQ( -1, str.compareBytes( str2 ) ) << "Failed to compare empty";
+
+		WANT_EQ( -1, eon::string( "beta" ).compareBytes( "beta/gamma" ) )
 			<< "Failed to compare correctly when rhs is identical to lhs but longer";
 	}
 #endif
