@@ -724,12 +724,12 @@ namespace eon
 		WANT_EQ( 3, eon::string( "alpha" ).substr().compareSub( eon::string( "alPHA" ).substr(), 3 ) );
 		WANT_EQ( -3, eon::string( "alPha" ).substr().compareSub( eon::string( "alpha" ).substr(), 3 ) );
 	}
-	//TEST( String, iCompare )
-	//{
-	//	WANT_EQ( 0, eon::string( "alpha" ).iCompare( "ALPHA" ) );
-	//	WANT_EQ( 5, eon::string( "alpha" ).iCompare( "alPh" ) );
-	//	WANT_EQ( -5, eon::string( "alPh" ).iCompare( "alpha" ) );
-	//}
+	TEST( String, iCompare )
+	{
+		WANT_EQ( 0, eon::string( "alpha" ).compare( "ALPHA", strcmp::icase_utf8::Cmp ) );
+		WANT_EQ( 5, eon::string( "alpha" ).compare( "alPh", strcmp::icase_utf8::Cmp ) );
+		WANT_EQ( -5, eon::string( "alPh" ).compare( "alpha", strcmp::icase_utf8::Cmp ) );
+	}
 
 	TEST( String, escape )
 	{
