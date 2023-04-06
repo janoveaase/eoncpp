@@ -231,6 +231,8 @@ namespace eon
 
 		inline bool matchNonStar( const std::set<char_t>& ignore_chars, bool icase ) noexcept
 		{
+			if( !Pattern )
+				return false;
 			const locale& loc = locale::get();
 			bool match = *Pattern == '?' && ignore_chars.find( *Input ) == ignore_chars.end();
 			if( !match )
@@ -246,7 +248,7 @@ namespace eon
 		inline void recordRMatchedChar() noexcept { --Input; if( Reverse ) --Pattern; else ++Pattern; }
 
 		inline bool deadEnd( const std::set<char_t>& ignore_chars ) const noexcept {
-			return !PatternBak.hasSource() || ignore_chars.find( *InputBak ) != ignore_chars.end(); }
+			return PatternBak.isVoid() || ignore_chars.find( *InputBak ) != ignore_chars.end(); }
 
 		inline void backTrack() noexcept { Input = ++InputBak; Pattern = PatternBak; }
 		inline void rBackTrack() noexcept { Input = --InputBak; Pattern = PatternBak; }
@@ -325,7 +327,7 @@ namespace eon
 		for( string_iterator i = area.begin(); i < short_end; ++i )
 		{
 			auto end = _matchLowToHigh( Value.substr(), substring( i, area.end() ), true );
-			if( end.hasSource() )
+			if( !end.isVoid() )
 				return substring( i, end );
 		}
 		return substring();
@@ -338,7 +340,7 @@ namespace eon
 		for( string_iterator i = area.begin(); i > short_end; --i )
 		{
 			auto end = _matchHighToLow( Value.substr().highToLow(), substring( i, area.end() ), true );
-			if( end.hasSource() )
+			if( !end.isVoid() )
 				return substring( i, end );
 		}
 		return substring();

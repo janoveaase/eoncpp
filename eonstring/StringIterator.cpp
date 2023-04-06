@@ -104,12 +104,12 @@ namespace eon
 		EON_EQ( "12:5", string_iterator( source, 14, 6, source + 12, 5 ).encode() ) );
 
 
-	string_iterator::string_iterator( const string_iterator& source, const char* pos, index_t num_char ) noexcept
+	string_iterator::string_iterator( const string_iterator& other, const char* pos, index_t num_char ) noexcept
 	{
-		Source = source.Source;
-		SourceEnd = source.SourceEnd;
-		NumSourceChars = source.NumSourceChars;
-		ValidUTF8 = source.ValidUTF8;
+		Source = other.Source;
+		SourceEnd = other.SourceEnd;
+		NumSourceChars = other.NumSourceChars;
+		ValidUTF8 = other.ValidUTF8;
 		Pos = pos;
 		NumChar = num_char;
 		if( NumChar == 0 && Pos != Source )
@@ -221,7 +221,7 @@ namespace eon
 		obj += 3,
 		EON_TRUE( string_iterator() == obj.reset() ) );
 
-	string_iterator& string_iterator::resetToBegin() noexcept
+	string_iterator& string_iterator::resetToFirst() noexcept
 	{
 		if( Pos == Source && CodepointSize != 0 )
 			return *this;
@@ -233,10 +233,15 @@ namespace eon
 			_translateCodepoint();
 		return *this;
 	}
-	EON_TEST_3STEP( string_iterator, resetToBegin, basic,
+	EON_TEST_3STEP( string_iterator, resetToFirst, basic,
 		string_iterator obj( "abcdef" ),
 		obj += 3,
-		EON_EQ( "0:0", obj.resetToBegin().encode() ) );
+		EON_EQ( "0:0", obj.resetToFirst().encode() ) );
+
+	EON_TEST_3STEP( string_iterator, resetToLast, basic,
+		string_iterator obj( "abcdef" ),
+		obj += 3,
+		EON_EQ( "5:5", obj.resetToLast().encode() ) );
 
 	string_iterator& string_iterator::resetToEnd() noexcept
 	{
@@ -274,12 +279,12 @@ namespace eon
 	EON_TEST( string_iterator, operator_bool, false_no_source,
 		EON_FALSE( string_iterator() ) );
 
-	EON_TEST( string_iterator, hasSource, true_start,
-		EON_TRUE( string_iterator( "abcdef" ).hasSource() ) );
-	EON_TEST( string_iterator, hasSource, true_end,
-		EON_TRUE( ( string_iterator( "abcdef" ) + 6 ).hasSource() ) );
-	EON_TEST( string_iterator, hasSource, false,
-		EON_FALSE( string_iterator().hasSource() ) );
+	EON_TEST( string_iterator, isVoid, true_start,
+		EON_FALSE( string_iterator( "abcdef" ).isVoid() ) );
+	EON_TEST( string_iterator, isVoid, true_end,
+		EON_FALSE( ( string_iterator( "abcdef" ) + 6 ).isVoid() ) );
+	EON_TEST( string_iterator, isVoid, false,
+		EON_TRUE( string_iterator().isVoid() ) );
 
 	EON_TEST( string_iterator, atREnd, false_start,
 		EON_FALSE( string_iterator( "abcdef" ).atREnd() ) );
@@ -417,26 +422,49 @@ namespace eon
 		const char* source = u8"\u00D8\u20A0\u0153\u2122\u00A9\u00B5",
 		EON_TRUE( string_iterator( source ) + 6 == string_iterator( source ).getEnd() ) );
 
-	EON_TEST_2STEP( string_iterator, getBegin, empty,
+	EON_TEST_2STEP( string_iterator, getREnd, empty,
 		const char* source = "",
-		EON_TRUE( string_iterator( source ) == string_iterator( source ).getBegin() ) );
-	EON_TEST_2STEP( string_iterator, getBegin, ASCII,
+		EON_TRUE( string_iterator( source ) - 1 == string_iterator( source ).getREnd() ) );
+	EON_TEST_2STEP( string_iterator, getREnd, ASCII,
 		const char* source = "abcdef",
-		EON_TRUE( string_iterator( source ) == ( string_iterator( source ) + 3 ).getBegin() ) );
-	EON_TEST_2STEP( string_iterator, getBegin, UTF8,
+		EON_TRUE( string_iterator( source ) - 1 == string_iterator( source ).getREnd() ) );
+	EON_TEST_2STEP( string_iterator, getREnd, UTF8,
 		const char* source = u8"\u00D8\u20A0\u0153\u2122\u00A9\u00B5",
-		EON_TRUE( string_iterator( source ) == ( string_iterator( source ) + 3 ).getBegin() ) );
+		EON_TRUE( string_iterator( source ) - 1 == string_iterator( source ).getREnd() ) );
+
+	EON_TEST_2STEP( string_iterator, getFirst, empty,
+		const char* source = "",
+		EON_TRUE( string_iterator( source ) == string_iterator( source ).getFirst() ) );
+	EON_TEST_2STEP( string_iterator, getFirst, ASCII,
+		const char* source = "abcdef",
+		EON_TRUE( string_iterator( source ) == ( string_iterator( source ) + 3 ).getFirst() ) );
+	EON_TEST_2STEP( string_iterator, getFirst, UTF8,
+		const char* source = u8"\u00D8\u20A0\u0153\u2122\u00A9\u00B5",
+		EON_TRUE( string_iterator( source ) == ( string_iterator( source ) + 3 ).getFirst() ) );
+
+	EON_TEST_2STEP( string_iterator, getLast, empty,
+		const char* source = "",
+		EON_TRUE( string_iterator( source ) == string_iterator( source ).getLast() ) );
+	EON_TEST_2STEP( string_iterator, getLast, ASCII,
+		const char* source = "abcdef",
+		EON_TRUE( string_iterator( source ) + 5 == string_iterator( source ).getLast() ) );
+	EON_TEST_2STEP( string_iterator, getLast, UTF8,
+		const char* source = u8"\u00D8\u20A0\u0153\u2122\u00A9\u00B5",
+		EON_TRUE( string_iterator( source ) + 5 == string_iterator( source ).getLast() ) );
 
 
 
 
 	string_iterator& string_iterator::operator++() noexcept
 	{
-		if( atEnd() )
+		if( atEnd() )			// Cannot move beyond 'end' state!
 			return *this;
-		if( Pos + CodepointSize == SourceEnd )
+		if( atREnd() )			// From 'rend' to 'first'!
+			return resetToFirst();
+		if( atLast() )			// From 'last' to 'end'!
 			return resetToEnd();
 
+		// Actual increment:
 		Pos += CodepointSize;	// Next byte position.
 		Codepoint = nochar;		// Unknown until we look ahead.
 		char32_t state = 0;
@@ -472,7 +500,7 @@ namespace eon
 	EON_TEST_3STEP( string_iterator, operator_dec, from_end,
 		string_iterator obj( "abcdef" ),
 		obj.resetToEnd(),
-		EON_EQ( --obj, obj.getBegin() + 5 ) );
+		EON_EQ( --obj, obj.getFirst() + 5 ) );
 
 	EON_TEST_3STEP( string_iterator, operator_pfinc, from_rend,
 		string_iterator obj( "abcdef" ),
@@ -512,9 +540,9 @@ namespace eon
 
 	string_iterator& string_iterator::operator-=( index_t num_chars ) noexcept
 	{
-		if( atREnd() || num_chars == 0 )
+		if( atREnd() || num_chars == 0 )	// Cannot move before 'rend' state!
 			return *this;
-		if( Pos == Source )
+		if( atFirst() )						// Moving from 'first' to 'rend' state!
 			return resetToREnd();
 		_backtrack( num_chars );
 		_translateCodepoint();
@@ -620,21 +648,20 @@ namespace eon
 
 	int string_iterator::compare( const string_iterator& other ) const noexcept
 	{
-		// First make sure the source is the same!
 		if( Source != other.Source )
 			return Source < other.Source ? -1 : Source > other.Source ? 1 : 0;
 
-		// If 'this' is at the very end, then 'other'
-		else if( atEnd() )
-			return other.atEnd() ? 0 : 1;
-		else if( other.atEnd() )
-			return -1;
-		else if( atREnd() )
+		if( atREnd() )
 			return other.atREnd() ? 0 : -1;
 		else if( other.atREnd() )
 			return 1;
-		else
-			return Pos < other.Pos ? -1 : other.Pos < Pos ? 1 : 0;
+
+		if( atEnd() )
+			return other.atEnd() ? 0 : 1;
+		else if( other.atEnd() )
+			return -1;
+
+		return Pos < other.Pos ? -1 : other.Pos < Pos ? 1 : 0;
 	}
 	EON_TEST_2STEP( string_iterator, compare, diff_source_lt,
 		const char* source = "abcdef",

@@ -81,6 +81,20 @@ namespace eon
 	//          string remains unchanged! Use of a string_iterator with an
 	//          invalid source may result in undefined behavior!
 	//
+	// A string iterator is aware of its source string, including where it
+	// starts and ends. It can be used to iterate both forwards and backwards.
+	// An iterator will always be in one of the following absolute states:
+	//  - void   : No source!
+	//  - end    : After last character in source.
+	//             Using the -- operator will change it's state to 'last'.
+	//  - rend   : Before first character in source.
+	//             Using the ++ operator will change it's state to 'first'.
+	//  - valid  : Somewhere after rend and before end.
+	//
+	// Additionally, the following virtual states are possible for 'valid' iterators:
+	//  - first  : First character in source.
+	//  - last   : Last character in source.
+	//
 	class string_iterator
 	{
 	public:
@@ -100,102 +114,97 @@ namespace eon
 		//
 	public:
 
-		// Construct an unattached iterator that is equivalent to 'false'.
-		// (Typically as a place-holder.)
+		// Construct a 'void' iterator.
 		string_iterator() = default;
 
 		// Construct as a copy of another iterator.
 		inline string_iterator( const string_iterator& other ) { *this = other; }
 
 
-		// Construct for a 'std::string'.
-		// Will count number of UTF-8 characters and optimize for UTF-8 handling.
-		// NOTE: If the string contains invalid UTF-8 characters, it will be
-		//       treated as a pure C string with byte characters only!
+		// Construct for a 'std::string' source.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// NOTE: If the source is not valid UTF-8, it will be treated as all bytes!
 		inline explicit string_iterator( const std::string& stdstr ) noexcept {
 			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() ); }
 
-		// Construct for a 'std::string', but set to a specific character position.
-		// Will count number of UTF-8 characters and optimize for UTF-8 handling.
-		// NOTE: If the string contains invalid UTF-8 characters, it will be
-		//       treated as a pure C string with byte characters only!
+		// Construct for a 'std::string' source, set to a specific character position.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// NOTE: If the source is not valid UTF-8, it will be treated as all bytes!
 		inline string_iterator( const std::string& stdstr, index_t pos ) noexcept {
 			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() ); *this += pos; }
 
 
-		// Construct for a 'C-string'.
-		// Will count number of UTF-8 characters and optimize for UTF-8 handling.
-		// NOTE: If the string contains invalid UTF-8 characters, it will be
-		//       treated as a pure C string with byte characters only!
+		// Construct for a 'C-string' source.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// NOTE: If the source is not valid UTF-8, it will be treated as all bytes!
 		inline explicit string_iterator( const char* cstr ) noexcept { _prep( cstr, cstr + strlen( cstr ), cstr ); }
 
-		// Construct for a 'C-string'.
-		// Will count number of UTF-8 characters and optimize for UTF-8 handling.
-		// NOTE: If the string contains invalid UTF-8 characters, it will be
-		//       treated as a pure C string with byte characters only!
+		// Construct for a 'C-string' source.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// NOTE: If the source is not valid UTF-8, it will be treated as all bytes!
 		inline explicit string_iterator( const unsigned char* cstr ) noexcept {
 			_prep( (const char*)cstr, (const char*)cstr + strlen( (const char*)cstr ), (const char*)cstr ); }
 
-		// Construct for a 'C-string', but set to a specific byte length.
-		// Will count number of UTF-8 characters and optimize for UTF-8 handling.
-		// NOTE: If the string contains invalid UTF-8 characters, it will be
-		//       treated as a pure C string with byte characters only!
+		// Construct for a 'C-string' source, set to a specific byte length.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// NOTE: If the source is not valid UTF-8, it will be treated as all bytes!
 		inline string_iterator( const char* cstr, index_t size ) noexcept { _prep( cstr, cstr + size, cstr ); }
 
 
 		// Construct from already known details, position at start of source.
-		// Fast, does not have to count any UTF-8 characters!
-		// WARNING: Setting invalid details may likely result in undefined behavior!
+		// Fast, will not count number of UTF-8 characters in source!
+		// WARNING: Setting invalid details may result in undefined behavior!
 		// Parameters:
-		//   begin            : Start of source string.
-		//   num_bytes        : Total number of bytes in source string.
-		//   num_source_chars : Total number of UTF-8 characters in source string.
-		inline string_iterator( const char* begin, index_t num_bytes, index_t num_source_chars ) noexcept {
-			NumSourceChars = num_source_chars; _prep( begin, begin + num_bytes, begin ); }
+		//   source           : Start of source.
+		//   num_bytes        : Source size in bytes.
+		//   num_source_chars : Source size in number of UTF-8 characters.
+		inline string_iterator( const char* source, index_t num_bytes, index_t num_source_chars ) noexcept {
+			NumSourceChars = num_source_chars; _prep( source, source + num_bytes, source ); }
 
-		// Construct from already known details, position specified.
-		// Will count number of UTF-8 characters and optimize for UTF-8 handling.
-		// WARNING: Setting invalid details may likely result in undefined behavior!
+		// Construct from already known details, for specified position in source.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// WARNING: Setting invalid details may result in undefined behavior!
 		// Parameters:
-		//   begin     : Start of source string.
-		//   num_bytes : Total number of bytes in source string.
-		//   pos       : Iterator position in source string.
-		inline string_iterator( const char* begin, index_t num_bytes, const char* pos ) noexcept {
-			_prep( begin, begin + num_bytes, pos ); }
+		//   source    : Start of source.
+		//   num_bytes : Source size in bytes.
+		//   pos       : Iterator position in source in bytes.
+		inline string_iterator( const char* source, index_t num_bytes, const char* pos ) noexcept {
+			_prep( source, source + num_bytes, pos ); }
 
-		// Construct from already known details, position specified.
-		// Does not have to count all UTF-8 characters, only up to 'pos'!
-		// WARNING: Setting invalid details may likely result in undefined behavior!
+		// Construct from already known details, for specified position in source.
+		// Will only count number of UTF-8 characters up to specified position!
+		// WARNING: Setting invalid details may result in undefined behavior!
 		// Parameters:
-		//   begin            : Start of source string.
-		//   num_bytes        : Total number of bytes in source string.
-		//   num_source_chars : Total number of UTF-8 characters in source string.
-		//   pos              : Iterator position in source string.
+		//   source           : Start of source.
+		//   num_bytes        : Source size in bytes.
+		//   num_source_chars : Source size in number of UTF-8 characters.
+		//   pos              : Iterator position in source in bytes.
 		inline string_iterator(
-			const char* begin, index_t num_bytes, index_t num_source_chars, const char* pos ) noexcept {
-			NumSourceChars = num_source_chars; _prep( begin, begin + num_bytes, pos ); }
+			const char* source, index_t num_bytes, index_t num_source_chars, const char* pos ) noexcept {
+			NumSourceChars = num_source_chars; _prep( source, source + num_bytes, pos ); }
 
-		// Construct from already known details, position specified.
-		// Fast, does not have to count any UTF-8 characters!
-		// WARNING: Setting invalid details may likely result in undefined behavior!
+		// Construct from already known details, for specified position in source.
+		// Fast, will not count number of UTF-8 characters in source!
+		// WARNING: Setting invalid details may result in undefined behavior!
 		// Parameters:
-		//   begin            : Start of source string.
-		//   num_bytes        : Total number of bytes in source string.
-		//   num_source_chars : Total number of UTF-8 characters in source string.
-		//   pos              : Iterator position in source string.
-		//   num_char         : UTF-8 character number of iterator position.
+		//   source           : Start of source.
+		//   num_bytes        : Source size in bytes.
+		//   num_source_chars : Source size in number of UTF-8 characters.
+		//   pos              : Iterator position in source in bytes.
+		//   num_char         : Iteration position in source in UTF-8 characters.
 		inline string_iterator(
-			const char* begin, index_t num_bytes, index_t num_source_chars, const char* pos, index_t num_char ) noexcept {
-			NumSourceChars = num_source_chars; NumChar = num_char; _prep( begin, begin + num_bytes, pos ); }
+			const char* source, index_t num_bytes, index_t num_source_chars, const char* pos, index_t num_char ) noexcept {
+			NumSourceChars = num_source_chars; NumChar = num_char; _prep( source, source + num_bytes, pos ); }
 
-		// Construct using another 'string_iterator' as 'source', but set a specific position.
-		// Fast, does not have to count any UTF-8 characters!
-		// WARNING: Setting invalid details may likely result in undefined behavior!
+
+		// Construct using another 'string_iterator' as 'source', but set specified position.
+		// Fast, will not count number of UTF-8 characters in source!
+		// WARNING: Setting invalid details may result in undefined behavior!
 		// Parameters:
-		//   source   : 'string_iterator' to copy source details from.
-		//   pos      : New iterator position.
-		//   num_char : UTF-8 character number of new iterator position.
-		string_iterator( const string_iterator& source, const char* pos, index_t num_char ) noexcept;
+		//   other    : Other 'string_iterator' to copy source details from.
+		//   pos      : Iterator position in source in bytes.
+		//   num_char : Iterator position in source in UTF-8 characters.
+		string_iterator( const string_iterator& other, const char* pos, index_t num_char ) noexcept;
 
 
 		// Default destructor
@@ -210,17 +219,17 @@ namespace eon
 		//
 	public:
 
-		// Get iterator as an std::string formatted as "<byte pos>:<char pos>".
+		// Get iterator as a std::string formatted as "<byte pos>:<char pos>".
 		inline std::string encode() const {
-			return hasSource() ? std::to_string( numByte() ) + ":" + std::to_string( numChar() ) : std::string(); }
+			return isVoid() ? std::string() : std::to_string( numByte() ) + ":" + std::to_string( numChar() ); }
 
 		// Set iterator from std::string formatted as "<byte pos>:<char pos>" for the specified source.
 		// Parameters:
 		//   iterator_format : String formatted as "<byte pos>:<char pos>".
 		//   source_start    : Start of source to set for the decoded iterator.
 		//   source_end      : End of iterator source. If nullptr, then assume null-terminated.
-		//   num_source_chars: Number of UTF-8 characters in source.
-		//                     If this is no_index, then the characters will be counted.
+		//   num_source_chars: Source size in number of UTF-8 characters.
+		//                     If this is no_index, then the characters will be counted (slow).
 		// Returns: true if set, false if invalid format!
 		// Throws [eon::WrongSource] if invalid format or <byte pos> or <char pos> doesn't fit the source!
 		// Throws [eon::InvalidUTF8] if num_source_chars is [eon::no_index] and source turns out to be invalid!
@@ -239,21 +248,25 @@ namespace eon
 		//
 	public:
 
-		// Set from 'std::string'.
-		// Will use UTF-8 iteration if no invalid UTF-8 characters, byte-sized characters otherwise.
+		// Discard existing details and set new 'std::string' as source, positioned at start.
+		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
+		// NOTE: If the source is not valid UTF-8, it will be treated as all bytes!
 		inline string_iterator& operator=( const std::string& stdstr ) noexcept {
 			_prep( stdstr.c_str(), stdstr.c_str() + stdstr.size(), stdstr.c_str() ); return *this; }
 
-		// Reset string_iterator to default constructor state. (No source.)
+		// Reset to 'void' state.
 		string_iterator& reset() noexcept;
 
-		// Reset string_iterator to beginning (start position).
-		string_iterator& resetToBegin() noexcept;
+		// Reset to 'first' state.
+		string_iterator& resetToFirst() noexcept;
 
-		// Reset string_iterator to end position.
+		// Reset to 'last' state.
+		inline string_iterator& resetToLast() noexcept { resetToEnd(); return --( *this ); }
+
+		// Reset to 'end' state.
 		string_iterator& resetToEnd() noexcept;
 
-		// Reset string_iterator to reverse end position.
+		// Reset to 'rend' state.
 		string_iterator& resetToREnd() noexcept;
 
 
@@ -265,19 +278,23 @@ namespace eon
 		//
 	public:
 
-		// Check if the iterator has a source and is not at the (r)end of that source.
+		// Check that state is 'valid' (not 'void' or 'end' or 'rend).
 		inline operator bool() const noexcept { return CodepointSize > 0; }
 
-		// Check if the iterator has a source, regardless of position.
-		inline bool hasSource() const noexcept { return Source != nullptr; }
+		// Check if in 'void' state.
+		inline bool isVoid() const noexcept { return Source == nullptr; }
 
-		// Check if the iterator is at reverse end of the source string.
-		// Returns false if not at end or there is no source!
-		inline bool atREnd() const noexcept { return CodepointSize == 0 && Pos == Source; }
+		// Check if in 'first' state.
+		inline bool atFirst() const noexcept { return CodepointSize > 0 && Pos == Source; }
 
-		// Check if the iterator is at the end of the source string.
-		// Returns false if not at end or there is no source!
+		// Check if in 'last' state.
+		inline bool atLast() const noexcept { return CodepointSize > 0 && NumChar == NumSourceChars - 1; }
+
+		// Check if in 'end' state.
 		inline bool atEnd() const noexcept { return CodepointSize == 0 && Pos > Source; }
+
+		// Check if in 'rend' state.
+		inline bool atREnd() const noexcept { return CodepointSize == 0 && Pos == Source; }
 
 
 		// Check if the specified source is the same as referenced by the iterator.
@@ -298,48 +315,55 @@ namespace eon
 
 
 		// Get the codepoint for the position in the source string referenced by the iterator.
-		// Will be [eon::nochar] if no source or at the end of the source.
+		// Returns [eon::nochar] if not in 'valid' state (if in 'void', 'end', or 'rend' state)!
 		inline char_t operator*() const noexcept { return Codepoint; }
 
-		// Get which character (counted from the start) the iterator refers to in the source.
-		// For UTF-8 strings, this will be the number of UTF-8 characters, number of bytes otherwise.
+		// Get iteration position in source as number of UTF-8 characters from start.
+		// For byte strings this will be identical to [numByte]!
 		inline index_t numChar() const noexcept { return NumChar; }
 
-		// Get which byte (counted from the start) the iterator refers to in the source.
-		// This may be different from [numChar] if there are non-ASCII UTF-8 characters in the source.
+		// Get iterator position in source as number of bytes from start.
+		// For UTF-8 strings this will be >= [numChar]!
 		inline index_t numByte() const noexcept { return Pos - Source; }
 
-		// Get the number of bytes making up the code point the iterator refers to in the source.
-		// For ASCII characters, this will always be 1, otherwise > 1.
+		// Get the number of bytes making up the code point at [numChar] in the source.
+		// For UTF-8 strings this will be >= 1, for byte strings, always 1!
 		inline index_t codepointSize() const noexcept { return CodepointSize; }
 
 
-		// Check if the entire source string referenced by the iterator is ASCII- (byte-) characters only.
-		// (If it is, certain optimizations for pure byte-strings can be utilizied.)
+		// Check if source is all bytes (no UTF-8 characters).
 		inline bool bytesOnly() const noexcept { return NumSourceChars == SourceEnd - Source; }
 
-		// Check if the string contains only valid UTF-8 characters.
-		// Returns 'true' if ASCII/bytes only, otherwise all characters must be valid UTF-8!
+		// Check if source is valid UTF-8.
 		inline bool validUTF8() const noexcept { return ValidUTF8; }
 
 
-		// Get the address of the raw source byte data starting at the position referenced by the iterator.
-		// WARNING: The returned C-string may end at any arbitrary chracter, null is not guaranteed!
+		// Get source address.
+		// WARNING: Terminating null character is not guaranteed! Use [numSourceBytes] to determine end point.
 		inline const char* byteData() const noexcept { return Pos; }
 
-		// Get total number of raw bytes in the source string.
+		// Get source size in number of bytes.
 		inline index_t numSourceBytes() const noexcept { return SourceEnd - Source; }
 
-		// Get total number of (UTF-8 or byte-sized) characters in the source string.
+		// Get source size in number of UTF-8 characters.
 		inline index_t numSourceChars() const noexcept { return NumSourceChars; }
 
-		// Get a copy of the iterator, reset to end of source.
-		inline string_iterator getEnd() const noexcept {
-			if( !hasSource() ) return *this; string_iterator end = *this; return end.resetToEnd(); }
 
-		// Get a copy of the iterator, reset to start of source.
-		inline string_iterator getBegin() const noexcept {
-			if( !*this ) return *this; auto beg = *this; return beg.resetToBegin(); }
+		// Get a new iterator that is in 'end' state.
+		inline string_iterator getEnd() const noexcept {
+			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToEnd(); }
+
+		// Get a new iterator that is in 'rend' state.
+		inline string_iterator getREnd() const noexcept {
+			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToREnd(); }
+
+		// Get a new iterator that is in 'first' state.
+		inline string_iterator getFirst() const noexcept {
+			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToFirst(); }
+
+		// Get a new iterator that is in 'last' state.
+		inline string_iterator getLast() const noexcept {
+			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToLast(); }
 
 
 
@@ -350,10 +374,12 @@ namespace eon
 		//
 	public:
 
-		// Prefix iteration by increment. Fast!
+		// Prefix iteration by increment.
+		// If in 'rend' state, state will change to 'first' if source is not empty.
 		string_iterator& operator++() noexcept;
 
-		// Prefix iteration by decrement. Fast!
+		// Prefix iteration by decrement.
+		// If in 'end' state, state will change to 'last' if source is not empty.
 		inline string_iterator& operator--() noexcept { return *this -= 1; }
 
 		// Postfix iteration by increment. Involves copying!
@@ -363,68 +389,68 @@ namespace eon
 		inline string_iterator operator--( int ) noexcept { auto _this = *this; *this -= 1; return _this; }
 
 
-		// Move forward a specific number of (UTF-8) characters.
-		// Uses the prefix increment operator.
-		// Optimized for pure ASCII strings!
+		// Move forward a specific number of UTF-8 characters.
+		// Uses the prefix increment operator unless source is all bytes, in which case an optimized increment is used.
 		inline string_iterator& operator+=( index_t num_chars ) noexcept {
 			if( bytesOnly() ) _advanceBytes( num_chars );
 				else { for( index_t i = 0; i < num_chars && *this; ++i, ++*this ); } return *this; }
 
-		// Move backward a specific number of characaters.
+		// Move backward a specific number of UTF-8 characaters.
 		// Uses the prefix decrement operator.
 		string_iterator& operator-=( index_t num_chars ) noexcept;
 
 
-		// Move forward (positive) or backward (negative) a specific number of characters.
+		// Move forward (positive) or backward (negative) a specific number of UTF-8 characters.
 		inline string_iterator& operator+=( long_t num_chars ) noexcept {
 			return num_chars >= 0 ? *this += static_cast<index_t>( num_chars )
 				: *this -= static_cast<index_t>( -num_chars ); }
 
-		// Move forward (positive) or backward (negative) a specific number of characters.
+		// Move forward (positive) or backward (negative) a specific number of UTF-8 characters.
 		inline string_iterator& operator+=( int num_chars ) noexcept {
 			return num_chars >= 0 ? *this += static_cast<index_t>( num_chars )
 				: *this -= static_cast<index_t>( -num_chars ); }
 
-		// Move backward (positive) or forward (negative) a specific number of characters.
+		// Move backward (positive) or forward (negative) a specific number of UTF-8 characters.
 		inline string_iterator& operator-=( long_t num_chars ) noexcept {
 			return num_chars >= 0 ? *this -= static_cast<index_t>( num_chars )
 				: *this += static_cast<index_t>( -num_chars ); }
 
-		// Move backward (positive) or forward (negative) a specific number of characters.
+		// Move backward (positive) or forward (negative) a specific number of UTF-8 characters.
 		inline string_iterator& operator-=( int num_chars ) noexcept {
 			return num_chars >= 0 ? *this -= static_cast<index_t>( num_chars )
 				: *this += static_cast<index_t>( -num_chars ); }
 
-		// Get a copy of the specified iterator moved forward by the specified number of characters.
+
+		// Get a copy of the specified iterator moved forward by the specified number of UTF-8 characters.
 		inline friend string_iterator operator+( const string_iterator& itr, index_t num ) noexcept {
 			return string_iterator( itr ) += num; }
 
 		// Get a copy of the specified iterator moved forward (or backward if negative)
-		// by the specified number of characters.
+		// by the specified number of UTF-8 characters.
 		inline friend string_iterator operator+( const string_iterator& itr, long_t num ) noexcept {
 			return string_iterator( itr ) += num; }
 
 		// Get a copy of the specified iterator moved forward (or backward if negative)
-		// by the specified number of characters.
+		// by the specified number of UTF-8 characters.
 		inline friend string_iterator operator+( const string_iterator& itr, int num ) noexcept {
 			return string_iterator( itr ) += num; }
 
 
-		// Get number of characters between two iterators of the same source.
+		// Get number of UTF-8 characters between two iterators of the same source.
 		// Throws [eon::WrongSource] if different sources!
 		friend long_t operator-( const string_iterator& lhs, const string_iterator& rhs );
 
-		// Get a copy of the specified iterator moved backward by the specified number of characters.
+		// Get a copy of the specified iterator moved backward by the specified number of UTF-8 characters.
 		inline friend string_iterator operator-( const string_iterator& itr, index_t num ) noexcept {
 			return string_iterator( itr ) -= num; }
 
 		// Get a copy of the specified iterator moved backward (or forward if negative)
-		// by the specified number of characters.
+		// by the specified number of UTF-8 characters.
 		inline friend string_iterator operator-( const string_iterator& itr, long_t num ) noexcept {
 			return string_iterator( itr ) -= num; }
 
 		// Get a copy of the specified iterator moved backward (or forward if negative)
-		// by the specified number of characters.
+		// by the specified number of UTF-8 characters.
 		inline friend string_iterator operator-( const string_iterator& itr, int num ) noexcept {
 			return string_iterator( itr ) -= num; }
 
@@ -437,10 +463,10 @@ namespace eon
 		//
 	public:
 
-		// Compare against another 'string_iterator' by comparing source positions.
+		// Compare against another iterator by comparing source positions.
 		// Returns -1 if 'this' occurs before 'other', 0 if same, and 1 if after.
 		// NOTE: If different sources, then source (start) addresses are compared!
-		// NOTE: End positions are accounted for!
+		// The following rule applies when neither iterator is 'invalid': 'rend' < 'first' < 'last' < 'end'.
 		int compare( const string_iterator& other ) const noexcept;
 
 		// Check if 'this' comes before 'other' using [compare].
@@ -471,8 +497,8 @@ namespace eon
 	public:
 
 		// Given a raw byte string with a 'start' and an 'end' position, set
-		// 'codepoint' to the first codepoint at or after 'start' and return
-		// the number of bytes it occupies. Zero if not invalid unicode.
+		// 'codepoint' to the first actual codepoint at or after 'start' and
+		// return the number of bytes it occupies. Zero if not invalid unicode.
 		static index_t bytesToUnicode( const char* start, const char* end, char_t& codepoint );
 
 		// Given a codepoint, convert it into bytes.
@@ -519,14 +545,17 @@ namespace eon
 		//
 	private:
 
-		const char* Pos{ nullptr };			// Address of character in string.
-		const char* Source{ nullptr };		// Start of source string.
-		const char* SourceEnd{ nullptr };	// End of source string.
+		const char* Pos{ nullptr };			// Pointer to current character.
+		index_t NumChar{ 0 };				// UTF-8 position within source.
+
+		const char* Source{ nullptr };		// Pointer to first byte in source.
+		const char* SourceEnd{ nullptr };	// Pointer to end of source.
+		index_t NumSourceChars{ 0 };		// Number of UTF-8 characters in source.
+
 		char_t Codepoint{ nochar };			// Translated code point at 'Pos'.
 		charsize_t CodepointSize{ 0 };		// Number of bytes in code point.
-		index_t NumChar{ 0 };				// Character position from start
-		index_t NumSourceChars{ 0 };		// Total number of characters in source.
-		bool ValidUTF8{ true };				// All valid UTF-8 characters?
+
+		bool ValidUTF8{ true };				// Confirmation on whether All valid UTF-8 characters?
 
 		// Best friends with [eon::substring]!
 		friend class substring;

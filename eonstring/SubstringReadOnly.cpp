@@ -49,7 +49,7 @@ namespace eon
 		if( !isHighToLow() )
 			return *this;
 		if( End.atREnd() )
-			return substring( string_iterator( End ).resetToBegin(), Beg + 1 );
+			return substring( string_iterator( End ).resetToFirst(), Beg + 1 );
 		else
 			return substring( End + 1, Beg + 1 );
 	}
@@ -213,9 +213,9 @@ namespace eon
 		return isLowToHigh() ? begin() + num_char : begin() - num_char;
 	}
 	EON_TEST( substring, iterator, no_source,
-		EON_FALSE( substring().iterator( 0 ).hasSource() ) );
+		EON_TRUE( substring().iterator( 0 ).isVoid() ) );
 	EON_TEST( substring, iterator, empty,
-		EON_TRUE( substring( "" ).iterator( 0 ).hasSource() ) );
+		EON_FALSE( substring( "" ).iterator( 0 ).isVoid() ) );
 	EON_TEST( substring, iterator, lowToHigh,
 		EON_EQ( char_t( 'c' ), *substring( "abcdef" ).iterator( 2 ) ) );
 	EON_TEST( substring, iterator, highToLow,

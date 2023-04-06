@@ -123,7 +123,7 @@ namespace eon
 
 
 		// Check if the substring iterators have a source and are not both at the end of that source.
-		inline operator bool() const noexcept { return Beg.hasSource() && End.hasSource() && ( Beg || End ); }
+		inline operator bool() const noexcept { return !Beg.isVoid() && !End.isVoid() && ( Beg || End ); }
 
 		// Check if the substring is empty.
 		// NOTE: A source-less substring is by definition empty!
@@ -131,7 +131,7 @@ namespace eon
 
 		// Check if there is a source.
 		// NOTE: A substring with source can still be empty!
-		inline bool hasSource() const noexcept { return Beg.hasSource() && End.hasSource(); }
+		inline bool hasSource() const noexcept { return !Beg.isVoid() && !End.isVoid(); }
 
 		// Get number of characters in substring.
 		inline index_t numChars() const noexcept { return static_cast<index_t>( End >= Beg ? End - Beg : Beg - End ); }

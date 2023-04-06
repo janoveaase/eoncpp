@@ -64,7 +64,7 @@ namespace eon
 
 		// If first character is the first in the string and also a letter,
 		// then we need not search any further.
-		bool is_first = start == start.getBegin();
+		bool is_first = start == start.getFirst();
 		if( is_first && chars.isLetter( *start ) )
 			return start;
 
@@ -103,7 +103,7 @@ namespace eon
 
 		// If first character is the first in the string and also a letter,
 		// then we need not search any further.
-		bool is_first = start == start.getBegin();
+		bool is_first = start == start.getFirst();
 		if( is_first && chars.isLetter( *start ) )
 			return start;
 
