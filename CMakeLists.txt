@@ -1,75 +1,68 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-project(Eon LANGUAGES CXX)
-set(VERSION "0.1.1")
-message(STATUS "Eon C++ v${VERSION}")
+cmake_minimum_required(VERSION 3.25)
+project( Eon
+	VERSION 0.1.1
+)
+
+message(STATUS "${PROJECT_NAME} C++ v${PROJECT_VERSION}")
+include(GNUInstallDirs)
+include(CTest)
 
 # Configuration
-set(EON_SOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "The directory containing the source files")
-set(EON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install")
-set(EON_BINARY_DIR "bin" CACHE STRING "Where to install binaries under EON_INSTALL_DIR")
-set(EON_LIBRARY_DIR "lib" CACHE STRING "Where to install libraries under EON_INSTALL_DIR")
-set(EON_INCLUDE_DIR "include" CACHE STRING "Where to install headers under EON_INSTALL_DIR")
-set(EON_TESTS_DIR "eontests" CACHE PATH "Where to install tests under EON_INSTALL_DIR")
-set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Postfix to debug builds")
-
-set(EON_BUILD_TESTS ON CACHE BOOL "Include tests in build?")
-set(EON_INLINE_TESTS ON CACHE BOOL "Include inline unit tests in build?")
-set(EON_BUILD_FILESYS ON CACHE BOOL "Include the File System package")
-set(EON_BUILD_TYPESYSTEM ON CACHE BOOL "Include the Type System package")
-#set(EON_BUILD_EDT OFF CACHE BOOL "Build the Eon Data Tuple package")
-set(EON_BUILD_EDOC OFF CACHE BOOL "Build the Eon Documentation package")
-set(EON_BUILD_TOKENIZER OFF CACHE BOOL "Build the Tokenizer package")
-set(EON_BUILD_PARSER ON CACHE BOOL "Build the Eon Parser package")
-set(EON_BUILD_EONEDOCGEN OFF CACHE BOOL "Build the Eon Document Generator")
-set(EON_TEST_LOCALE_NO OFF CACHE BOOL "Check if Norwegian locale is present on host computer")
-set(EON_STATIC_RUNTIME ON CACHE BOOL "Use static runtime libraries")
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions(-D_DEBUG)
-endif()
-set(CMAKE_CXX_STANDARD 17)
-
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+option(EON_INLINE_TESTS "Include inline unit tests in build?" ON)
+option(EON_BUILD_FILESYS "Include the File System package" ON)
+option(EON_BUILD_TYPESYSTEM "Include the Type System package" ON)
+#option(EON_BUILD_EDT "Build the Eon Data Tuple package")
+option(EON_BUILD_EDOC "Build the Eon Documentation package")
+option(EON_BUILD_TOKENIZER "Build the Tokenizer package")
+option(EON_BUILD_PARSER "Build the Eon Parser package" ON)
+option(EON_BUILD_EONEDOCGEN "Build the Eon Document Generator")
+option(EON_STATIC_RUNTIME "Use static runtime libraries" ON)
 
 if(EON_STATIC_RUNTIME)
 	message(STATUS "Using static runtime.")
-	if(CMAKE_COMPILER_IS_GNUCC)
-		include(CheckCCompilerFlag)
-		check_c_compiler_flag(-static-libgcc has_gnucc_static_libgcc)
-		if(has_gnucc_static_libgcc)
-			foreach(_type EXE SHARED MODULE)
-				set(CMAKE_${_type}_LINKER_FLAGS "${CMAKE_${_type}_LINKER_FLAGS} -static-libgcc")
-			endforeach()
-		endif()
+	if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+		add_link_options(-static-libgcc)
 	endif()
-	if(CMAKE_COMPILER_IS_GNUCXX)
-		include(CheckCXXCompilerFlag)
-		check_cxx_compiler_flag(-static-libstdc++ has_gnucxx_static_libstdcxx)
-		if(has_gnucxx_static_libstdcxx)
-			foreach(_type EXE SHARED MODULE)
-				set(CMAKE_${_type}_LINKER_FLAGS "${CMAKE_${_type}_LINKER_FLAGS} -static-libstdc++")
-			endforeach()
-		endif()
+	if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+		add_link_options(-static-libgcc -static-libstdc++)
 	endif()
-	if( MSVC )
-		foreach(lang C CXX)
-			foreach(config RELEASE MINSIZEREL DEBUG RELWITHDEBINFO)
-				string(REPLACE "/MD" "/MT" CMAKE_${lang}_FLAGS_${config} "${CMAKE_${lang}_FLAGS_${config}}")
-			endforeach()
-		endforeach()
-	endif()
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
+function(eon_add_library)
+	message(STATUS " -> ${PROJECT_NAME}")
 
-if(EON_BUILD_TESTS)
-	add_subdirectory(eontest)
-endif()
-if(EON_INLINE_TESTS)
-	add_definitions( -DEON_INLINE_TEST )
-	if(EON_TEST_LOCALE_NO)
-		add_definitions( -DEON_TEST_LOCALE_NO )
-	endif()
-endif()
+	add_library(${PROJECT_NAME})
+	file(GLOB sources *.cpp *.natvis)
+	list(FILTER sources INCLUDE REGEX "[A-Z][a-zA-Z]+\.cpp" )
+	file(GLOB public_headers *.h)
+	target_sources(${PROJECT_NAME}
+		PRIVATE
+			${sources}
+		PUBLIC FILE_SET HEADERS
+			BASE_DIRS ..
+			FILES
+				${public_headers}
+	)
+	target_include_directories(${PROJECT_NAME}
+		PUBLIC
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+			$<INSTALL_INTERFACE:include>
+	)
+	target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+	set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Eon/${PROJECT_NAME}")
+
+	install(
+		TARGETS ${PROJECT_NAME}
+		EXPORT EonCpp
+		FILE_SET HEADERS
+	)
+endfunction()
+
+add_subdirectory(eontest)
 add_subdirectory(eoninlinetest)
+
 add_subdirectory(eonterminal)
 add_subdirectory(eoncontainers)
 #add_subdirectory(eonstack)
