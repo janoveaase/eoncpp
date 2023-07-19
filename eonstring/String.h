@@ -323,7 +323,8 @@ namespace eon
 		// Descard current details and use a single codepoint as new value.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid Unicode codepoint!
 		inline string& operator=( char_t input ) {
-			uint32_t bytes; auto num = iterator::unicodeToBytes( input, bytes ); return assign( (const char*)&bytes, num ); }
+			uint32_t bytes; auto num = iterator::unicodeToBytes( input, bytes ); return assign(
+				(const char*)&bytes, num ); }
 
 		// Discard current details and use a single signed character as new value.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid Unicode codepoint!
@@ -992,8 +993,9 @@ namespace eon
 		// Comparison is done using a binary char_t predicate.
 		// NOTE: ASCII-only optimization is only done if [eon::strcmp::chr::Cmp] is used!
 		template<typename compare_predicate = strcmp::chr>
-		inline string remove( char to_remove, const substring& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
-			return replace( string( to_remove ), string::Empty, sub ); }
+		inline string remove(
+			char to_remove, const substring& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
+				return replace( string( to_remove ), string::Empty, sub ); }
 
 
 		// Get a copy of the string with standard C single character escapes processed.
@@ -1752,8 +1754,9 @@ namespace eon
 		// Comparison is done using a binary char_t predicate.
 		// NOTE: ASCII-only optimization is only done if [eon::strcmp::chr::Cmp] is used!
 		template<typename compare_predicate = strcmp::chr>
-		inline substring findFirst( const string& to_find, const compare_predicate& cmp = strcmp::chr::Cmp ) const noexcept {
-			return substr().findFirst( to_find.substr(), cmp ); }
+		inline substring findFirst(
+			const string& to_find, const compare_predicate& cmp = strcmp::chr::Cmp ) const noexcept {
+				return substr().findFirst( to_find.substr(), cmp ); }
 
 		// Find first occurrence of 'to_find' string in 'sub' substring of 'this'.
 		// Returns the found substring within 'this' - 'false' substring if not found.
@@ -2229,19 +2232,24 @@ namespace eon
 		static inline bool isLetter( char_t codepoint ) noexcept { return Characters::get().isLetter( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Letter, Upper Case' category.
-		static inline bool isLetterUpperCase( char_t codepoint ) noexcept { return Characters::get().isLetterUpperCase( codepoint ); }
+		static inline bool isLetterUpperCase( char_t codepoint ) noexcept {
+			return Characters::get().isLetterUpperCase( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Letter, Lower Case' category.
-		static inline bool isLetterLowerCase( char_t codepoint ) noexcept { return Characters::get().isLetterLowerCase( codepoint ); }
+		static inline bool isLetterLowerCase( char_t codepoint ) noexcept {
+			return Characters::get().isLetterLowerCase( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Letter, Title Case' category.
-		static inline bool isLetterTitleCase( char_t codepoint ) noexcept { return Characters::get().isLetterTitleCase( codepoint ); }
+		static inline bool isLetterTitleCase( char_t codepoint ) noexcept {
+			return Characters::get().isLetterTitleCase( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Letter, Modifier' category.
-		static inline bool isLetterModifier( char_t codepoint ) noexcept { return Characters::get().isLetterModifier( codepoint ); }
+		static inline bool isLetterModifier( char_t codepoint ) noexcept {
+			return Characters::get().isLetterModifier( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Letter, Other' category.
-		static inline bool isLetterOther( char_t codepoint ) noexcept { return Characters::get().isLetterOther( codepoint ); }
+		static inline bool isLetterOther( char_t codepoint ) noexcept {
+			return Characters::get().isLetterOther( codepoint ); }
 
 
 		// Check if the specified Unicode codepoint is in the 'Mark, Spacing Combining' category.
@@ -2249,10 +2257,12 @@ namespace eon
 			return Characters::get().isMarkSpacingCombining( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Mark, Nonspacing' category.
-		static inline bool isMarknonSpacing( char_t codepoint ) noexcept { return Characters::get().isMarkNonspacing( codepoint ); }
+		static inline bool isMarknonSpacing( char_t codepoint ) noexcept {
+			return Characters::get().isMarkNonspacing( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Mark, Enclosing' category.
-		static inline bool isMarkEnclosing( char_t codepoint ) noexcept { return Characters::get().isMarkEnclosing( codepoint ); }
+		static inline bool isMarkEnclosing( char_t codepoint ) noexcept {
+			return Characters::get().isMarkEnclosing( codepoint ); }
 
 
 		// Check if the specified Unicode codepoint is in the 'Number' general category.
@@ -2260,34 +2270,41 @@ namespace eon
 			return isNumberDecimalDigit( codepoint ) || isNumberLetter( codepoint ) || isNumberOther( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Number, Ascii Digit' custom category.
-		static inline bool isNumberAsciiDigit( char_t codepoint ) noexcept { return Characters::get().isNumberAsciiDigit( codepoint ); }
+		static inline bool isNumberAsciiDigit( char_t codepoint ) noexcept {
+			return Characters::get().isNumberAsciiDigit( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Number, Decimal Digit' category.
 		static inline bool isNumberDecimalDigit( char_t codepoint ) noexcept {
 			return Characters::get().isNumberDecimalDigit( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Number, Letter' category.
-		static inline bool isNumberLetter( char_t codepoint ) noexcept { return Characters::get().isNumberLetter( codepoint ); }
+		static inline bool isNumberLetter( char_t codepoint ) noexcept {
+			return Characters::get().isNumberLetter( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Number, Other' category.
-		static inline bool isNumberOther( char_t codepoint ) noexcept { return Characters::get().isNumberOther( codepoint ); }
+		static inline bool isNumberOther( char_t codepoint ) noexcept {
+			return Characters::get().isNumberOther( codepoint ); }
 
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation' general category.
-		static inline bool isPunctuation( char_t codepoint ) noexcept { return Characters::get().isPunctuation( codepoint ); }
+		static inline bool isPunctuation( char_t codepoint ) noexcept {
+			return Characters::get().isPunctuation( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation, Connector' category.
 		static inline bool isPunctuationConnector( char_t codepoint ) noexcept {
 			return Characters::get().isPunctuationConnector( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation, Dash' category.
-		static inline bool isPunctuationDash( char_t codepoint ) noexcept { return Characters::get().isPunctuationDash( codepoint ); }
+		static inline bool isPunctuationDash( char_t codepoint ) noexcept {
+			return Characters::get().isPunctuationDash( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation, Open' category.
-		static inline bool isPunctuationOpen( char_t codepoint ) noexcept { return Characters::get().isPunctuationOpen( codepoint ); }
+		static inline bool isPunctuationOpen( char_t codepoint ) noexcept {
+			return Characters::get().isPunctuationOpen( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation, Close' category.
-		static inline bool isPunctuationClose( char_t codepoint ) noexcept { return Characters::get().isPunctuationClose( codepoint ); }
+		static inline bool isPunctuationClose( char_t codepoint ) noexcept {
+			return Characters::get().isPunctuationClose( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation, Initial Quote' category.
 		static inline bool isPunctuationInitialQuote( char_t codepoint ) noexcept {
@@ -2298,37 +2315,45 @@ namespace eon
 			return Characters::get().isPunctuationFinalQuote( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Punctuation, Other' category.
-		static inline bool isPunctuationOther( char_t codepoint ) noexcept { return Characters::get().isPunctuationOther( codepoint ); }
+		static inline bool isPunctuationOther( char_t codepoint ) noexcept {
+			return Characters::get().isPunctuationOther( codepoint ); }
 
 
 		// Check if the specified Unicode codepoint is in the 'Symbol' general category.
 		static inline bool isSymbol( char_t codepoint ) noexcept { return Characters::get().isSymbol( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Symbol, Currency' category.
-		static inline bool isSymbolCurrency( char_t codepoint ) noexcept { return Characters::get().isSymbolCurrency( codepoint ); }
+		static inline bool isSymbolCurrency( char_t codepoint ) noexcept {
+			return Characters::get().isSymbolCurrency( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Symbol, Modifier' category.
-		static inline bool isSymbolModifier( char_t codepoint ) noexcept { return Characters::get().isSymbolModifier( codepoint ); }
+		static inline bool isSymbolModifier( char_t codepoint ) noexcept {
+			return Characters::get().isSymbolModifier( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Symbol, Math' category.
-		static inline bool isSymbolMath( char_t codepoint ) noexcept { return Characters::get().isSymbolMath( codepoint ); }
+		static inline bool isSymbolMath( char_t codepoint ) noexcept {
+			return Characters::get().isSymbolMath( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Symbol, Other' category.
-		static inline bool isSymbolOther( char_t codepoint ) noexcept { return Characters::get().isSymbolOther( codepoint ); }
+		static inline bool isSymbolOther( char_t codepoint ) noexcept {
+			return Characters::get().isSymbolOther( codepoint ); }
 
 
 		// Check if the specified Unicode codepoint is in the 'Separator' general category.
-		static inline bool isSeparator( char_t codepoint ) noexcept { return Characters::get().isSeparator( codepoint ); }
+		static inline bool isSeparator( char_t codepoint ) noexcept {
+			return Characters::get().isSeparator( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Separator, Line' category.
-		static inline bool isSeparatorLine( char_t codepoint ) noexcept { return Characters::get().isSeparatorLine( codepoint ); }
+		static inline bool isSeparatorLine( char_t codepoint ) noexcept {
+			return Characters::get().isSeparatorLine( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Separator, Paragraph' category.
 		static inline bool isSeparatorParagraph( char_t codepoint ) noexcept {
 			return Characters::get().isSeparatorParagraph( codepoint ); }
 
 		// Check if the specified Unicode codepoint is in the 'Separator, Space' category.
-		static inline bool isSeparatorSpace( char_t codepoint ) noexcept { return Characters::get().isSeparatorSpace( codepoint ); }
+		static inline bool isSeparatorSpace( char_t codepoint ) noexcept {
+			return Characters::get().isSeparatorSpace( codepoint ); }
 
 
 		// Check if a Unicode codepoint is a word character.
@@ -2338,7 +2363,8 @@ namespace eon
 
 		// Check if a Unicode codepoint is a space character.
 		// NOTE: Includes tab, space, and all characters in the 'Separator' category!
-		static inline bool isSpaceChar( char_t codepoint ) noexcept { return ( codepoint >= 0x09 && codepoint <= 0x0D ) || isSeparator( codepoint ); }
+		static inline bool isSpaceChar( char_t codepoint ) noexcept {
+			return ( codepoint >= 0x09 && codepoint <= 0x0D ) || isSeparator( codepoint ); }
 
 
 

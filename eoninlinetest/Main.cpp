@@ -249,7 +249,7 @@ int main( int argc, const char* argv[] )
 	auto duration = timer.elapsed();
 	if( total > 0 )
 		eon::term << "Running " << eon::style::magenta << total << eon::style::normal << " test"
-		<< ( total > 1 ? "s" : "" ) << " tests took: " << eon::style::magenta << duration << eon::style::normal << "\n";
+		<< ( total > 1 ? "s" : "" ) << " took: " << eon::style::magenta << duration << eon::style::normal << "\n";
 
 	if( total == 0 )
 	{

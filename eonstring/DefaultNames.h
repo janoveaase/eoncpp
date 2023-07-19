@@ -266,11 +266,11 @@ namespace eon
 
 
 	// Macro for definining common names (prefixed by 'name_') in other places
-#define EON_NAME( new_name ) const name_t name_##new_name{ eon::name( #new_name ) }
+#define EON_NAME( new_name ) const name_t name_##new_name{ ::eon::name( #new_name ) }
 
 	// Macro for defining common compiler names (prefixed by 'name_') in other places
-#define EON_COMPILERNAME( new_name, text ) const name_t name_##new_name{ eon::compilerName( text ) }
+#define EON_COMPILERNAME( new_name, text ) const name_t name_##new_name{ ::eon::compilerName( text ) }
 
 	// Macro for defining common compiler names (prefixed by 'symbol_') in other places
-#define EON_SYMBOL( symb_name, symbol ) const name_t symbol_##symb_name{ eon::compilerName( symbol ) }
+#define EON_SYMBOL( symb_name, symbol ) const name_t symbol_##symb_name{ ::eon::compilerName( symbol ) }
 }
