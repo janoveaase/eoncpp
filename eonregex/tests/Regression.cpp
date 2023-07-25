@@ -55,6 +55,15 @@ namespace eon
 		WANT_FALSE( spaces_rx.match( "   " ) );
 	}
 
+	TEST( RegExTest, boundary_real_issue )
+	{
+		regex rx( R"(a.+? |;|$)" );
+
+		WANT_TRUE( rx.match( "a1 " ) );
+		WANT_TRUE( rx.match( "a1;" ) );
+		WANT_TRUE( rx.match( "a1" ) );
+	}
+
 	TEST( RegExTest, prefix_not )
 	{
 		regex rx( R"(.\b!a\l)" );
@@ -531,7 +540,7 @@ namespace eon
 	{
 		string str_good{ "Eon is great!" };
 		regex expr{ R"(@<one>(\w+) is @<2_>(\w+)@<three>(.))" };
-		
+
 		rx::match match;
 		REQUIRE_NO_EXCEPT( match = expr.match( str_good ) );
 		WANT_TRUE( match );
@@ -733,7 +742,7 @@ namespace eon
 		REQUIRE_EQ( 2, found.size() ) << "Failed to find good";
 		WANT_EQ( "caa", eon::string( found[ 0 ].group( name_complete ) ) ) << "Wrong first value found";
 		WANT_EQ( "ba", eon::string( found[ 1 ].group( name_complete ) ) ) << "Wrong second value found";
-		
+
 		found = rx.findAll( bad );
 		WANT_EQ( 0, found.size() ) << "Found bad";
 	}

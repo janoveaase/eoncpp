@@ -324,6 +324,14 @@ namespace eon
 					++matches;
 				}
 			}
+
+			// We have no more input data, but there is still a change 'Next' can match (like boundary).
+			if( _next()->match( data_tmp ) )
+			{
+				data = std::move( data_tmp );
+				return true;
+			}
+
 			return false;
 		}
 		bool Node::_matchNext( RxData& data, index_t steps )
