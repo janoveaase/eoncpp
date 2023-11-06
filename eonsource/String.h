@@ -107,7 +107,7 @@ namespace eon
 			//
 			// Helpers
 			//
-		PRIVATE:
+		EON_PRIVATE:
 
 			void _forward( Pos& pos, index_t num_chars );
 			void _backward( Pos& pos, index_t num_chars );
@@ -121,7 +121,7 @@ namespace eon
 			//
 			// Attributes
 			//
-		PRIVATE:
+		EON_PRIVATE:
 
 			string Data;
 			std::vector<size_t> NumCharsOnLines;

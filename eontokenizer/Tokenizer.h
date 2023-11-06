@@ -120,13 +120,13 @@ namespace eon
 
 
 
-	PRIVATE:
+	EON_PRIVATE:
 		class CharMatch
 		{
 		public:
 			inline CharMatch( name_t name, CharacterGrouping type ) { Name = name; Type = type; }
 
-		PRIVATE:
+		EON_PRIVATE:
 			name_t Name;
 			CharacterGrouping Type;
 		};

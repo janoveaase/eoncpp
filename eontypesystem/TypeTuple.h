@@ -376,7 +376,7 @@ namespace eon
 		//
 		// Attributes
 		//
-	PROTECTED:
+	EON_PROTECTED:
 
 		// Hasher object for generating hash values for name values.
 		static std::hash<name_t> NameHasher;

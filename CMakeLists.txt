@@ -11,4 +11,4 @@ include(configuration.cmake)
 include(functions.cmake)
 include(modules.cmake)
 
-install(FILES eoncppConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EonCpp )
+install(FILES eoncppConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/eoncpp )

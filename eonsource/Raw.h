@@ -89,7 +89,7 @@ namespace eon
 			//
 			// Attributes
 			//
-		PROTECTED:
+		EON_PROTECTED:
 
 			string Name;
 			std::vector<size_t> NumCharsOnLines;

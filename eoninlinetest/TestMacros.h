@@ -10,10 +10,12 @@
 
 
 	// Private declaration in inline test context.
-#	define PRIVATE public
+#	define EON_PRIVATE public
+#	define PRIVATE public		// DEPRECATED!
 
 	// Protected declaration in inline test context.
-#	define PROTECTED public
+#	define EON_PROTECTED public
+#	define PROTECTED public		// DEPRECATED!
 
 	// Specify a comma-separated list enclosed in curly braces (Comma-Separated Curly-braced).
 #	define EON_CURLY( ... ) { __VA_ARGS__ }
@@ -249,28 +251,28 @@
 
 
 
-#	define TEST_NAME( class_name, function_name, test_name ) class_name##_##function_name##_##test_name
-#	define TEST_SUPER( class_name, function_name, test_name ) ::eonitest::EonTest(\
+#	define EON_TEST_NAME( class_name, function_name, test_name ) class_name##_##function_name##_##test_name
+#	define EON_TEST_SUPER( class_name, function_name, test_name ) ::eonitest::EonTest(\
 		::eonitest::TestName( #class_name, #function_name, #test_name ) )
-#	define TEST_SUPER_SANDBOX( class_name, function_name, test_name ) ::eonitest::EonTestSandbox(\
+#	define EON_TEST_SUPER_SANDBOX( class_name, function_name, test_name ) ::eonitest::EonTestSandbox(\
 		::eonitest::TestName( #class_name, #function_name, #test_name ) )
-#	define TEST_LINE std::to_string( __LINE__ )
-#	define REGISTRATION_DUMMY( class_name, function_name, test_name )\
+#	define EON_TEST_LINE std::to_string( __LINE__ )
+#	define EON_REGISTRATION_DUMMY( class_name, function_name, test_name )\
 	class_name##_##function_name##_##test_name##_registration_dummy
 
 
 #define EON_REGISTER_TEST( class_name, function_name, test_name )\
-	bool REGISTRATION_DUMMY( class_name, function_name, test_name )\
+	bool EON_REGISTRATION_DUMMY( class_name, function_name, test_name )\
 	{\
 		::eonitest::TestBase::registerTest(\
 			eonitest::TestName( #class_name, #function_name, #test_name ),\
-			eonitest::TestLocation( __FILE__, TEST_LINE ),\
-			new ::eonitest::TstFactory<TEST_NAME( class_name, function_name, test_name )>() )\
+			eonitest::TestLocation( __FILE__, EON_TEST_LINE ),\
+			new ::eonitest::TstFactory<EON_TEST_NAME( class_name, function_name, test_name )>() )\
 	}
 
 
 
-#	define TEST_BODY( test_expression )\
+#	define EON_TEST_BODY( test_expression )\
 	void test_body() override\
 	{\
 		auto error = canRun();\
@@ -283,7 +285,7 @@
 		test_expression;\
 	}
 
-#	define TEST_BODY_2STEP( step1, test_expression )\
+#	define EON_TEST_BODY_2STEP( step1, test_expression )\
 	void test_body() override\
 	{\
 		auto error = canRun();\
@@ -297,7 +299,7 @@
 		test_expression;\
 	}
 
-#	define TEST_BODY_3STEP( step1, step2, test_expression )\
+#	define EON_TEST_BODY_3STEP( step1, step2, test_expression )\
 	void test_body() override\
 	{\
 		auto error = canRun();\
@@ -312,7 +314,7 @@
 		test_expression;\
 	}
 
-#	define TEST_BODY_4STEP( step1, step2, step3, test_expression )\
+#	define EON_TEST_BODY_4STEP( step1, step2, step3, test_expression )\
 	void test_body() override\
 	{\
 		auto error = canRun();\
@@ -336,13 +338,13 @@
 	// 1. EON_TEST( myclass, myfunc, mytest,
 	// 2.     EON_EQ( expected, actual ) );
 #	define EON_TEST( class_name, function_name, test_name, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTest\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTest\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY( test_expression )\
+		EON_TEST_BODY( test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 	// Define a two-step test where the specified test expression (second step)
@@ -354,13 +356,13 @@
 	// 2.     step1;
 	// 2.     EON_EQ( expected, actual ) );
 #	define EON_TEST_2STEP( class_name, function_name, test_name, step1, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTest\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTest\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY_2STEP( step1, test_expression )\
+		EON_TEST_BODY_2STEP( step1, test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 	// Define a three-step test where the specified test expression (third
@@ -373,13 +375,13 @@
 	// 3.     step2;
 	// 4.     EON_EQ( expected, actual ) );
 #	define EON_TEST_3STEP( class_name, function_name, test_name, step1, step2, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTest\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTest\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY_3STEP( step1, step2, test_expression )\
+		EON_TEST_BODY_3STEP( step1, step2, test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 
@@ -391,13 +393,13 @@
 	// 1. EON_TEST( myclass, myfunc, mytest,
 	// 2.     EON_EQ( expected, actual ) );
 #	define EON_TEST_SANDBOX( class_name, function_name, test_name, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY( test_expression )\
+		EON_TEST_BODY( test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 	// Define a two-step test with sandbox where the specified test expression
@@ -409,13 +411,13 @@
 	// 2.     step1;
 	// 2.     EON_EQ( expected, actual ) );
 #	define EON_TEST_2STEP_SANDBOX( class_name, function_name, test_name, step1, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY_2STEP( step1, test_expression )\
+		EON_TEST_BODY_2STEP( step1, test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 	// Define a three-step test with sandbox where the specified test
@@ -428,13 +430,13 @@
 	// 3.     step2;
 	// 4.     EON_EQ( expected, actual ) );
 #	define EON_TEST_3STEP_SANDBOX( class_name, function_name, test_name, step1, step2, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY_3STEP( step1, step2, test_expression )\
+		EON_TEST_BODY_3STEP( step1, step2, test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 	// Define a four-step test with sandbox where the specified test
@@ -448,22 +450,24 @@
 	// 4.     step3;
 	// 5.     EON_EQ( expected, actual ) );
 #	define EON_TEST_4STEP_SANDBOX( class_name, function_name, test_name, step1, step2, step3, test_expression )\
-	class TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
+	class EON_TEST_NAME( class_name, function_name, test_name ) : public eonitest::EonTestSandbox\
 	{\
 	public:\
-		TEST_NAME( class_name, function_name, test_name )() noexcept\
-			: TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
+		EON_TEST_NAME( class_name, function_name, test_name )() noexcept\
+			: EON_TEST_SUPER_SANDBOX( class_name, function_name, test_name ) {}\
 	private:\
-		TEST_BODY_4STEP( step1, step2, step3, test_expression )\
+		EON_TEST_BODY_4STEP( step1, step2, step3, test_expression )\
 	}; EON_REGISTER_TEST( class_name, function_name, test_name )
 
 #else
 
 	// Private declaration in inline test context.
-#	define PRIVATE private
+#	define EON_PRIVATE private
+#	define PRIVATE private			// DEPRECATED!
 
 	// Protected declaration in inline test context.
-#	define PROTECTED protected
+#	define EON_PROTECTED protected
+#	define PROTECTED protected		// DEPRECATED!
 
 	// Define a single-step test where the specified test expression (first and
 	// only step) must evaluate to true.

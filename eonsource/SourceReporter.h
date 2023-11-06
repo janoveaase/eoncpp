@@ -55,7 +55,7 @@ namespace eon
 			// Get the message a formatted string
 			string str() const;
 
-		PRIVATE:
+		EON_PRIVATE:
 			string _formatSource() const;
 			string _formatPosition() const;
 			string _formatSourceIndicator() const;
@@ -66,12 +66,12 @@ namespace eon
 				SourceIndicator() = default;
 				SourceIndicator( Ref source );
 				string format();
-			PRIVATE:
+			EON_PRIVATE:
 				bool _write( string& str );
 				string _startLine();
 				string _writeIndicator();
 				size_t _selectLineLength();
-			PRIVATE:
+			EON_PRIVATE:
 				Ref Source;
 				bool Newline{ false };
 				Pos Start;
@@ -80,7 +80,7 @@ namespace eon
 				int I{ 0 };
 			};
 
-		PRIVATE:
+		EON_PRIVATE:
 			severity Level{ severity::none };
 			string Text;
 			Ref Source;

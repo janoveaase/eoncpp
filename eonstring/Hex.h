@@ -151,7 +151,7 @@ namespace eon
 		//
 		// Helpers
 		//
-	PRIVATE:
+	EON_PRIVATE:
 
 		inline void _assertValidHex( const std::string& hex ) {
 			if( hex.size() % 2 == 1 ) throw Invalid( "Odd number of digits" ); }
@@ -166,7 +166,7 @@ namespace eon
 		//
 		// Attributes
 		//
-	PRIVATE:
+	EON_PRIVATE:
 
 		std::string Value;
 	};

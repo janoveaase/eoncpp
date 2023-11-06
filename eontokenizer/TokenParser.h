@@ -141,7 +141,7 @@ namespace eon
 		//
 		// Attributes
 		//
-	PRIVATE:
+	EON_PRIVATE:
 
 		std::vector<Token> Tokens;
 		size_t View{ 0 };

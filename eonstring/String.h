@@ -249,7 +249,7 @@ namespace eon
 		virtual ~string() = default;
 
 
-	PRIVATE:
+	EON_PRIVATE:
 
 		// Constructor for internal use, where we know the input string is ASCII only.
 		// (Faster than normal construction!)
@@ -2374,7 +2374,7 @@ namespace eon
 		//
 		// Helpers
 		//
-	PRIVATE:
+	EON_PRIVATE:
 
 		template<typename T>
 		inline void _assertValidUtf8( const T& value ) const { if( !value.validUTF8() ) throw InvalidUTF8(); }
@@ -2456,7 +2456,7 @@ namespace eon
 		// Attributes
 		//
 
-	PRIVATE:
+	EON_PRIVATE:
 		std::string Bytes;
 		index_t NumChars{ 0 };	// Number of code points
 

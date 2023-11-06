@@ -95,7 +95,7 @@ namespace eon
 		//
 		// Element classes
 		//
-	PRIVATE:
+	EON_PRIVATE:
 
 		enum class flags
 		{
