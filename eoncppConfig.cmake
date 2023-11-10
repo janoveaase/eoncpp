@@ -1,3 +1,9 @@
+# Do not import target more than once.
+if(TARGET EonCpp::eoncpp)
+	return()
+endif()
+
+
 # Add libraries based upon options
 if(EON_INLINE_TESTS)
 	set(Eon_LIBRARIES
@@ -43,8 +49,8 @@ set(Eon_INCLUDE_DIRS ${Eon_INCLUDE_DIRS} CACHE PATH "Eon include directories")
 set(Eon_LIBRARIES ${Eon_LIBRARIES} CACHE FILEPATH "Eon libraries")
 
 # Create an imported target for the library
-add_library(Eon::eon INTERFACE IMPORTED)
-set_target_properties(Eon::eon PROPERTIES
+add_library(EonCpp::eoncpp INTERFACE IMPORTED)
+set_target_properties(EonCpp::eoncpp PROPERTIES
 	INTERFACE_INCLUDE_DIRECTORIES "${Eon_INCLUDE_DIRS}"
 	INTERFACE_LINK_LIBRARIES "${Eon_LIBRARIES}"
 )
