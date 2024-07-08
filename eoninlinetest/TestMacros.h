@@ -20,12 +20,12 @@
 	// Specify a comma-separated list enclosed in curly braces (Comma-Separated Curly-braced).
 #	define EON_CURLY( ... ) { __VA_ARGS__ }
 
-#define utf8( value ) u8 ## value
+#define eon_utf8( value ) u8 ## value
 
 #	define EON_TRUE( expression )\
 	Details.Log << "Testing that " << eonitest::style::item_1 << "expression" << eonitest::style::normal\
 		<< " evaluates to " << eonitest::style::item_2 << "true" << "." << '\n';\
-	Details.Log << "  " << eonitest::style::key_1 << "Expression" << eonitest::style::value << utf8( #expression ) << '\n';\
+	Details.Log << "  " << eonitest::style::key_1 << "Expression" << eonitest::style::value << eon_utf8( #expression ) << '\n';\
 	Details.Success = static_cast<bool>( expression );\
 	if( !Details.Success )\
 		Details.Log << "  " << eonitest::style::key_1 << "Value" << eonitest::style::value_1 << "false" << '\n'
@@ -33,7 +33,7 @@
 #	define EON_FALSE( expression )\
 	Details.Log << "Testing that " << eonitest::style::item_1 << "expression" << eonitest::style::normal\
 		<< " evaluates to " << eonitest::style::item_2 << "false" << "." << '\n';\
-	Details.Log << "  " << eonitest::style::key_1 << "Expression" << eonitest::style::value << utf8( #expression ) << '\n';\
+	Details.Log << "  " << eonitest::style::key_1 << "Expression" << eonitest::style::value << eon_utf8( #expression ) << '\n';\
 	Details.Success = !static_cast<bool>( expression );\
 	if( !Details.Success )\
 		Details.Log << "  " << eonitest::style::key_1 << "Value" << eonitest::style::value_1 << "true" << '\n'
@@ -42,9 +42,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " == "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
-		<< utf8( #left_expression ) << '\n';\
+		<< eon_utf8( #left_expression ) << '\n';\
 	Details.Log << "  " << eonitest::style::key_2 << "right" << eonitest::style::value\
-		<< utf8( #right_expression ) << '\n';\
+		<< eon_utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
 	Details.Success = eonitest::BinaryOp::eq( l, r );\
@@ -60,9 +60,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " != "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
-		<< utf8( #left_expression ) << '\n';\
+		<< eon_utf8( #left_expression ) << '\n';\
 	Details.Log << "  " << eonitest::style::key_2 << "right" << eonitest::style::value\
-		<< utf8( #right_expression ) << '\n';\
+		<< eon_utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
 	Details.Success = eonitest::BinaryOp::ne( l, r );\
@@ -78,9 +78,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " < "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
-		<< utf8( #left_expression ) << '\n';\
+		<< eon_utf8( #left_expression ) << '\n';\
 	Details.Log << "  " << eonitest::style::key_2 << "right" << eonitest::style::value\
-		<< utf8( #right_expression ) << '\n';\
+		<< eon_utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
 	Details.Success = eonitest::BinaryOp::lt( l, r );\
@@ -96,9 +96,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " <= "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
-		<< utf8( #left_expression ) << '\n';\
+		<< eon_utf8( #left_expression ) << '\n';\
 	Details.Log << "  " << eonitest::style::key_2 << "right" << eonitest::style::value\
-		<< utf8( #right_expression ) << '\n';\
+		<< eon_utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
 	Details.Success = eonitest::BinaryOp::le( l, r );\
@@ -114,9 +114,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " > "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
-		<< utf8( #left_expression ) << '\n';\
+		<< eon_utf8( #left_expression ) << '\n';\
 	Details.Log << "  " << eonitest::style::key_2 << "right" << eonitest::style::value\
-		<< utf8( #right_expression ) << '\n';\
+		<< eon_utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
 	Details.Success = eonitest::BinaryOp::gt( l, r );\
@@ -132,9 +132,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "left" << eonitest::style::item << " >= "\
 		<< eonitest::style::item_2 << "right" << ":" << '\n';\
 	Details.Log << "  " << eonitest::style::key_1 << "left" << eonitest::style::value\
-		<< utf8( #left_expression ) << '\n';\
+		<< eon_utf8( #left_expression ) << '\n';\
 	Details.Log << "  " << eonitest::style::key_2 << "right" << eonitest::style::value\
-		<< utf8( #right_expression ) << '\n';\
+		<< eon_utf8( #right_expression ) << '\n';\
 	auto l = ( left_expression );\
 	auto r = ( right_expression );\
 	Details.Success = eonitest::BinaryOp::ge( l, r );\
@@ -150,9 +150,9 @@
 	Details.Log << "Testing that " << eonitest::style::item_1 << "lower" << eonitest::style::item << " <= "\
 		<< eonitest::style::item_2 << "value" << eonitest::style::item << " <= "\
 		<< eonitest::style::item_3 << "upper" << ":" << '\n';\
-	Details.Log << "  " << eonitest::style::key_1 << "lower" << eonitest::style::value << utf8( #lower ) << '\n';\
-	Details.Log << "  " << eonitest::style::key_2 << "value" << eonitest::style::value << utf8( #actual_value ) << '\n';\
-	Details.Log << "  " << eonitest::style::key_3 << "upper" << eonitest::style::value << utf8( #upper ) << '\n';\
+	Details.Log << "  " << eonitest::style::key_1 << "lower" << eonitest::style::value << eon_utf8( #lower ) << '\n';\
+	Details.Log << "  " << eonitest::style::key_2 << "value" << eonitest::style::value << eon_utf8( #actual_value ) << '\n';\
+	Details.Log << "  " << eonitest::style::key_3 << "upper" << eonitest::style::value << eon_utf8( #upper ) << '\n';\
 	auto l = ( lower );\
 	auto v = ( actual_value );\
 	auto u = ( upper );\
