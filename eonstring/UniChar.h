@@ -104,7 +104,7 @@ namespace eon
 	static const char_t RoundBrcOpenChr{ '(' }, RoundBrcCloseChr{ ')' };
 	static const char_t CurlyBrcOpenChr{ '{' }, CurlyBrcCloseChr{ '}' };
 	static const char_t SquareBrcOpenChr{ '[' }, SquareBrcCloseChr{ ']' };
-	static const char_t AngleBrcOpenChr{ '{' }, AngleBrcCloseChr{ '}' };
+	static const char_t AngleBrcOpenChr{ '<' }, AngleBrcCloseChr{ '>' };
 	static const char_t ForwSlashChr{ '/' }, BackSlashChr{ '\\' };
 	static const char_t BarChr{ '|' };
 

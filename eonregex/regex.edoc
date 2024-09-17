@@ -1,0 +1,178 @@
+>> !Æon Regular Expressions <<
+Similar to many approaches to regular expressions, but with a few special tweaks that sets it apart.
+
+  --toc Index--><--
+
+An Æon regular expression - *regex* - consists of literal values and meta-characters, where the latter include operators, character groups, quantifiers, and qualifiers.
+
+
+>> Elements
+Before diving into the details of meta-characters, we need to clarify what an *element* is. Quantifiers, operators and qualifiers all apply to *elements*. The following applies:
+
+  1 Any sequence of arbitrary Unicode letters form an element.
+  2 Any sequence of digits form an element.
+  3 Any character not a letter or a digit or a meta-character form an individual element.
+  4 All meta-characters break or form elements on their own.
+  5 Parenthesis can be used to make a group of elements into a larger element.
+  6 Boundary start ("^", "\b", "!^", and "!\b") are not elements of their own, but applies to the element immediately to the right. (Boundary end ("$", "\B", "!$", and "!\B") form proper elements.)
+
+NOTE: Grouping elements using parenthesis will not *capture* anything! Æon captures are always explicit.
+
+
+>> Operators
+Æon regex has two operators: *or* and *not*. The former is expressed using the "|" (pipe) character, the latter the "!" (exclamation point). The *or* operator is binary and applies to the elements immediately before and after. In case of alternating element and *or* operator, each element will be attempted matched in order from first to last. If there is a match, the remaining options are ignored. The *not* operator is unary and applies to the element immediately to the right.
+
+  --code Regex "Or" Operator Example-->
+  alpha|beta|gamma
+  <--
+This will match "alpha", "beta" or "gamma", but no other combination of characters.
+
+As for the "not" operator, this is a non-matching operator. It will fail if the element prefixed with "!" matches, but otherwise it will not match anything. Therefore, the following expression can only tell you if the string to match isn't "alpha" and nothing else:
+
+  --code Regex "Not" Operator Example 1-->
+  !alpha
+  <--
+
+The operator must be used together with other elements to make an actual match:
+
+  --code Regex "Not" Operator Example 2-->
+  !alpha\l+
+  <--
+
+This will match any sequence of letters, except "alpha".
+
+Furthermore, the operator cannot be used together with quantifiers. Specifying e.g., "!alpha+" is an error.
+
+
+>> Quantifiers
+The quantifiers are more or less identical to that of most regular expression implementations. All quantifiers apply to the element immediately to the left.
+
+  "{A}":
+    Match element exactly A number of times.
+  "{A,B}":
+    Match element at least A number of times, at most B.
+    "A" defaults to zero when omitted, "B" to infinite.
+    Matching is greedy by default and will try to match as many as possible before trying to match the rest of the expression.
+  "{A,B}?":
+    Non-greedy version of the above.
+    Match only A number of times before trying to match the rest of the expression.
+  "?":
+    Match element zero or one time. This is the same as "{0,1}".
+  "*":
+    Match zero or more times, greedy. This is the same as "{0,}".
+  "*?":
+    Match zero or more times, non-greedy. This is the same as "{0,}?".
+  "+":
+    Match one or more times, greedy. This is the same as "{1,}".
+  "+?":
+    Match one or more times, non-greedy. This is the same as "{1,}?".
+
+
+>> Qualifiers
+There is only one qualifier and it is unique to Æon.
+
+  "{name}":
+    Previously matched element must be a valid *name*. The typical pattern would be: "\w+{name}".
+    Because Æon names can start with a digit, more common name matching expressions won't work. Therefore, this special construct is included to make proper Æon name matching easy.
+
+
+>> Anchors and Boundaries
+Like the *not* operator, anchors/boundaries will not matching anything. They will fail to match if not at a boundary.
+
+  "^":
+    Anchor to start of input/line. (Fail to match if not at start.)
+  "!^":
+    Anchor to "not start" of input/line. (Fail to match if at start.)
+  "$":
+    Boundary. Fail match if not at end of input/line.
+  "!$":
+    Boundary. Fail match if at end of input/line.
+  "\b":
+    Anchor to start of word. A word is in this context any sequence of characters that is not a punctuation or separator character.
+  "\B":
+    Boundary. Fail match if end of word.
+
+It is important to know that anchors are attached to the element immediately following, they are not elements of their own. "^|\s" will not work! Boundaries are, however, elements in their own right.
+
+NOTE: The "l" and "b" flags will change the meaning of the anchors/boundaries!
+
+
+>> Character Groups
+The following is a complete list of supported patterns for matching various types and groups of characters:
+
+  "[<characters>]":
+    Match one of the character listed. Dashes can be used to specify ranges between literal characters.
+    The backslashed groups below can also be included. Apart from those, the only characters that require backslash are backslash itself, "]", and "-". Double quotes can have backslash, but are not required to. Adding backslash in front of any other character will match backslash + that character.
+  "[^<characters>]":
+    When "^" is the first character within, match any character not listed.
+  ".":
+    Match any character (including newline).
+  "\w":
+    Match any word character = Unicode letters, basic digits, and underscore.
+  "\W":
+    Match any non-word character.
+  "\l":
+    Match any Unicode letter.
+  "\L":
+    Match any character that is not a Unicode letter.
+  "\u":
+    Match any lower case Unicode letter.
+  "\U":
+    Match any upper case Unicode letter.
+  "\d":
+    Match any basic digit. This is the same as "[0-9]".
+  "\D":
+    Match any character that is not a basic digit. This is the same as "[^0-9]".
+  "\s":
+    Match any space character. This includes all the characters in the *separator* character category.
+  "\S":
+    Match any character that is not a space character.
+  "\p":
+    Match any character in the *punctuation* category.
+  "\P":
+    Match any character not in the *punctuation* category.
+  "\e":
+    Match the escaped character following.  *TODO!*
+
+NOTE: The complementary (e.g., "\s" vs. "\S") is not the same as putting "!" (not) in front. ("\S" is not the same as "!\s".) The former will make an actual match (e.g., if a non-space letter is seen), the latter will only cause a failed match if it is not.
+
+
+>> Captures
+In order to capture a part of the matched string data, we need to explicitly mark this. (Except for the whole match, which is captured under the group name "complete".)
+Captures can be extracted after the match has completed, but they can also be referenced later within the same expression.
+
+  "@<A>(B)":
+    Match B (a sub-expression) and record using the group name A. Example: "@<eonname>(\w+{name})".
+  "@:<A>":
+    Match previously captured group A. Example: "@<eonname>(\w+{name})\s+@:<eonname>". (Will match e.g., "alpha   alpha".)
+  "!@:<A>":
+    Fail match if the previously captured group A matches. Example: "@<eonname>(\w+{name})\s+!@:<eonname>.+". ( Will match "alpha   beta" but not "alpha  alpha".)
+
+
+>> Flags
+Flags are specified as a second argument to a regex definition and will influence how matching is done. Each flag is a single letter and one can specify multiple flag letters in the same string argument.
+
+  "i":
+    Ignore case. This has effekt on literal character values and the "\l" (letter) character group. "\u" and "\U" will ignore thist flag!
+  "l":
+    Make "^" and "$" match start and end of line rather than start and end of the full input.
+  "b":
+    Make "\b" and "\B" match any sequence of characters between start of line or space and end of line or space respectively.
+  "f":
+    If there is a literal element at the end of the expression to be matched at least once, then setting this flag will force that last element to be matched first in order to fail fast if it doesn't match. Can be very efficient if the expression is otherwise complex and long, and a majority of input strings are presumed to fail.
+  "q":
+    If the expression contains one or more literal elements to be matched at least once, then setting this flag will trigger a quick search for those elements (in the correct order) before the expression is attempted matched. Can be very efficient if the expression is complex and long, and a majority of input strings are presumed to fail.
+
+The following flags are likely to be removed:
+
+  "s":
+    Favor speed over accuracy.
+  "a":
+    Favor accuracy over speed (Both "s" and "a" will balance the two).
+
+The following flags are for speed testing only:
+
+  "!g":
+    Do not remove superfluous groupings.
+  "!e":
+    Do not expose literal characters.
