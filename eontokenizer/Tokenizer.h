@@ -115,7 +115,7 @@ namespace eon
 	public:
 
 		// Get sequence of [eon::Token]s from an [eon::source::Ref]
-		std::vector<Token> operator()( source::Ref src );
+		std::vector<Token> operator()( const source::Ref& src ) const;
 
 
 
@@ -124,16 +124,16 @@ namespace eon
 		class CharMatch
 		{
 		public:
-			inline CharMatch( name_t name, CharacterGrouping type ) { Name = name; Type = type; }
+			inline explicit CharMatch( name_t name ) : Name( name ) {}
 
 		EON_PRIVATE:
 			name_t Name;
-			CharacterGrouping Type;
 		};
 
 		struct Configuration
 		{
-			inline operator bool() const noexcept { return !CharMap.empty() || !CatMap.empty() || !SeqMap.empty(); }
+			inline explicit operator bool() const noexcept {
+				return !CharMap.empty() || !CatMap.empty() || !SeqMap.empty(); }
 			std::unordered_map<char_t, std::pair<name_t, CharacterGrouping>> CharMap;
 			std::map<charcat, std::pair<name_t, CharacterGrouping>> CatMap;
 			std::unordered_map<string, name_t> SeqMap;
@@ -144,15 +144,15 @@ namespace eon
 
 		struct Scanner
 		{
-			Scanner( const Configuration& conf, source::Ref source );
+			Scanner( const Configuration& conf, const source::Ref& source );
 			std::vector<Token> scan();
 			bool _scan();
 			name_t _identifyType();
 			name_t _extendToMaximum();
 			source::Ref _maximizeSource();
 			name_t _shrinkToMaxPossible( source::Ref& source );
-			name_t _matchCharMap( char_t chr );
-			name_t _matchCategoryMap( char_t chr );
+			name_t _matchCharMap( char_t chr ) const;
+			name_t _matchCategoryMap( char_t chr ) const;
 			inline bool _isNameCandidate( name_t name ) const noexcept {
 				return name == name_letters || name == name_digits || name == name_underscore || name == name_name; }
 			void _processNewType( name_t type_name );
@@ -163,7 +163,8 @@ namespace eon
 			void _processEndOfSource( name_t type_name );
 
 			const Configuration* Conf{ nullptr };
-			source::Ref Source, CurMatch;
+			source::Ref Source;
+			source::Ref CurMatch;
 			name_t CurMatchName{ no_name };
 			const Characters* Chars{ nullptr };
 			source::Ref Unmatched;

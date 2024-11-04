@@ -58,17 +58,18 @@ namespace eon
 			Ref() noexcept = default;
 
 			// Copy another source reference.
-			inline Ref( const Ref& rhs ) noexcept { *this = rhs; }
+			Ref( const Ref& ) noexcept = default;
 
 			// Construct for a source, reference the entire source.
 			inline Ref( Raw& src ) noexcept { *this = src; }
 
 			// Construct for a source, reference from specified start to the end of the source.
-			inline Ref( Raw& src, Pos start ) noexcept {
-				Source = &src; Start = start; End.BytePos = Source->numBytesInSource(); }
+			inline Ref( Raw& src, const Pos& start ) noexcept : Source( &src ), Start( start ) {
+				End.BytePos = Source->numBytesInSource(); }
 
 			// Construct for a source, reference the specified area.
-			inline Ref( Raw& src, Pos start, Pos end ) noexcept { Source = &src; Start = start; End = end; }
+			inline Ref( Raw& src, const Pos& start, const Pos& end ) noexcept
+				: Source( &src ), Start( start ), End( end ) {}
 
 
 
@@ -80,8 +81,7 @@ namespace eon
 		public:
 
 			// Discard existing details and assign a copy the 'other' source reference.
-			inline Ref& operator=( const Ref& other ) noexcept {
-				Source = other.Source; Start = other.Start; End = other.End; return *this; }
+			Ref& operator=( const Ref& ) noexcept = default;
 
 			// Discard existing details and assing a new source.
 			inline Ref& operator=( Raw& src ) noexcept {
@@ -105,8 +105,17 @@ namespace eon
 			// Set start position to specified value
 			// If new start is beyond the current end, the end position will be moved to match start!
 			// Returns true if set!
-			inline bool start( Pos pos ) noexcept {
-				if( !Source->afterLast( pos ) ) { Start = pos; if( End < Start ) End = Start; return true; } return false; }
+			inline bool start( const Pos& pos ) noexcept
+			{
+				if( !Source->afterLast( pos ) )
+				{
+					Start = pos;
+					if( End < Start )
+						End = Start;
+					return true;
+				}
+				return false;
+			}
 
 			// Move end position a number of characters forward (positive argument) or backward (negative argument).
 			// END POSITION MUST BE EXPLICIT!
@@ -123,7 +132,7 @@ namespace eon
 			// Will not set to after end of source nor before current start
 			// position!
 			// Returns true if set
-			inline bool end( Pos pos ) noexcept {
+			inline bool end( const Pos& pos ) noexcept {
 				if( pos >= Start && Source->isValid( pos ) ) { End = pos; return true; } return false; }
 
 
@@ -139,7 +148,7 @@ namespace eon
 			inline bool empty() const noexcept { return numBytes() == 0; }
 
 			// Check if source reference refers to something
-			inline operator bool() const { return numBytes() > 0; }
+			inline explicit operator bool() const { return numBytes() > 0; }
 
 			// Check if end position is explicit
 			inline bool explicitEnd() const noexcept { return End.CharPos > 0 && End.BytePos > 0; }
@@ -206,6 +215,17 @@ namespace eon
 			inline string endStr() const { return End.str(); }
 
 
+			// Compare two source references.
+			int compare( const Ref& other ) const noexcept;
+
+			inline friend bool operator<( const Ref& a, const Ref& b ) noexcept { return a.compare( b ) < 0; }
+			inline friend bool operator<=( const Ref& a, const Ref& b ) noexcept { return a.compare( b ) <= 0; }
+			inline friend bool operator>( const Ref& a, const Ref& b ) noexcept { return a.compare( b ) > 0; }
+			inline friend bool operator>=( const Ref& a, const Ref& b ) noexcept { return a.compare( b ) >= 0; }
+			inline friend bool operator==( const Ref& a, const Ref& b ) noexcept { return a.compare( b ) == 0; }
+			inline friend bool operator!=( const Ref& a, const Ref& b ) noexcept { return a.compare( b ) != 0; }
+
+
 
 
 			///////////////////////////////////////////////////////////////////////
@@ -215,7 +235,8 @@ namespace eon
 		private:
 
 			Raw* Source{ nullptr };
-			Pos Start, End;
+			Pos Start;
+			Pos End;
 		};
 	}
 }

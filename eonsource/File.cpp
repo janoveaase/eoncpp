@@ -5,13 +5,10 @@ namespace eon
 {
 	namespace source
 	{
-		File::File( const string& name )
+		File::File( const string& name ) : Raw( name )
 		{
-			if( name.empty() )
-				throw BadName();
-			Name = name;
 #ifdef EON_WINDOWS
-			Data = std::ifstream( Name.stdwstr(), std::ios_base::in | std::ios_base::binary );
+			Data = std::ifstream( sourceName().stdwstr(), std::ios_base::in | std::ios_base::binary );
 #else
 			Data.open( Name.stdstr(), std::ios_base::in | std::ios_base::binary );
 #endif
@@ -26,6 +23,22 @@ namespace eon
 			saveFile( "source.txt", "one two three" ),
 			File obj( ( sandboxDir() / "source.txt" ).string() ),
 			EON_EQ( ( sandboxDir() / "source.txt" ).string(), obj.sourceName() ) );
+
+
+		File::~File()
+		{
+			if( Data )
+			{
+				try
+				{
+					Data.close();
+				}
+				catch( ... )
+				{
+					// Nothing we can do - except not throw anything from this destructor!
+				}
+			}
+		}
 
 
 
@@ -140,14 +153,13 @@ namespace eon
 			saveFile( "source.txt", "123456789" ),
 			EON_EQ( -1, File( ( sandboxDir() / "source.txt" ).string() ).byte( 9 ) ) );
 
-		string File::str( Pos start, Pos end ) noexcept
+		string File::str( const Pos& start, const Pos& end ) noexcept
 		{
-			if( end.BytePos == 0 )
-				end.BytePos = NumBytes;
-			if( start.BytePos >= NumBytes || end <= start )
+			auto real_end = _realEnd( end );
+			if( start.BytePos >= NumBytes || real_end <= start )
 				return string();
 			string str;
-			for( auto p = start; p != end; p = getPosAtOffset( p, 1 ) )
+			for( auto p = start; p != real_end; p = getPosAtOffset( p, 1 ) )
 				str += chr( p );
 			return str;
 		}
@@ -158,15 +170,14 @@ namespace eon
 			saveFile( "source.txt", "one two three" ),
 			EON_EQ( "two", File( ( sandboxDir() / "source.txt" ).string() ).str( Pos( 4, 4, 0, 4 ), Pos( 7, 7, 0, 7 ) ) ) );
 
-		std::string File::bytes( Pos start, Pos end ) noexcept
+		std::string File::bytes( const Pos& start, const Pos& end ) noexcept
 		{
-			if( end.BytePos == 0 )
-				end.BytePos = NumBytes;
-			if( start.BytePos >= NumBytes || end <= start )
+			auto real_end = _realEnd( end );
+			if( start.BytePos >= NumBytes || real_end <= start )
 				return std::string();
 			std::string str;
-			for( auto p = start; p != end; p = getPosAtOffset( p, 1 ) )
-				str += byte( p.BytePos );
+			for( auto p = start; p != real_end; p = getPosAtOffset( p, 1 ) )
+				str += static_cast<char>( byte( p.BytePos ) );
 			return str;
 		}
 		EON_TEST_2STEP_SANDBOX( File, bytes, empty,
@@ -209,8 +220,8 @@ namespace eon
 					throw InvalidUTF8( "Not a valid UTF-8 file" );
 				if( cp == NewlineChr )
 				{
-					if( pos.Line == NumCharsOnLines.size() )
-						NumCharsOnLines.push_back( pos.PosOnLine );
+					if( pos.Line == _numCharsOnLines().size() )
+						_numCharsOnLines().push_back( pos.PosOnLine );
 					++pos.Line;
 					pos.PosOnLine = 0;
 				}
@@ -271,9 +282,9 @@ namespace eon
 				if( chr == NewlineChr )
 				{
 					--pos.Line;
-					if( NumCharsOnLines.empty() )
+					if( _numCharsOnLines().empty() )
 						_scanFile();
-					pos.PosOnLine = NumCharsOnLines[ pos.Line ];
+					pos.PosOnLine = _numCharsOnLines()[ pos.Line ];
 				}
 				else
 					--pos.PosOnLine;
@@ -303,10 +314,10 @@ namespace eon
 
 		void File::_scanFile()
 		{
-			NumCharsOnLines.clear();
+			_numCharsOnLines().clear();
 			Pos pos( 0, 0, 0, 0 );
 			_forward( pos, NumBytes );
-			NumCharsOnLines.push_back( pos.PosOnLine );
+			_numCharsOnLines().push_back( pos.PosOnLine );
 		}
 		EON_TEST_4STEP_SANDBOX( File, _scanFile, empty,
 			saveFile( "source.txt", "" ),

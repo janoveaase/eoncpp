@@ -137,7 +137,7 @@ namespace eon
 
 
 
-	std::vector<Token> Tokenizer::operator()( source::Ref src )
+	std::vector<Token> Tokenizer::operator()( const source::Ref& src ) const
 	{
 		Scanner scanner( Conf, src );
 		return scanner.scan();
@@ -151,7 +151,7 @@ namespace eon
 
 
 
-	Tokenizer::Scanner::Scanner( const Configuration& conf, source::Ref source )
+	Tokenizer::Scanner::Scanner( const Configuration& conf, const source::Ref& source )
 	{
 		Conf = &conf;
 		Source = source;
@@ -233,27 +233,26 @@ namespace eon
 		return source;
 	}
 
-	name_t Tokenizer::Scanner::_matchCharMap( char_t chr )
+	name_t Tokenizer::Scanner::_matchCharMap( char_t chr ) const
 	{
-		auto found = Conf->CharMap.find( chr );
-		if( found != Conf->CharMap.end() && ( CurMatchName == no_name || CurMatchName == found->second.first ) )
-		{
-			if( found->second.second == CharacterGrouping::sequence || CurMatch.numChars() == 1 )
-				return found->second.first;
-		}
+		if( auto found = Conf->CharMap.find( chr );
+			found != Conf->CharMap.end()
+			&& ( CurMatchName == no_name || CurMatchName == found->second.first )
+			&& ( found->second.second == CharacterGrouping::sequence || CurMatch.numChars() == 1 ) )
+			return found->second.first;
 		return no_name;
 	}
 
-	name_t Tokenizer::Scanner::_matchCategoryMap( char_t chr )
+	name_t Tokenizer::Scanner::_matchCategoryMap( char_t chr ) const
 	{
 		auto category = Chars->category( chr );
-		for( auto& pos_cat : Conf->CatMap )
+		for( auto& [pos, cat] : Conf->CatMap )
 		{
-			if( pos_cat.first && category && ( CurMatchName == no_name || CurMatchName == pos_cat.second.first ) )
-			{
-				if( pos_cat.second.second == CharacterGrouping::sequence || CurMatch.numChars() == 1 )
-					return pos_cat.second.first;
-			}
+			if( pos
+				&& category
+				&& ( CurMatchName == no_name || CurMatchName == cat.first )
+				&& ( cat.second == CharacterGrouping::sequence || CurMatch.numChars() == 1 ) )
+				return cat.first;
 		}
 		return no_name;
 	}
@@ -262,7 +261,7 @@ namespace eon
 	{
 		if( Unmatched )
 		{
-			Tokens.push_back( Token( Unmatched, name_undef ) );
+			Tokens.emplace_back( Unmatched, name_undef );
 			Unmatched = source::Ref();
 		}
 		CurMatchName = type_name;
@@ -272,7 +271,7 @@ namespace eon
 	{
 		CurMatch.moveEnd( -1 );
 		if( !_extendWithNewType() && !_recordNameToken() )
-			Tokens.push_back( Token( CurMatch, CurMatchName ) );
+			Tokens.emplace_back( CurMatch, CurMatchName );
 		CurMatch.moveStartToEnd();
 		CurMatchName = no_name;
 	}
@@ -292,7 +291,7 @@ namespace eon
 	{
 		if( Conf->MatchEonNames && ( CurMatchName == name_letters || CurMatchName == name_underscore ) )
 		{
-			Tokens.push_back( Token( CurMatch, name_name ) );
+			Tokens.emplace_back( CurMatch, name_name );
 			return true;
 		}
 		return false;
@@ -312,9 +311,9 @@ namespace eon
 		if( type_name != no_name )
 		{
 			if( !_extendWithNewType() && !_recordNameToken() )
-				Tokens.push_back( Token( CurMatch, type_name ) );
+				Tokens.emplace_back( CurMatch, type_name );
 		}
 		else if( Unmatched )
-			Tokens.push_back( Token( Unmatched, name_undef ) );
+			Tokens.emplace_back( Unmatched, name_undef );
 	}
 }

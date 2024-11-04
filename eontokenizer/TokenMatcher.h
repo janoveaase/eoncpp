@@ -63,15 +63,14 @@ namespace eon
 		EONEXCEPT( InvalidPattern );
 		inline TokenMatcher( string pattern ) { Pattern.Root = true; Pattern.parse( pattern.begin() ); }
 
-		TokenMatcher( const TokenMatcher& other ) { Pattern = other.Pattern; }
-		inline TokenMatcher( TokenMatcher&& other ) noexcept { Pattern = std::move( other.Pattern ); }
+		TokenMatcher( const TokenMatcher& ) = default;
+		TokenMatcher( TokenMatcher&& ) noexcept = default;
 
 		virtual ~TokenMatcher() = default;
 
 
-		inline TokenMatcher& operator=( const TokenMatcher& other ) { Pattern = other.Pattern; return *this; }
-		inline TokenMatcher& operator=( TokenMatcher&& other ) noexcept {
-			Pattern = std::move( other.Pattern ); return *this; }
+		TokenMatcher& operator=( const TokenMatcher& ) = default;
+		TokenMatcher& operator=( TokenMatcher&& ) noexcept = default;
 
 
 
@@ -82,7 +81,7 @@ namespace eon
 		//
 
 		// Check if this matcher is empty (no pattern)
-		inline operator bool() const noexcept { return !Pattern.empty(); }
+		inline explicit operator bool() const noexcept { return !Pattern.empty(); }
 
 		// Check if the specified [eon::TokenParser] is matching the pattern
 		// of this matcher at its current position.
@@ -117,10 +116,18 @@ namespace eon
 
 		struct Element
 		{
-			Element& operator=( const Element& other ) noexcept { Flags = other.Flags; return *this; }
+			flags Flags{ flags::advance };
+
+			Element() = default;
+			Element( const Element& ) noexcept = default;
+			Element( Element&& ) noexcept = default;
+			virtual ~Element() = default;
+
+			Element& operator=( const Element& ) noexcept = default;
+			Element& operator=( Element&& ) noexcept = default;
 
 			virtual string::iterator parse( string::iterator i ) = 0;
-			virtual Element* clone() const = 0;
+			virtual std::shared_ptr<Element> clone() const = 0;
 			virtual bool match( TokenParser& parser ) const noexcept = 0;
 
 			inline bool optional() const noexcept { return Flags && flags::optional; }
@@ -130,17 +137,10 @@ namespace eon
 			virtual bool isData() const noexcept { return false; }
 			virtual bool isOptions() const noexcept { return false; }
 			virtual bool isSequence() const noexcept { return false; }
-
-			flags Flags{ flags::advance };
 		};
 
 		struct DataElement : public Element
 		{
-			DataElement() = default;
-			inline DataElement( const DataElement& other ) { *this = other; }
-			inline DataElement( DataElement&& other ) noexcept { *this = std::move( other ); }
-			virtual ~DataElement() = default;
-
 			enum class OpenEnded
 			{
 				none,
@@ -148,47 +148,62 @@ namespace eon
 				end
 			};
 
-			inline DataElement& operator=( const DataElement& other ) {
-				Type = other.Type; Str = other.Str; Open = other.Open; *static_cast<Element*>( this ) = other;
-				return *this; }
-			inline DataElement& operator=( DataElement&& other ) noexcept {
-				Type = other.Type; other.Type = no_name; Str = std::move( other.Str ); Open = other.Open;
-				other.Open = OpenEnded::none; *static_cast<Element*>( this ) = other; return *this; }
+			name_t Type{ no_name };
+			string Str;
+			OpenEnded Open{ OpenEnded::none };
+
+
+			DataElement() = default;
+			inline DataElement( const DataElement& ) = default;
+			inline DataElement( DataElement&& ) noexcept = default;
+			~DataElement() final = default;
+
+			DataElement& operator=( const DataElement& ) = default;
+			DataElement& operator=( DataElement&& ) noexcept = default;
 
 			string::iterator parse( string::iterator i ) override;
 			bool _parse( string::iterator& i );
-			inline Element* clone() const override { return new DataElement( *this ); }
+			inline std::shared_ptr<Element> clone() const override { return std::make_shared<DataElement>( *this ); }
 			bool match( TokenParser& parser ) const noexcept override;
-			bool _matchStr( TokenParser& parser ) const noexcept;
+			bool _matchStr( const TokenParser& parser ) const noexcept;
 
 			inline bool isData() const noexcept override { return true; }
 
 			string::iterator _parseStr( string::iterator i );
 			string::iterator _parseStartedStr( string::iterator i );
-			inline bool _openEndedStart( string::iterator i ) const noexcept { return *i == '*'; }
-			inline bool _openEndedEnd( string::iterator i ) const noexcept {
+			inline bool _openEndedStart( const string::iterator& i ) const noexcept { return *i == '*'; }
+			inline bool _openEndedEnd( const string::iterator& i ) const noexcept {
 				if( *i == '*' ) { auto next = i + 1; return next && *next == SglQuoteChr; } return false; }
 			string::iterator _parseStrContents( string::iterator i );
 			string::iterator _parseStrEscaped( string::iterator i );
-
-			name_t Type{ no_name };
-			string Str;
-			OpenEnded Open{ OpenEnded::none };
 		};
 
 		struct ContainerElement : public Element
 		{
+			std::list<std::shared_ptr<Element>> Elements;
+			bool Root{ false };
+
+
 			ContainerElement() = default;
 			ContainerElement( const ContainerElement& other ) { *this = other; }
 			ContainerElement( ContainerElement&& other ) noexcept { *this = std::move( other ); }
-			virtual ~ContainerElement() { reset(); }
-			inline void reset() noexcept { for( auto elm : Elements ) delete elm; Elements.clear(); }
+			~ContainerElement() override { Elements.clear(); }
+			inline void reset() noexcept { Elements.clear(); }
 
-			ContainerElement& operator=( const ContainerElement& other ) {
-				reset(); for( auto elm : other.Elements ) Elements.push_back( elm->clone() );
-				*static_cast<Element*>( this ) = other; return *this; }
-			inline ContainerElement& operator=( ContainerElement&& other ) noexcept {
-				Elements = std::move( other.Elements ); *static_cast<Element*>( this ) = other; return *this; }
+			ContainerElement& operator=( const ContainerElement& other )
+			{
+				reset();
+				for( auto& elm : other.Elements )
+					Elements.push_back( elm->clone() );
+				*static_cast<Element*>( this ) = *static_cast<const Element*>( &other );
+				return *this;
+			}
+			ContainerElement& operator=( ContainerElement&& other ) noexcept
+			{
+				Elements = std::move( other.Elements );
+				*static_cast<Element*>( this ) = std::move( *static_cast<Element*>( &other ) );
+				return *this;
+			}
 
 			inline bool empty() const noexcept { return Elements.empty(); }
 
@@ -196,9 +211,17 @@ namespace eon
 
 			struct Parser
 			{
+				flags ParseFlags{ flags::advance };
+				name_t ElmType{ no_name };
+				string::iterator Pos;
+				string::iterator I;
+				std::list<std::shared_ptr<Element>>* Elements{ nullptr };
+				bool* Root{ nullptr };
+
+
 				Parser() = default;
-				inline Parser( string::iterator pos, std::list<Element*>& elements, bool& root ) {
-					I = pos; Pos = pos; Elements = &elements; Root = &root; }
+				inline Parser( const string::iterator& pos, std::list<std::shared_ptr<Element>>& elements, bool& root )
+					: Pos( pos ), I( pos ), Elements( &elements ), Root( &root ) {}
 				string::iterator parse();
 				inline bool _skipSpace() noexcept { if( isSpaceChar( *I ) ) { ++I; return true; } return false; }
 				bool _parseFlag() noexcept;
@@ -207,31 +230,19 @@ namespace eon
 					if( isNameChar( *I ) ) { Pos = I; I = parseName( I, ElmType ); return true; } return false; }
 				bool _parseNewElement();
 				void _createNewElement();
-
-				flags ParseFlags{ flags::advance };
-				name_t ElmType{ no_name };
-				string::iterator Pos, I;
-				std::list<Element*>* Elements{ nullptr };
-				bool* Root{ nullptr };
 			};
-
-			std::list<Element*> Elements;
-			bool Root{ false };
 		};
 
 		struct OptionsElement : public ContainerElement
 		{
 			OptionsElement() = default;
-			OptionsElement( const OptionsElement& other ) { *this = other; }
-			OptionsElement( OptionsElement&& other ) noexcept { *this = std::move( other ); }
-			virtual ~OptionsElement() = default;
+			OptionsElement( const OptionsElement& ) = default;
+			OptionsElement( OptionsElement&& ) noexcept = default;
 
-			inline OptionsElement& operator=( const OptionsElement& other ) {
-				*static_cast<ContainerElement*>( this ) = other; return *this; }
-			inline OptionsElement& operator=( OptionsElement&& other ) noexcept {
-				*static_cast<ContainerElement*>( this ) = std::move( other ); return *this; }
+			OptionsElement& operator=( const OptionsElement& ) = default;
+			OptionsElement& operator=( OptionsElement&& ) noexcept = default;
 
-			inline Element* clone() const override { return new OptionsElement( *this ); }
+			inline std::shared_ptr<Element> clone() const override { return std::make_shared<OptionsElement>( *this ); }
 			bool match( TokenParser& parser ) const noexcept override;
 
 			inline bool isOptions() const noexcept override { return true; }
@@ -240,15 +251,13 @@ namespace eon
 		struct SequenceElement : public ContainerElement
 		{
 			SequenceElement() = default;
-			SequenceElement( const SequenceElement& other ) { *this = other; }
-			SequenceElement( SequenceElement&& other ) noexcept { *this = std::move( other ); }
+			SequenceElement( const SequenceElement& ) = default;
+			SequenceElement( SequenceElement&& ) noexcept = default;
 
-			inline SequenceElement& operator=( const SequenceElement& other ) {
-				*static_cast<ContainerElement*>( this ) = other; return *this; }
-			inline SequenceElement& operator=( SequenceElement&& other ) noexcept {
-				*static_cast<ContainerElement*>( this ) = std::move( other ); return *this; }
+			SequenceElement& operator=( const SequenceElement& ) = default;
+			SequenceElement& operator=( SequenceElement&& ) noexcept = default;
 
-			inline Element* clone() const override { return new SequenceElement( *this ); }
+			inline std::shared_ptr<Element> clone() const override { return std::make_shared<SequenceElement>( *this ); }
 			bool match( TokenParser& parser ) const noexcept override;
 			bool _matchSequence( TokenParser& parser ) const noexcept;
 

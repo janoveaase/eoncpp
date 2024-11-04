@@ -84,35 +84,25 @@ namespace eon
 		EON_TEST( String, byte, beyond_last,
 			EON_EQ( -1, String( "test", "123456789" ).byte( 9 ) ) );
 
-		string String::str( Pos start, Pos end ) noexcept
+		string String::str( const Pos& start, const Pos& end ) noexcept
 		{
-			if( end.BytePos == 0 )
-			{
-				auto last = Data.last();
-				end.BytePos = last.numByte() + 1;
-				end.CharPos = last.numChar() + 1;
-			}
+			auto real_end = _realEnd( end );
 			return Data.substr(
 				string::iterator( Data.c_str(), Data.numBytes(), Data.numChars(),
 					Data.c_str() + start.BytePos, start.CharPos ),
-				end.BytePos > Data.numBytes() ? Data.end() :
+				real_end.BytePos > Data.numBytes() ? Data.end() :
 				string::iterator( Data.c_str(), Data.numBytes(), Data.numChars(),
-					Data.c_str() + end.BytePos, end.CharPos ) );
+					Data.c_str() + real_end.BytePos, real_end.CharPos ) );
 		}
 		EON_TEST( String, str, empty,
 			EON_EQ( "", String( "test", "" ).str( Pos( 0, 0, 0, 0 ), Pos( 9, 9, 0, 9 ) ) ) );
 		EON_TEST( String, str, non_empty,
 			EON_EQ( "two", String( "test", "one two three" ).str( Pos( 4, 4, 0, 4 ), Pos( 7, 7, 0, 7 ) ) ) );
 
-		std::string String::bytes( Pos start, Pos end ) noexcept
+		std::string String::bytes( const Pos& start, const Pos& end ) noexcept
 		{
-			if( end.BytePos == 0 )
-			{
-				auto last = Data.last();
-				end.BytePos = last.numByte() + 1;
-				end.CharPos = last.numChar() + 1;
-			}
-			return Data.stdstr().substr( start.BytePos, end.BytePos - start.BytePos );
+			auto real_end = _realEnd( end );
+			return Data.stdstr().substr( start.BytePos, real_end.BytePos - start.BytePos );
 		}
 		EON_TEST( String, bytes, empty,
 			EON_EQ( "", String( "test", "" ).bytes( Pos( 0, 0, 0, 0 ), Pos( 9, 9, 0, 9 ) ) ) );
@@ -121,6 +111,18 @@ namespace eon
 
 
 
+
+		Pos String::_realEnd( const Pos& end ) const noexcept
+		{
+			Pos real_end{ end };
+			if( real_end.BytePos == 0 )
+			{
+				auto last = Data.last();
+				real_end.BytePos = last.numByte() + 1;
+				real_end.CharPos = last.numChar() + 1;
+			}
+			return real_end;
+		}
 
 		void String::_forward( Pos& pos, index_t num_chars )
 		{

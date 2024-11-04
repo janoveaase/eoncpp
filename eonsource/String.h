@@ -35,12 +35,7 @@ namespace eon
 			// (for reference purposes) is required and it cannot be empty!
 			// NOTE: The source data can be reclaimed later!
 			// WARNING: Throws [eon::source::BadName] if the name is empty!
-			inline String( const string& name, string&& source_data ) {
-				if( name.empty() ) throw BadName(); Name = name; Data = std::move( source_data ); }
-
-
-			// Default destruction
-			virtual ~String() = default;
+			inline String( const string& name, string&& source_data ) : Raw( name ), Data( std::move( source_data ) ) {}
 
 
 
@@ -53,7 +48,7 @@ namespace eon
 
 			// Reclaim the source data string.
 			// This will effectively clear 'this' source!
-			inline string&& reclaim() noexcept { Name.clear(); return std::move( Data ); }
+			inline string&& reclaim() noexcept { _clearName(); return std::move( Data ); }
 
 
 
@@ -94,11 +89,11 @@ namespace eon
 			// Get string at specified area.
 			// Returns empty string if not a valid area or the entire area is
 			// outside the scope of the source!
-			string str( Pos start, Pos end ) noexcept override;
+			string str( const Pos& start, const Pos& end ) noexcept override;
 
 			// Get bytes at specified area.
 			// Returns empty if not a valid area or the entire area is outside the scope of the source!
-			std::string bytes( Pos start, Pos end ) noexcept override;
+			std::string bytes( const Pos& start, const Pos& end ) noexcept override;
 
 
 
@@ -108,6 +103,8 @@ namespace eon
 			// Helpers
 			//
 		EON_PRIVATE:
+
+			Pos _realEnd( const Pos& end ) const noexcept;
 
 			void _forward( Pos& pos, index_t num_chars );
 			void _backward( Pos& pos, index_t num_chars );

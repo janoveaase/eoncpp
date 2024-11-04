@@ -214,7 +214,7 @@ namespace eon
 		string str{ "This is a 2 line test\nLine #2!" };
 		source::String src( "test", std::move( str ) );
 		source::Reporter rep;
-		rep.add( *this );
+		rep.add( source::MessageTargetRef::borrow( *this ) );
 
 		rep.fatal( "one", source::Ref( src, source::Pos( 5, 5, 0, 5 ), source::Pos( 7, 7, 0, 7 ) ) );
 		rep.error( "two", source::Ref( src, source::Pos( 10, 10, 0, 10 ), source::Pos( 11, 11, 0, 11 ) ) );
@@ -239,7 +239,7 @@ namespace eon
 		string str{ "This is a 2 line test\nLine #2!" };
 		source::String src( "test", std::move( str ) );
 		source::Reporter rep;
-		rep.add( *this );
+		rep.add( source::MessageTargetRef::borrow( *this ) );
 
 		rep.fatal( "one", source::Ref( src ) );
 		rep.error( "two", source::Ref( src ) );

@@ -25,7 +25,7 @@ namespace eon
 	public:
 
 		ReTokenizer() = default;
-		virtual ~ReTokenizer() { for( auto rule : Rules ) delete rule; };
+		virtual ~ReTokenizer() = default;
 
 
 
@@ -100,129 +100,137 @@ namespace eon
 		class RuleDef
 		{
 		public:
-			RuleDef( name_t name ) { Name = name; }
+			inline explicit RuleDef( name_t name ) : Name( name ) {}
 			virtual ~RuleDef() = default;
 			inline name_t name() const noexcept { return Name; }
 			virtual bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept = 0;
-		protected:
+
+		private:
 			name_t Name{ no_name };
 		};
 
 		class RemoveRule : public RuleDef
 		{
 		public:
-			inline RemoveRule( std::set<name_t>&& remove ) noexcept : RuleDef( no_name ) {
+			inline explicit RemoveRule( std::set<name_t>&& remove ) noexcept : RuleDef( no_name ) {
 				Remove = std::move( remove ); }
-			virtual ~RemoveRule() = default;
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			std::set<name_t> Remove;
 		};
+
 		class EncloseRule : public RuleDef
 		{
 		public:
-			inline EncloseRule( name_t name, name_t enclose_char, name_t escape ) noexcept : RuleDef( name ) {
-				EncloseStart = enclose_char; EncloseEnd = enclose_char; Escape = escape; }
+			inline EncloseRule( name_t name, name_t enclose_char, name_t escape ) noexcept
+				: RuleDef( name ), EncloseStart( enclose_char ), EncloseEnd( enclose_char ), Escape( escape ) {}
 			inline EncloseRule( name_t name, name_t enclose_start, name_t enclose_end, bool nested ) noexcept
-				: RuleDef( name ) { EncloseStart = enclose_start; EncloseEnd = enclose_end; Nested = nested; }
-			virtual ~EncloseRule() = default;
-			virtual bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
+				: RuleDef( name ), EncloseStart( enclose_start ), EncloseEnd( enclose_end ), Nested( nested ) {}
+			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		protected:
 			bool _match( size_t initial, Token matched, TokenParser& parser, std::vector<Token>& output ) const noexcept;
-			name_t EncloseStart{ no_name }, EncloseEnd{ no_name }, Escape{ no_name };
+			inline name_t _encloseStart() const noexcept { return EncloseStart; }
+			inline name_t _encloseEnd() const noexcept { return EncloseEnd; }
+		private:
+			name_t EncloseStart{ no_name };
+			name_t EncloseEnd{ no_name };
+			name_t Escape{ no_name };
 			bool Nested{ false };
 		};
+
 		class PrefixEncloseRule : public EncloseRule
 		{
 		public:
 			inline PrefixEncloseRule( name_t name, string prefix, name_t enclose_char, name_t escape ) noexcept
-				: EncloseRule( name, enclose_char, escape ) { Prefix = prefix; }
+				: EncloseRule( name, enclose_char, escape ), Prefix( std::move( prefix ) ) {}
 			inline PrefixEncloseRule( name_t name, string prefix, name_t enclose_start, name_t enclose_end, bool nested )
-				noexcept : EncloseRule( name, enclose_start, enclose_end, nested ) { Prefix = prefix; }
-			virtual ~PrefixEncloseRule() = default;
+				noexcept : EncloseRule( name, enclose_start, enclose_end, nested ), Prefix( std::move( prefix ) ) {}
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			string Prefix;
 		};
+
 		class ComboRule : public RuleDef
 		{
 		public:
-			inline ComboRule( name_t name, std::set<name_t>&& combo, regex&& exclude = regex() ) : RuleDef( name ) {
-				Combo = std::move( combo ); Exclude = std::move( exclude ); }
-			virtual ~ComboRule() = default;
-			virtual bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
+			inline ComboRule( name_t name, std::set<name_t>&& combo, regex&& exclude = regex() )
+				: RuleDef( name ), Combo( std::move( combo ) ), Exclude( std::move( exclude ) ) {}
+			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		protected:
 			bool _match( size_t initial, Token matched, TokenParser& parser, std::vector<Token>& output ) const noexcept;
+		private:
 			std::set<name_t> Combo;
 			regex Exclude;
 		};
+
 		class PrefixComboRule : public ComboRule
 		{
 		public:
 			inline PrefixComboRule( name_t name, string prefix, std::set<name_t>&& combo, regex&& exclude = regex() )
-				: ComboRule( name, std::move( combo ), std::move( exclude ) ) { Prefix = prefix; }
-			virtual ~PrefixComboRule() = default;
-			virtual bool match( TokenParser& parser, std::vector<Token>&output ) const noexcept override;
+				: ComboRule( name, std::move( combo ), std::move( exclude ) ), Prefix( std::move( prefix ) ) {}
+			bool match( TokenParser& parser, std::vector<Token>&output ) const noexcept override;
 		private:
 			string Prefix;
 		};
+
 		class AlternatingRule : public RuleDef
 		{
 		public:
-			inline AlternatingRule( name_t name, name_t a, name_t b, bool end_on_a = true ) : RuleDef( name ) {
-				A = a; B = b; EndOnA = end_on_a; }
-			virtual ~AlternatingRule() = default;
-			virtual bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
+			inline AlternatingRule( name_t name, name_t a, name_t b, bool end_on_a = true )
+				: RuleDef( name ), A( a ), B( b ), EndOnA( end_on_a ) {}
+			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		protected:
 			bool _match( size_t initial, Token matched, TokenParser& parser, std::vector<Token>& output ) const noexcept;
-			name_t A{ no_name }, B{ no_name };
+		private:
+			name_t A{ no_name };
+			name_t B{ no_name };
 			bool EndOnA{ true };
 		};
+
 		class PrefixAlternatingRule : public AlternatingRule
 		{
 		public:
 			inline PrefixAlternatingRule( name_t name, string prefix, name_t a, name_t b, bool end_on_a = true )
-				: AlternatingRule( name, a, b, end_on_a ) { Prefix = prefix; }
-			virtual ~PrefixAlternatingRule() = default;
-			virtual bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
+				: AlternatingRule( name, a, b, end_on_a ), Prefix( std::move( prefix ) ) {}
+			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			string Prefix;
 		};
+
 		class SequenceRule : public RuleDef
 		{
 		public:
 			inline SequenceRule( name_t name, std::vector<name_t>&& sequence, regex&& exclude = regex() )
-				: RuleDef( name ) { Sequence = std::move( sequence ); Exclude = std::move( exclude ); }
-			virtual ~SequenceRule() = default;
+				: RuleDef( name ), Sequence( std::move( sequence ) ), Exclude( std::move( exclude ) ) {}
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			std::vector<name_t> Sequence;
 			regex Exclude;
 		};
+
 		class LiteralNameRule : public RuleDef
 		{
 		public:
-			inline LiteralNameRule( name_t name, std::set<string>&& names ) : RuleDef( name ) {
-				Names = std::move( names ); }
-			virtual ~LiteralNameRule() = default;
+			inline LiteralNameRule( name_t name, std::set<string>&& names )
+				: RuleDef( name ), Names( std::move( names ) ) {}
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			std::set<string> Names;
 		};
+
 		class RegexRule : public RuleDef
 		{
 		public:
-			inline RegexRule( name_t name, regex&& pattern ) : RuleDef( name ) { Pattern = std::move( pattern ); }
-			virtual ~RegexRule() = default;
+			inline RegexRule( name_t name, regex&& pattern ) : RuleDef( name ), Pattern( std::move( pattern ) ) {}
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			regex Pattern;
 		};
+
 		class LinestartRule : public RuleDef
 		{
 		public:
-			inline LinestartRule( name_t name, name_t linestart ) : RuleDef( name ) { Linestart = linestart; }
-			virtual ~LinestartRule() = default;
+			inline LinestartRule( name_t name, name_t linestart ) : RuleDef( name ), Linestart( linestart ) {}
 			bool match( TokenParser& parser, std::vector<Token>& output ) const noexcept override;
 		private:
 			name_t Linestart{ no_name };
@@ -231,10 +239,10 @@ namespace eon
 
 
 		// Check if there are any rules present
-		inline operator bool() const noexcept { return !Rules.empty(); }
+		inline explicit operator bool() const noexcept { return !Rules.empty(); }
 
 		// Add a rule
-		inline void addRule( RuleDef* rule ) { Rules.push_back( rule ); }
+		inline void addRule( std::shared_ptr<RuleDef> rule ) { Rules.push_back( rule ); }
 
 
 
@@ -267,6 +275,6 @@ namespace eon
 		// Attributes
 		//
 	private:
-		std::vector<RuleDef*> Rules;
+		std::vector<std::shared_ptr<RuleDef>> Rules;
 	};
 };

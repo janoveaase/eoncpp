@@ -31,13 +31,13 @@ namespace eon
 		// Construct parser for a specific set of tokens.
 		// NOTE: The ownership of the tokens is transferred to the parser.
 		//       When the parser is done, they can be reclaimed if necessary.
-		inline TokenParser( std::vector<Token>&& tokens ) noexcept { Tokens = std::move( tokens ); }
+		inline explicit TokenParser( std::vector<Token>&& tokens ) noexcept : Tokens( std::move( tokens ) ) {}
 
 		// Cannot copy-construct a token parser.
 		TokenParser( const TokenParser& ) = delete;
 
 		// Take ownership of the data of another token parser.
-		inline TokenParser( TokenParser&& other ) noexcept { *this = std::move( other ); }
+		TokenParser( TokenParser&& ) noexcept = default;
 
 		// Default destruction.
 		virtual ~TokenParser() = default;
@@ -51,8 +51,7 @@ namespace eon
 		//
 
 		// Discard current data and take ownership of those of another token parser.
-		inline TokenParser& operator=( TokenParser&& other ) noexcept {
-			Tokens = std::move( other.Tokens ); View = other.View; other.View = 0; return *this; }
+		TokenParser& operator=( TokenParser&& ) noexcept = default;
 
 		// Reclaim the tokens (makes the parser void).
 		inline std::vector<Token>&& reclaim() noexcept { View = 0; return std::move( Tokens ); }
@@ -60,12 +59,23 @@ namespace eon
 
 		// Move 'token view' one or more steps forward.
 		// Returns true unless zero or too many steps.
-		inline bool forward( size_t steps = 1 ) noexcept {
-			if( Tokens.size() - View < steps ) return false; View += steps; return true; }
+		inline bool forward( size_t steps = 1 ) noexcept
+		{
+			if( Tokens.size() - View < steps )
+				return false;
+			View += steps;
+			return true;
+		}
 
 		// Move 'token view' one or more steps backward.
 		// Returns true unless zero or too many steps.
-		inline bool backward( size_t steps = 1 ) noexcept { if( View < steps ) return false; View -= steps; return true; }
+		inline bool backward( size_t steps = 1 ) noexcept
+		{
+			if( View < steps )
+				return false;
+			View -= steps;
+			return true;
+		}
 
 
 		// Move 'token view' to the next token if the currently viewed token is of the named type.
@@ -83,7 +93,13 @@ namespace eon
 		// Move 'token view' to the token at the specified position within the tokens vector.
 		// Returns true unless the new view position is out of range!
 		// NOTE: Setting to one past the last element is legal!
-		inline bool setView( size_t pos ) noexcept { if( pos > Tokens.size() ) return false; View = pos; return true; }
+		inline bool setView( size_t pos ) noexcept
+		{
+			if( pos > Tokens.size() )
+				return false;
+			View = pos;
+			return true;
+		}
 
 
 
@@ -92,9 +108,6 @@ namespace eon
 		//
 		// Read-only Methods
 		//
-
-//		// Check if there 'token view' is for a token in the tokens vector.
-//		inline operator bool() const noexcept { return View < Tokens.size(); }
 
 		// Check if at the end of the token sequence.
 		inline bool atEnd() const noexcept { return View >= Tokens.size(); }

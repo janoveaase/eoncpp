@@ -62,21 +62,21 @@ namespace eon
 		string raw{
 			"TEST( TokenizerTest, basic )\n"
 			"{\n"
-			"	string raw{ \"This is a 02   \\tline test\\nLine #2!\" };\n"
-			"	source src( \"test\", std::move( raw ) );\n"
-			"	auto tokens = Tokenizer()( src );\n"
-			"	REQUIRE_EQ( 18, tokens.size() ) << \"Wrong number of tokens\";\n"
+			"\tstring raw{ \"This is a 02   \\tline test\\nLine #2!\" };\n"
+			"\tsource src( \"test\", std::move( raw ) );\n"
+			"\tauto tokens = Tokenizer()( src );\n"
+			"\tREQUIRE_EQ( 18, tokens.size() ) << \"Wrong number of tokens\";\n"
 			"\n"
-			"	string expected{\n"
-			"		\"This; ;is; ;a; ;02;   ;\\t;line; ;test;\\n;Line; ;#;2;!\" };\n"
-			"	string actual;\n"
-			"	for( auto& token : tokens )\n"
-			"	{\n"
-			"		if( !actual.empty() )\n"
-			"			actual += \";\";\n"
-			"		actual += token.substr();\n"
-			"	}\n"
-			"	WANT_EQ( expected, actual );\n"
+			"\tstring expected{\n"
+			"\t\t\"This; ;is; ;a; ;02;   ;\\t;line; ;test;\\n;Line; ;#;2;!\" };\n"
+			"\tstring actual;\n"
+			"\tfor( auto& token : tokens )\n"
+			"\t{\n"
+			"\t\tif( !actual.empty() )\n"
+			"\t\t\tactual += \";\";\n"
+			"\t\tactual += token.substr();\n"
+			"\t}\n"
+			"\tWANT_EQ( expected, actual );\n"
 			"}" };
 		source::String src( "test", std::move( raw ) );
 		auto tokens = Tok( src );
@@ -156,8 +156,9 @@ namespace eon
 
 		ReTokenizer retok;
 		retok.addRule(
-			new ReTokenizer::ComboRule( name_name, { name_letters, name_digits, name_underscore }, regex{ R"(^\d+$)" } ) );
-		retok.addRule( new ReTokenizer::RemoveRule( { name_space } ) );
+			std::make_shared<ReTokenizer::ComboRule>(
+				name_name, std::set<eon::name_t>{ name_letters, name_digits, name_underscore }, regex{ R"(^\d+$)" } ) );
+		retok.addRule( std::make_shared<ReTokenizer::RemoveRule>( std::set<eon::name_t>{ name_space } ) );
 		tokens = retok( parser );
 
 		string expected{ "name=2num" };
@@ -173,8 +174,9 @@ namespace eon
 
 		ReTokenizer retok;
 		retok.addRule(
-			new ReTokenizer::ComboRule( name_name, { name_letters, name_digits, name_underscore }, regex{ R"(^\d+$)" } ) );
-		retok.addRule( new ReTokenizer::RemoveRule( { name_space } ) );
+			std::make_shared<ReTokenizer::ComboRule>(
+				name_name, std::set<eon::name_t>{ name_letters, name_digits, name_underscore }, regex{ R"(^\d+$)" } ) );
+		retok.addRule( std::make_shared<ReTokenizer::RemoveRule>( std::set<eon::name_t>{ name_space } ) );
 		tokens = retok( parser );
 
 		string expected{ "name=_sum_1|operator=+=|digits=2|operator=+|name=2num" };
@@ -183,19 +185,21 @@ namespace eon
 	}
 	TEST( ReTokenizerTest, enclosed )
 	{
-		string raw{ "one \"two \\\" three\" (four and five) [six[seven]eight]" };
+		string raw{ R"(one "two \" three" (four and five) [six[seven]eight])" };
 		source::String src( "test", std::move( raw ) );
 		auto tokens = Tok( src );
 		TokenParser parser( std::move( tokens ) );
 
 		ReTokenizer retok;
-		retok.addRule( new ReTokenizer::EncloseRule( name_string, name_doublequote, name_backslash ) );
-		retok.addRule( new ReTokenizer::EncloseRule( name( "parenthesized" ), name_open, name_close, false ) );
-		retok.addRule( new ReTokenizer::EncloseRule( name( "nested" ), name_open_square, name_close_square, true ) );
-		retok.addRule( new ReTokenizer::RemoveRule( { name_space } ) );
+		retok.addRule( std::make_shared<ReTokenizer::EncloseRule>( name_string, name_doublequote, name_backslash ) );
+		retok.addRule(
+			std::make_shared<ReTokenizer::EncloseRule>( name( "parenthesized" ), name_open, name_close, false ) );
+		retok.addRule(
+			std::make_shared<ReTokenizer::EncloseRule>( name( "nested" ), name_open_square, name_close_square, true ) );
+		retok.addRule( std::make_shared<ReTokenizer::RemoveRule>( std::set<eon::name_t>{ name_space } ) );
 		tokens = retok( parser );
 
-		string expected{ "letters=one|string=two \\\" three|parenthesized=four and five|nested=six[seven]eight" };
+		string expected{ R"(letters=one|string=two \" three|parenthesized=four and five|nested=six[seven]eight)" };
 		string actual = fullJoin( tokens );
 		WANT_EQ( expected, actual );
 	}
@@ -207,8 +211,8 @@ namespace eon
 		TokenParser parser( std::move( tokens ) );
 
 		ReTokenizer retok;
-		retok.addRule( new ReTokenizer::LinestartRule( name_indentation, name_space ) );
-		retok.addRule( new ReTokenizer::RemoveRule( { name_newline } ) );
+		retok.addRule( std::make_shared<ReTokenizer::LinestartRule>( name_indentation, name_space ) );
+		retok.addRule( std::make_shared<ReTokenizer::RemoveRule>( std::set<eon::name_t>{ name_newline } ) );
 		tokens = retok( parser );
 
 		string expected{
@@ -224,8 +228,12 @@ namespace eon
 		TokenParser parser( std::move( tokens ) );
 
 		ReTokenizer retok;
-		retok.addRule( new ReTokenizer::SequenceRule( name_float, { name_digits, name_point, name_digits } ) );
-		retok.addRule( new ReTokenizer::ComboRule( name_name, { name_letters, name_digits, name_underscore },
+		retok.addRule(
+			std::make_shared<ReTokenizer::SequenceRule>(
+				name_float, std::vector<eon::name_t>{ name_digits, name_point, name_digits } ) );
+		retok.addRule(
+			std::make_shared<ReTokenizer::ComboRule>(
+				name_name, std::set<eon::name_t>{ name_letters, name_digits, name_underscore },
 			regex{ R"(^\d+$)" } ) );
 		tokens = retok( parser );
 

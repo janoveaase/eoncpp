@@ -9,7 +9,7 @@ namespace eon
 	EON_NAME( seq );
 
 #ifdef EON_TEST_MODE
-	void createTokenizer( Tokenizer& tokenizer )
+	static void createTokenizer( Tokenizer& tokenizer )
 	{
 		tokenizer.registerCharSequenceAsToken( charcat::letter, name_letters );
 		tokenizer.registerCharSequenceAsToken( charcat::number_ascii_digit, name_digits );
@@ -18,18 +18,20 @@ namespace eon
 
 	struct TestMatcher
 	{
-		TestMatcher( string pattern = "(digits) (space)", string input_source = "one 23 for 6", size_t view = 2 )
+		source::String Src;
+		TokenParser Parser;
+		TokenMatcher Obj;
+
+		TestMatcher(
+			const string& pattern = "(digits) (space)", string input_source = "one 23 for 6", size_t view = 2 )
+			: Src( source::String( "test", std::move( input_source ) ) ), Obj( pattern )
 		{
-			Src = source::String( "test", std::move( input_source ) );
+
 			Tokenizer tokenizer;
 			createTokenizer( tokenizer );
 			Parser = TokenParser( tokenizer( source::Ref( Src ) ) );
 			Parser.setView( view );
-			Obj = TokenMatcher( pattern );
 		}
-		source::String Src;
-		TokenParser Parser;
-		TokenMatcher Obj;
 	};
 
 	struct NameTestData
@@ -161,7 +163,7 @@ namespace eon
 		};
 		DataElementParsedData(
 			string source,
-			string pattern,
+			const string& pattern,
 			size_t pos = 0,
 			Advance advance = Advance::advance ) : DataElementTestData( pattern, pos )
 		{
@@ -363,7 +365,7 @@ namespace eon
 		data.Obj.match( data.Parser ),
 		EON_EQ( 0, data.Parser.viewedPos() ) );
 
-	bool TokenMatcher::DataElement::_matchStr( TokenParser& parser ) const noexcept
+	bool TokenMatcher::DataElement::_matchStr( const TokenParser& parser ) const noexcept
 	{
 		switch( Open )
 		{
@@ -395,19 +397,18 @@ namespace eon
 #ifdef EON_TEST_MODE
 	struct ContainerParser
 	{
-		ContainerParser( string str, size_t pos = 0, name_t elm_type = no_name )
-		{
-			Str = std::move( str );
-			I = Str.begin() + pos;
-			Obj = TokenMatcher::ContainerElement::Parser( I, Elements, Root );
-			Obj.ElmType = elm_type;
-		}
-		~ContainerParser() { for( auto element : Elements ) delete element; }
 		string Str;
 		string::iterator I;
-		std::list<TokenMatcher::Element*> Elements;
+		std::list<std::shared_ptr<TokenMatcher::Element>> Elements;
 		bool Root{ false };
 		TokenMatcher::ContainerElement::Parser Obj;
+
+
+		ContainerParser( string str, size_t pos = 0, name_t elm_type = no_name )
+			: Str( std::move( str ) ), I( Str.begin() + pos ), Obj( I, Elements, Root )
+		{
+			Obj.ElmType = elm_type;
+		}
 	};
 #endif
 
@@ -497,14 +498,14 @@ namespace eon
 	void TokenMatcher::ContainerElement::Parser::_createNewElement()
 	{
 		if( ElmType == name_opt )
-			Elements->push_back( new OptionsElement() );
+			Elements->push_back( std::make_shared<OptionsElement>() );
 		else if( ElmType == name_seq )
-			Elements->push_back( new SequenceElement() );
+			Elements->push_back( std::make_shared<SequenceElement>() );
 		else if( ElmType == no_name )
-			Elements->push_back( new DataElement() );
+			Elements->push_back( std::make_shared<DataElement>() );
 		else
 			throw InvalidPattern(
-				"Expected \"opt\" or \"seq\" at position " + string( Pos.numChar() ) + ", not \""
+				R"(Expected "opt" or "seq" at position )" + string( Pos.numChar() ) + ", not \""
 				+ eon::str( ElmType ) + "\"!" );
 	}
 	EON_TEST_3STEP( TokenMatcher_ContainerElement_Parser, _createNewElement, data,
@@ -527,12 +528,17 @@ namespace eon
 #ifdef EON_TEST_MODE
 	struct OptionsElementTestData
 	{
+		source::String Src;
+		TokenParser Parser;
+		TokenMatcher::OptionsElement Obj;
+
+
 		OptionsElementTestData( string source )
 		{
-			auto elm = new TokenMatcher::DataElement();
+			auto elm = std::make_shared<TokenMatcher::DataElement>();
 			elm->Type = name_letters;
 			Obj.Elements.push_back( elm );
-			elm = new TokenMatcher::DataElement();
+			elm =  std::make_shared<TokenMatcher::DataElement>();
 			elm->Type = name_digits;
 			Obj.Elements.push_back( elm );
 			Src = eon::source::String( "test", std::move( source ) );
@@ -540,9 +546,6 @@ namespace eon
 			createTokenizer( tokenizer );
 			Parser = TokenParser( tokenizer( eon::source::Ref( Src ) ) );
 		}
-		source::String Src;
-		TokenParser Parser;
-		TokenMatcher::OptionsElement Obj;
 	};
 #endif
 
@@ -550,7 +553,7 @@ namespace eon
 	{
 		auto pos = parser.viewedPos();
 		bool result = false;
-		for( auto elm : Elements )
+		for( auto& elm : Elements )
 		{
 			result = elm->match( parser );
 			if( result )
@@ -576,12 +579,17 @@ namespace eon
 #ifdef EON_TEST_MODE
 	struct SequenceElementTestData
 	{
+		source::String Src;
+		TokenParser Parser;
+		TokenMatcher::SequenceElement Obj;
+
+
 		SequenceElementTestData( string source )
 		{
-			auto elm = new TokenMatcher::DataElement();
+			auto elm = std::make_shared<TokenMatcher::DataElement>();
 			elm->Type = name_letters;
 			Obj.Elements.push_back( elm );
-			elm = new TokenMatcher::DataElement();
+			elm = std::make_shared<TokenMatcher::DataElement>();
 			elm->Type = name_digits;
 			Obj.Elements.push_back( elm );
 			Src = eon::source::String( "test", std::move( source ) );
@@ -589,9 +597,6 @@ namespace eon
 			createTokenizer( tokenizer );
 			Parser = TokenParser( tokenizer( eon::source::Ref( Src ) ) );
 		}
-		source::String Src;
-		TokenParser Parser;
-		TokenMatcher::SequenceElement Obj;
 	};
 #endif
 

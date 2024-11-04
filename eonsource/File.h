@@ -6,109 +6,109 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // The 'eon' namespace encloses all public functionality
+// The 'source' namespace encloses all source functionality
 //
-namespace eon
+namespace eon::source
 {
 	///////////////////////////////////////////////////////////////////////////
 	//
-	// The 'source' namespace encloses all source functionality
+	// Eon File Source Class - eon::source::File
 	//
-	namespace source
+	// A subclass of [eon::source::Raw], using a file as source
+	//
+	class File : public Raw
 	{
 		///////////////////////////////////////////////////////////////////////
 		//
-		// Eon File Source Class - eon::source::File
+		// Construction
 		//
-		// A subclass of [eon::source::Raw], using a file as source
+	public:
+
+		// Default constructor for empty source
+		inline File() = default;
+
+		// Construct for a named file (which must exist!)
+		// WARNING: Throws [eon::source::BadName] if the name is not for
+		//          an existing file that we can open for reading!
+		File( const string& name );
+
+		~File() final;
+
+
+
+
+		///////////////////////////////////////////////////////////////////
 		//
-		class File : public Raw
+		// Read-only Methods
+		//
+	public:
+
+		inline size_t numBytesInSource() const noexcept override { return NumBytes; }
+
+		// Given a base position and an offset (in characaters, not bytes!),
+		// get a source::Pos object for that offset.
+		// If 'offset_chars' refers to a character before start or after
+		// end of source, it will be adjusted to fit.
+		// Returns 'base_position' if 'offset_chars' is adjusted to zero!
+		Pos getPosAtOffset( Pos base_position, int offset_chars = 1 ) override;
+
+		// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+		inline bool match( const Pos& start, const Pos& end, const eon::string& value ) const noexcept override {
+			return ( (File*)this )->str( start, end ) == value; }
+
+		// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
+		bool match( const Pos& start, const Pos& end, const char* value ) const noexcept override {
+			return ( (File*)this )->str( start, end ) == value; }
+
+		// Get characater at specified position
+		// Returns [eon::nochar] if at or beyond source end!
+		char_t chr( const Pos& pos ) noexcept override;
+
+		// Get byte at specified position
+		// Returns -1 if at or beyond source end!
+		int byte( index_t pos ) noexcept override;
+
+		// Get string at specified area
+		// Returns empty string if not a valid area or the entire area is
+		// outside the scope of the source!
+		string str( const Pos& start, const Pos& end ) noexcept override;
+
+		// Get bytes at specified area.
+		// Returns empty if not a valid area or the entire area is outside the scope of the source!
+		std::string bytes( const Pos& start, const Pos& end ) noexcept override;
+
+
+
+
+		///////////////////////////////////////////////////////////////////
+		//
+		// Helpers
+		//
+	EON_PRIVATE:
+
+		inline Pos _realEnd( const Pos& end ) const noexcept
 		{
-		public:
-			///////////////////////////////////////////////////////////////////
-			//
-			// Construction
-			//
+			Pos real_end{ end };
+			if( real_end.BytePos == 0 )
+				real_end.BytePos = NumBytes;
+			return real_end;
+		}
 
-			// Default constructor for empty source
-			inline File() = default;
+		void _forward( Pos& pos, index_t num_chars );
+		void _backward( Pos& pos, index_t num_chars );
 
-			// Construct for a named file (which must exist!)
-			// WARNING: Throws [eon::source::BadName] if the name is not for
-			//          an existing file that we can open for reading!
-			File( const string& name );
-
-
-			// Default destruction
-			virtual ~File() { if( Data ) Data.close(); };
+		void _scanFile();
 
 
 
 
-			///////////////////////////////////////////////////////////////////
-			//
-			// Read-only Methods
-			//
-		public:
+		///////////////////////////////////////////////////////////////////
+		//
+		// Attributes
+		//
+	private:
 
-			inline size_t numBytesInSource() const noexcept override { return NumBytes; }
-
-			// Given a base position and an offset (in characaters, not bytes!),
-			// get a source::Pos object for that offset.
-			// If 'offset_chars' refers to a character before start or after
-			// end of source, it will be adjusted to fit.
-			// Returns 'base_position' if 'offset_chars' is adjusted to zero!
-			Pos getPosAtOffset( Pos base_position, int offset_chars = 1 ) override;
-
-			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
-			inline bool match( const Pos& start, const Pos& end, const eon::string& value ) const noexcept override {
-				return ( (File*)this )->str( start, end ) == value; }
-
-			// Check if the portion of the source between 'start' and 'end' matches the specified string 'value'.
-			bool match( const Pos& start, const Pos& end, const char* value ) const noexcept override {
-				return ( (File*)this )->str( start, end ) == value; }
-
-			// Get characater at specified position
-			// Returns [eon::nochar] if at or beyond source end!
-			char_t chr( const Pos& pos ) noexcept override;
-
-			// Get byte at specified position
-			// Returns -1 if at or beyond source end!
-			int byte( index_t pos ) noexcept override;
-
-			// Get string at specified area
-			// Returns empty string if not a valid area or the entire area is
-			// outside the scope of the source!
-			string str( Pos start, Pos end ) noexcept override;
-
-			// Get bytes at specified area.
-			// Returns empty if not a valid area or the entire area is outside the scope of the source!
-			std::string bytes( Pos start, Pos end ) noexcept override;
-
-
-
-
-			///////////////////////////////////////////////////////////////////
-			//
-			// Helpers
-			//
-		EON_PRIVATE:
-
-			void _forward( Pos& pos, index_t num_chars );
-			void _backward( Pos& pos, index_t num_chars );
-
-			void _scanFile();
-
-
-
-
-			///////////////////////////////////////////////////////////////////
-			//
-			// Attributes
-			//
-		private:
-
-			std::ifstream Data;
-			size_t NumBytes{ 0 };
-		};
-	}
+		std::ifstream Data;
+		size_t NumBytes{ 0 };
+	};
 }
