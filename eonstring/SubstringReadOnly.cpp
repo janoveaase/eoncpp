@@ -155,18 +155,18 @@ namespace eon
 		EON_EQ( 101, static_cast<int>( substring(
 			string_iterator( source ) + 6, string_iterator( source ) + 1 ).byte( 2 ) ) ) );
 
-	EON_TEST( substring, enclosed, no_source,
-		EON_FALSE( substring().enclosed( '"' ) ) );
-	EON_TEST( substring, enclosed, empty,
-		EON_FALSE( substring( "" ).enclosed( '"' ) ) );
-	EON_TEST( substring, enclosed, false,
-		EON_FALSE( substring( "abcdef" ).enclosed( '"' ) ) );
-	EON_TEST( substring, enclosed, half,
-		EON_FALSE( substring( "\"abcdef" ).enclosed( '"' ) ) );
-	EON_TEST( substring, enclosed, same_char,
-		EON_TRUE( substring( "\"abcdef\"" ).enclosed( '"' ) ) );
-	EON_TEST( substring, enclosed, diff_char,
-		EON_TRUE( substring( "(abcdef)" ).enclosed( '(', ')' ) ) );
+	EON_TEST( substring, enclosedBy, no_source,
+		EON_FALSE( substring().enclosedBy( '"' ) ) );
+	EON_TEST( substring, enclosedBy, empty,
+		EON_FALSE( substring( "" ).enclosedBy( '"' ) ) );
+	EON_TEST( substring, enclosedBy, false,
+		EON_FALSE( substring( "abcdef" ).enclosedBy( '"' ) ) );
+	EON_TEST( substring, enclosedBy, half,
+		EON_FALSE( substring( "\"abcdef" ).enclosedBy( '"' ) ) );
+	EON_TEST( substring, enclosedBy, same_char,
+		EON_TRUE( substring( "\"abcdef\"" ).enclosedBy( '"' ) ) );
+	EON_TEST( substring, enclosedBy, diff_char,
+		EON_TRUE( substring( "(abcdef)" ).enclosedBy( '(', ')' ) ) );
 
 	bool substring::blank() const noexcept
 	{

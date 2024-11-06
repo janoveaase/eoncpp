@@ -400,16 +400,16 @@ namespace eon
 
 
 		// Check if the string is enclosed by double quotation marks.
-		inline bool isDoubleQuoted() const noexcept { return substr().enclosed( DblQuoteChr ); }
+		inline bool isDoubleQuoted() const noexcept { return substr().enclosedBy( DblQuoteChr ); }
 
 		// Check if a part of the string is enclosed by double quotation marks.
-		inline bool isDoubleQuoted( const substring& sub ) const noexcept { return sub.enclosed( DblQuoteChr ); }
+		inline bool isDoubleQuoted( const substring& sub ) const noexcept { return sub.enclosedBy( DblQuoteChr ); }
 
 		// Check if the string is enclosed by single quotation marks.
-		inline bool isSingleQuoted() const noexcept { return substr().enclosed( SglQuoteChr ); }
+		inline bool isSingleQuoted() const noexcept { return substr().enclosedBy( SglQuoteChr ); }
 
 		// Check if a part of the string is enclosed by single quotation marks.
-		inline bool isSingleQuoted( const substring& sub ) const noexcept { return sub.enclosed( SglQuoteChr ); }
+		inline bool isSingleQuoted( const substring& sub ) const noexcept { return sub.enclosedBy( SglQuoteChr ); }
 
 
 		// Check if the string is 'blank' (contains only whitespaces).

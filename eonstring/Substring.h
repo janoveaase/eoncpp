@@ -151,10 +151,10 @@ namespace eon
 
 
 		// Check if the substring is enclosed by a specific pair of characters, such as quotation marks or parenthesis.
-		// NOTE: if 'end_char' is 'same_char' it will be the same as 'start_char'!
-		inline bool enclosed( char_t start_char, char_t end_char = same_char ) const noexcept {
-			return numChars() > 1 && *begin() == start_char && *last() == (
-				end_char == same_char ? start_char : end_char ); }
+		// NOTE: if the value of 'end_char' is 'same_char' it will be the same as 'start_char'!
+		inline bool enclosedBy( char_t start_char, char_t end_char = same_char ) const noexcept {
+			return numChars() > 1 && *begin() == start_char
+				&& *last() == ( end_char == same_char ? start_char : end_char ); }
 
 
 		// Check if the substring is blank (is empty or contains characters from
