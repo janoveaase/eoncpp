@@ -25,7 +25,7 @@ namespace eon
 		1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, // s5..s6
 		1, 3, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // s7..s8
 	};
-	inline char32_t _utf8Decode( char32_t& state, char32_t& codep, char32_t byte ) noexcept
+	static inline char32_t _utf8Decode( char32_t& state, char32_t& codep, char32_t byte ) noexcept
 	{
 		char32_t type = utf8d[ byte ];
 		codep = ( state != UTF8_ACCEPT ) ? ( byte & 0x3fu ) | ( codep << 6 ) : ( 0xff >> type ) & ( byte );
@@ -743,7 +743,6 @@ namespace eon
 			size = 4;
 		cp = 0;
 		char32_t state = 0;
-		index_t num = 0;
 		for( auto c = start; size > 0; ++c, --size )
 		{
 			if( !_utf8Decode( state, cp, static_cast<unsigned char>( *c ) ) )
@@ -769,7 +768,7 @@ namespace eon
 		if( !isValidCodepoint( cp ) )
 			throw InvalidUTF8();
 		bytes = 0;
-		char* b = (char*)&bytes;
+		auto b = (char*)&bytes;
 
 		if( cp < 0x80 )
 		{
@@ -819,7 +818,8 @@ namespace eon
 
 	index_t string_iterator::countUtf8Chars( const char* str, index_t size )
 	{
-		char32_t cp{ 0 }, state{ 0 };
+		char32_t cp{ 0 };
+		char32_t state{ 0 };
 		index_t num = 0;
 		for( auto c = str, end_c = str + size; c != end_c; ++c )
 		{
@@ -851,7 +851,8 @@ namespace eon
 
 	void string_iterator::_utf8CharacterCount() noexcept
 	{
-		char32_t state = 0, cp = 0;
+		char32_t state = 0;
+		char32_t cp = 0;
 		const char* cs{ nullptr };
 		NumSourceChars = 0;
 		for( auto c = Source; c != SourceEnd; ++c )

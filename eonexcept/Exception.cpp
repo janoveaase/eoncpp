@@ -5,7 +5,7 @@
 namespace eon
 {
 	EON_TEST( exception, exception, bad_name,
-		EON_RAISE( exception( 0 ), BadName ) );
+		EON_RAISE( exception( name( "" ) ), BadName ) );
 	EON_TEST( exception, exception, good_name,
 		EON_NO_X( eon::exception( name( "test" ) ) ) );
 

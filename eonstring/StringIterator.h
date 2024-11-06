@@ -19,8 +19,8 @@ namespace eon
 	using charsize_t = uint16_t;
 #endif
 
-#define UTF8_ACCEPT 0
-#define UTF8_REJECT 1
+	constexpr int UTF8_ACCEPT = 0;
+	constexpr int UTF8_REJECT = 1;
 
 
 
@@ -33,10 +33,10 @@ namespace eon
 	class WrongSource : public std::exception
 	{
 	public:
-		inline WrongSource() : std::exception() {}
-		inline WrongSource( const char* message ) : std::exception() { Message = message; }
-		inline WrongSource( const std::string& message ) : std::exception() { Message = message; }
-		inline WrongSource( std::string&& message ) noexcept : std::exception() { Message = std::move( message ); }
+		using std::exception::exception;
+		inline explicit WrongSource( const char* message ) : std::exception(), Message( message ) {}
+		inline explicit WrongSource( const std::string& message ) : std::exception(), Message( message ) {}
+		inline explicit WrongSource( std::string&& message ) noexcept : std::exception(), Message( std::move( message ) ) {}
 		inline const char* what() const noexcept override { return Message.c_str(); }
 	private:
 		std::string Message;
@@ -53,10 +53,10 @@ namespace eon
 	class InvalidUTF8 : public std::exception
 	{
 	public:
-		inline InvalidUTF8() : std::exception() {}
-		inline InvalidUTF8( const char* message ) : std::exception() { Message = message; }
-		inline InvalidUTF8( const std::string& message ) : std::exception() { Message = message; }
-		inline InvalidUTF8( std::string&& message ) noexcept : std::exception() { Message = std::move( message ); }
+		using std::exception::exception;
+		inline explicit InvalidUTF8( const char* message ) : std::exception(), Message( message ) {}
+		inline explicit InvalidUTF8( const std::string& message ) : std::exception(), Message( message ) {}
+		inline explicit InvalidUTF8( std::string&& message ) noexcept : std::exception(), Message( std::move( message ) ) {}
 		inline const char* what() const noexcept override { return Message.c_str(); }
 	private:
 		std::string Message;
@@ -98,7 +98,6 @@ namespace eon
 	class string_iterator
 	{
 	public:
-
 		using iterator_category = std::input_iterator_tag;
 		using value_type = char_t;
 		using difference_type = char_t;
@@ -158,8 +157,8 @@ namespace eon
 		//   source           : Start of source.
 		//   num_bytes        : Source size in bytes.
 		//   num_source_chars : Source size in number of UTF-8 characters.
-		inline string_iterator( const char* source, index_t num_bytes, index_t num_source_chars ) noexcept {
-			NumSourceChars = num_source_chars; _prep( source, source + num_bytes, source ); }
+		inline string_iterator( const char* source, index_t num_bytes, index_t num_source_chars ) noexcept
+			: NumSourceChars( num_source_chars ) { _prep( source, source + num_bytes, source ); }
 
 		// Construct from already known details, for specified position in source.
 		// Slow, will count number of UTF-8 characters in source and optimize for UTF-8 handling.
@@ -180,8 +179,8 @@ namespace eon
 		//   num_source_chars : Source size in number of UTF-8 characters.
 		//   pos              : Iterator position in source in bytes.
 		inline string_iterator(
-			const char* source, index_t num_bytes, index_t num_source_chars, const char* pos ) noexcept {
-			NumSourceChars = num_source_chars; _prep( source, source + num_bytes, pos ); }
+			const char* source, index_t num_bytes, index_t num_source_chars, const char* pos ) noexcept
+		: NumSourceChars( num_source_chars ) { _prep( source, source + num_bytes, pos ); }
 
 		// Construct from already known details, for specified position in source.
 		// Fast, will not count number of UTF-8 characters in source!
@@ -193,8 +192,8 @@ namespace eon
 		//   pos              : Iterator position in source in bytes.
 		//   num_char         : Iteration position in source in UTF-8 characters.
 		inline string_iterator(
-			const char* source, index_t num_bytes, index_t num_source_chars, const char* pos, index_t num_char ) noexcept {
-			NumSourceChars = num_source_chars; NumChar = num_char; _prep( source, source + num_bytes, pos ); }
+			const char* source, index_t num_bytes, index_t num_source_chars, const char* pos, index_t num_char ) noexcept
+		: NumChar( num_char ), NumSourceChars( num_source_chars ) { _prep( source, source + num_bytes, pos ); }
 
 
 		// Construct using another 'string_iterator' as 'source', but set specified position.
@@ -279,7 +278,7 @@ namespace eon
 	public:
 
 		// Check that state is 'valid' (not 'void' or 'end' or 'rend).
-		inline operator bool() const noexcept { return CodepointSize > 0; }
+		inline explicit operator bool() const noexcept { return CodepointSize > 0; }
 
 		// Check if in 'void' state.
 		inline bool isVoid() const noexcept { return Source == nullptr; }
@@ -350,20 +349,40 @@ namespace eon
 
 
 		// Get a new iterator that is in 'end' state.
-		inline string_iterator getEnd() const noexcept {
-			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToEnd(); }
+		inline string_iterator getEnd() const noexcept
+		{
+			if( isVoid() )
+				return *this;
+			string_iterator other{ *this };
+			return other.resetToEnd();
+		}
 
 		// Get a new iterator that is in 'rend' state.
-		inline string_iterator getREnd() const noexcept {
-			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToREnd(); }
+		inline string_iterator getREnd() const noexcept
+		{
+			if( isVoid() )
+				return *this;
+			string_iterator other{ *this };
+			return other.resetToREnd();
+		}
 
 		// Get a new iterator that is in 'first' state.
-		inline string_iterator getFirst() const noexcept {
-			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToFirst(); }
+		inline string_iterator getFirst() const noexcept
+		{
+			if( isVoid() )
+				return *this;
+			string_iterator other{ *this };
+			return other.resetToFirst();
+		}
 
 		// Get a new iterator that is in 'last' state.
-		inline string_iterator getLast() const noexcept {
-			if( isVoid() ) return *this; string_iterator other{ *this }; return other.resetToLast(); }
+		inline string_iterator getLast() const noexcept
+		{
+			if( isVoid() )
+				return *this;
+			string_iterator other{ *this };
+			return other.resetToLast();
+		}
 
 
 
@@ -383,10 +402,10 @@ namespace eon
 		inline string_iterator& operator--() noexcept { return *this -= 1; }
 
 		// Postfix iteration by increment. Involves copying!
-		inline string_iterator operator++( int ) noexcept { auto _this = *this; ++*this; return _this; }
+		inline string_iterator operator++( int ) noexcept { string_iterator _this = *this; ++*this; return _this; }
 
 		// Postfix iteration by decrement. Involves copying!
-		inline string_iterator operator--( int ) noexcept { auto _this = *this; *this -= 1; return _this; }
+		inline string_iterator operator--( int ) noexcept { string_iterator _this = *this; *this -= 1; return _this; }
 
 
 		// Move forward a specific number of UTF-8 characters.
@@ -470,22 +489,28 @@ namespace eon
 		int compare( const string_iterator& other ) const noexcept;
 
 		// Check if 'this' comes before 'other' using [compare].
-		inline bool operator<( const string_iterator& other ) const noexcept { return compare( other ) < 0; }
+		inline friend bool operator<( const string_iterator& a, const string_iterator& b ) noexcept {
+			return a.compare( b ) < 0; }
 
 		// Check if 'this' comes before or same as 'other' using [compare].
-		inline bool operator<=( const string_iterator& other ) const noexcept { return compare( other ) <= 0; }
+		inline friend bool operator<=( const string_iterator& a, const string_iterator& b ) noexcept {
+			return a.compare( b ) <= 0; }
 
 		// Check if 'this' comes after 'other' using [compare].
-		inline bool operator>( const string_iterator& other ) const noexcept { return compare( other ) > 0; }
+		inline friend bool operator>( const string_iterator& a, const string_iterator& b ) noexcept {
+			return a.compare( b ) > 0; }
 
 		// Check if 'this' comes after or same as 'other' using [compare].
-		inline bool operator>=( const string_iterator& other ) const noexcept { return compare( other ) >= 0; }
+		inline friend bool operator>=( const string_iterator& a, const string_iterator& b ) noexcept {
+			return a.compare( b ) >= 0; }
 
 		// Check if 'this' is at same position as 'other' using [compare].
-		inline bool operator==( const string_iterator& other ) const noexcept { return compare( other ) == 0; }
+		inline friend bool operator==( const string_iterator& a, const string_iterator& b ) noexcept {
+			return a.compare( b ) == 0; }
 
 		// Check if 'this' is at different position from 'other' using [compare].
-		inline bool operator!=( const string_iterator& other ) const noexcept { return compare( other ) != 0; }
+		inline friend bool operator!=( const string_iterator& a, const string_iterator& b ) noexcept {
+			return a.compare( b ) != 0; }
 
 
 

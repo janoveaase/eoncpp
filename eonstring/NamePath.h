@@ -27,8 +27,8 @@ namespace eon
 	public:
 
 		namepath() = default;
-		inline namepath( const namepath& other ) { Value = other.Value; }
-		inline namepath( namepath&& other ) noexcept { Value = std::move( other.Value ); }
+		namepath( const namepath& ) = default;
+		namepath( namepath&& ) noexcept = default;
 
 		inline namepath( const string& ref ) { *this = ref; }
 		inline namepath( std::initializer_list<name_t> value ) { for( auto name : value ) Value.push_back( name ); }
@@ -50,7 +50,7 @@ namespace eon
 		inline bool empty() const noexcept { return Value.empty(); }
 
 		// Check if reference contains something.
-		inline operator bool() const noexcept { return !Value.empty(); }
+		inline explicit operator bool() const noexcept { return !Value.empty(); }
 
 		// Get number of elements (names) in reference.
 		inline size_t numElms() const noexcept { return Value.size(); }
@@ -74,26 +74,39 @@ namespace eon
 
 
 		// Get reference as a string.
-		inline string str() const noexcept {
-			string s{ "@" }; for( auto name : Value ) {
-				if( s.numChars() > 2 ) s += "/"; s += eon::str( name ); } return s; }
+		inline string str() const noexcept
+		{
+			string s{ "@" };
+			for( auto name : Value )
+			{
+				if( s.numChars() > 2 )
+					s += "/";
+				s += eon::str( name );
+			}
+			return s;
+		}
 
 
 		// Get hash value.
-		inline size_t hash() const noexcept {
+		inline size_t hash() const noexcept
+		{
 			static std::hash<uint32_t> hasher;
-			size_t val{ 0 }; for( auto name : Value ) val = val * 37 + hasher( name.value() ); return val; }
+			size_t val{ 0 };
+			for( auto name : Value )
+				val = val * 37 + hasher( name.value() );
+			return val;
+		}
 
 
 		// Comparison.
 		int compare( const namepath& other ) const noexcept;
 
-		inline bool operator<( const namepath& other ) const noexcept { return compare( other ) < 0; }
-		inline bool operator<=( const namepath& other ) const noexcept { return compare( other ) <= 0; }
-		inline bool operator>( const namepath& other ) const noexcept { return compare( other ) > 0; }
-		inline bool operator>=( const namepath& other ) const noexcept { return compare( other ) >= 0; }
-		inline bool operator==( const namepath& other ) const noexcept { return compare( other ) == 0; }
-		inline bool operator!=( const namepath& other ) const noexcept { return compare( other ) != 0; }
+		inline friend bool operator<( const namepath& a, const namepath& b ) noexcept { return a.compare( b ) < 0; }
+		inline friend bool operator<=( const namepath& a, const namepath& b ) noexcept { return a.compare( b ) <= 0; }
+		inline friend bool operator>( const namepath& a, const namepath& b ) noexcept { return a.compare( b ) > 0; }
+		inline friend bool operator>=( const namepath& a, const namepath& b ) noexcept { return a.compare( b ) >= 0; }
+		inline friend bool operator==( const namepath& a, const namepath& b ) noexcept { return a.compare( b ) == 0; }
+		inline friend bool operator!=( const namepath& a, const namepath& b ) noexcept { return a.compare( b ) != 0; }
 
 
 
@@ -105,24 +118,28 @@ namespace eon
 	public:
 
 		// Set the reference.
-		inline namepath& operator=( const namepath& other ) { Value = other.Value; return *this; }
+		namepath& operator=( const namepath& ) = default;
 
 		// Take ownership of another reference's value.
-		inline namepath& operator=( namepath&& other ) noexcept { Value = std::move( other.Value ); return *this; }
+		namepath& operator=( namepath&& ) noexcept = default;
 
 		// Parse from string.
 		// NOTE: Will ignore illegal name characters and only use legal ones. Empty elements will also be ignored!
 		namepath& operator=( const string& ref );
 
-		inline namepath& operator=( std::initializer_list<name_t> names ) {
-			for( auto name : names ) Value.push_back( name ); return *this; }
+		inline namepath& operator=( std::initializer_list<name_t> names )
+		{
+			for( auto name : names )
+				Value.push_back( name );
+			return *this;
+		}
 
 		// Clear the reference.
 		inline void clear() noexcept { Value.clear(); }
 
 		// Add a name to the end of the reference.
 		// Will not add [eon::no_name], but also not report it!
-		inline namepath& add( name_t name ) { if( name != no_name ) Value.push_back( name ); return *this; }
+		inline namepath& add( name_t name ) { if( name != no_name ) { Value.push_back( name ); } return *this; }
 
 
 
@@ -145,11 +162,13 @@ namespace std
 	// Allow implicit use of [eon::namepath] as key/value when used in
 	// containers such as 'std::unordered_map' and 'std::unordered_set'.
 	template<>
-	struct hash<::eon::namepath> {
-		inline size_t operator()( const ::eon::namepath& rhs ) const {
-			return static_cast<size_t>( rhs.hash() ); } };
+	struct hash<::eon::namepath>
+	{
+		inline size_t operator()( const ::eon::namepath& rhs ) const { return static_cast<size_t>( rhs.hash() ); }
+	};
 	template<>
-	struct equal_to<::eon::namepath> {
-		inline bool operator()( const ::eon::namepath& lhs,
-			const ::eon::namepath& rhs ) const { return lhs == rhs; } };
+	struct equal_to<::eon::namepath>
+	{
+		inline bool operator()( const ::eon::namepath& a, const ::eon::namepath& b ) const { return a == b; }
+	};
 };

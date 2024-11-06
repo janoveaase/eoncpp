@@ -47,9 +47,9 @@ namespace eon
 			string str() const {
 				string s;
 				if( Max == INDEX_MAX )
-					s = Min == 0 ? "*" : Min == 1 ? "+" : "{" + string( Min ) + ",}";
+					s = Min == 0 ? string( "*" ) : Min == 1 ? string( "+" ) : "{" + string( Min ) + ",}";
 				else if( Min == Max )
-					s = Min == 1 ? "" : "{" + string( Min ) + "}";
+					s = Min == 1 ? string( "" ) : "{" + string( Min ) + "}";
 				else if( Min == 0 && Max == 1 )
 					s = "?";
 				else

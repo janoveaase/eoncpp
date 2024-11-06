@@ -121,7 +121,7 @@ namespace eon
 
 
 
-	void locale::_set( std::string name )
+	void locale::_set( const std::string& name )
 	{
 		Loc = std::locale( name.c_str() );		// Issues with G++ using std::string directly!
 		Coll = &std::use_facet<std::collate<wchar_t>>( Loc );

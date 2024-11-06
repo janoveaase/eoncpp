@@ -10,7 +10,7 @@ namespace eonitest
 
 
 
-	bool TestBase::registerTest( TestName name, TestLocation location, FactoryMain* test )
+	bool TestBase::registerTest( const TestName& name, const TestLocation& location, FactoryMain* test )
 	{
 		if( !TestNames )
 		{
@@ -27,12 +27,12 @@ namespace eonitest
 
 
 
-	bool EonTestSandbox::exists( eon::string name ) const noexcept {
+	bool EonTestSandbox::exists( const eon::string& name ) const noexcept {
 		if( name.contains( ".." ) )
 			return false;
 		return std::filesystem::exists( sandboxDir() / name.stdwstr() ); }
 
-	bool EonTestSandbox::makeDir( eon::string name ) const
+	bool EonTestSandbox::makeDir( const eon::string& name ) const
 	{
 		if( name.contains( ".." ) )
 			return false;
@@ -40,7 +40,7 @@ namespace eonitest
 		return _makeDir( full_path );
 	}
 
-	void EonTestSandbox::saveFile( eon::string name, eon::string contents ) const
+	void EonTestSandbox::saveFile( const eon::string& name, const eon::string& contents ) const
 	{
 		if( name.contains( ".." ) )
 			return;
@@ -51,10 +51,10 @@ namespace eonitest
 		file.close();
 	}
 
-	eon::string EonTestSandbox::loadFile( eon::string name ) const
+	eon::string EonTestSandbox::loadFile( const eon::string& name ) const
 	{
 		if( name.contains( ".." ) )
-			return "";
+			return eon::string();
 		std::filesystem::path path = sandboxDir() / name.stdwstr();
 		std::ifstream file;
 		file.open( path, std::ios_base::in | std::ios_base::binary );
@@ -69,7 +69,7 @@ namespace eonitest
 		return eon::string( std::move( raw ) );
 	}
 
-	bool EonTestSandbox::deleteFile( eon::string name ) const
+	bool EonTestSandbox::deleteFile( const eon::string& name ) const
 	{
 		if( name.contains( ".." ) )
 			return false;
@@ -77,7 +77,7 @@ namespace eonitest
 		return std::filesystem::remove( path );
 	}
 
-	bool EonTestSandbox::deleteDir( eon::string name ) const
+	bool EonTestSandbox::deleteDir( const eon::string& name ) const
 	{
 		if( name.contains( ".." ) )
 			return false;

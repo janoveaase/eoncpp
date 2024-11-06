@@ -30,23 +30,38 @@ namespace eon
 		byteserializer() = default;
 
 		// Construct an object that is ready to de-serialize
-		inline byteserializer( std::string bytes ) noexcept { *this = bytes; }
+		inline explicit byteserializer( const std::string& bytes ) noexcept { *this = bytes; }
+
+		// Construct an object that is ready to de-serialize
+		inline explicit byteserializer( std::string&& bytes ) noexcept { *this = std::move( bytes ); }
 
 		inline byteserializer( const byteserializer& other ) { *this = other; }
 		inline byteserializer( byteserializer&& other ) noexcept { *this = std::move( other ); }
 
-		virtual ~byteserializer() = default;
+		~byteserializer() final = default;
 
 
-		inline byteserializer& operator=( std::string bytes ) noexcept {
-			Bytes = std::move( bytes ); Pos = Bytes.begin(); IsStoring = false; return *this; }
+		inline byteserializer& operator=( const std::string_view& bytes ) noexcept {
+			Bytes = bytes; Pos = Bytes.begin(); _setReading(); return *this; }
 
-		inline byteserializer& operator=( const byteserializer& other ) {
-			Bytes = other.Bytes; Pos = Bytes.begin() + ( other.Pos - other.Bytes.begin() );
-			*static_cast<serializer*>( this ) = other; return *this; }
-		inline byteserializer& operator=( byteserializer&& other ) noexcept {
-			Bytes = std::move( other.Bytes ); Pos = Bytes.begin() + ( other.Pos - other.Bytes.begin() );
-			other.Pos = other.Bytes.begin(); *static_cast<serializer*>( this ) = other; return *this; }
+		inline byteserializer& operator=( std::string&& bytes ) noexcept {
+			Bytes = std::move( bytes ); Pos = Bytes.begin(); _setReading(); return *this; }
+
+		byteserializer& operator=( const byteserializer& other )
+		{
+			Bytes = other.Bytes;
+			Pos = Bytes.begin() + ( other.Pos - other.Bytes.begin() );
+			*static_cast<serializer*>( this ) = *static_cast<const serializer*>( &other );
+			return *this;
+		}
+		byteserializer& operator=( byteserializer&& other ) noexcept
+		{
+			Bytes = std::move( other.Bytes );
+			Pos = Bytes.begin() + ( other.Pos - other.Bytes.begin() );
+			other.Pos = other.Bytes.begin();
+			*static_cast<serializer*>( this ) = *static_cast<const serializer*>( &other );
+			return *this;
+		}
 
 
 
@@ -75,8 +90,8 @@ namespace eon
 		//
 	protected:
 
-		inline std::string& _byteStore() noexcept { return Bytes; }
-		inline std::string::const_iterator& _bytePos() noexcept { return Pos; }
+		inline std::string& _byteStore() noexcept override { return Bytes; }
+		inline std::string::const_iterator& _bytePos() noexcept override { return Pos; }
 
 
 

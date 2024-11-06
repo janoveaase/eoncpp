@@ -92,20 +92,32 @@ namespace eon
 	// While not strictly necessary, these character definitions can help
 	// increase clarity and avoid some confusions:
 	static const char_t NullChr{ '\0' };
-	static const char_t SpaceChr{ ' ' }, TabChr{ '\t' };
+	static const char_t SpaceChr{ ' ' };
+	static const char_t TabChr{ '\t' };
 	static const char_t NBSpaceChr{ 160 };
-	static const char_t PointChr{ '.' }, CommaChr{ ',' };
-	static const char_t ColonChr{ ':' }, SemiColonChr{ ';' };
-	static const char_t DblQuoteChr{ '"' }, SglQuoteChr{ '\'' };
+	static const char_t PointChr{ '.' };
+	static const char_t CommaChr{ ',' };
+	static const char_t ColonChr{ ':' };
+	static const char_t SemiColonChr{ ';' };
+	static const char_t DblQuoteChr{ '"' };
+	static const char_t SglQuoteChr{ '\'' };
 	static const char_t ZeroChr{ '0' };
-	static const char_t NewlineChr{ '\n' }, CReturnChr{ '\r' };
+	static const char_t NewlineChr{ '\n' };
+	static const char_t CReturnChr{ '\r' };
 	static const char_t StarChr{ '*' };
-	static const char_t EqualChr{ '=' }, PlusChr{ '+' }, MinusChr{ '-' };
-	static const char_t RoundBrcOpenChr{ '(' }, RoundBrcCloseChr{ ')' };
-	static const char_t CurlyBrcOpenChr{ '{' }, CurlyBrcCloseChr{ '}' };
-	static const char_t SquareBrcOpenChr{ '[' }, SquareBrcCloseChr{ ']' };
-	static const char_t AngleBrcOpenChr{ '<' }, AngleBrcCloseChr{ '>' };
-	static const char_t ForwSlashChr{ '/' }, BackSlashChr{ '\\' };
+	static const char_t EqualChr{ '=' };
+	static const char_t PlusChr{ '+' };
+	static const char_t MinusChr{ '-' };
+	static const char_t RoundBrcOpenChr{ '(' };
+	static const char_t RoundBrcCloseChr{ ')' };
+	static const char_t CurlyBrcOpenChr{ '{' };
+	static const char_t CurlyBrcCloseChr{ '}' };
+	static const char_t SquareBrcOpenChr{ '[' };
+	static const char_t SquareBrcCloseChr{ ']' };
+	static const char_t AngleBrcOpenChr{ '<' };
+	static const char_t AngleBrcCloseChr{ '>' };
+	static const char_t ForwSlashChr{ '/' };
+	static const char_t BackSlashChr{ '\\' };
 	static const char_t BarChr{ '|' };
 
 	// Special character that indicates a [eon::char_t] nothing value.
@@ -215,7 +227,7 @@ namespace eon
 	inline charcat operator|( charcat a, charcat b ) noexcept {
 		return static_cast<charcat>( static_cast<int>( a ) | static_cast<int>( b ) ); }
 	inline charcat& operator|=( charcat& a, charcat b ) noexcept { return a = a | b; }
-	inline bool operator&&( charcat a, charcat b ) noexcept {
+	inline bool operator&( charcat a, charcat b ) noexcept {
 		return static_cast<bool>( static_cast<int>( a ) & static_cast<int>( b ) ); }
 
 
@@ -417,7 +429,7 @@ namespace eon
 		// Check if a character belongs to a named [eon::charcat] character category.
 		// If 'category' is a combination, this method will return true if 'codepoint' is in any of those!
 		inline bool is( char_t codepoint, charcat category ) const noexcept {
-			return category && this->category( codepoint ); }
+			return category & this->category( codepoint ); }
 
 		// Get the [eon::charcat] character category for the specified character.
 		// Returns [eon::charcat::undef] if unable to categorize.
@@ -510,15 +522,28 @@ namespace eon
 			|| ( codepoint >= 'a' && codepoint <= 'f' ); }
 
 	// Given a hexadecimal digit, return the base-10 numerical value.
-	static inline byte_t hexToNum( byte_t digit ) noexcept {
-		return ( digit >= '0' && digit <= '9' ) ? ( digit - '0' )
-			: ( digit >= 'A' && digit <= 'F' ) ? ( digit - 'A' + 10 )
-			: ( digit >= 'a' && digit <= 'f' ) ? ( digit - 'a' + 10 ) : 0; }
+	static inline byte_t hexToNum( byte_t digit ) noexcept
+	{
+		if( digit >= '0' && digit <= '9' )
+			return digit - '0';
+		else if( digit >= 'A' && digit <= 'F' )
+			return digit - 'A' + 10;
+		else if( digit >= 'a' && digit <= 'f' )
+			return digit - 'a' + 10;
+		else
+			return 0;
+	}
 
 	// Given a byte, convert it into two hexadecimal digits stored in a std::string of bytes.
-	static inline std::string byteToHex( byte_t byte ) noexcept {
-		byte_t hi = byte / 16, lo = byte % 16; std::string str( "00" );
-		str[ 0 ] = hi < 10 ? '0' + hi : 'A' + hi - 10; str[ 1 ] = lo < 10 ? '0' + lo : 'A' + lo - 10; return str; }
+	static inline std::string byteToHex( byte_t byte ) noexcept
+	{
+		byte_t hi = byte / 16;
+		byte_t lo = byte % 16;
+		std::string str( "00" );
+		str[ 0 ] = hi < 10 ? '0' + hi : 'A' + hi - 10;
+		str[ 1 ] = lo < 10 ? '0' + lo : 'A' + lo - 10;
+		return str;
+	}
 
 	// Check if the given codepoint is/can be used as an octal digit.
 	static inline bool isOctalDigit( char_t codepoint ) noexcept { return codepoint >= '0' && codepoint <= '7'; }

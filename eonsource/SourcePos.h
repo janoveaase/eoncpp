@@ -47,10 +47,11 @@ namespace eon::source
 
 		// Get line number and position on line as string format: "<line>:<pos>".
 		// Returns empty string if not valid!
-		inline string str() const { return Valid ? string( Line + 1 ) + ":" + string( PosOnLine + 1 ) : ""; }
+		inline string str() const { return Valid ? string( Line + 1 ) + ":" + string( PosOnLine + 1 ) : string( "" ); }
 
 		// Get position as a whole as a raw string, format: "<bytepos>,<charpos>,<line>,<pos-on-line>,<valid>".
-		inline string rawStr() const {
+		inline string rawStr() const
+		{
 			return string( BytePos ) + "," + string( CharPos ) + "," + string( Line ) + "," + string( PosOnLine )
 				+ "," + string( Valid ? "valid" : "invalid" );
 		}

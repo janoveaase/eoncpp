@@ -31,7 +31,7 @@ namespace eon
 		std::set<index_t> taken;
 		for( auto& named : other.NamedAttributes )
 		{
-			attribute( named.first ) = other.Attributes[ named.first ];
+			attribute( named.first ) = other.Attributes[ Attribute( named.first ) ];
 			taken.insert( named.second );
 		}
 		for( index_t i = 0; i < other.Attributes.size(); ++i )

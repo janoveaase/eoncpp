@@ -253,9 +253,9 @@
 
 #	define EON_TEST_NAME( class_name, function_name, test_name ) class_name##_##function_name##_##test_name
 #	define EON_TEST_SUPER( class_name, function_name, test_name ) ::eonitest::EonTest(\
-		::eonitest::TestName( #class_name, #function_name, #test_name ) )
+		::eonitest::TestName( ::eon::string( #class_name ), ::eon::string( #function_name ), ::eon::string( #test_name ) ) )
 #	define EON_TEST_SUPER_SANDBOX( class_name, function_name, test_name ) ::eonitest::EonTestSandbox(\
-		::eonitest::TestName( #class_name, #function_name, #test_name ) )
+		::eonitest::TestName( ::eon::string( #class_name ), ::eon::string( #function_name ), ::eon::string( #test_name ) ) )
 #	define EON_TEST_LINE std::to_string( __LINE__ )
 #	define EON_REGISTRATION_DUMMY( class_name, function_name, test_name )\
 	class_name##_##function_name##_##test_name##_registration_dummy
@@ -266,7 +266,7 @@
 	{\
 		::eonitest::TestBase::registerTest(\
 			eonitest::TestName( #class_name, #function_name, #test_name ),\
-			eonitest::TestLocation( __FILE__, EON_TEST_LINE ),\
+			eonitest::TestLocation( ::eon::string( __FILE__ ), ::eon::string( EON_TEST_LINE ) ),\
 			new ::eonitest::TstFactory<EON_TEST_NAME( class_name, function_name, test_name )>() )\
 	}
 

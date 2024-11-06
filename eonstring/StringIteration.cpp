@@ -146,7 +146,7 @@ namespace eon
 		EON_EQ( "CD", string( string( "ABCDEF" ).rebaseMoved( obj.substr( obj.begin() + 2, obj.end() - 2 ) ) ) ) );
 
 
-	string::iterator string::decodeIterator( const string& encoded_iterator )
+	string::iterator string::decodeIterator( const string& encoded_iterator ) const
 	{
 		std::regex pattern{ R"(^(\d+):(\d+)$)" };
 		std::smatch match;
@@ -172,7 +172,7 @@ namespace eon
 		std::regex pattern{ R"(^(\d+:\d+)\-(\d+:\d+)$)" };
 		std::smatch match;
 		if( std::regex_match( encode_substring.stdstr(), match, pattern ) )
-			return substring( decodeIterator( match[ 1 ].str() ), decodeIterator( match[ 2 ].str() ) );
+			return substring( decodeIterator( string( match[ 1 ].str() ) ), decodeIterator( string( match[ 2 ].str() ) ) );
 		else
 			return substring( end() );
 	}

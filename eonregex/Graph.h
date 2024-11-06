@@ -43,7 +43,7 @@ namespace eon
 				if( Head ) { Head->_unmatch(); return Head->match( param ); } else return false; }
 
 			inline const substring& source() const noexcept { return Source; }
-			
+
 			inline string strStruct() const { return Head ? Head->strStruct() : string(); }
 
 		private:
@@ -64,7 +64,7 @@ namespace eon
 				inline operator bool() const noexcept { return static_cast<bool>( CurPos && CurPos != Source.end() ); }
 
 				inline char_t operator()() noexcept { return *CurPos; }
-				inline bool advance() noexcept { return ++CurPos; }
+				inline bool advance() noexcept { return static_cast<bool>( ++CurPos ); }
 				inline string_iterator pos() const noexcept { return CurPos; }
 				inline void pos( const string_iterator& pos ) noexcept { CurPos = pos; }
 

@@ -33,12 +33,15 @@ namespace eon
 		// Pair of hex digits
 		struct digits
 		{
-			digits() = default;
-			inline digits( byte_t first, byte_t second ) { this->first = first; this->second = second; }
-			inline std::string stdstr() const { std::string s; s += first; s += second; return s; }
-			inline operator std::string() const { return stdstr(); }
+			byte_t first{ '0' };
+			byte_t second{ '0' };
 
-			byte_t first{ '0' }, second{ '0' };
+			digits() = default;
+			inline digits( byte_t first_, byte_t second_ ) : first( first_ ), second( second_ ) {}
+			inline string str() const { string s; s += first; s += second; return s; }
+			inline explicit operator string() const { return str(); }
+			inline std::string stdstr() const { std::string s; s += first; s += second; return s; }
+			inline explicit operator std::string() const { return stdstr(); }
 		};
 
 
@@ -51,9 +54,10 @@ namespace eon
 	public:
 
 		hex() = default;
-		inline hex( const hex& other ) { Value = other.Value; }
-		inline hex( hex&& other ) noexcept { Value = std::move( other.Value ); }
-		inline hex( const std::string& binary_data ) { *this = binary_data; }
+		hex( const hex& ) = default;
+		hex( hex&& ) noexcept = default;
+		inline explicit hex( const string& binary_data ) { *this = binary_data.stdstr(); }
+		inline explicit hex( const std::string& binary_data ) { *this = binary_data; }
 		inline hex( const char* binary_data ) { *this = binary_data; }
 
 
@@ -68,9 +72,10 @@ namespace eon
 		//
 	public:
 
-		inline hex& operator=( const hex& other ) { Value = other.Value; return *this; }
-		inline hex& operator=( hex&& other ) noexcept { Value = std::move( other.Value ); return *this; }
+		hex& operator=( const hex& ) = default;
+		hex& operator=( hex&& ) noexcept = default;
 
+		inline hex& operator=( const string& binary_data ) { return *this = binary_data.stdstr(); }
 		hex& operator=( const std::string& binary_data );
 		hex& operator=( const char* binary_data );
 
@@ -97,7 +102,7 @@ namespace eon
 
 		// Use as boolean
 		// Returns true if not empty!
-		inline operator bool() const noexcept { return !Value.empty(); }
+		inline explicit operator bool() const noexcept { return !Value.empty(); }
 
 		// Get number of hex digits
 		// (Number of bytes can be obtained by dividing by 2!)
@@ -121,7 +126,7 @@ namespace eon
 		inline int compare( const hex& other ) const noexcept { return Value.compare( other.Value ); }
 
 		// Check if 'this' is less than 'other'.
-		inline bool operator<( const hex& other ) const noexcept { return Value < other.Value; }
+		inline friend bool operator<( const hex& a, const hex& b ) noexcept { return a.Value < b.Value; }
 
 
 
@@ -153,11 +158,11 @@ namespace eon
 		//
 	EON_PRIVATE:
 
-		inline void _assertValidHex( const std::string& hex ) {
+		inline void _assertValidHex( const std::string_view& hex ) const {
 			if( hex.size() % 2 == 1 ) throw Invalid( "Odd number of digits" ); }
 
-		std::string _parseHex( const std::string& hex );
-		std::string _parseNonEmptyHex( const std::string& hex );
+		std::string _parseHex( const std::string& hex ) const;
+		std::string _parseNonEmptyHex( const std::string& hex ) const;
 
 
 

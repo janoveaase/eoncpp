@@ -92,7 +92,7 @@ namespace eon
 		inline string( string&& other ) noexcept { *this = std::move( other ); }
 
 		// Construct as a copy of another string
-		inline string( const string& other ) { *this = other; }
+		inline string( const string& ) = default;
 
 
 		// Construct as a copy of a substring marked by the specified iterator pair.
@@ -107,11 +107,11 @@ namespace eon
 
 		// Construct as a copy of a [std::string].
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid UTF-8!
-		inline string( const std::string& input ) { *this = input; }
+		inline explicit string( const std::string& input ) { *this = input; }
 
 		// Construct by taking ownership of a [std::string].
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid UTF-8!
-		inline string( std::string&& input ) { *this = std::move( input ); }
+		inline explicit string( std::string&& input ) { *this = std::move( input ); }
 
 		// Construct as a copy of a C string.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid UTF-8!
@@ -145,7 +145,7 @@ namespace eon
 
 		// Construct from vector of Unicode codepoints.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid UTF-8!
-		inline string( const std::vector<char_t>& input ) { *this = input; }
+		inline explicit string( const std::vector<char_t>& input ) { *this = input; }
 
 		// Construct from literal list of signed characters.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid UTF-8!
@@ -253,7 +253,7 @@ namespace eon
 
 		// Constructor for internal use, where we know the input string is ASCII only.
 		// (Faster than normal construction!)
-		inline string( std::string&& value, bool identifier ) noexcept {
+		inline string( std::string&& value, bool identifier [[maybe_unused]]) noexcept {
 			Bytes = std::move( value ); NumChars = Bytes.size(); }
 
 
@@ -295,7 +295,7 @@ namespace eon
 
 
 		// Discard current details and copy those of another string.
-		inline string& operator=( const string& other ) { Bytes = other.Bytes; NumChars = other.NumChars; return *this; }
+		inline string& operator=( const string& ) = default;
 
 		// Discard current details and take over ownership of those of another string.
 		inline string& operator=( string&& other ) noexcept {
@@ -322,9 +322,12 @@ namespace eon
 
 		// Descard current details and use a single codepoint as new value.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid Unicode codepoint!
-		inline string& operator=( char_t input ) {
-			uint32_t bytes; auto num = iterator::unicodeToBytes( input, bytes ); return assign(
-				(const char*)&bytes, num ); }
+		inline string& operator=( char_t input )
+		{
+			uint32_t bytes;
+			auto num = iterator::unicodeToBytes( input, bytes );
+			return assign( (const char*)&bytes, num );
+		}
 
 		// Discard current details and use a single signed character as new value.
 		// WARNING: Throws [eon::InvalidUTF8] if input is not valid Unicode codepoint!
@@ -384,6 +387,9 @@ namespace eon
 		// NOTE: This is intant since eon::string uses std::string as underlying structure!
 		inline const std::string& stdstr() const noexcept { return Bytes; }
 
+		// Use eon::string where std::string is required.
+		inline operator const std::string&() const noexcept { return Bytes; }
+
 		// Access the underlying bytes as a C-string.
 		// NOTE: This is the same as calling [stdstr] and then [std::string::c_str] on the returned value!
 		inline const char* c_str() const noexcept { return Bytes.c_str(); }
@@ -412,7 +418,7 @@ namespace eon
 		// Get number of indentations for the first (and possibly only) line of text in the string.
 		// NOTE: This is the number of times the indentation character occurs at the start of the string!
 		inline index_t indentationLevel( char_t indentation_char = TabChr ) const noexcept {
-			return substr().indentationLevel(); }
+			return substr().indentationLevel( indentation_char ); }
 
 
 		// Get characters as a sequential container of codepoint elements.
@@ -488,7 +494,7 @@ namespace eon
 		// If the encoded iterator does not refer to a valid position in the string,
 		// the returned value will be equal to that returned by [end)]!
 		// (See matching [eon::string::encode] method.)
-		iterator decodeIterator( const string& encoded_iterator );
+		iterator decodeIterator( const string& encoded_iterator ) const;
 
 		// Assuming the 'encoded_substring' string is formatted as {"<byte pos>:<char pos>-<byte pos>:<char pos>"},
 		// convert it into a substring for 'this' string.
@@ -1472,32 +1478,32 @@ namespace eon
 		// Check if 'this' string is less than 'other' using compareBytes.
 		// NOTE: Will not compare UTF-8 characters, is not locale aware!
 		// Returns: true if 'this' is less than 'other', false if not.
-		inline bool operator<( const string& other ) const noexcept { return compareBytes( other ) < 0; }
+		inline friend bool operator<( const string& a, const string& b ) noexcept { return a.compareBytes( b ) < 0; }
 
 		// Check if 'this' string is less than or equal to 'other' using compareBytes.
 		// NOTE: Will not compare UTF-8 characters, is not locale aware!
 		// Returns: true if 'this' is less than or equal to 'other', false if not.
-		inline bool operator<=( const string& other ) const noexcept { return compareBytes( other ) <= 0; }
+		inline friend bool operator<=( const string& a, const string& b ) noexcept { return a.compareBytes( b ) <= 0; }
 
 		// Check if 'this' string is greater than 'other' using compareBytes.
 		// NOTE: Will not compare UTF-8 characters, is not locale aware!
 		// Returns: true if 'this' is greater than 'other', false if not.
-		inline bool operator>( const string& other ) const noexcept { return compareBytes( other ) > 0; }
+		inline friend bool operator>( const string& a, const string& b ) noexcept { return a.compareBytes( b ) > 0; }
 
 		// Check if 'this' string is greater than or equal to 'other' using compareBytes.
 		// NOTE: Will not compare UTF-8 characters, is not locale aware!
 		// Returns: true if 'this' is greater than or equal to 'other', false if not.
-		inline bool operator>=( const string& other ) const noexcept { return compareBytes( other ) >= 0; }
+		inline friend bool operator>=( const string& a, const string& b ) noexcept { return a.compareBytes( b ) >= 0; }
 
 		// Check if 'this' string is equal to 'other' using compareBytes.
 		// NOTE: Will not compare UTF-8 characters, is not locale aware!
 		// Returns: true if 'this' is equal to 'other', false if not.
-		inline bool operator==( const string& other ) const noexcept { return compareBytes( other ) == 0; }
+		inline friend bool operator==( const string& a, const string& b ) noexcept { return a.compareBytes( b ) == 0; }
 
 		// Check if 'this' string is not equal to 'other' using compareBytes.
 		// NOTE: Will not compare UTF-8 characters, is not locale aware!
 		// Returns: true if 'this' is not equal to 'other', false if not.
-		inline bool operator!=( const string& other ) const noexcept { return compareBytes( other ) != 0; }
+		inline friend bool operator!=( const string& a, const string& b ) noexcept { return a.compareBytes( b ) != 0; }
 
 
 		// UTF-8 characater comparison.
@@ -1530,29 +1536,35 @@ namespace eon
 			return substr().compare( sub, cmp ); }
 
 		// Check if 'this' string sorts before 'sub' using [eon::strcmp::utf8].
-		inline bool operator<( const substring& sub ) const noexcept { return compare( sub, strcmp::utf8::Cmp ) < 0; }
+		inline friend bool operator<( const string& a, const substring& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) < 0; }
 
 		// Check if 'this' string sorts before or same as 'sub' using [eon::strcmp::utf8].
-		inline bool operator<=( const substring& sub ) const noexcept { return compare( sub, strcmp::utf8::Cmp ) <= 0; }
+		inline friend bool operator<=( const string& a, const substring& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) <= 0; }
 
 		// Check if 'this' string sorts after 'sub' using [eon::strcmp::utf8].
-		inline bool operator>( const substring& sub ) const noexcept { return compare( sub, strcmp::utf8::Cmp ) > 0; }
+		inline friend bool operator>( const string& a, const substring& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) > 0; }
 
 		// Check if 'this' string sorts after or same as 'sub' using [eon::strcmp::utf8].
-		inline bool operator>=( const substring& sub ) const noexcept { return compare( sub, strcmp::utf8::Cmp ) >= 0; }
+		inline friend bool operator>=( const string& a, const substring& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) >= 0; }
 
 		// Check if 'this' string sorts same as 'sub' using [eon::strcmp::utf8].
-		inline bool operator==( const substring& sub ) const noexcept { return compare( sub, strcmp::utf8::Cmp ) == 0; }
+		inline friend bool operator==( const string& a, const substring& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) == 0; }
 
 		// Check if 'this' string sorts before or after 'sub' using [eon::strcmp::utf8].
-		inline bool operator!=( const substring& sub ) const noexcept { return compare( sub, strcmp::utf8::Cmp ) != 0; }
+		inline friend bool operator!=( const string& a, const substring& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) != 0; }
 
-		inline friend bool operator<( const substring& sub, const string& str ) noexcept { return str >= sub; }
-		inline friend bool operator<=( const substring& sub, const string& str ) noexcept { return str > sub; }
-		inline friend bool operator>( const substring& sub, const string& str ) noexcept { return str <= sub; }
-		inline friend bool operator>=( const substring& sub, const string& str ) noexcept { return str < sub; }
-		inline friend bool operator==( const substring& sub, const string& str ) noexcept { return str == sub; }
-		inline friend bool operator!=( const substring& sub, const string& str ) noexcept { return str != sub; }
+		inline friend bool operator<( const substring& a, const string& b ) noexcept { return b >= a; }
+		inline friend bool operator<=( const substring& a, const string& b ) noexcept { return b > a; }
+		inline friend bool operator>( const substring& a, const string& b ) noexcept { return b <= a; }
+		inline friend bool operator>=( const substring& a, const string& b ) noexcept { return b < a; }
+		inline friend bool operator==( const substring& a, const string& b ) noexcept { return b == a; }
+		inline friend bool operator!=( const substring& a, const string& b ) noexcept { return b != a; }
 
 
 		// Compare against 'C-string'.
@@ -1563,29 +1575,35 @@ namespace eon
 			return substr().compare( substring( cstr ), cmp ); }
 
 		// Check if 'this' string sorts before 'cstr' using [eon::strcmp::utf8].
-		inline bool operator<( const char* cstr ) const noexcept { return compare( cstr, strcmp::utf8::Cmp ) < 0; }
+		inline friend bool operator<( const string& a, const char* b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) < 0; }
 
 		// Check if 'this' string sorts before or same as 'cstr' using [eon::strcmp::utf8].
-		inline bool operator<=( const char* cstr ) const noexcept { return compare( cstr, strcmp::utf8::Cmp ) <= 0; }
+		inline friend bool operator<=( const string& a, const char* b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) <= 0; }
 
 		// Check if 'this' string sorts after 'cstr' using [eon::strcmp::utf8].
-		inline bool operator>( const char* cstr ) const noexcept { return compare( cstr, strcmp::utf8::Cmp ) > 0; }
+		inline friend bool operator>( const string& a, const char* b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) > 0; }
 
 		// Check if 'this' string sorts after or same as 'cstr' using [eon::strcmp::utf8].
-		inline bool operator>=( const char* cstr ) const noexcept { return compare( cstr, strcmp::utf8::Cmp ) >= 0; }
+		inline friend bool operator>=( const string& a, const char* b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) >= 0; }
 
 		// Check if 'this' string sorts same as 'cstr' using [eon::strcmp::utf8].
-		inline bool operator==( const char* cstr ) const noexcept { return compare( cstr, strcmp::utf8::Cmp ) == 0; }
+		inline friend bool operator==( const string& a, const char* b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) == 0; }
 
 		// Check if 'this' string sorts before or after 'cstr' using [eon::strcmp::utf8].
-		inline bool operator!=( const char* cstr ) const noexcept { return compare( cstr, strcmp::utf8::Cmp ) != 0; }
+		inline friend bool operator!=( const string& a, const char* b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) != 0; }
 
-		inline friend bool operator<( const char* cstr, const string& str ) noexcept { return str >= cstr; }
-		inline friend bool operator<=( const char* cstr, const string& str ) noexcept { return str > cstr; }
-		inline friend bool operator>( const char* cstr, const string& str ) noexcept { return str <= cstr; }
-		inline friend bool operator>=( const char* cstr, const string& str ) noexcept { return str < cstr; }
-		inline friend bool operator==( const char* cstr, const string& str ) noexcept { return str == cstr; }
-		inline friend bool operator!=( const char* cstr, const string& str ) noexcept { return str != cstr; }
+		inline friend bool operator<( const char* a, const string& b ) noexcept { return b >= a; }
+		inline friend bool operator<=( const char* a, const string& b ) noexcept { return b > a; }
+		inline friend bool operator>( const char* a, const string& b ) noexcept { return b <= a; }
+		inline friend bool operator>=( const char* a, const string& b ) noexcept { return b < a; }
+		inline friend bool operator==( const char* a, const string& b ) noexcept { return b == a; }
+		inline friend bool operator!=( const char* a, const string& b ) noexcept { return b != a; }
 
 
 		// Compare against 'std::string'.
@@ -1596,35 +1614,35 @@ namespace eon
 			return substr().compare( substring( stdstr ), cmp ); }
 
 		// Check if 'this' string sorts before 'stdstr' using [eon::strcmp::utf8].
-		inline bool operator<( const std::string& stdstr ) const noexcept {
-			return compare( stdstr, strcmp::utf8::Cmp ) < 0; }
+		inline friend bool operator<( const string& a, const std::string& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) < 0; }
 
 		// Check if 'this' string sorts before or same as 'stdstr' using [eon::strcmp::utf8].
-		inline bool operator<=( const std::string& stdstr ) const noexcept {
-			return compare( stdstr, strcmp::utf8::Cmp ) <= 0; }
+		inline friend bool operator<=( const string& a, const std::string& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) <= 0; }
 
 		// Check if 'this' string sorts after 'stdstr' using [eon::strcmp::utf8].
-		inline bool operator>( const std::string& stdstr ) const noexcept {
-			return compare( stdstr, strcmp::utf8::Cmp ) > 0; }
+		inline friend bool operator>( const string& a, const std::string& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) > 0; }
 
 		// Check if 'this' string sorts after or same as 'stdstr' using [eon::strcmp::utf8].
-		inline bool operator>=( const std::string& stdstr ) const noexcept {
-			return compare( stdstr, strcmp::utf8::Cmp ) >= 0; }
+		inline friend bool operator>=( const string& a, const std::string& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) >= 0; }
 
 		// Check if 'this' string sorts same as 'stdstr' using [eon::strcmp::utf8].
-		inline bool operator==( const std::string& stdstr ) const noexcept {
-			return compare( stdstr, strcmp::utf8::Cmp ) == 0; }
+		inline friend bool operator==( const string& a, const std::string& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) == 0; }
 
 		// Check if 'this' string sorts before or after 'stdstr' using [eon::strcmp::utf8].
-		inline bool operator!=( const std::string& stdstr ) const noexcept {
-			return compare( stdstr, strcmp::utf8::Cmp ) != 0; }
+		inline friend bool operator!=( const string& a, const std::string& b ) noexcept {
+			return a.compare( b, strcmp::utf8::Cmp ) != 0; }
 
-		inline friend bool operator<( const std::string& stdstr, const string& str ) noexcept { return str >= stdstr; }
-		inline friend bool operator<=( const std::string& stdstr, const string& str ) noexcept { return str > stdstr; }
-		inline friend bool operator>( const std::string& stdstr, const string& str ) noexcept { return str <= stdstr; }
-		inline friend bool operator>=( const std::string& stdstr, const string& str ) noexcept { return str < stdstr; }
-		inline friend bool operator==( const std::string& stdstr, const string& str ) noexcept { return str == stdstr; }
-		inline friend bool operator!=( const std::string& stdstr, const string& str ) noexcept { return str != stdstr; }
+		inline friend bool operator<( const std::string& a, const string& b ) noexcept { return b >= a; }
+		inline friend bool operator<=( const std::string& a, const string& b ) noexcept { return b > a; }
+		inline friend bool operator>( const std::string& a, const string& b ) noexcept { return b <= a; }
+		inline friend bool operator>=( const std::string& a, const string& b ) noexcept { return b < a; }
+		inline friend bool operator==( const std::string& a, const string& b ) noexcept { return b == a; }
+		inline friend bool operator!=( const std::string& a, const string& b ) noexcept { return b != a; }
 
 
 		// Comparing against a single Unicode codepoint.
@@ -1638,35 +1656,35 @@ namespace eon
 		}
 
 		// Check if 'this' string sorts before 'codepoint' using [eon::substring::FastCmpCompare].
-		inline bool operator<( char_t codepoint ) const noexcept {
-			return compare( codepoint, strcmp::chr::Cmp ) < 0; }
+		inline bool friend operator<( const string& a, char_t b ) noexcept {
+			return a.compare( b, strcmp::chr::Cmp ) < 0; }
 
 		// Check if 'this' string sorts before or same as 'codepoint' using [eon::substring::FastCmpCompare].
-		inline bool operator<=( char_t codepoint ) const noexcept {
-			return compare( codepoint, strcmp::chr::Cmp ) <= 0; }
+		inline bool friend operator<=( const string& a, char_t b ) noexcept {
+			return a.compare( b, strcmp::chr::Cmp ) <= 0; }
 
 		// Check if 'this' string sorts after 'codepoint' using [eon::substring::FastCmpCompare].
-		inline bool operator>( char_t codepoint ) const noexcept {
-			return compare( codepoint, strcmp::chr::Cmp ) > 0; }
+		inline bool friend operator>( const string& a, char_t b ) noexcept {
+			return a.compare( b, strcmp::chr::Cmp ) > 0; }
 
 		// Check if 'this' string sorts after or same as 'codepoint' using [eon::substring::FastCmpCompare].
-		inline bool operator>=( char_t codepoint ) const noexcept {
-			return compare( codepoint, strcmp::chr::Cmp ) >= 0; }
+		inline bool friend operator>=( const string& a, char_t b ) noexcept {
+			return a.compare( b, strcmp::chr::Cmp ) >= 0; }
 
 		// Check if 'this' string sorts same as 'codepoint' using [eon::substring::FastCmpCompare].
-		inline bool operator==( char_t codepoint ) const noexcept {
-			return compare( codepoint, strcmp::chr::Cmp ) == 0; }
+		inline bool friend operator==( const string& a, char_t b ) noexcept {
+			return a.compare( b, strcmp::chr::Cmp ) == 0; }
 
 		// Check if 'this' string sorts before or after 'codepoint' using [eon::substring::FastCmpCompare].
-		inline bool operator!=( char_t codepoint ) const noexcept {
-			return compare( codepoint, strcmp::chr::Cmp ) != 0; }
+		inline bool friend operator!=( const string& a, char_t b ) noexcept {
+			return a.compare( b, strcmp::chr::Cmp ) != 0; }
 
-		inline friend bool operator<( char_t codepoint, const string& str ) noexcept { return str >= codepoint; }
-		inline friend bool operator<=( char_t codepoint, const string& str ) noexcept { return str > codepoint; }
-		inline friend bool operator>( char_t codepoint, const string& str ) noexcept { return str <= codepoint; }
-		inline friend bool operator>=( char_t codepoint, const string& str ) noexcept { return str < codepoint; }
-		inline friend bool operator==( char_t codepoint, const string& str ) noexcept { return str == codepoint; }
-		inline friend bool operator!=( char_t codepoint, const string& str ) noexcept { return str != codepoint; }
+		inline friend bool operator<( char_t a, const string& b ) noexcept { return b >= a; }
+		inline friend bool operator<=( char_t a, const string& b ) noexcept { return b > a; }
+		inline friend bool operator>( char_t a, const string& b ) noexcept { return b <= a; }
+		inline friend bool operator>=( char_t a, const string& b ) noexcept { return b < a; }
+		inline friend bool operator==( char_t a, const string& b ) noexcept { return b == a; }
+		inline friend bool operator!=( char_t a, const string& b ) noexcept { return b != a; }
 
 
 		// Comparing against a single ASCII character.
@@ -1676,35 +1694,35 @@ namespace eon
 			return compare( static_cast<char_t>( c ), cmp ); }
 
 		// Check if 'this' string sorts before 'c' using [eon::substring::FastCmpCompare].
-		inline bool operator<( char c ) const noexcept {
-			return compare( static_cast<char_t>( c ), strcmp::chr::Cmp ) < 0; }
+		inline friend bool operator<( const string& a, char b ) noexcept {
+			return a.compare( static_cast<char_t>( b ), strcmp::chr::Cmp ) < 0; }
 
 		// Check if 'this' string sorts before or same as 'c' using [eon::substring::FastCmpCompare].
-		inline bool operator<=( char c ) const noexcept {
-			return compare( static_cast<char_t>( c ), strcmp::chr::Cmp ) <= 0; }
+		inline friend bool operator<=( const string& a, char b ) noexcept {
+			return a.compare( static_cast<char_t>( b ), strcmp::chr::Cmp ) <= 0; }
 
 		// Check if 'this' string sorts after 'c' using [eon::substring::FastCmpCompare].
-		inline bool operator>( char c ) const noexcept {
-			return compare( static_cast<char_t>( c ), strcmp::chr::Cmp ) > 0; }
+		inline friend bool operator>( const string& a, char b ) noexcept {
+			return a.compare( static_cast<char_t>( b ), strcmp::chr::Cmp ) > 0; }
 
 		// Check if 'this' string sorts after or same as 'c' using [eon::substring::FastCmpCompare].
-		inline bool operator>=( char c ) const noexcept {
-			return compare( static_cast<char_t>( c ), strcmp::chr::Cmp ) >= 0; }
+		inline friend bool operator>=( const string& a, char b ) noexcept {
+			return a.compare( static_cast<char_t>( b ), strcmp::chr::Cmp ) >= 0; }
 
 		// Check if 'this' string sorts same as 'c' using [eon::substring::FastCmpCompare].
-		inline bool operator==( char c ) const noexcept {
-			return compare( static_cast<char_t>( c ), strcmp::chr::Cmp ) != 0; }
+		inline friend bool operator==( const string& a, char b ) noexcept {
+			return a.compare( static_cast<char_t>( b ), strcmp::chr::Cmp ) != 0; }
 
 		// Check if 'this' string sorts before or after 'c' using [eon::substring::FastCmpCompare].
-		inline bool operator!=( char c ) const noexcept {
-			return compare( static_cast<char_t>( c ), strcmp::chr::Cmp ) != 0; }
+		inline friend bool operator!=( const string& a, char b ) noexcept {
+			return a.compare( static_cast<char_t>( b ), strcmp::chr::Cmp ) != 0; }
 
-		inline friend bool operator<( char c, const string& str ) noexcept { return str >= c; }
-		inline friend bool operator<=( char c, const string& str ) noexcept { return str > c; }
-		inline friend bool operator>( char c, const string& str ) noexcept { return str <= c; }
-		inline friend bool operator>=( char c, const string& str ) noexcept { return str < c; }
-		inline friend bool operator==( char c, const string& str ) noexcept { return str == c; }
-		inline friend bool operator!=( char c, const string& str ) noexcept { return str != c; }
+		inline friend bool operator<( char a, const string& b ) noexcept { return b >= a; }
+		inline friend bool operator<=( char a, const string& b ) noexcept { return b > a; }
+		inline friend bool operator>( char a, const string& b ) noexcept { return b <= a; }
+		inline friend bool operator>=( char a, const string& b ) noexcept { return b < a; }
+		inline friend bool operator==( char a, const string& b ) noexcept { return b == a; }
+		inline friend bool operator!=( char a, const string& b ) noexcept { return b != a; }
 
 
 
@@ -1724,6 +1742,12 @@ namespace eon
 		template<typename compare_predicate = strcmp::chr>
 		inline bool contains( const string& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const noexcept {
 			return substr().contains( sub.substr(), cmp ); }
+		template<typename compare_predicate = strcmp::chr>
+		inline bool contains( const std::string& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const noexcept {
+			return substr().contains( substring( sub ), cmp ); }
+		template<typename compare_predicate = strcmp::chr>
+		inline bool contains( const char* sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const noexcept {
+			return substr().contains( substring( sub ), cmp ); }
 
 		// Check if substring contains the specified codepoint.
 		// Comparison is done using a binary char_t predicate.
@@ -1823,7 +1847,7 @@ namespace eon
 		// NOTE: If the decimal separator appears before the first numeral, it will not be counted as part of the number!
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
 		inline substring findFirstNumber(
-			const substring& sub, iterator* separator = nullptr, const locale* custom_locale = nullptr ) {
+			const substring& sub, iterator* separator = nullptr, const locale* custom_locale = nullptr ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.lowToHigh().findFirstNumber( separator, custom_locale ); }
 
 
@@ -1848,14 +1872,14 @@ namespace eon
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
 		template<typename compare_predicate = strcmp::chr>
 		inline iterator findFirstOf(
-			const string& characters, substring sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
+			const string& characters, const substring& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.findFirstOf( characters.substr(), cmp ); }
 
 		// Find first occurrence of any character in the specified character class(es) in 'sub' substring of 'this'.
 		// NOTE: Multiple classes can be or'ed together!
 		// Returns iterator for the found character - 'false' iterator if not found.
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
-		inline iterator findFirstOf( charcat characters, substring sub ) const {
+		inline iterator findFirstOf( charcat characters, const substring& sub ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.findFirstOf( characters ); }
 
 
@@ -1881,14 +1905,14 @@ namespace eon
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
 		template<typename compare_predicate = strcmp::chr>
 		inline iterator findFirstNotOf(
-			const string& characters, substring sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
+			const string& characters, const substring& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.findFirstNotOf( characters.substr(), cmp ); }
 
 		// Find first occurrence in 'sub' substring of 'this' of any character in the specified character class(es).
 		// NOTE: Multiple classes can be or'ed together!
 		// Returns iterator for the found character - 'false' iterator if not found.
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
-		inline iterator findFirstNotOf( charcat characters, substring sub ) const {
+		inline iterator findFirstNotOf( charcat characters, const substring& sub ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.findFirstNotOf( characters ); }
 
 
@@ -2045,14 +2069,14 @@ namespace eon
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
 		template<typename compare_predicate = strcmp::chr>
 		inline iterator findLastOf(
-			const string& characters, substring sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
+			const string& characters, const substring& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.highToLow().findLastOf( characters.substr(), cmp ); }
 
 		// Find last occurrence of any character in the specified character class(es) in 'sub' substring of 'this'.
 		// NOTE: Multiple classes can be or'ed together!
 		// Returns iterator for the found character - 'false' iterator if not found.
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
-		inline iterator findLastOf( charcat characters, substring sub ) const {
+		inline iterator findLastOf( charcat characters, const substring& sub ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.highToLow().findLastOf( characters ); }
 
 
@@ -2078,14 +2102,14 @@ namespace eon
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
 		template<typename compare_predicate = strcmp::chr>
 		inline iterator findLastNotOf(
-			const string& characters, substring sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
+			const string& characters, const substring& sub, const compare_predicate& cmp = strcmp::chr::Cmp ) const {
 			sub.assertSameSource( Bytes.c_str() ); return sub.highToLow().findLastNotOf( characters.substr(), cmp ); }
 
 		// Find last occurrence in 'sub' substring of 'this' of any character in the specified character class(es).
 		// NOTE: Multiple classes can be or'ed together!
 		// Returns iterator for the found character - 'false' iterator if not found.
 		// Throws [eon::WrongSource] if 'sub' is not a substring of 'this'!
-		inline iterator findLastNotOf( charcat characters, substring sub ) const {
+		inline iterator findLastNotOf( charcat characters, const substring& sub ) const {
 			sub.assertSameSource( Bytes.c_str() );  return sub.highToLow().findLastNotOf( characters ); }
 
 
@@ -2140,10 +2164,10 @@ namespace eon
 	public:
 
 		// Construct string from 'std::wstring'.
-		inline string( const std::wstring& stdwstr ) { *this = stdwstr; }
+		inline explicit string( const std::wstring& stdwstr ) { *this = stdwstr; }
 
 		// Construct string from C-style wide-string.
-		inline string( const wchar_t* cstr ) { *this = cstr; }
+		inline explicit string( const wchar_t* cstr ) { *this = cstr; }
 
 
 		// Discard current details and assign from 'std::wstring'.
@@ -2386,8 +2410,13 @@ namespace eon
 		string::iterator _ensureValidStart( iterator& start ) const;
 		string::iterator _count( index_t pos, iterator& start ) const;
 
-		inline string _prepOutput( const substring& area ) const {
-			string output; if( area.begin() > begin() ) output = substr( begin(), area.begin() ); return output; }
+		inline string _prepOutput( const substring& area ) const
+		{
+			string output;
+			if( area.begin() > begin() )
+				output = substr( begin(), area.begin() );
+			return output;
+		}
 
 		string _escape( const substring& sub, const std::unordered_map<char_t, char_t>& singletons ) const;
 		string _escape( const substring& area, string output, const std::unordered_map<char_t, char_t>& singletons ) const;

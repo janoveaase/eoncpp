@@ -200,14 +200,23 @@ namespace eon
 		Bytes = std::move( input );
 		return *this;
 	}
+#ifdef EON_TEST_MODE
+	struct strpair
+	{
+		std::string stdstr;
+		eon::string eonstr;
+
+		strpair( std::string value ) : stdstr( std::move( value ) ) {}
+	};
+#endif
 	EON_TEST_3STEP( string, operator_asgn, stdstring_move_1,
-		std::string source( "abcdef" ),
-		string obj = std::move( source ),
-		EON_EQ( "", source ) );
+		strpair data( "abcdef" ),
+		data.eonstr = std::move( data.stdstr ),
+		EON_EQ( "", data.stdstr ) );
 	EON_TEST_3STEP( string, operator_asgn, stdstring_move_2,
-		std::string source( "abcdef" ),
-		string obj = std::move( source ),
-		EON_EQ( "abcdef", obj ) );
+		strpair data( "abcdef" ),
+		data.eonstr = std::move( data.stdstr ),
+		EON_EQ( "abcdef", data.eonstr ) );
 
 	EON_TEST( string, operator_asgn, cstring_empty,
 		EON_EQ( "", string() = "" ) );

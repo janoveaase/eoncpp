@@ -223,8 +223,8 @@ namespace eon
 
 	struct _MatchArgs
 	{
-		inline _MatchArgs( string_iterator input, string_iterator pattern, bool reverse ) {
-			Input = input; Pattern = pattern; Reverse = reverse; }
+		inline _MatchArgs( const string_iterator& input, const string_iterator& pattern, bool reverse )
+			: Input( input ), Pattern( pattern ), Reverse( reverse ) {}
 
 		inline void newPatternLoop() noexcept {
 			InputBak = Input; PatternBak = Reverse ? --Pattern : ++Pattern; Star = true; }
@@ -253,7 +253,10 @@ namespace eon
 		inline void backTrack() noexcept { Input = ++InputBak; Pattern = PatternBak; }
 		inline void rBackTrack() noexcept { Input = --InputBak; Pattern = PatternBak; }
 
-		string_iterator Input, Pattern, InputBak, PatternBak;
+		string_iterator Input;
+		string_iterator Pattern;
+		string_iterator InputBak;
+		string_iterator PatternBak;
 		bool Reverse{ false };
 		bool Star{ false };
 	};
@@ -324,7 +327,7 @@ namespace eon
 	{
 		auto min_length = Value.numChars() - Value.count( '*' );
 		auto short_end = area.end() - min_length;
-		for( string_iterator i = area.begin(); i < short_end; ++i )
+		for( auto i = area.begin(); i < short_end; ++i )
 		{
 			auto end = _matchLowToHigh( Value.substr(), substring( i, area.end() ), true );
 			if( !end.isVoid() )
@@ -337,7 +340,7 @@ namespace eon
 	{
 		auto min_length = Value.numChars() - Value.count( '*' );
 		auto short_end = area.end() + min_length;
-		for( string_iterator i = area.begin(); i > short_end; --i )
+		for( auto i = area.begin(); i > short_end; --i )
 		{
 			auto end = _matchHighToLow( Value.substr().highToLow(), substring( i, area.end() ), true );
 			if( !end.isVoid() )

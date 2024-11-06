@@ -84,7 +84,7 @@ namespace eon
 		EON_EQ( obj.substr( 5, 1 ), obj.substr().findFirst( char_t( 181 ) ) ) );
 	EON_TEST_2STEP( substring, findFirst, char_t_beyond_end,
 		string obj( "abcdef" ),
-		EON_EQ( obj.end(), obj.substr().findFirst( char_t( 'g' ) ) ) );
+		EON_EQ( obj.end(), obj.substr().findFirst( char_t( 'g' ) ).begin() ) );
 
 
 	substring substring::findFirstNumber( string_iterator* separator, const locale* custom_locale )

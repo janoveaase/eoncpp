@@ -37,7 +37,7 @@ namespace eon
 	public:
 
 		inline locale() { _set( "en_US" _UTF8 ); }
-		inline locale( std::string name ) { _set( name ); }
+		inline locale( const std::string& name ) { _set( name ); }
 
 
 
@@ -178,7 +178,7 @@ namespace eon
 		//
 	private:
 
-		void _set( std::string name );
+		void _set( const std::string& name );
 
 
 

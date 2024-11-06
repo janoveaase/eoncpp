@@ -33,12 +33,10 @@ namespace eon
 	public:
 
 		globpattern() = default;
-		inline globpattern( const globpattern& other ) { Value = other.Value; }
-		inline globpattern( globpattern&& other ) noexcept { Value = std::move( other.Value ); }
+		globpattern( const globpattern& ) = default;
+		globpattern( globpattern&& ) noexcept = default;
 
-		inline globpattern( string pattern ) { Value = std::move( pattern ); }
-
-		virtual ~globpattern() = default;
+		inline globpattern( string pattern ) : Value( std::move( pattern ) ) {}
 
 
 
@@ -50,8 +48,8 @@ namespace eon
 	public:
 
 		// Set the pattern using assignment operator
-		inline globpattern& operator=( const globpattern& other ) { Value = other.Value; return *this; }
-		inline globpattern& operator=( globpattern&& other ) noexcept { Value = std::move( other.Value ); return *this; }
+		globpattern& operator=( const globpattern& ) = default;
+		globpattern& operator=( globpattern&& ) noexcept = default;
 		inline globpattern& operator=( string pattern ) { Value = std::move( pattern ); return *this; }
 
 		// Get the pattern as a string
@@ -135,9 +133,12 @@ namespace eon
 		//
 	private:
 
-		inline bool _match( const substring& input ) const noexcept {
-			return ( input.isHighToLow() ? _matchHighToLow( Value.substr(), input )
-				: _matchLowToHigh( Value.substr(), input ) ) == input.end(); }
+		inline bool _match( const substring& input ) const noexcept
+		{
+			return (
+				input.isHighToLow() ? _matchHighToLow( Value.substr(), input ) : _matchLowToHigh( Value.substr(), input )
+				) == input.end();
+		}
 
 		// Return iterator for end of matched section.
 		string_iterator _matchLowToHigh(

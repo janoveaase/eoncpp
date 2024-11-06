@@ -46,7 +46,7 @@ namespace eon
 		if( before != stringify::Type::none && _addBefore( type, value, before ) )
 			return;
 		if( Lines.size() == CurLine )
-			Lines.push_back( stringify::Line( Indentation ) );
+			Lines.emplace_back( Indentation );
 		Lines[ CurLine ].push_back( stringify::Element( type, std::move( value ) ) );
 	}
 
@@ -62,13 +62,11 @@ namespace eon
 	bool Stringifier::_addBefore( stringify::Type type, string& value, stringify::Type before, index_t pos )
 	{
 		auto& elements = Lines[ pos ].Elements;
-		index_t i = 0;
-		for( i = elements.size(); i > 0; --i )
+		for( index_t i = elements.size(); i > 0; --i )
 		{
 			if( elements[ i - 1 ]->ElmType == before )
 				continue;
-			elements.insert( elements.begin() + i,
-				stringify::ElementPtr( new stringify::Element( type, std::move( value ) ) ) );
+			elements.insert( elements.begin() + i, std::make_shared<stringify::Element>( type, std::move( value ) ) );
 			return true;
 		}
 		return false;
@@ -128,8 +126,8 @@ namespace eon
 
 	bool Stringifier::_processLineSplit( GeneratorData& data, element_iterator end ) const
 	{
-		auto& e = **end;
-		if( e.isSplitPlain() || e.isSplitBlock() )
+		if( const auto& e = **end;
+			e.isSplitPlain() || e.isSplitBlock() )
 		{
 			data.curElement( end );
 			++data.curElement();
@@ -150,7 +148,7 @@ namespace eon
 		auto probe = data.curElement();
 		for( ; probe != data.endElement(); ++probe )
 		{
-			auto& elm = **probe;
+			const auto& elm = **probe;
 			index_t new_w{ elm.Value.numChars() };
 			if( prev_type == stringify::Type::none && data.Indentation > 0 )
 				new_w += data.Indentation * 2;
@@ -167,6 +165,7 @@ namespace eon
 		}
 		return probe;
 	}
+
 	Stringifier::element_iterator Stringifier::_findSplit( element_iterator begin, element_iterator end ) const noexcept
 	{
 		// Check primary first, then secondary, then tertiary
@@ -181,13 +180,14 @@ namespace eon
 			return found;
 		return end;
 	}
+
 	Stringifier::element_iterator Stringifier::_findSplit(
 		stringify::Type type, stringify::Type type_block, element_iterator begin, element_iterator end ) const noexcept
 	{
 		auto cur = end;
 		for( --cur; cur != begin; --cur )
 		{
-			auto& elm = **cur;
+			const auto& elm = **cur;
 			if( elm.ElmType == type || elm.ElmType == type_block )
 				return cur;
 		}
@@ -207,8 +207,8 @@ namespace eon
 				line += value.doubleq() ? "\"" : "'";
 				++elm_w;
 			}
-			index_t remaining = value.Value.numChars() - total;
-			if( remaining < Configuration.HardLineWidth )
+			if( index_t remaining = value.Value.numChars() - total;
+				remaining < Configuration.HardLineWidth )
 			{
 				line << value.Value.substr( beg );
 				line += value.doubleq() ? "\"" : "'";
@@ -227,6 +227,7 @@ namespace eon
 			beg = split_point;
 		}
 	}
+
 	eon::string::iterator Stringifier::_findStringSplitPoint( eon::string::iterator beg, eon::string::iterator end ) const
 	{
 		static string split_after{ " .,;:)]}>-/" };
@@ -240,6 +241,7 @@ namespace eon
 		}
 		return end;
 	}
+
 	void Stringifier::_output( GeneratorData& data, element_iterator end ) const
 	{
 		string line( data.Indentation * 2, ' ' );

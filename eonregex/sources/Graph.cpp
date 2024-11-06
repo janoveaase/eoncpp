@@ -686,7 +686,7 @@ namespace eon
 				{
 					if( !digit.empty() )
 					{
-						min = stoidx( digit );
+						min = stoidx( digit.stdstr() );
 						max = min;
 					}
 					param.advance();
@@ -708,7 +708,7 @@ namespace eon
 			}
 			if( !digit.empty() )
 			{
-				min = stoidx( digit );
+				min = stoidx( digit.stdstr() );
 				digit.clear();
 			}
 			while( param )
@@ -716,7 +716,7 @@ namespace eon
 				if( param() == '}' )
 				{
 					if( !digit.empty() )
-						max = stoidx( digit );
+						max = stoidx( digit.stdstr() );
 					param.advance();
 					return true;
 				}

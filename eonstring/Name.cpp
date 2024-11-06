@@ -5,14 +5,14 @@
 namespace eon
 {
 #ifndef _DEBUG
-	NameData* Data{ nullptr };
+	std::unique_ptr<NameData> Data;
 #endif
 
 
 	inline void init()
 	{
 		if( !Data )
-			Data = new NameData();
+			Data = std::make_unique<NameData>();
 	}
 
 	const string& str( const name_t& name )

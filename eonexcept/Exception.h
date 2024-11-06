@@ -18,7 +18,7 @@ namespace eon
 	class BadName : public std::exception
 	{
 	public:
-		BadName() : std::exception() {}
+		using std::exception::exception;
 		const char* what() const noexcept override { return "Bad Name!"; }
 	};
 
@@ -32,9 +32,17 @@ namespace eon
 #define EONEXCEPT( exception_name )\
 	class exception_name : public ::eon::exception {\
 	public:\
+		using ::eon::exception::exception;\
 		exception_name() : exception( ::eon::name( #exception_name ) ) {}\
-		exception_name( const ::eon::string& info ) : exception( ::eon::name( #exception_name ), info ) {}\
-		exception_name( ::eon::string&& info ) : exception( ::eon::name( #exception_name ), std::move( info ) ) {}\
+		explicit exception_name( const ::eon::string& info ) : exception( ::eon::name( #exception_name ), info ) {}\
+		explicit exception_name(\
+			::eon::string&& info ) : exception( ::eon::name( #exception_name ), std::move( info ) ) {}\
+		explicit exception_name(\
+			const ::std::string& info ) : exception( ::eon::name( #exception_name ), ::eon::string( info ) ) {}\
+		explicit exception_name(\
+			::std::string&& info ) : exception( ::eon::name( #exception_name ), ::eon::string( std::move( info ) ) ) {}\
+		explicit exception_name(\
+			const char* info ) : exception( ::eon::name( #exception_name ), ::eon::string( info ) ) {}\
 	}
 
 
@@ -60,20 +68,23 @@ namespace eon
 
 		// All exceptions must have at least an [eon::name]
 		// Will throw [eon::BadName] if 'name' is [eon::no_name].
-		inline exception( name_t name ) { if( name != no_name ) Name = name; else throw BadName(); }
+		inline explicit exception( name_t name ) { if( name != no_name ) Name = name; else throw BadName(); }
 
 		// Construct exception with name and an 'info' message
 		// Will throw [eon::BadName] if 'name' is [eon::no_name].
-		inline exception( name_t name, const string& info ) {
-			if( name != no_name ) { Name = name; Info = info; } else throw BadName(); }
-		inline exception( name_t name, string&& info ) {
-			if( name != no_name ) { Name = name; Info = std::move( info ); } else throw BadName(); }
+		inline exception( name_t name, const string& info ) { _set( name, string( info ) ); }
+		inline exception( name_t name, string&& info ) { _set( name, std::move( info ) ); }
+		inline exception( name_t name, const std::string& info ) { _set( name, string( info ) ); }
+		inline exception( name_t name, std::string&& info ) { _set( name, string( std::move( info ) ) ); }
+		inline exception( name_t name, const char* info ) { _set( name, string( info ) ); }
 
 		// Copy the 'other' exception
-		inline exception( const exception& other ) { *this = other; }
+		inline exception( const exception& ) = default;
 
 		// Take ownership of the 'other' exception's details
-		inline exception( exception&& other ) noexcept { *this = std::move( other ); }
+		inline exception( exception&& ) noexcept = default;
+
+		~exception() override = default;
 
 
 
@@ -85,17 +96,21 @@ namespace eon
 	public:
 
 		// Copy the 'other' exception
-		inline exception& operator=( const exception& other ) { Name = other.Name; Info = other.Info; return *this; }
+		inline exception& operator=( const exception& ) = default;
 
 		// Take ownership of the 'other' exception's details
-		inline exception& operator=( exception&& other ) noexcept {
-			Name = other.Name; Info = std::move( other.Info ); return *this; }
+		inline exception& operator=( exception&& ) noexcept = default;
 
 
 		// Set or add to 'info' message
 		inline exception& info( const string& info ) { Info += info; return*this; }
-		inline exception& info( string&& info ) {
-			if( Info.empty() ) Info = std::move( info ); else Info += info; return *this; }
+		inline exception& info( string&& info )
+		{
+			if( Info.empty() )
+				Info = std::move( info );
+			else Info += info;
+			return *this;
+		}
 
 
 
@@ -107,13 +122,13 @@ namespace eon
 	public:
 
 		// Get the message info
-		virtual const char* what() const noexcept override;
+		const char* what() const noexcept override;
 
 		// Get combined name and info
 		virtual string details() const;
 
 		// Get the exception name
-		const name_t name() const noexcept { return Name; }
+		name_t name() const noexcept { return Name; }
 
 		// Get the info message
 		const string& info() const noexcept { return Info; }
@@ -122,8 +137,15 @@ namespace eon
 
 
 	private:
+		inline void _set( name_t name, string&& info )
+		{
+			if( name == no_name )
+				throw BadName();
+			Name = name;
+			Info = std::move( info );
+		}
+
 		name_t Name{ no_name };
-	protected:
 		string Info;
 	};
 }

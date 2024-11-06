@@ -125,7 +125,12 @@ namespace eon
 		inline Stringifier& end_chapt() { _add( stringify::Type::end_chapt ); return *this; }
 
 		// Add a hard line-feed
-		inline Stringifier& hard_lf() { if( CurLine < Lines.size() ) ++CurLine; return *this; }
+		inline Stringifier& hard_lf()
+		{
+			if( CurLine < Lines.size() )
+				++CurLine;
+			return *this;
+		}
 
 		// Primary split points. Prefer long lines to be split here.
 		// Use the 'block' version to have subsequent lines indented.
@@ -215,7 +220,7 @@ namespace eon
 		{
 		public:
 			GeneratorData() = delete;
-			inline GeneratorData( const std::vector<stringify::Line>& lines ) { Lines = &lines; }
+			inline GeneratorData( const std::vector<stringify::Line>& lines ) : Lines( &lines ) {}
 
 			void startLineIteration() noexcept;
 			inline bool atEndLine() const noexcept { return CurLine == Lines->end(); }
@@ -258,7 +263,7 @@ namespace eon
 		element_iterator _findSplit( element_iterator begin, element_iterator end ) const noexcept;
 		element_iterator _findSplit(
 			stringify::Type type, stringify::Type type_block, element_iterator begin, element_iterator end ) const noexcept;
-		
+
 		void _splitHard( const stringify::Element& value, GeneratorData& data ) const;
 		eon::string::iterator _findStringSplitPoint( eon::string::iterator beg, eon::string::iterator end ) const;
 		void _output( GeneratorData& data, element_iterator end ) const;

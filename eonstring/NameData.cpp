@@ -10,9 +10,9 @@ namespace eon
 	{
 		if( !validName( str ) )
 			return no_name;
-		std::lock_guard<std::mutex> lock( Lock );
-		auto found = Lookup.find( &str );
-		if( found != Lookup.end() )
+		std::scoped_lock<std::mutex> lock( Lock );
+		if( auto found = Lookup.find( &str );
+			found != Lookup.end() )
 		{
 			str.clear();		// For consistency!
 			return found->second;
@@ -41,9 +41,9 @@ namespace eon
 	{
 		if( str.empty() )
 			return no_name;
-		std::lock_guard<std::mutex> lock( Lock );
-		auto found = Lookup.find( &str );
-		if( found != Lookup.end() )
+		std::scoped_lock<std::mutex> lock( Lock );
+		if( auto found = Lookup.find( &str );
+			found != Lookup.end() )
 		{
 			str.clear();		// For consistency!
 			return found->second;

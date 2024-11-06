@@ -84,7 +84,7 @@ size_t runTests( const std::string& exe, const std::string& filter, std::list<st
 		if( !filter.empty() && !std::regex_match( test.TestClass + "." + test.TestName, pattern ) )
 			continue;
 		++total;
-		eon::string test_name = test.TestClass + "." + test.TestName;
+		eon::string test_name{ test.TestClass + "." + test.TestName };
 		size_t col_w = eon::term.width() < 70 ? eon::term.width() : 70;
 		if( col_w == 0 )
 			col_w = 50;

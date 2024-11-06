@@ -150,7 +150,7 @@ namespace eon
 	EON_TEST( hex, _assertValidHex, throw,
 		EON_RAISE( hex()._assertValidHex( "B20" ), hex::Invalid ) );
 
-	std::string hex::_parseHex( const std::string& hex )
+	std::string hex::_parseHex( const std::string& hex ) const
 	{
 		if( hex.size() == 0 )
 			return std::string();
@@ -162,7 +162,7 @@ namespace eon
 	EON_TEST( hex, _parseHex, nonempty,
 		EON_EQ( "10DE", hex()._parseHex( "10DE" ) ) );
 
-	std::string hex::_parseNonEmptyHex( const std::string& hex )
+	std::string hex::_parseNonEmptyHex( const std::string& hex ) const
 	{
 		std::string value;
 		digits hx;

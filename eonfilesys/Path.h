@@ -131,14 +131,14 @@ namespace eon
 
 		// Check if parts/elements are present
 		inline bool isRoot() const noexcept { return Root && !( Dirs || Base ); }
-		inline bool hasRoot() const noexcept { return Root; }
-		inline bool hasDirs() const noexcept { return Dirs; }
-		inline bool hasParent() const noexcept { return Parent; }
+		inline bool hasRoot() const noexcept { return static_cast<bool>( Root ); }
+		inline bool hasDirs() const noexcept { return static_cast<bool>( Dirs ); }
+		inline bool hasParent() const noexcept { return static_cast<bool>( Parent ); }
 		inline bool isBase() const noexcept { return Base && !Root && !Dirs; }
-		inline bool hasBase() const noexcept { return Base; }
-		inline bool hasName() const noexcept { return Name; }
+		inline bool hasBase() const noexcept { return static_cast<bool>( Base ); }
+		inline bool hasName() const noexcept { return static_cast<bool>( Name ); }
 		inline bool isExt() const noexcept { return Ext && !Name && !Root && !Dirs; }
-		inline bool hasExt() const noexcept { return Ext; }
+		inline bool hasExt() const noexcept { return static_cast<bool>( Ext ); }
 
 		// Get path parts/elements
 		inline const substring& root() const noexcept { return Root; }

@@ -131,7 +131,7 @@ eonitest::TestPtr run( eonitest::TestBase::TestRef& test ) noexcept
 	{
 		test_obj->Details.Success = false;
 		test_obj->Details.Log << eonitest::style::error << "ERROR!" << " Got an std::exception!" << '\n';
-		eon::string type = typeid( e ).name();
+		eon::string type{ typeid( e ).name() };
 		eon::string what = eon::string( e.what() ).trim();
 		test_obj->Details.Log << "  " << eonitest::style::key << "Type"
 			<< eonitest::style::value << type << '\n';
@@ -200,11 +200,11 @@ size_t runTests( eon::string cls_name, eon::string func_name, eon::string tst_na
 		return 0;
 
 	reportSpecifications( cls_name, func_name, tst_name );
-	eon::globpattern cls( cls_name.empty() ? "*" : cls_name );
+	eon::globpattern cls( cls_name.empty() ? eon::string( "*" ) : cls_name );
 	cls.ignoreCase();
-	eon::globpattern func( func_name.empty() ? "*" : func_name );
+	eon::globpattern func( func_name.empty() ? eon::string( "*" ) : func_name );
 	func.ignoreCase();
-	eon::globpattern tst( tst_name.empty() ? "*" : tst_name );
+	eon::globpattern tst( tst_name.empty() ? eon::string( "*" ) : tst_name );
 	tst.ignoreCase();
 	size_t total = 0;
 	for( auto& test : *eonitest::TestBase::TestsList )

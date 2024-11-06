@@ -66,7 +66,7 @@ namespace eon
 	name_t name( string&& str ) noexcept;
 	inline name_t name( const string& str ) { return name( string( str ) ); }
 	inline name_t name( const std::string& str ) { return name( string( str ) ); }
-	inline name_t name( const char* str ) { return name( substring( str ) ); }
+	inline name_t name( const char* str ) { return name( string( substring( str ) ) ); }
 
 	// Check if string is valid as name
 	inline bool validName( const string& str ) noexcept { return NameData::validName( str ); }
@@ -75,7 +75,11 @@ namespace eon
 	// Such names can contain non-name characters
 	name_t compilerName( string&& str );
 
+	// Convert string into name for compiler use
+	// Such names can contain non-name characters
+	inline name_t compilerName( const char* str ) { return compilerName( string( str ) ); }
+
 #ifdef _DEBUG
-	static NameData* Data{ nullptr };
+	static std::unique_ptr<NameData> Data;
 #endif
 }

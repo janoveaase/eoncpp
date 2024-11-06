@@ -78,7 +78,10 @@ namespace eon
 			else if( cmp > 0 )
 				return i;
 		}
-		return i == Value.size() + 1 && i == other.Value.size() + 1 ? 0 : i == Value.size() + 1 ? -i : i;
+		if( i == Value.size() + 1 && i == other.Value.size() + 1 )
+			return 0;
+		else
+			return i == Value.size() + 1 ? -i : i;
 	}
 	EON_TEST( namepath, compare, empty,
 		EON_EQ( 0, namepath().compare( namepath() ) ) );

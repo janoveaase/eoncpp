@@ -43,7 +43,7 @@ namespace eon
 			}
 			return string( ";" ).join( results );
 		}
-		string charCat( charcat cat ) { return std::to_string( static_cast<int>( cat ) ); }
+		string charCat( charcat cat ) const { return string( static_cast<int>( cat ) ); }
 		string catMap()
 		{
 			string result;
@@ -249,7 +249,7 @@ namespace eon
 		for( auto& [pos, cat] : Conf->CatMap )
 		{
 			if( pos
-				&& category
+				& category
 				&& ( CurMatchName == no_name || CurMatchName == cat.first )
 				&& ( cat.second == CharacterGrouping::sequence || CurMatch.numChars() == 1 ) )
 				return cat.first;
